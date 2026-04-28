@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: restoreGasToBucket()] Can an unprivileged external user submit a transaction with a gas limit where `gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f` overflows or truncates due to float arithmetic, causing the throttle bucket to restore an incorrect gas amount and allowing subsequent calls to bypass the intended gas-per-second rate limit, resulting in unintended smart contract execution throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c62fe554-12cb-439f-aed1-659e14bfb271?mode=deep",
+    "timestamp": "2026-04-28 23:31:37.190096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: restoreGasToBucket()] Can an unprivileged external user craft a failing transaction where `result.gasUsed()` equals `gasLimit` exactly, triggering the `gasLimitToRestoreBaseline` refund path instead of the `gasRemaining` path, and by doing so repeatedly inflate the throttle bucket beyond its intended capacity, causing other users' contract calls to execute under a falsely permissive throttle state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3da1eaf8-65d9-4f49-89b7-cc2b47ccd989?mode=deep",
+    "timestamp": "2026-04-28 23:31:49.885768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user exploit the fact that `validateResult()` is skipped when `estimate=true` to observe EVM execution results for calls that would otherwise be rejected, effectively using the estimate path as an oracle to probe contract state or revert reasons without triggering the normal error-handling path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17d9a357-a7b0-440e-a324-c09dd73cba22?mode=deep",
+    "timestamp": "2026-04-28 23:32:02.621601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user trigger the `catch (IllegalStateException | IllegalArgumentException e)` branch in `doProcessCall()` by crafting parameters that cause an internal state inconsistency, causing `restoreGasToBucket()` to be called with a `null` result and `gasLimit` from the original request, leading to incorrect throttle restoration and unintended execution capacity for subsequent calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bbbca34-91ed-4719-9058-fadab9ae7eda?mode=deep",
+    "timestamp": "2026-04-28 23:32:15.876982",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract()] Can an unprivileged external user supply a `BlockType` value that causes `recordFileService.findByBlockType()` to return an empty `Optional`, triggering `BlockNumberNotFoundException` before the EVM is invoked, yet still consuming throttle budget because the exception is thrown outside the `doProcessCall()` try-finally block, causing throttle state desynchronization that affects subsequent contract call behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b726014c-3c64-46ae-9e84-cc5bd526e2e1?mode=deep",
+    "timestamp": "2026-04-28 23:32:30.591280",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract()] Can an unprivileged external user pass a historical `BlockType` that resolves to a record file with a `consensusEnd` timestamp in the future (relative to `Utils.getCurrentTimestamp()`), causing `getBlock()` to return `BlockType.LATEST.toString()` for metric tagging while the actual execution uses historical state, creating a mismatch between the EVM version used and the version recorded in metrics, potentially masking unintended smart contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_275eee58-eea0-4ced-a014-e8a299bf322d?mode=deep",
+    "timestamp": "2026-04-28 23:32:44.934724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlock()] Can an unprivileged external user submit a historical call with a timestamp that is exactly equal to `Utils.getCurrentTimestamp()`, causing the `filter(t -> t <= Utils.getCurrentTimestamp())` predicate to pass, and observe that the block tag used in metrics reflects a historical month rather than LATEST, while the EVM executes with a different version than what the metric implies, leading to undetected unintended contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5877a3e1-ca11-4e8e-aa89-efb87d69bcd9?mode=deep",
+    "timestamp": "2026-04-28 23:32:59.742025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: validateResult()] Can an unprivileged external user cause `txnResult.getErrorMessage()` to return an `Optional` containing a hex string that, when passed to `maybeDecodeSolidityErrorStringToReadableMessage()`, produces a misleading or truncated error detail, causing the `MirrorEvmTransactionException` to carry incorrect revert reason information that misrepresents the actual smart contract execution failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0cfbae7f-28a1-4638-ba6c-b80724364352?mode=deep",
+    "timestamp": "2026-04-28 23:33:15.689680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: validateResult()] Can an unprivileged external user craft a contract call that returns a non-successful `responseCodeEnum` but with an `errorMessage` that does not start with `HEX_PREFIX`, causing `getErrorMessage()` to return `Optional.empty()` and `validateResult()` to use the fallback `HEX_PREFIX` as the revert reason hex, resulting in the exception carrying no meaningful revert data and masking the true cause of unintended smart contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ef4524a-888a-4b0f-868b-1355c00c2ba4?mode=deep",
+    "timestamp": "2026-04-28 23:33:32.713132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: updateMetrics()] Can an unprivileged external user supply a `CallType` value or status string containing special characters that pollute the Micrometer tag cardinality, causing metric label explosion that degrades monitoring infrastructure and masks anomalous smart contract execution patterns from operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68ecb557-69ed-41ec-8502-fc4a557ce0fb?mode=deep",
+    "timestamp": "2026-04-28 23:33:49.994306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user trigger a `MirrorEvmTransactionException` where `e.getResult()` returns a non-null `EvmTransactionResult` with `gasUsed()` returning 0, causing `restoreGasToBucket()` to restore `Math.min(gasLimit, gasLimitToRestoreBaseline)` gas instead of the correct remaining gas, effectively over-restoring the throttle bucket and enabling more contract calls than the rate limit intends?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7eebc151-097b-4e54-bc59-36994ddda06c?mode=deep",
+    "timestamp": "2026-04-28 23:34:09.270946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: restoreGasToBucket()] Can an unprivileged external user submit a request with `gasLimit = 0` (if not validated upstream), causing `gasLimitToRestoreBaseline` to be computed as `0 * refundPercent / 100f = 0`, and `throttleManager.restore(0)` to be called, effectively never restoring any gas to the bucket and starving subsequent legitimate contract calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1293ad3-10ad-4c3d-a522-2b166b9f4c83?mode=deep",
+    "timestamp": "2026-04-28 23:34:28.769043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user exploit the lazy `blockSupplier` set via `Suppliers.memoize()` in `callContract()` to cause the block resolution to be deferred until after context state has been partially mutated, resulting in the historical record file being resolved against a different state than what was used during EVM execution, causing unintended smart contract behavior for historical queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66908cb6-afe7-4eea-aaba-e9b6a9326adc?mode=deep",
+    "timestamp": "2026-04-28 23:34:49.407818",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user cause the `finally` block in `doProcessCall()` to execute `restoreGasToBucket()` with a stale `result` reference captured from a previous iteration of the estimate loop (if subclass reuses context), leading to incorrect gas restoration and unintended throttle state that affects the accuracy of subsequent smart contract executions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e27668aa-0f34-4e8a-959b-aa058a3fcd03?mode=deep",
+    "timestamp": "2026-04-28 23:35:10.087645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: updateGasLimitMetric()] Can an unprivileged external user submit repeated calls with the maximum allowed `gasLimit` value (`Long.MAX_VALUE` or near it) to cause `gasLimitCounter` to overflow its internal counter, corrupting gas limit telemetry and preventing operators from detecting abnormal smart contract execution patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a75c95c-20a8-4b9a-94a5-fe00de9405fe?mode=deep",
+    "timestamp": "2026-04-28 23:35:31.955511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract(CallServiceParameters)] Can an unprivileged external user call `callContract(params)` which wraps execution in `ContractCallContext.run()`, and if the underlying `ScopedValue` binding fails or is already bound in a nested call scenario, cause the context to be shared across concurrent requests, leading to cross-request state contamination and unintended smart contract execution results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_970eb1f7-752b-4e24-a2a4-4fc2f3a16915?mode=deep",
+    "timestamp": "2026-04-28 23:35:53.063049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user craft a call where `transactionExecutionService.execute()` throws an `IllegalArgumentException` wrapping a message that contains sensitive internal state information, which is then re-thrown as a `MirrorEvmTransactionException` with that message exposed in the response, leaking internal EVM execution details that could be used to craft more targeted attacks on smart contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d15d059d-c803-46e7-830a-6fea28760bb0?mode=deep",
+    "timestamp": "2026-04-28 23:36:15.956348",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: restoreGasToBucket()] Can an unprivileged external user exploit the condition `!result.isSuccessful() && gasLimit == result.gasUsed()` in `restoreGasToBucket()` by crafting a reverted transaction where the EVM happens to consume exactly `gasLimit` gas, causing the system to treat it as a failed (not reverted) transaction and restore only `gasLimitToRestoreBaseline` instead of `gasRemaining`, leading to incorrect throttle accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd4fa61f-ce92-4479-9feb-086abcd1e689?mode=deep",
+    "timestamp": "2026-04-28 23:36:38.801155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user pass `params.getBlock()` as a non-LATEST block type while `recordFileService.findByBlockType()` returns a record file whose `consensusEnd` timestamp is 0 or negative, causing `getBlock()` to produce an invalid `YearMonth` string that corrupts metric tags and prevents proper monitoring of unintended smart contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_237daac8-02fb-4a1e-b264-0c1f6c110420?mode=deep",
+    "timestamp": "2026-04-28 23:37:02.695078",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user trigger a scenario where `result` is non-null after a `MirrorEvmTransactionException` (captured via `e.getResult()`), but `result.gasUsed()` returns a value greater than `gasLimit`, causing `gasRemaining` to be negative and `Math.min(gasRemaining, gasLimitToRestoreBaseline)` to restore a negative gas amount to the throttle bucket, corrupting the throttle state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5836161-b8a4-4aac-a08a-bec4bb1e244b?mode=deep",
+    "timestamp": "2026-04-28 23:37:27.391157",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: validateResult()] Can an unprivileged external user cause `txnResult.responseCodeEnum()` to return a non-SUCCESS code while `txnResult.isSuccessful()` returns false, but the `revertReasonHex` passed to `MirrorEvmTransactionException` is a valid hex string that decodes to a misleading Solidity error message, causing clients to misinterpret the smart contract's actual revert reason and take incorrect actions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a48a7787-4083-466a-bc49-799cb62276d1?mode=deep",
+    "timestamp": "2026-04-28 23:37:52.026316",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user supply a `CallServiceParameters` with `getBlock()` returning a block number that maps to a record file using an older EVM version (e.g., `EVM_VERSION_0_30`), while the current node runs a newer version, causing the historical call to execute under semantics that differ from what the contract was originally deployed with, producing unintended smart contract behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae4d17cf-5676-4864-86c6-f881a555676e?mode=deep",
+    "timestamp": "2026-04-28 23:38:17.535223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: doProcessCall()] Can an unprivileged external user submit a call where `transactionExecutionService.execute()` returns a result with `isSuccessful()` returning true but `gasUsed()` returning 0, causing `updateMetrics()` to record 0 gas used while `restoreGasToBucket()` restores the full `gasLimit` as remaining gas, leading to throttle over-restoration and unintended execution capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_556b3b97-1699-45b2-87e3-fcba3276990f?mode=deep",
+    "timestamp": "2026-04-28 23:38:45.036139",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlock()] Can an unprivileged external user trigger a historical call where `ContractCallContext.get().getTimestamp()` returns a timestamp that, when converted via `Instant.ofEpochSecond(0L, t).atZone(UTC)`, causes an `ArithmeticException` or `DateTimeException` due to nanosecond overflow, crashing the metric recording path and leaving the throttle bucket in an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd43ba8a-9c66-43c1-b05b-91240f9f50ad?mode=deep",
+    "timestamp": "2026-04-28 23:39:11.832914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user exploit the `Suppliers.memoize()` wrapping of `blockSupplier` to cause the block lookup to be cached after the first access, and if the underlying `recordFileService` returns different results on subsequent calls (e.g., due to a race condition), the memoized stale block is used for EVM version selection, causing unintended smart contract behavior under the wrong EVM version?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53adf3f8-ef6d-4ef8-8508-75cc83404cd6?mode=deep",
+    "timestamp": "2026-04-28 23:39:39.334843",
+    "report_generated": false
+  }
+]
