@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that `entity.Key` (raw bytes) is returned directly as `publicKey` (line 221) without any validation or size check, and if the database contains a malformed or oversized key blob, cause downstream callers to process untrusted binary data that could trigger parsing vulnerabilities?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79c9e8f8-e4b5-4d3f-9d09-801139329847?mode=deep",
+    "timestamp": "2026-04-28 19:52:43.085263",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias-based `accountId` and a `consensusEnd` that falls within a gap between `entity` and `entity_history` timestamp ranges, causing both UNION ALL branches to return no rows, and the function to return `nil, nil`, which `RetrieveBalanceAtBlock()` then treats as a non-existent alias account and returns zero balance, hiding actual transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d097c5c2-ce5d-4214-9710-ee00e0199594?mode=deep",
+    "timestamp": "2026-04-28 19:52:55.053999",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getBalanceChange()] Can an unprivileged external user observe that the `end_range` named parameter (line 327) is passed to `balanceChangeBetween` but the SQL query does NOT reference `@end_range`, meaning it is silently ignored — and exploit this discrepancy to understand that range-based filtering is absent, allowing balance queries that span unexpectedly wide timestamp windows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1408663d-2326-4971-85b3-7806d2d285cc?mode=deep",
+    "timestamp": "2026-04-28 19:53:07.443491",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user pass a `consensusEnd` that is exactly `balanceChangeEndTimestamp - 1` for a deleted account (line 184), causing `balanceSnapshotEndTimestamp` to be one nanosecond before the deletion, and if no snapshot exists at that exact nanosecond boundary, the snapshot query returns zero, while the balance change query still runs from timestamp 0 to the deletion time, producing an incorrect cumulative balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_389e84a0-bd21-4af0-b297-a8a094c1f94b?mode=deep",
+    "timestamp": "2026-04-28 19:53:20.242103",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user trigger a scenario where `db.Raw(query, args...).Scan(&entities)` returns no error but populates `entities` with a partially-scanned result (e.g., due to a DB timeout mid-scan), causing `getCryptoEntity` to return an entity with zero-value fields that passes the `len(entities) == 0` check but contains invalid data used in balance computation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eea74d25-22f1-42eb-b849-a89a070dc2af?mode=deep",
+    "timestamp": "2026-04-28 19:53:33.084946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: GetAccountId()] Can an unprivileged external user supply an alias that is an empty byte slice (`[]byte{}`), causing `selectCurrentCryptoEntityByAlias` to query `WHERE alias = ''`, potentially matching entities with empty aliases and returning an unintended entity ID?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_642a4098-96c2-4e99-87a1-efff354c66f9?mode=deep",
+    "timestamp": "2026-04-28 19:53:45.787339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: GetAccountId()] Can an unprivileged external user supply an alias that is a very long byte sequence (e.g., megabytes), causing the `sql.Named(",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23fb1c57-3585-4b2a-b0a9-e4c8506da41d?mode=deep",
+    "timestamp": "2026-04-28 19:53:59.102472",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias that matches thousands of rows in `entity_history` (e.g., an alias that was reassigned many times), causing the UNION ALL query in `selectCryptoEntityByAlias` to return a massive result set that is fully scanned into `entities := make([]domain.Entity, 0)`, exhausting server memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_992ed335-b614-451e-8615-f97f2986f490?mode=deep",
+    "timestamp": "2026-04-28 19:54:13.884772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that `getLatestBalanceSnapshot` uses `ar.treasuryEntityId.EncodedId` as the anchor for finding the latest balance file timestamp, and if the treasury entity has no balance snapshots before the requested `timestamp`, the query returns no rows and `ErrNodeIsStarting` is returned, leaking that the node has not yet synced to that block height?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a786bdf-4615-4441-91f3-78967f2893bf?mode=deep",
+    "timestamp": "2026-04-28 19:54:27.329534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user use the `ErrNodeIsStarting` error (returned when `ab.ConsensusTimestamp == 0`, line 304-305) as a timing oracle to determine the exact consensus timestamp of the latest balance snapshot by binary-searching over timestamp values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43ca98a2-824a-4d66-a251-53fc0ba8a2eb?mode=deep",
+    "timestamp": "2026-04-28 19:54:40.493612",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user pass a `consensusEnd` value of `math.MinInt64` (most negative int64), causing `getInclusiveInt8Range(consensusEnd, consensusEnd)` to produce an underflow in the pgtype range, leading to unexpected database behavior or a panic in the pgtype library?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ab44bf6-db09-4f4c-8a55-bbdf66474abb?mode=deep",
+    "timestamp": "2026-04-28 19:54:55.447786",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user observe that `selectCryptoEntityById` filters `type in ('ACCOUNT', 'CONTRACT')` but `selectCryptoEntityByAlias` does NOT filter by type, meaning an alias-based lookup can return entities of any type (e.g., FILE, TOPIC, TOKEN), causing `RetrieveBalanceAtBlock()` to compute a balance for a non-account entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae870d33-4b2c-45fa-a639-0e3e57a35668?mode=deep",
+    "timestamp": "2026-04-28 19:55:08.390953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user exploit the asymmetry between `selectCryptoEntityById` (which has `limit 1`) and `selectCryptoEntityByAlias` (which has no LIMIT clause), causing alias-based queries to return unbounded result sets and consume excessive memory when many historical alias records exist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d8cef60-8dbb-4277-846c-be9b9f6437cd?mode=deep",
+    "timestamp": "2026-04-28 19:55:22.592155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user pass an alias-based `accountId` where the entity is found with `Deleted = true` but `GetModifiedTimestamp()` returns `0` (zero-value), causing `entity.GetModifiedTimestamp() <= consensusEnd` to always be true (since 0 <= any positive timestamp), and forcing `balanceSnapshotEndTimestamp = -1`, which then causes the snapshot query to find no results and return `ErrNodeIsStarting`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c608323-e813-4d2e-a644-12128b2698c7?mode=deep",
+    "timestamp": "2026-04-28 19:55:36.149780",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getBalanceChange()] Can an unprivileged external user pass `consensusStart = 0` and a large `consensusEnd` to `getBalanceChange()`, causing `balanceChangeBetween` to sum ALL crypto transfers for the account from the beginning of time, potentially returning a very large or unexpected balance delta that is added to the snapshot balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5970fa0d-0e31-4233-a2a0-d6cfa2e05aa1?mode=deep",
+    "timestamp": "2026-04-28 19:55:49.975274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause a time-of-check/time-of-use (TOCTOU) vulnerability by submitting concurrent requests to `RetrieveBalanceAtBlock()` for the same account at the same `consensusEnd`, where the three separate DB queries (`getCryptoEntity`, `getLatestBalanceSnapshot`, `getBalanceChange`) execute without a snapshot isolation transaction, returning inconsistent results across concurrent calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e02d28c-03de-4af2-9bc5-b16daff0cdf1?mode=deep",
+    "timestamp": "2026-04-28 19:56:03.145425",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: GetAccountAlias()] Can an unprivileged external user call `GetAccountAlias()` with a valid account ID, receive an alias-based `AccountId` in return, and then use that alias to call `GetAccountId()` — but if the account was deleted between the two calls, `GetAccountId()` returns `ErrAccountNotFound`, creating an inconsistent view that could confuse upstream Rosetta API consumers about account state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14e190a0-de57-43cb-992d-96d615fe4304?mode=deep",
+    "timestamp": "2026-04-28 19:56:16.716526",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user supply a `consensusEnd` that is exactly at the boundary of a `timestamp_range` (e.g., the exact lower or upper bound of an entity's range), and due to the inclusive range operator `@>`, cause the query to match both the current entity record and a history record simultaneously, returning the wrong entity version?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3790596-44d2-4eed-b253-04693c060d20?mode=deep",
+    "timestamp": "2026-04-28 19:56:31.719128",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that when `entity != nil` and `accountId.HasAlias()`, the code uses `entity.Id.EncodedId` (line 190) for balance queries instead of the alias-derived ID, and if `entity.Id` is a zero-value `EntityId` (due to a DB scan error), cause balance queries to run against entity ID `0` (treasury), leaking treasury balance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c02850e-97cc-486f-84e1-9da6065a9adb?mode=deep",
+    "timestamp": "2026-04-28 19:56:44.343692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user pass a `timestamp` that falls in a partition gap (between two partitions in `mirror_node_time_partitions`), causing `selectPreviousPartitionLowerBound` to return the lower bound of a very old partition, and `latestBalanceBeforeConsensus` to scan an unexpectedly large range of historical balance data, causing a performance denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b672c1e8-2e7b-4417-91d6-16886dd36d11?mode=deep",
+    "timestamp": "2026-04-28 19:56:57.871635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user observe that `entityIdString` is initialized as an empty string (line 166) and only set when `entity != nil` (line 219), and use the presence/absence of `entityIdString` in the response to determine whether an entity record exists for a given account ID at a given timestamp, enabling entity existence enumeration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8431dab6-61ca-405f-a94b-b8e4d2189e2b?mode=deep",
+    "timestamp": "2026-04-28 19:57:12.992112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user supply a null-byte-containing alias (e.g., `\\x00\\x00...`) to `selectCryptoEntityByAlias`, causing the PostgreSQL `alias = @alias` comparison to behave unexpectedly with binary data containing null bytes, potentially matching unintended rows or bypassing alias uniqueness checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b37e0e4-36ff-456e-9b07-09008ad0344f?mode=deep",
+    "timestamp": "2026-04-28 19:57:27.189264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user pass a `consensusEnd` that is in the future (beyond the latest indexed block), causing `getCryptoEntity` to return the current entity, `getLatestBalanceSnapshot` to return the most recent snapshot, and `getBalanceChange` to sum all transfers up to the future timestamp — effectively returning the current live balance under the guise of a historical query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9a29e85-d844-4fac-9a97-84db8e9e7750?mode=deep",
+    "timestamp": "2026-04-28 19:57:40.005349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getBalanceChange()] Can an unprivileged external user exploit the fact that `balanceChangeBetween` uses `coalesce(sum(...), 0)` — meaning if no transfers exist, it returns `0` — to distinguish between accounts with zero transfers vs. accounts with transfers that cancel out, enabling inference about transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df551c42-9e41-48b3-b65b-cc17ec188831?mode=deep",
+    "timestamp": "2026-04-28 19:57:53.575033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: '] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias-based `accountId` and observe that the error message logged at line 251-255 includes `fmt.Sprintf(",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77b39582-1854-4971-a585-82ad1f522b8b?mode=deep",
+    "timestamp": "2026-04-28 19:58:08.370487",
+    "report_generated": false
+  }
+]
