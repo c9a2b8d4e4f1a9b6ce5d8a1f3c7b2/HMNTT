@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged external user trigger concurrent calls to getWritableStates() for the same serviceName, exploiting the fact that the writableStates ConcurrentHashMap cache is never invalidated after commit(), causing a stale MapWritableStates object to be returned on subsequent calls and allowing the user to observe or replay committed-but-stale writable state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_493bc97e-b6c7-49fe-a444-f8ef75fe9bfc?mode=deep",
+    "timestamp": "2026-04-28 23:19:15.758621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the fact that getWritableStates() calls getReadableStates(serviceName) inside a computeIfAbsent lambda on writableStates ConcurrentHashMap, while getReadableStates() also uses computeIfAbsent on readableStates ConcurrentHashMap, creating a nested computeIfAbsent pattern that under concurrent load causes a thread to block indefinitely (deadlock or livelock) leading to denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52e0673b-8d3a-4b7b-a120-c2c001afe190?mode=deep",
+    "timestamp": "2026-04-28 23:19:27.788907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getReadableStates()] Can an unprivileged user send concurrent requests that both trigger getReadableStates() for the same serviceName simultaneously, where the computeIfAbsent lambda reads from the non-thread-safe states HashMap, causing a data race that returns a partially-constructed MapReadableStates object with inconsistent state entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca3326e9-115f-4e30-a64b-591df3768f41?mode=deep",
+    "timestamp": "2026-04-28 23:19:40.554287",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initQueueStates()] Can an unprivileged user trigger concurrent access to the TRANSACTION_RECEIPTS_STATE_ID queue, which is backed by a non-thread-safe LinkedList stored in the states HashMap, causing a race condition that corrupts the queue structure and leads to incorrect transaction receipt responses or a NullPointerException crash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe240a5c-41a1-4722-952f-7af20aee70a6?mode=deep",
+    "timestamp": "2026-04-28 23:19:53.817386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the onCommit lambda () -> readableStates.remove(serviceName) in MapWritableStates to cause a TOCTOU race: after commit() removes the readable state cache entry, a concurrent getReadableStates() call re-creates it from the states HashMap while the writable state is still cached in writableStates, resulting in the writable and readable views diverging and serving inconsistent data to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd86169e-f5fa-455a-b5cb-3600fab400a7?mode=deep",
+    "timestamp": "2026-04-28 23:20:07.621334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initSingletonStates()] Can an unprivileged user indirectly trigger a scenario where initSingletonStates() mutates the externally-provided singletonStates List by unconditionally calling singletonStates.add(), and if the injected list is an unmodifiable or fixed-size list (e.g., List.of()), this throws an UnsupportedOperationException at startup, causing a denial of service by preventing the MirrorNodeState bean from being initialized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb4641e2-3b4b-4bbc-8df5-9ba26ca56cc6?mode=deep",
+    "timestamp": "2026-04-28 23:20:22.473909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getStates()] Can an unprivileged user (or component reachable without privilege) exploit the @VisibleForTesting getStates() method returning Collections.unmodifiableMap(states) where the outer map is unmodifiable but the inner Map<Integer, Object> values are still mutable HashMap instances, allowing mutation of the inner service state maps and corrupting the state registry for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22dda8b6-beac-4922-8bf0-aa8c71ed076f?mode=deep",
+    "timestamp": "2026-04-28 23:20:37.492359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user cause the writableStates ConcurrentHashMap to grow unboundedly by repeatedly calling getWritableStates() with arbitrary crafted serviceName strings that do not exist in the states HashMap, causing EmptyWritableStates objects to be cached for every unique serviceName and exhausting heap memory (OOM denial of service)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_059ff020-decb-4832-ab74-e34d041ea2b4?mode=deep",
+    "timestamp": "2026-04-28 23:20:54.331538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getReadableStates()] Can an unprivileged user cause the readableStates ConcurrentHashMap to grow unboundedly by sending requests that trigger getReadableStates() with arbitrary serviceName values not present in states, caching empty MapReadableStates objects for each unique name and exhausting heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5796adfc-027e-47db-b423-274e5da3eb3c?mode=deep",
+    "timestamp": "2026-04-28 23:21:10.875843",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the fact that after MapWritableStates.commit() fires the onCommit lambda removing the serviceName from readableStates, the writableStates entry for that serviceName is NOT removed, so a subsequent call to getWritableStates() returns the same already-committed MapWritableKVState object whose internal dirty/modified maps still contain previously written keys, allowing cross-request state leakage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7aa2125-ace2-4cec-9a2a-6216803a083a?mode=deep",
+    "timestamp": "2026-04-28 23:21:28.542883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initKVStates()] Can an unprivileged user exploit a collision between injected readableKVStates and the hardcoded defaultKvImplementations (EVM_HOOK_STORAGE_STATE_ID, EVM_HOOK_STATES_STATE_ID, SCHEDULE_ID_BY_EQUALITY_STATE_ID, SCHEDULED_COUNTS_STATE_ID, SCHEDULED_USAGES_STATE_ID) where initKVStates() first puts injected states then overwrites them with createMapReadableStateForId(), silently discarding the injected implementation and causing all reads to return empty results for those state IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a05b829-f7bc-47a4-8206-745a2a079ef5?mode=deep",
+    "timestamp": "2026-04-28 23:21:48.168371",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getReadableStates()] Can an unprivileged user trigger a scenario where getReadableStates() is called for a serviceName that exists in states but has an empty inner map, causing a MapReadableStates with no entries to be cached and returned, and any subsequent get() call on it throws IllegalArgumentException leaking internal state ID information to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b366f2cb-a7b0-4602-9466-ed94e69a5d11?mode=deep",
+    "timestamp": "2026-04-28 23:22:07.057358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the type-dispatch logic in getWritableStates() where a state object that is simultaneously a ReadableKVState and a Queue (or other ambiguous type) causes the wrong branch to be taken, wrapping it in a MapWritableKVState instead of a ListWritableQueueState, leading to incorrect state access and potential ClassCastException that crashes the request handler?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86daca7d-5047-42d7-afe9-66aa1d9656cf?mode=deep",
+    "timestamp": "2026-04-28 23:22:26.419496",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getReadableStates()] Can an unprivileged user exploit the type-dispatch logic in getReadableStates() where the instanceof chain (Queue, ReadableKVState, SingletonState) silently drops any state object that does not match any branch, causing that state ID to be absent from the returned MapReadableStates and making it appear as if the state does not exist, bypassing expected state lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f264e66-7d7d-4a6e-b00c-344136886cb8?mode=deep",
+    "timestamp": "2026-04-28 23:22:46.730109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initSingletonStates()] Can an unprivileged user exploit a duplicate state ID collision where initSingletonStates() adds DefaultSingleton for HIGHEST_NODE_ID_STATE_ID, STAKING_NETWORK_REWARDS_STATE_ID, and NODE_REWARDS_STATE_ID, and if any injected singletonState in the list shares the same stateId and serviceName, the HashMap.put() silently overwrites the DefaultSingleton with the injected one (or vice versa), causing the wrong singleton implementation to serve state reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cdf8f96-698d-46e8-bc3c-c073fc430aad?mode=deep",
+    "timestamp": "2026-04-28 23:23:08.144440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the fact that MapWritableKVState.putIntoDataSource() calls the parent class put() method which writes only to the in-memory writable cache and never to the underlying ReadableKVState backing store, so after commit() the readable state is invalidated but the next getReadableStates() re-reads from the original unmodified backing store, making all writes effectively invisible and creating a silent data integrity failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd00e328-1d10-43f5-8e56-e6c81c349fc5?mode=deep",
+    "timestamp": "2026-04-28 23:23:30.136377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user trigger a scenario where getWritableStates() is called concurrently for the same serviceName by two threads, both pass the computeIfAbsent check, and both call getReadableStates(serviceName) which itself triggers computeIfAbsent on readableStates, resulting in two different MapReadableStates objects being created and one being used as the backing store for a MapWritableKVState while the other is cached, causing the writable state to read from a non-cached readable state that diverges from what other callers see?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_060ca4e5-8c6c-44c0-a137-4d9596220e19?mode=deep",
+    "timestamp": "2026-04-28 23:23:52.747405",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initQueueStates()] Can an unprivileged user exploit the fact that initQueueStates() uses states.put() with a new HashMap wrapping a LinkedList, and if getReadableStates() or getWritableStates() for RecordCacheService.NAME was already called and cached before initQueueStates() completes (in a concurrent startup scenario), the cached ReadableStates/WritableStates will not contain the TRANSACTION_RECEIPTS_STATE_ID queue, causing all receipt lookups to fail with IllegalArgumentException?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e551d2d-cc40-4fbb-9230-5f59cd34ad47?mode=deep",
+    "timestamp": "2026-04-28 23:24:17.187378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the fact that the writableStates cache is never cleared (only readableStates is cleared on commit via onCommit), so after a commit the next call to getWritableStates() returns the same stale MapWritableStates object, and calling commit() on it again fires onCommit again, removing the freshly re-created readableStates entry in a loop, causing repeated cache invalidation and denial of service through cache thrashing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66728095-a60b-42d4-b295-36d66f5f3ff6?mode=deep",
+    "timestamp": "2026-04-28 23:24:42.804218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getReadableStates()] Can an unprivileged user exploit the fact that getReadableStates() wraps Queue objects in ListReadableQueueState but the underlying LinkedList is not thread-safe, and concurrent iteration (via iterateOnDataSource()) and modification (via addToDataSource() in ListWritableQueueState) on the same LinkedList instance cause a ConcurrentModificationException that propagates to the user as an unhandled error, leaking stack trace information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3526487-52b6-4180-8ab4-78e63f8492a0?mode=deep",
+    "timestamp": "2026-04-28 23:25:08.292112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: equals()] Can an unprivileged user craft a scenario where two MirrorNodeState instances are compared via equals() during a state validation check, and because equals() compares readableStates and writableStates ConcurrentHashMap contents (which are caches that may be populated or empty depending on access history), two logically identical states compare as unequal, causing incorrect state divergence detection and potentially triggering erroneous error handling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b10f3b1a-99d8-472d-af49-2bfa7369c836?mode=deep",
+    "timestamp": "2026-04-28 23:25:34.797621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: hashCode()] Can an unprivileged user exploit the fact that hashCode() includes readableStates and writableStates (which are mutable caches) in its computation, causing the hash code of a MirrorNodeState to change over time as states are accessed and cached, violating the hashCode contract and causing incorrect behavior if MirrorNodeState is used as a key in a HashMap or HashSet?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d591fbd-190e-4863-a543-d402be4e9f1d?mode=deep",
+    "timestamp": "2026-04-28 23:26:01.742486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the fact that getWritableStates() for a serviceName not in states returns EmptyWritableStates (which throws on any access), while getReadableStates() for the same serviceName returns an empty MapReadableStates (which also throws), but the two behave differently (EmptyWritableStates vs MapReadableStates), causing inconsistent error types that confuse error handling logic and potentially mask real errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e20634fc-bfc9-40b6-9556-1ec5ce4cc366?mode=deep",
+    "timestamp": "2026-04-28 23:26:29.566883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: initKVStates()] Can an unprivileged user exploit the fact that createMapReadableStateForId() creates a MapReadableKVState backed by an empty HashMap for EVM_HOOK_STORAGE_STATE_ID and EVM_HOOK_STATES_STATE_ID, meaning all EVM hook storage reads return null/empty, and if the EVM execution engine does not handle null returns from these states correctly, an attacker can craft a contract call that triggers a NullPointerException or incorrect execution path in the EVM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3997c6c-5584-483f-8602-d7516496dd5b?mode=deep",
+    "timestamp": "2026-04-28 23:26:57.808167",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: '] [Function: getWritableStates()] Can an unprivileged user exploit the race condition between the onCommit lambda (readableStates.remove(serviceName)) and a concurrent getReadableStates() call, where the remove happens between the computeIfAbsent check and the cache insertion, causing the newly computed MapReadableStates to be immediately evicted and the next access to re-compute it again, creating an infinite invalidation loop under sustained concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1b356ee-20da-4a37-aebe-53d9b8a91e57?mode=deep",
+    "timestamp": "2026-04-28 23:27:27.288700",
+    "report_generated": false
+  }
+]
