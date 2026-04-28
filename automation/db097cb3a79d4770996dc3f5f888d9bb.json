@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the fact that Web3Application bootstraps the full Spring context (including staking reward calculation pipelines) by sending crafted EVM contract call requests that read stale pending_reward values before EntityStakeCalculatorImpl completes its calculate() cycle, causing the mirror node to report inflated unpaid staking rewards that differ from the actual on-chain settled amount?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93990c22-ed2d-4fdd-a597-1db1f84953c7?mode=deep",
+    "timestamp": "2026-04-28 19:43:59.342158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: cleanup()] Can an unprivileged external user trigger a race condition by sending concurrent requests during the startup window when cleanup() deletes and recreates the tmpDir, causing the web3 service to serve stale or zero pending_reward values from an incomplete entity_stake snapshot, leading to incorrect reward accounting that understates or overstates unpaid staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f360170-80e0-43ba-bcd0-fe03beed3806?mode=deep",
+    "timestamp": "2026-04-28 19:44:11.130433",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: cleanup()] Can an unprivileged external user exploit the non-atomic nature of FileSystemUtils.deleteRecursively() followed by Files.createDirectories() in cleanup() to cause the web3 application to start with a missing or partially initialized tmpDir, resulting in EVM contract execution failures that bypass pending_reward validation and allow incorrect staking reward state to be served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aae044f1-0588-4fdb-a35c-46c5af3c0068?mode=deep",
+    "timestamp": "2026-04-28 19:44:23.448323",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user query the REST API endpoint /api/v1/accounts/{id} immediately after the Web3Application restarts (before EntityStakeCalculatorImpl.calculate() has run) to observe a pending_reward value of 0 for an account that has legitimately accumulated unpaid staking rewards, effectively causing the mirror node to misreport the account's unpaid reward balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3935ba2-3434-4399-9811-042a2f626724?mode=deep",
+    "timestamp": "2026-04-28 19:44:36.643061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the @EnableAsync annotation on Web3Application to trigger concurrent async processing of staking reward events, causing a race between onStakingRewardTransfer() updating stake_period_start and updateEntityStake() computing pending_reward, resulting in an incorrect pending_reward value being persisted and served via the accounts API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a57e7918-39cd-42a5-96c0-e3dc8d5b9be9?mode=deep",
+    "timestamp": "2026-04-28 19:44:49.281595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user craft a historical timestamp query to /api/v1/accounts/{id}?timestamp=X that falls within a gap between two entity_stake_history rows, causing the getEntityStakeQuery() union of entity_stake and entity_stake_history to return no matching row and thus report pending_reward as 0 for an account that had accumulated unpaid staking rewards at that point in time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f174d8ee-6e28-48c4-b9eb-e56f82203ca8?mode=deep",
+    "timestamp": "2026-04-28 19:45:02.392254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the pending_reward staleness acknowledged in the OpenAPI spec ('there may be delay to reflect the changes in the past staking period') by querying /api/v1/accounts/{id} at the exact boundary of a staking period end to observe a pending_reward that has not yet been updated by updateEntityStake(), and use this stale value to make financial decisions based on incorrect reward data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94739bbc-e3a9-4afc-a11c-0b888e16d6b6?mode=deep",
+    "timestamp": "2026-04-28 19:45:15.541843",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the condition in the REST accounts.js pending_reward CASE expression ('when e.stake_period_start >= es.end_stake_period then 0') by observing that an account with stake_period_start exactly equal to end_stake_period always returns pending_reward=0, even if the account has legitimately earned rewards in that period, causing theft of unpaid staking rewards through misreporting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c3a88d8-f010-44a7-a76d-6ed210454914?mode=deep",
+    "timestamp": "2026-04-28 19:45:28.203415",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the fact that the pending_reward CASE expression in accounts.js returns 0 when 'e.decline_reward is true OR coalesce(e.staked_node_id, -1) = -1', by observing that an account that recently changed its staked_node_id to -1 (unstaked) still has a non-zero pending_reward in entity_stake that is hidden from the API response, effectively making those rewards invisible and unclaimable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_191f63d1-ba78-438e-947f-7960853545c6?mode=deep",
+    "timestamp": "2026-04-28 19:45:41.292655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the integer truncation in the pending_reward calculation '(stake_total_start / 100000000)::bigint * reward_rate' in updateEntityStake() by holding a balance just below a whole HBAR boundary (e.g., 99,999,999 tinybars), causing the truncation to zero out the whole-HBAR count and produce a pending_reward of 0 despite the account being eligible for staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62e49c49-475d-4a14-a660-23db9bcc4018?mode=deep",
+    "timestamp": "2026-04-28 19:45:54.733918",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the 365-day forfeiture logic in updateEntityStake() ('when epoch_day - ess.stake_period_start > 365 then pending_reward + reward_rate * stake_total_start_whole_bar - coalesce(forfeited_period.reward_rate, 0) * stake_total_start_whole_bar') by observing that if the forfeited_period node_stake row is missing for a given node_id, the coalesce returns 0 and no reward is deducted, causing the pending_reward to be overstated beyond the 365-day cap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db5d5835-07ca-40b5-8b7b-7955572bd1d4?mode=deep",
+    "timestamp": "2026-04-28 19:46:08.095005",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the 'distinct on(node_id)' ordering in the forfeited_period CTE of updateEntityStake() — which selects by 'order by node_id, consensus_timestamp' — to cause the wrong (earliest) node_stake row to be selected for the forfeited period when multiple node_stake rows exist for the same epoch_day, resulting in an incorrect forfeiture deduction and an overstated pending_reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6d2821f-84da-4196-84ba-8869f4260387?mode=deep",
+    "timestamp": "2026-04-28 19:46:22.521798",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the proxy_staking CTE in updateEntityStake() ('select staked_account_id, sum(balance) as staked_to_me from entity_state_start where staked_account_id <> 0') by staking their account to a target account, causing the target account's stake_total_start to be inflated by the attacker's balance, which in turn inflates the target account's pending_reward calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9c1c432-6d02-4c90-a364-0674f5654d63?mode=deep",
+    "timestamp": "2026-04-28 19:46:37.641789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the fact that entity_state_start is a materialized view (not refreshed in real-time) by querying pending_reward immediately after a balance change but before the materialized view is refreshed, causing the stake_total_start used in pending_reward calculation to reflect an outdated balance and produce an incorrect reward amount?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e35dbd6b-3495-4445-bb54-dea8fb23ea9c?mode=deep",
+    "timestamp": "2026-04-28 19:46:52.911053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the updated() check in EntityStakeCalculatorImpl ('select case when account_id is null then true') by observing that if the staking reward account (0.0.800) does not exist in the entity table, updated() returns true and the calculate() loop exits immediately without updating any pending_reward values, causing all accounts to retain stale pending_reward data indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af2bf23c-bcce-43f8-8ca0-4a1ca11b05a8?mode=deep",
+    "timestamp": "2026-04-28 19:47:07.491125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the AtomicBoolean running flag in EntityStakeCalculatorImpl by flooding the system with NodeStakeUpdate events that trigger calculate() concurrently, causing the second invocation to be silently skipped ('Skipping since the previous entity stake calculation is still running'), resulting in missed pending_reward updates for one or more staking periods?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ed4e69b-1e28-488a-8fca-a2de8bfafae1?mode=deep",
+    "timestamp": "2026-04-28 19:47:21.206136",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the break condition in EntityStakeCalculatorImpl.calculate() ('Failed to calculate pending reward') — which exits the while loop without retrying — by causing a transient database error during updateEntityStake(), resulting in the pending_reward for all accounts remaining at the pre-calculation value and never being updated for that staking period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70b25175-7169-49f7-ad40-f2c0630a2b9d?mode=deep",
+    "timestamp": "2026-04-28 19:47:35.015604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the lockFromConcurrentUpdates() advisory lock ('lock table entity_stake in share row exclusive mode nowait') by causing a long-running read transaction on entity_stake to hold a conflicting lock, causing lockFromConcurrentUpdates() to throw an exception, which propagates through calculate() and leaves pending_reward values stale for the entire staking period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36dd45f9-cbc5-4614-b8cd-46d37e98d4fb?mode=deep",
+    "timestamp": "2026-04-28 19:47:48.669540",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the ending_period CTE in updateEntityStake() — which selects the node_stake row with 'epoch_day >= end_stake_period + 1 order by consensus_timestamp limit 1' — by observing that if multiple node_stake rows exist for the same epoch_day (e.g., due to re-submission), the earliest consensus_timestamp is selected, potentially using an incorrect reward_rate for the ending period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_819b1934-932a-446e-82ad-b820a37d297a?mode=deep",
+    "timestamp": "2026-04-28 19:48:03.970063",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the RecalculatePendingRewardMigration's first_period_stake_change CTE — which sums crypto_transfer amounts between the last staking reward transfer and the first period end timestamp — by observing that if a crypto transfer is recorded with a consensus_timestamp exactly equal to the last staking reward transfer timestamp, it is included in the sum, potentially causing an incorrect stake_total_start adjustment and wrong pending_reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5360ebd2-7eee-4952-be12-ea23c258779d?mode=deep",
+    "timestamp": "2026-04-28 19:48:16.688476",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the FIRST_NONZERO_REWARD_RATE_TIMESTAMP hardcoded values in RecalculatePendingRewardMigration (MAINNET: 1666310400447390002L, TESTNET: 1659139200596847383L) by observing that on any network other than MAINNET or TESTNET, the migration returns early without recalculating pending_reward, leaving potentially incorrect pending_reward values from the original accumulation bug in place?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f84a201-966c-4f10-803d-a4d6975dea51?mode=deep",
+    "timestamp": "2026-04-28 19:48:30.492891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the onStakingRewardTransfer() logic in SqlEntityListener — which sets stake_period_start to 'getEpochDay(consensusTimestamp) - 1' — by triggering a staking reward transfer at exactly 1 nanosecond before UTC midnight, causing stake_period_start to be set to the previous day minus 1 instead of the current day minus 1, resulting in the account earning an extra period of staking rewards it should not receive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0960d812-57ce-48b9-8bf6-8b007ae5f0a1?mode=deep",
+    "timestamp": "2026-04-28 19:48:44.642390",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the condition in onStakingRewardTransfer() ('if current.getStakePeriodStart() < stakePeriodStart') by observing that if two staking reward transfers occur in the same block across a day boundary, the second transfer's stake_period_start (today) is greater than the first's (today - 1), causing the stake_period_start to be updated twice and potentially resetting the reward accumulation window incorrectly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5c84c52-c610-486b-81ab-f3fb884c2eb8?mode=deep",
+    "timestamp": "2026-04-28 19:48:58.999879",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the listStakingRewardsByAccountId() endpoint in accountController.js by supplying a crafted timestamp filter (e.g., timestamp=gte:0) to enumerate all historical staking reward transfers for any account without authentication, enabling the attacker to map out the full reward history of high-value accounts and identify periods where pending_reward was miscalculated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8d25487-b18f-468a-bf30-f4008977f6cf?mode=deep",
+    "timestamp": "2026-04-28 19:49:12.336356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/Web3Application.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: main()] Can an unprivileged external user exploit the getRewardsQuery() in StakingRewardTransferService — which appends user-supplied conditions via 'conditions.join(' and ')' — by injecting malformed timestamp filter values that cause the query to return reward records for accounts other than the requested account_id, leaking staking reward transfer data across account boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_086a5483-1a38-466f-818c-030d12640119?mode=deep",
+    "timestamp": "2026-04-28 19:49:25.702989",
+    "report_generated": false
+  }
+]
