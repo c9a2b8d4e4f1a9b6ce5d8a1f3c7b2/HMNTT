@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user force the `throttled=false` path by triggering the safety-check gap-recovery flow in `TopicMessageServiceImpl.missingMessages()`, which calls `topicMessageRetriever.retrieve(gapFilter, false)` without any user-facing rate limit, causing the unthrottled page size of 5000 and 20ms polling frequency to be applied and exhausting DB resources that underpin fee-calculation data availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43a9ddd0-4220-4bca-a626-199a8df92a0f?mode=deep",
+    "timestamp": "2026-04-28 20:14:35.746789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user subscribe to a topic with no `limit` set (limit=0, so `hasLimit()` returns false), causing `PollingContext.isComplete()` in unthrottled mode to never return true, resulting in the retriever issuing up to `maxPolls` (default 12) full-page queries of 5000 messages each and inflating the apparent volume of fee-bearing transactions returned to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f9a9fbf-81c7-48d6-87c7-1b6bc2d89906?mode=deep",
+    "timestamp": "2026-04-28 20:14:47.841198",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `startTime=0` in `TopicMessageFilter` to request all topic messages from epoch 0, causing `poll()` to issue queries spanning the entire message history and retrieving fee-related transaction data far outside the intended time window, bypassing the design parameter that `startTime` should default to `DomainUtils.now()`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e5c97b1-309d-4971-84ee-20c4da35e6ba?mode=deep",
+    "timestamp": "2026-04-28 20:15:00.348310",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user craft a `ConsensusTopicQuery` with `consensusStartTime` set to seconds=0 and nanos=0, bypassing the `isValidStartTime()` check (which only rejects future times, not epoch-zero), causing `retrieve()` to scan the entire fee transaction history and return data outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a0f94d5-d7bc-425e-88c8-372df0bd40e3?mode=deep",
+    "timestamp": "2026-04-28 20:15:12.992304",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user open thousands of concurrent gRPC `subscribeTopic` streams with `startTime=0` and no `endTime`, causing `subscriberCount` to grow unboundedly and the `retrieve()` calls to collectively exhaust DB connection pools, making fee-related transaction data unavailable to legitimate consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b394c93a-ea37-42ae-977a-b4eab004464c?mode=deep",
+    "timestamp": "2026-04-28 20:15:26.867986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the fact that `PollingContext.isComplete()` in throttled mode checks `pageSize.get() < retrieverProperties.getMaxPageSize()`, and by subscribing to a topic with exactly `maxPageSize` messages, keep the retriever polling indefinitely (since the page is always full), causing continuous DB load that degrades fee data retrieval for other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c898367-c44f-4620-8e1e-e9b9fc2be66e?mode=deep",
+    "timestamp": "2026-04-28 20:15:40.213070",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `limit=Long.MAX_VALUE` in the gRPC `ConsensusTopicQuery` (since `query.getLimit()` is a uint64 and maps directly to `filter.limit`), causing `poll()` to compute `(int)(filter.getLimit() - context.getTotal().get())` which overflows to a negative integer, resulting in `Math.min(limit, maxPageSize)` returning a negative pageSize and corrupting the fee-data query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c7f48b6-6d6e-4e80-81b4-4120e9adbbc7?mode=deep",
+    "timestamp": "2026-04-28 20:15:55.002900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user trigger the `missingMessages()` safety-check path by subscribing and immediately stalling (not consuming messages), causing the 1-second `Mono.delay` to fire and invoke `topicMessageRetriever.retrieve(gapFilter, false)` in unthrottled mode, which uses `maxPolls=12` iterations at 20ms intervals to dump fee transaction data at a rate exceeding design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cebc2c9a-7de8-4724-ac85-7c489796522c?mode=deep",
+    "timestamp": "2026-04-28 20:16:08.348657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `endTime=null` (by omitting `consensusEndTime` in the gRPC request), causing `pastEndTime()` to return `Flux.never()` and the subscription to never terminate, holding a `retrieve()` stream open indefinitely and consuming server resources that affect fee-data processing throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25127c50-3196-47a1-8e56-48bb29696d33?mode=deep",
+    "timestamp": "2026-04-28 20:16:21.953302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user send a `ConsensusTopicQuery` with `consensusStartTime.seconds=9223372035` to trigger the `convertTimestamp()` boundary condition that returns `Long.MAX_VALUE`, causing `retrieve()` to be called with `startTime=Long.MAX_VALUE` and potentially causing arithmetic overflow in `poll()` when computing `last.getConsensusTimestamp() + 1`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae14749e-bfed-46a9-97cc-f1880665d103?mode=deep",
+    "timestamp": "2026-04-28 20:16:34.919555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the absence of per-user rate limiting on `subscribeTopic()` to open many parallel streams each calling `retrieve()` with `startTime=0`, collectively causing the `hiero_mirror_grpc_retriever` metric to be flooded with data that misrepresents the actual fee-transaction retrieval rate to monitoring systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca69f614-1a51-40f0-9941-dfe23cda5d46?mode=deep",
+    "timestamp": "2026-04-28 20:16:48.370124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user craft a filter with `startTime` just below `DomainUtils.now()` and no `endTime`, causing `retrieve()` in throttled mode to poll with `numRepeats=Long.MAX_VALUE` indefinitely, holding a DB cursor open and preventing garbage collection of fee-related transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8772d544-3f94-4d4f-ac3c-cad52c9fbd15?mode=deep",
+    "timestamp": "2026-04-28 20:17:02.254766",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `PollingContext` constructor's branch where `throttled=false` sets `numRepeats=unthrottled.getMaxPolls()` (default 12) and `maxPageSize=5000`, by triggering the unthrottled path via gap recovery, to retrieve 60,000 fee-bearing messages (12 × 5000) in a single gap-fill operation outside the throttled design limit of 1000 per page?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a7773ec-b32f-49a9-8ac7-8f7a9cd8ce3f?mode=deep",
+    "timestamp": "2026-04-28 20:17:16.950159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `topicId` to a non-existent entity ID when `grpcProperties.isCheckTopicExists()=false`, causing `topicExists()` to return a synthetic `Entity` with type TOPIC, and then `retrieve()` to execute repeated DB queries against a non-existent topic, wasting resources that affect fee-data availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_212a0ac0-439d-4985-bcda-ec6e7c5f9e25?mode=deep",
+    "timestamp": "2026-04-28 20:17:31.619554",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `isValidStartTime()` constraint (only checks `startTime <= DomainUtils.now()`) to pass `startTime=1` (1 nanosecond after epoch), which is technically valid, causing `retrieve()` to scan the entire fee transaction history from near-epoch and return data far outside the intended recent-history design parameter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b1e0556-4b03-40b6-8fc5-29b86aa0096d?mode=deep",
+    "timestamp": "2026-04-28 20:17:46.797341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `endTime` to a value only 1 nanosecond after `startTime` (satisfying `isValidEndTime()` since `endTime > startTime`), causing `retrieve()` to execute a near-zero-range query that returns no fee data, and then immediately re-subscribe in a tight loop to amplify DB query load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4fbd29c7-163d-4998-9a1a-15cd304d41f8?mode=deep",
+    "timestamp": "2026-04-28 20:18:02.184644",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `subscriberId` field (randomly generated 8-char string logged in `onComplete()`) by crafting a `TopicMessageFilter` with a `subscriberId` containing log-injection characters (e.g., newlines), causing the `[{}] Finished retrieving {} messages` log entry to be forged and mislead operators about fee-data retrieval activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e7d1901-2323-4697-9c0a-32a3ec45f87c?mode=deep",
+    "timestamp": "2026-04-28 20:18:16.731773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user trigger the `timeout` mechanism in `RetrieverProperties` (default 60s) by subscribing to a high-volume topic with `startTime=0` and no limit, causing the retriever to time out mid-stream and deliver an incomplete set of fee-bearing transactions that misrepresents the actual fee history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d2b2582-6668-4d07-a4bf-6f88059dbf20?mode=deep",
+    "timestamp": "2026-04-28 20:18:30.783563",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `poll()` method's computation `var startTime = last != null ? last.getConsensusTimestamp() + 1 : filter.getStartTime()` by subscribing to a topic where the last message has `consensusTimestamp=Long.MAX_VALUE - 1`, causing `last.getConsensusTimestamp() + 1` to overflow to `Long.MIN_VALUE` and the next poll to query from the beginning of time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d8eccab-c88b-407e-932f-128ad819d39f?mode=deep",
+    "timestamp": "2026-04-28 20:18:47.180391",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user open a subscription with no `endTime` and no `limit`, causing `incomingMessages()` to compute `limit = filter.hasLimit() ? ... : 0` (limit=0 means unlimited in the listener), and the live stream to never terminate, holding the `retrieve()` historical stream open and consuming resources indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_061b0df6-005a-4000-99ac-b7ca76808662?mode=deep",
+    "timestamp": "2026-04-28 20:19:01.308995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `missingMessages()` gap-fill logic where `numMissingMessages = current.getSequenceNumber() - last.getSequenceNumber() - 1` is used as the `limit` in a new `retrieve()` call, and by manipulating sequence numbers (e.g., via a crafted topic with large sequence gaps), cause an unbounded `retrieve()` call with a very large limit that retrieves excessive fee transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88feadf9-7376-40a9-ac44-64a6d6583d25?mode=deep",
+    "timestamp": "2026-04-28 20:19:14.288254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the fact that `retrieve()` is called with `throttled=false` in `missingMessages()` (line 149 and 177 of `TopicMessageServiceImpl`), and by subscribing to a topic with artificially large sequence gaps, trigger repeated unthrottled `retrieve()` calls that collectively bypass the throttled page-size design parameter of 1000?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67e08066-2faf-4f0b-ad5b-19d696ab4f13?mode=deep",
+    "timestamp": "2026-04-28 20:19:28.211836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `METRIC = 'hiero_mirror_grpc_retriever'` constant by flooding the gRPC endpoint with subscriptions, causing the Micrometer metric to record an artificially high retrieval rate that triggers auto-scaling or alerting systems and indirectly affects fee-parameter tuning decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e7ae0a9-b494-4f66-bd5a-20c68a00240d?mode=deep",
+    "timestamp": "2026-04-28 20:19:42.401093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user set `limit=1` in `TopicMessageFilter` to cause `poll()` to compute `pageSize = Math.min(1, maxPageSize) = 1`, and then immediately re-subscribe in a loop, causing the DB to execute single-row queries at high frequency that degrade fee-data retrieval performance for other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3eb5516-647c-4ef1-b167-776520666033?mode=deep",
+    "timestamp": "2026-04-28 20:19:55.912258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged user exploit the `PollingContext.isComplete()` logic where throttled mode returns `pageSize.get() < retrieverProperties.getMaxPageSize() || limitHit`, by subscribing to a topic that always returns exactly `maxPageSize` messages per poll, causing the retriever to loop indefinitely and never signal completion, holding server threads and DB connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a5f3e45-ab80-46b3-bb46-9c38dd6540ea?mode=deep",
+    "timestamp": "2026-04-28 20:20:08.982420",
+    "report_generated": false
+  }
+]
