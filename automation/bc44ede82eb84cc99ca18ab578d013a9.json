@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user exploit the mutable `filters` array being modified via `filters.push(...spenderIdFilters)` across multiple `getSubQuery()` calls sharing the same `params` array, causing parameter index drift that silently maps filter values to wrong SQL positional parameters, resulting in historically incorrect NFT ownership records being returned as current truth?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1eaf4e6-e93d-44b2-85db-9ae9436efc9f?mode=deep",
+    "timestamp": "2026-04-28 20:46:04.330925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user craft a query with all three of `lower`, `inner`, and `upper` filter arrays populated such that the shared `params` array passed by reference into each `getSubQuery()` call accumulates positional offsets incorrectly, causing `timestamp_range` boundary conditions to be evaluated against wrong parameter values and returning NFT history states that never existed on the Hashgraph?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_008186f1-3691-4177-9e8a-77d784bb9fc9?mode=deep",
+    "timestamp": "2026-04-28 20:46:16.307086",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNft()] Can an unprivileged external user supply a crafted `tokenId` or `serialNumber` that, when passed to `pool.queryQuietly(NftService.nftByIdQuery, [tokenId, serialNumber])`, exploits type coercion differences between JavaScript and PostgreSQL to match an NFT row with a different `created_timestamp`, effectively presenting a falsified Hashgraph mint history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d23e561-a7bb-4d4b-b14a-6b5aa82ea34a?mode=deep",
+    "timestamp": "2026-04-28 20:46:28.696408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNft()] Can an unprivileged external user pass a `serialNumber` value of `0` or a negative integer to `getNft()`, which uses `select * from nft where token_id = $1 and serial_number = $2`, to retrieve a sentinel or boundary row that exposes internal `timestamp_range` metadata not intended to be surfaced, thereby leaking Hashgraph history state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87ca1907-11bb-4bf4-b0ec-039c8bc90586?mode=deep",
+    "timestamp": "2026-04-28 20:46:41.637046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNft()] Can an unprivileged external user exploit the `select *` wildcard in `nftByIdQuery` to receive all columns including raw `timestamp_range` int8range values, and by comparing responses across multiple requests infer or reconstruct suppressed Hashgraph history entries that were intentionally excluded from the public API response schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d829b603-84cc-4da8-9430-53c4623b9ceb?mode=deep",
+    "timestamp": "2026-04-28 20:46:54.977102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user submit a `spenderIdInFilters` array with a very large number of equal-operator spender entries, causing the `spender in ($5,$6,...$N)` clause to be appended to every subquery in the `UNION ALL`, and by observing which serial numbers appear or disappear across different spender sets, reconstruct the historical ownership chain of an NFT without direct access to `nft_history`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9993ab27-ca6a-4864-9010-1b31de65c8c5?mode=deep",
+    "timestamp": "2026-04-28 20:47:08.731903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user exploit the fact that `orderByColumns` is fixed to `[Nft.TOKEN_ID, Nft.SERIAL_NUMBER]` with no `timestamp_range` ordering, causing the `UNION ALL` of `lower`, `inner`, and `upper` subqueries to return rows in an order that misrepresents the chronological Hashgraph history of NFT ownership transitions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15846d5b-19ec-4a83-9c3f-82bd8fe4e63c?mode=deep",
+    "timestamp": "2026-04-28 20:47:22.556461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user craft filter values for `token_id` and `serial_number` that span the boundary between the `nft` (current state) and `nft_history` (historical state) tables, and by exploiting the absence of a `timestamp_range` filter in `nftQuery`, receive rows that blend current and historical NFT states, presenting a tampered view of Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c5ad2dd-1b89-4d46-9be3-1793c0eb4678?mode=deep",
+    "timestamp": "2026-04-28 20:47:35.809441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNfts()] Can an unprivileged external user trigger the `getNfts()` function with a query object where `ownerAccountId` is set to a value that matches a deleted entity, and because `nftQuery` uses a `left join entity e on e.id = nft.token_id` with `coalesce(e.deleted, false)`, receive NFTs whose `deleted` status is computed incorrectly, misrepresenting the burn history recorded on the Hashgraph?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93356821-872e-4c1b-9f60-36bc9264fa50?mode=deep",
+    "timestamp": "2026-04-28 20:47:48.208500",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user exploit the fact that `spenderIdFilters` (range operators) are pushed into the mutable `filters` array via `filters.push(...spenderIdFilters)` before iterating, causing the same spender range condition to be duplicated across multiple `UNION ALL` subqueries that share the same `params` array, leading to incorrect parameter binding that returns NFT records with falsified `timestamp_range` values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97667feb-0643-4792-99dc-80d0ad4e4ee7?mode=deep",
+    "timestamp": "2026-04-28 20:48:01.660674",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user send a request where `lower`, `inner`, and `upper` filter arrays each contain overlapping `token_id` range conditions, causing the `UNION ALL` to return duplicate NFT rows with different `timestamp_range` values, making it appear that the same NFT existed in two ownership states simultaneously on the Hashgraph?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c285bc61-1108-4477-8826-79750dbfd8b0?mode=deep",
+    "timestamp": "2026-04-28 20:48:15.143394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user supply a `filter.operator` value that is not sanitized before being interpolated directly into the SQL string as `${column}${filter.operator}$${params.length}`, injecting SQL fragments that alter the `WHERE` clause to bypass `timestamp_range` constraints and expose historical NFT states that should be hidden?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24216e17-6db7-4026-904c-aa463a815636?mode=deep",
+    "timestamp": "2026-04-28 20:48:27.879372",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user exploit the direct string interpolation of `filter.operator` in `${column}${filter.operator}$${params.length}` to inject a SQL comment sequence (`--`) or semicolon that truncates the WHERE clause, removing the `account_id = $1` constraint and returning NFT history records belonging to other accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb5f8d1c-8583-41a3-a92b-a08c9683c9f1?mode=deep",
+    "timestamp": "2026-04-28 20:48:41.572428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user inject a crafted `filter.key` value that does not exist in `NftService.columns`, causing `NftService.columns[filter.key]` to return `undefined`, which when interpolated as `${undefined}${operator}$N` produces a malformed SQL condition that PostgreSQL evaluates in an unexpected way, potentially bypassing `timestamp_range` integrity checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84c4e6a6-ff58-4f3e-a943-0727fe3cfef7?mode=deep",
+    "timestamp": "2026-04-28 20:48:55.324380",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user pass a `limit` value of `0` or a very large integer to `getQuery()`, which uses `super.getLimitQuery(2)` hardcoded to position `$2`, causing the limit parameter to be ignored or overridden, resulting in unbounded result sets that expose the full historical NFT ownership chain stored in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de6db944-949b-492e-b0c3-936a9504eb71?mode=deep",
+    "timestamp": "2026-04-28 20:49:09.540313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user exploit the fact that `params = [ownerAccountId, limit]` is initialized with only two values and then mutated by reference across all `getSubQuery()` calls, such that a carefully crafted multi-filter request causes parameter positions to shift, binding `timestamp_range` lower-bound values to `account_id` positions and vice versa, corrupting the historical query logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86f715a5-886b-4257-aeae-233f24baa295?mode=deep",
+    "timestamp": "2026-04-28 20:49:23.864445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNfts()] Can an unprivileged external user trigger `getNfts()` with a query that produces a `UNION ALL` of three subqueries, each independently applying the same `spenderIdInFilters` via `getSubQuery()`, causing the same historical NFT record to appear multiple times in the result set with different apparent ownership contexts, misleading consumers about the true Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ed96e4f-1276-4154-aa8c-bc1baf54b9bd?mode=deep",
+    "timestamp": "2026-04-28 20:49:37.691248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user exploit the absence of any validation on `filter.value` before it is pushed to `params` via `params.push(filter.value)`, supplying a JavaScript object or array as a filter value that PostgreSQL driver serializes unexpectedly, causing the `timestamp_range` comparison to evaluate against a malformed value and return incorrect historical NFT states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_935020a6-7eaf-443f-b0c8-91dc0289be7e?mode=deep",
+    "timestamp": "2026-04-28 20:49:51.261091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user craft a request where `lower` and `upper` filter arrays are both non-empty but `inner` is empty, causing `getQuery()` to produce a `UNION ALL` of exactly two subqueries without an inner range guard, allowing NFT records with `timestamp_range` values between the lower and upper bounds to be omitted, creating gaps in the visible Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ff07389-06e6-453c-99bb-9c5eea0f5e9b?mode=deep",
+    "timestamp": "2026-04-28 20:50:04.757447",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user supply an empty `spenderIdInFilters` array alongside a non-empty `spenderIdFilters` array, causing `filters.push(...spenderIdFilters)` to append spender range conditions to the main filter list while the `spender in (...)` clause is skipped, resulting in a query that returns NFTs with any spender matching the range but misses the `IN` constraint, exposing historical spender assignments not intended to be visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01a3d7dd-d1d5-404a-a0d9-3a75e5af93a4?mode=deep",
+    "timestamp": "2026-04-28 20:50:20.221439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNft()] Can an unprivileged external user pass a floating-point `serialNumber` (e.g., `1.5`) to `getNft()`, which passes it directly to `pool.queryQuietly` as a parameter, causing PostgreSQL to cast it to `bigint` in an unexpected way that matches a different serial number's row, returning an NFT with a `created_timestamp` that does not correspond to any real Hashgraph mint event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f32f1ab-eab7-416f-a292-be29e45988aa?mode=deep",
+    "timestamp": "2026-04-28 20:50:33.796400",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user exploit the fact that `NftService.nftQuery` includes `nft.timestamp_range` in the SELECT but applies no WHERE filter on `timestamp_range`, meaning that when the `nft` table contains rows whose `timestamp_range` upper bound is not null (indicating a closed/historical range that should be in `nft_history`), those rows are returned as if they represent current Hashgraph state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d597ac15-140b-4def-9d7f-28cd23522b77?mode=deep",
+    "timestamp": "2026-04-28 20:50:47.853449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getQuery()] Can an unprivileged external user exploit the `UNION ALL` construction in `getQuery()` where the outer `orderClause` and `limitClause` are appended after the union, but each subquery also has its own `orderClause` and `limitClause`, causing the database to apply per-subquery limits before the outer limit, potentially omitting NFT records from the middle of the historical range and creating a false impression of ownership continuity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0767b602-e55a-45c2-ad85-e6fb20ca2ece?mode=deep",
+    "timestamp": "2026-04-28 20:51:01.353534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSubQuery()] Can an unprivileged external user supply a `spenderIdInFilters` list containing duplicate spender IDs, causing the `spender in ($5,$6,$7)` clause to contain repeated parameter placeholders that PostgreSQL evaluates correctly but that inflate the `params` array, shifting subsequent parameter positions and causing `token_id` or `serial_number` filter values to be bound to wrong positions, corrupting the historical query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42e2dfb6-3010-4928-84c9-7b9acd96cfc0?mode=deep",
+    "timestamp": "2026-04-28 20:51:14.550432",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNfts()] Can an unprivileged external user trigger `getNfts()` with a query that results in zero subqueries (all three filter arrays empty), causing the fallback `getSubQuery([], params, ...)` path to execute with only `account_id = $1` as the WHERE condition and no `timestamp_range` filter, returning all NFTs for the account including those with closed `timestamp_range` values that represent historical-only states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0662eaf0-6336-4526-8a5e-663e6c498fb6?mode=deep",
+    "timestamp": "2026-04-28 20:51:27.776728",
+    "report_generated": false
+  }
+]
