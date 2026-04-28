@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a base64url-encoded transaction hash that decodes to bytes matching multiple transactions in `getTransactionHash()`, causing `getTransactionsByTransactionIdsSql()` to be called with multiple `[payerAccountId, consensus_timestamp]` pairs all sharing the same `payerAccountId`, potentially returning inner transactions with different fee structures than the outer transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfc918e2-c68c-4379-94ae-e02ae5b279c2?mode=deep",
+    "timestamp": "2026-04-28 20:00:30.770817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by ID that has `inner_transactions`, causing `getTransactionsByTransactionIdsSql()` to be called a second time for inner transactions using `Transaction.VALID_START_NS` as the timestamp field, and by crafting a transaction ID whose inner transactions span a large timestamp range, cause the query to return unrelated transactions with different `charged_tx_fee` values appended to the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d673a927-2d13-4650-8a40-199845211c02?mode=deep",
+    "timestamp": "2026-04-28 20:00:42.893899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user provide a transaction ID where `transactionId.getValidStartNs()` returns a value such that `maxTimestamp + maxTransactionConsensusTimestampRangeNs` overflows a BigInt or exceeds the database's `bigint` range, causing the upper consensus timestamp bound to wrap around and return transactions from an entirely different time period with different fee data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02376b1f-b54e-4674-9f50-3b8084b4aaca?mode=deep",
+    "timestamp": "2026-04-28 20:00:55.570153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user observe that `getTransactionsByTransactionIdsSql()` uses `params.lowerConsensusTimestampIndex` and `params.upperConsensusTimestampIndex` as custom properties on the `params` array, and by triggering the `mayMissLongTermScheduledTransaction()` retry path, cause `params[params.upperConsensusTimestampIndex]` to be mutated to an unintended value, returning transactions outside the intended fee window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ffb6644-1cf3-4586-ae26-536bf4c85def?mode=deep",
+    "timestamp": "2026-04-28 20:01:08.726461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCryptoTransferList()] Can an unprivileged external user observe that `createCryptoTransferList()` sets `is_approval` to `false` when the DB value is `null` (`isNil(is_approval) ? false : is_approval`), and by querying a transaction where an approval transfer was incorrectly stored as null, cause the API to misrepresent an approved fee deduction as a direct transfer, obscuring the fee authorization chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14cf1b4b-dccf-4dc7-80de-bf20addd1b88?mode=deep",
+    "timestamp": "2026-04-28 20:01:23.481587",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createTokenTransferList()] Can an unprivileged external user observe that `createTokenTransferList()` applies the same `isNil(is_approval) ? false : is_approval` default as `createCryptoTransferList()`, and by querying a token transfer transaction where the approval flag is null, cause the API to misrepresent a token fee transfer as non-approved, affecting downstream fee authorization verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdc6860e-7e97-4b04-8baa-960618b8841d?mode=deep",
+    "timestamp": "2026-04-28 20:01:37.807435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getStakingRewardTransferList()] Can an unprivileged external user craft a request that returns a large number of transactions all involving the staking reward account (entity ID 800), causing `getStakingRewardTimestamps()` to produce a large array and `getStakingRewardTransferList()` to execute a query with a very large `IN` clause, leading to resource exhaustion that delays or corrupts fee data retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e129d0c1-ef48-432b-b794-94ae781f1c4d?mode=deep",
+    "timestamp": "2026-04-28 20:01:52.664364",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: convertStakingRewardTransfers()] Can an unprivileged external user observe that `convertStakingRewardTransfers()` uses `t.staking_reward_transfers || []` as a fallback, and by querying a transaction where staking reward transfers are present but the DB returns an empty array (not null), cause the staking reward amount (which affects net fee calculation) to be silently omitted from the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d0d9653-a267-4bb2-8d58-848c1cb3ff70?mode=deep",
+    "timestamp": "2026-04-28 20:02:08.461141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatTransactionRows()] Can an unprivileged external user query a transaction where `assessed_custom_fees` is an empty array (not null), causing `createAssessedCustomFeeList()` to return an empty array rather than `undefined`, and observe that the API response includes `assessed_custom_fees: []` for a transaction that actually had fees assessed, if the DB aggregation returned an empty JSONB array instead of null?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8158c936-f6c9-4d6b-aadc-3392106ccdaf?mode=deep",
+    "timestamp": "2026-04-28 20:02:23.767632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionTimestamps()] Can an unprivileged external user supply multiple `timestamp=eq:X` filters causing `timestampRange.eqValues.length > 1` to be true in `getTransactionTimestamps()`, which returns `{rows: []}` immediately, effectively suppressing all transaction results and preventing any fee data from being returned for a targeted set of timestamps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b5ec2e1-b562-4761-97cd-18f5b337aeda?mode=deep",
+    "timestamp": "2026-04-28 20:02:36.958379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactions()] Can an unprivileged external user supply a `limit` parameter at the maximum allowed value combined with a broad timestamp range in `getTransactions()`, causing `doGetTransactions()` to load a large number of transactions into the cache via `cache.get()`, exhausting memory and causing subsequent requests to return stale or evicted fee data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16cc6bd5-1528-477a-95f3-cea3d136575c?mode=deep",
+    "timestamp": "2026-04-28 20:02:49.910582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: doGetTransactions()] Can an unprivileged external user exploit the pagination logic in `doGetTransactions()` where `isEnd = transactions.length !== limit`, and by crafting requests that return exactly `limit` transactions, cause the `next` link to always point to the last transaction's `consensus_timestamp`, creating an infinite pagination loop that repeatedly queries the same fee data without termination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c78d64dc-78b5-41db-8a4f-9d10d29c76f7?mode=deep",
+    "timestamp": "2026-04-28 20:03:03.538171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter that causes the `entityTransactionCondition` in `getTransactionTimestampsQuery()` to strip table prefixes via `.replace(/(ctl|t)\\\\./g, '')`, producing an ambiguous column reference in the SQL query that causes the database to use an incorrect index or return wrong results, affecting which transactions and their associated fees are returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba6ad3d1-ca19-4196-b89f-592544486f63?mode=deep",
+    "timestamp": "2026-04-28 20:03:17.541697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply a `transaction.type` filter combined with an `account.id` filter, causing `getTransactionTimestampsQuery()` to include `transactionTypeQuery` in the `entityTransactionCondition` after prefix stripping, and if the `entity_transaction` table lacks a `type` column, cause a SQL error that returns empty results, hiding fee data for targeted transaction types?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c47d4e1-985a-485c-b84c-e56812c8a92d?mode=deep",
+    "timestamp": "2026-04-28 20:03:31.513668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildWhereClause()] Can an unprivileged external user observe that `buildWhereClause()` joins conditions with ` and ` without any sanitization of the condition strings, and if any upstream condition-building function produces an empty string for a fee-related filter, cause that filter to be silently dropped, returning transactions that should have been excluded based on fee criteria?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52798181-c38a-49d3-9feb-7d6d9a6dab61?mode=deep",
+    "timestamp": "2026-04-28 20:03:46.212915",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user provide a transaction ID with a payer account ID of `0` or a system account, causing `getTransactionsByTransactionIdsSql()` to include `payer_account_id = 0` in the query conditions, potentially matching system-generated transactions with non-standard fee structures that are not intended to be exposed via the public API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_549e0da1-00c9-40bb-bff8-0da485773fbb?mode=deep",
+    "timestamp": "2026-04-28 20:04:00.556975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionByIdQueryParamConditions()] Can an unprivileged external user supply both `?nonce=0` and `?scheduled=false` to `getTransactionsByIdOrHash()`, causing `getTransactionByIdQueryParamConditions()` to add both conditions to the query, and by iterating over multiple nonce values, enumerate all child transactions of a batch transaction and observe their individual `charged_tx_fee` values to reconstruct the total fee distribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb2b725d-5c81-4575-a216-75580389be7d?mode=deep",
+    "timestamp": "2026-04-28 20:04:14.072865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by ID where `inner_transactions` is a non-empty array, and since `getTransactionsByTransactionIdsSql()` is called again for inner transactions without re-validating the `filters` parameter, cause the inner transaction query to inherit the outer query's `nonce` or `scheduled` filter conditions, potentially excluding inner transactions with different fee structures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30ca29b3-973b-453c-94d5-87af2bbf912e?mode=deep",
+    "timestamp": "2026-04-28 20:04:26.674672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatTransactionRows()] Can an unprivileged external user observe that `formatTransactionRows()` calls `createMaxCustomFeesList(row.max_custom_fees)` where `row.max_custom_fees` is the raw database value (an array of binary buffers), and if the database returns a single malformed buffer, cause `fromBinary()` in `CustomFeeLimits` to throw, crashing the entire `formatTransactionRows()` call and returning no fee data for any transaction in the batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8711de4-28e8-49f3-a80f-9ae0c6895a22?mode=deep",
+    "timestamp": "2026-04-28 20:04:39.860620",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createMaxCustomFeesList()] Can an unprivileged external user trigger a scenario where `CustomFeeLimitsViewModel` receives a `CustomFeeLimits` object with a fee entry where `fixedFee.amount` is a very large protobuf `uint64` value, causing `BigInt(fixedFee.amount)` in `CustomFeeLimitsViewModel` to produce a value exceeding JavaScript's safe integer range, leading to incorrect fee limit representation in the API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ccd1ab4-f3c0-475a-8800-4a12a38513ed?mode=deep",
+    "timestamp": "2026-04-28 20:04:53.796572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply a transaction hash that matches a transaction with `assessed_custom_fees` containing entries where `effective_payer_account_ids` is an empty array (pre-0.17.1 behavior), and since `AssessedCustomFeeViewModel` sets `effective_payer_account_ids = []` for null values, cause the API to return identical responses for both pre- and post-0.17.1 transactions, making it impossible to distinguish whether fees were actually assessed with payer attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1998b5d0-366b-40f7-b049-68d33a757f71?mode=deep",
+    "timestamp": "2026-04-28 20:05:07.487393",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply a `result=fail` filter combined with an `account.id` filter, causing `resultTypeQuery` to use `not in (${utils.resultSuccess})` in the join condition with the `entity_transaction` table after prefix stripping, and if the `entity_transaction` table lacks a `result` column, cause a SQL error that returns empty results, hiding failed transactions where fees were still charged?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5465315-0ca1-4000-be07-7f52abe02732?mode=deep",
+    "timestamp": "2026-04-28 20:05:21.423927",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactions()] Can an unprivileged external user supply a `transactiontype=SCHEDULECREATE` filter to `getTransactions()`, causing `TransactionType.getProtoId('SCHEDULECREATE')` to return proto ID `42` (matching `scheduleCreateProtoId`), and by combining with a timestamp filter, enumerate all schedule-create transactions to identify those with short cache windows, then race to query them before the cache expires to observe fee data before it is potentially updated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb4f80f5-4654-4461-8c4b-fbdb844d0fc0?mode=deep",
+    "timestamp": "2026-04-28 20:05:35.102327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user observe that `getTransactionsByIdOrHashCacheControlHeader()` checks `transaction.type === scheduleCreateProtoId` against the raw DB `type` field (not the formatted name), and by querying a transaction where `type` is stored as the integer `42` but `TransactionType.getName()` returns a different string, cause a mismatch between the cache control decision and the displayed transaction type, leading to incorrect cache behavior for fee data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4621bbe-14b1-4004-a699-f9a2e9ece779?mode=deep",
+    "timestamp": "2026-04-28 20:05:48.642958",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user observe that `getTransactionsByIdOrHashCacheControlHeader()` iterates over `transactions` (the raw DB rows, not the formatted rows) and checks `transaction.result` against `SUCCESS_PROTO_IDS`, and if `TransactionResult.getSuccessProtoIds()` returns an incomplete set, cause a `SCHEDULECREATE` transaction with a non-standard success code to bypass the shorter cache window, serving stale fee data for longer than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_715de6c0-70d9-490b-8554-b174814bee98?mode=deep",
+    "timestamp": "2026-04-28 20:06:01.141374",
+    "report_generated": false
+  }
+]
