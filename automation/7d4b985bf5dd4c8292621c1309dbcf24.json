@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that the cancel function returned by GetDbWithContext() is deferred by callers (e.g., defer cancel()), and by sending a request that causes a panic in the handler after GetDbWithContext() is called but before the query completes, the deferred cancel fires and cancels the context mid-query, causing a partial result set that misrepresents the transaction ordering in the block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46dc30df-103b-4912-8976-cb80c932bbc5?mode=deep",
+    "timestamp": "2026-04-28 20:58:38.931481",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request with a hash that matches multiple record_file rows (due to a hash collision or truncation), causing GetDbWithContext() to return a db that executes selectByHashWithIndex and returns the first matching row, which may not be the row with the correct consensus_timestamp ordering, presenting a reorganized block history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_303c8119-634e-47a2-afb3-a8cc5a0d6033?mode=deep",
+    "timestamp": "2026-04-28 20:58:50.986528",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes FindBetween() to call GetDbWithContext() and then execute selectTransactionsInTimestampRangeOrdered in batches of 2000, and by timing the request to coincide with a new transaction being inserted at a consensus_timestamp within the queried range, cause the second batch to include the new transaction while the first batch does not, resulting in a transaction appearing out of order relative to its true consensus_timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c93b963e-d66a-43e9-8de3-5e4ef92f9e4e?mode=deep",
+    "timestamp": "2026-04-28 20:59:03.476286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not set a PostgreSQL SET LOCAL statement_timeout, relying only on Go context cancellation, and because PostgreSQL does not cancel a running query when the Go context is cancelled (only when the connection is closed), the query may complete and return results after the context deadline, reading a post-write snapshot and returning transactions in a different order than expected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_811c43e3-dd3e-4dd4-b90e-2e7be256a388?mode=deep",
+    "timestamp": "2026-04-28 20:59:16.882216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to be passed to both findBlockByHash() and FindBetween(), and because gorm reuses the same connection for both queries in autocommit mode, a record_file update between the two queries causes the block's consensus_end to differ between the block lookup and the transaction range query, returning transactions that belong to a different block boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50efd753-8049-4a36-870a-12fe59fdd584?mode=deep",
+    "timestamp": "2026-04-28 20:59:30.654297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a request that causes GetDbWithContext() to be called with a context that has a very short deadline (e.g., 1 millisecond), causing the context to expire before the query completes, and if the error handling in FindBetween() does not distinguish between a context cancellation error and a database error, the partial result is returned as a valid transaction list with missing entries, making history appear reorganized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_012779e7-8a9b-4c50-accb-61eb7a714bca?mode=deep",
+    "timestamp": "2026-04-28 20:59:43.702997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() creates a new child context for every call, and by sending a request that triggers multiple sequential calls to GetDbWithContext() within the same handler, cause each call to start a new read at a different point in time, so that the combined result of all reads presents a transaction history that spans multiple committed states of the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad977a09-d14b-4087-b37d-3a9719be4c07?mode=deep",
+    "timestamp": "2026-04-28 20:59:57.201645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes the block service to call GetDbWithContext() for RetrieveLatest() and then for FindBetween(), and because RetrieveLatest() reads the latest record_file index at time T1 and FindBetween() reads transactions at time T2 > T1, a new record_file inserted between T1 and T2 causes FindBetween() to return transactions from the new block, making the latest block appear to contain transactions from a future block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e680af05-229b-41a3-ac02-dace16ea1a43?mode=deep",
+    "timestamp": "2026-04-28 21:00:11.215832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to return a *gorm.DB with a context that is cancelled by the parent request context (e.g., client disconnects), and because the cancel is propagated to the database query, the query returns an error that is silently swallowed by the handler, causing the block response to be constructed from a partial transaction list that omits later consensus_timestamp entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_916662cc-9ed6-4b54-bd3f-1ce96529e01e?mode=deep",
+    "timestamp": "2026-04-28 21:00:23.920020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not pin the database connection to a specific PostgreSQL transaction isolation level, and by sending a request during a PostgreSQL VACUUM or autovacuum operation, cause the query to read a version of the transaction table where dead tuples have been removed, making some historical transactions appear to have been deleted and thus reorganizing the apparent history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d6e7ce9-4b0a-4824-8ab9-e2f9b663c6ea?mode=deep",
+    "timestamp": "2026-04-28 21:00:37.252270",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting query to use the selectByHashWithIndex SQL with collate 'C', and by providing a hash string with mixed case or special byte sequences that collate differently under 'C' versus the default collation, cause the query to match a different record_file row than intended, returning a block with a different consensus_timestamp range and thus a different transaction ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_593eb33d-27de-4d65-88c7-ecf30a03637d?mode=deep",
+    "timestamp": "2026-04-28 21:00:50.512412",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute selectRecordBlockByIndex with a coalesce subquery that reads from record_file, and by timing the request to coincide with a new record_file insertion at index+1, cause the coalesce to return a consensus_end that is one nanosecond before the new block's consensus_start, truncating the transaction range and omitting the last transaction in the block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6eaa6ab4-6732-43f6-9f9b-dc1a29d58a49?mode=deep",
+    "timestamp": "2026-04-28 21:01:04.503447",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting query to read from the transaction table using selectTransactionsInTimestampRangeOrdered, and by timing the request to coincide with a transaction being updated (e.g., errata field set to 'DELETE'), cause the query to return the transaction before the update, while a subsequent request returns the same block without the transaction, making history appear to reorganize between requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0327a02-9a2e-47b0-a301-0a3b050fa117?mode=deep",
+    "timestamp": "2026-04-28 21:01:18.557807",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute a query that reads from both the transaction table and the crypto_transfer table in a correlated subquery, and because the two tables are read at different points in time within the same query (no snapshot isolation), a crypto_transfer insertion between the two reads causes a transaction to appear with more transfers than it had at consensus, reorganizing its operation list?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4aaa408-2c59-4f10-9c6c-9f27f4779cf6?mode=deep",
+    "timestamp": "2026-04-28 21:01:32.074107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute selectTransactionsInTimestampRangeOrdered with a Limit(batchSize) of 2000, and by crafting a block that contains exactly 2000 transactions, cause the batch loop to exit after the first batch without checking for more transactions, omitting any transactions inserted at consensus_timestamps after the 2000th entry but within the block's range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e96ac5c-a35b-46e8-8b81-8e191a1d4c6e?mode=deep",
+    "timestamp": "2026-04-28 21:01:45.839741",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the sameHashMap grouping logic in FindBetween(), and by timing the request to coincide with a transaction being inserted with the same hash as an existing transaction (hash collision), cause the new transaction's rows to be merged with the existing transaction's rows, producing a transaction with operations from two different consensus_timestamps and thus a reorganized operation history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fb1489a-c657-4ece-936c-30175e6f1521?mode=deep",
+    "timestamp": "2026-04-28 21:02:00.340572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the genesis block initialization via initGenesisRecordFile(), and because the genesis block is cached in a sync.Once after the first successful read, a race condition between the first request and a concurrent record_file insertion causes the genesis block to be initialized with a stale index, making all subsequent block index calculations off by one and reorganizing the apparent block history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed2463f3-a1ba-43c1-86c5-4f1b3098490c?mode=deep",
+    "timestamp": "2026-04-28 21:02:14.786178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute selectGenesis, which reads from both account_balance and record_file tables, and because these two tables are read in separate subqueries without snapshot isolation, a new account_balance row inserted between the two reads causes the genesis timestamp to shift, changing the consensus_start of the genesis block and reorganizing all block boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83f8c318-2d69-4153-99bf-72440b2bb697?mode=deep",
+    "timestamp": "2026-04-28 21:02:28.500773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the constructTransaction() logic, and by timing the request to coincide with a transaction result being updated in the database, cause constructTransaction() to read a transaction with result=22 (success) while a concurrent request reads the same transaction with a different result code, making the transaction's operation status appear different across requests and reorganizing its apparent history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c48e6683-3dc9-4fbc-9d09-aecab8b4aacd?mode=deep",
+    "timestamp": "2026-04-28 21:02:41.712950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the categorizeHbarTransfers() logic, and by timing the request to coincide with an itemized_transfer field being updated in the transaction table, cause categorizeHbarTransfers() to read a mix of old and new itemized transfers, producing an operation list that does not correspond to any single committed state of the transaction and thus reorganizing its transfer history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5325ffd6-3610-463e-84ee-5b7ba8a2dc7f?mode=deep",
+    "timestamp": "2026-04-28 21:02:54.665596",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the staking_reward_transfer subquery in selectTransactionsInTimestampRange, and by timing the request to coincide with a staking_reward_transfer row being inserted, cause the subquery to return a staking reward payout that was not present in the original transaction, adding a new operation to the transaction's history and reorganizing its operation list?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1bfbc50-1622-4fe3-b251-14541188b758?mode=deep",
+    "timestamp": "2026-04-28 21:03:08.316677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the crypto_transfer subquery in selectTransactionsInTimestampRange, and by timing the request to coincide with a crypto_transfer row having its errata field set to 'DELETE', cause the subquery to return the transfer before the errata update, while a subsequent request omits it, making the transaction's transfer history appear to reorganize between requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_640ac002-2581-40ad-8549-ea448daae56c?mode=deep",
+    "timestamp": "2026-04-28 21:03:20.813010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the getFeeHbarTransfers() logic, and by timing the request to coincide with a crypto_transfer amount being updated, cause getFeeHbarTransfers() to compute a fee amount based on a mix of old and new transfer amounts, producing a fee operation with an incorrect amount that does not match any single committed state of the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71d0881b-0015-4d11-a44d-c12a2ac0a674?mode=deep",
+    "timestamp": "2026-04-28 21:03:33.375563",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the aggregateHbarTransfers() logic, and by timing the request to coincide with an itemized_transfer being inserted with a duplicate entity_id, cause aggregateHbarTransfers() to double-count the transfer amount, producing an operation with an inflated amount that does not correspond to the actual consensus state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65ce9f67-a3be-41f6-9fc2-6187ac783246?mode=deep",
+    "timestamp": "2026-04-28 21:03:46.519766",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: GetDbWithContext()] Can an unprivileged external user send a /block request that causes GetDbWithContext() to be called and the resulting *gorm.DB to execute the IsTransactionResultSuccessful() check, and by timing the request to coincide with a transaction result being updated from a failed code to transactionResultSuccess (22), cause IsTransactionResultSuccessful() to return false for a transaction that is actually successful, omitting its operations from the block and reorganizing the block's operation history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a81d05e-0a14-4ecd-b478-23949296bc64?mode=deep",
+    "timestamp": "2026-04-28 21:04:00.135782",
+    "report_generated": false
+  }
+]
