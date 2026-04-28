@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply an arbitrary fileId value (e.g., file.id=101 or file.id=999) to getNetworkNodes() via the NetworkNodeRequest, causing the service to return address book entries from a non-canonical or historical address book file, thereby presenting a tampered view of the Hashgraph network topology to downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b28addd4-c894-48b8-bfda-085c3212fda8?mode=deep",
+    "timestamp": "2026-04-28 21:18:43.549381",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getAddressBookFileId()] Can an unprivileged external user bypass the default address book file (102) by providing any arbitrary numeric fileId in the request, since getAddressBookFileId() performs no validation that the supplied fileId is one of the legitimate address book files (101 or 102), allowing the attacker to retrieve address book history for arbitrary system files and misrepresent the Hashgraph node set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37a42755-05e6-4648-aec3-95fb78091118?mode=deep",
+    "timestamp": "2026-04-28 21:18:55.390456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user craft a nodeIds list with RangeOperator.GT applied to Long.MAX_VALUE-1, causing getInclusiveValue() to overflow to Long.MIN_VALUE, which then passes the lowerBound > upperBound check and is forwarded to networkNodeRepository.findNetworkNodes() with a negative minNodeId, potentially returning unintended historical address book entries and corrupting the view of Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97f24734-0cae-452c-9110-cdaf62d8aa4f?mode=deep",
+    "timestamp": "2026-04-28 21:19:08.223634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply a nodeIds parameter with RangeOperator.LT and value=0, causing getInclusiveValue() to return -1 (Long underflow), which is then used as upperBound in findNetworkNodes(), potentially causing the SQL query to match no nodes or behave unexpectedly, resulting in a falsified empty network topology response that misrepresents Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2f82e38-206a-4c02-9439-437e504ac25a?mode=deep",
+    "timestamp": "2026-04-28 21:19:20.540326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestNetworkStake()] Can an unprivileged external user exploit the fact that getLatestNetworkStake() unconditionally returns the record with the highest consensus_timestamp from network_stake, such that if a future-dated or manipulated consensus_timestamp record exists in the database (e.g., injected via a compromised ingestion path), the attacker can trigger the endpoint to return falsified stake data that misrepresents the Hashgraph staking history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9bf69dc-539d-4d2c-b907-89547a84e962?mode=deep",
+    "timestamp": "2026-04-28 21:19:33.641993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user provide a timestamp parameter with a far-future value (e.g., timestamp=lte:99999999999.999999999) to getSupply(), causing the service to query accountBalanceRepository.getSupplyHistory() with an upper timestamp far beyond the current consensus time, potentially returning stale or manipulated historical balance data as if it were the current supply, thereby misrepresenting the Hashgraph financial history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8da2ee55-b8ac-4d1c-847e-d51795024ca6?mode=deep",
+    "timestamp": "2026-04-28 21:19:47.138363",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user craft a timestamp range where minTimestamp equals maxTimestamp (e.g., timestamp=gte:X&timestamp=lte:X), causing getSupply() to query a single-point-in-time balance snapshot that may reflect a manipulated or anomalous historical state, and since the validation only checks minTimestamp > maxTimestamp (not >=), this equal-bound case passes through and returns potentially misleading historical supply data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d7cb6ba-da5f-4663-9cb7-fb8d7efad08d?mode=deep",
+    "timestamp": "2026-04-28 21:20:00.149394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFirstDayOfMonth()] Can an unprivileged external user supply a maxTimestamp value near Long.MAX_VALUE to getSupply(), causing getFirstDayOfMonth() to call Instant.ofEpochSecond(0, timestamp) with a nanosecond value that overflows the Instant range, throwing an uncaught DateTimeException or ArithmeticException that crashes the service and prevents legitimate users from querying Hashgraph supply history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa70f6c8-d985-477f-acc6-0ec2ddeee2d9?mode=deep",
+    "timestamp": "2026-04-28 21:20:14.255630",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFirstDayOfMonth()] Can an unprivileged external user supply a timestamp value of 0 (epoch) to getSupply(), causing getFirstDayOfMonth() to compute a month offset of -1 from January 1970, resulting in December 1969 (a negative epoch second), which when multiplied by DomainUtils.NANOS_PER_SECOND produces a negative optimalLowerBound that is then used as minTimestamp, causing the query to span an unintended historical range and return manipulated or unexpected supply data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8524926-c8e1-4174-a992-1d1c39a1028a?mode=deep",
+    "timestamp": "2026-04-28 21:20:27.632360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user provide a timestamp with RangeOperator.LT and value=1 (i.e., timestamp=lt:0.000000001), causing adjustUpperBound() to decrement to 0, and then getFirstDayOfMonth(0, -1) to compute a negative optimalLowerBound, resulting in Math.max(minTimestamp, negativeValue) returning the original minTimestamp and querying an unintended historical range that misrepresents Hashgraph supply history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75bd5b00-f2c3-4724-8b1e-332c2374a88b?mode=deep",
+    "timestamp": "2026-04-28 21:20:40.793430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user submit multiple EQ nodeId parameters (e.g., node.id=1&node.id=2&node.id=3) combined with a range parameter (e.g., node.id=gte:5), causing the EQ node IDs to be collected into a HashSet and then filtered by Range.closed(5, Long.MAX_VALUE), resulting in an empty nodeIdArray that triggers an early return of List.of(), effectively hiding all nodes from the response and presenting a falsified empty Hashgraph network topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a8467ec-a82b-4d29-acf4-f812bf9836e7?mode=deep",
+    "timestamp": "2026-04-28 21:20:53.704074",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user exploit the fact that when nodeIds is empty, EMPTY_NODE_ID_ARRAY is passed to findNetworkNodes(), which causes the SQL condition 'coalesce(array_length(:nodeIds, 1), 0) = 0' to be true and skips the IN filter entirely, returning all nodes in the address book regardless of any intended filtering, potentially exposing the full historical Hashgraph node set including nodes that should be filtered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ec9491c-ea1a-4b23-a585-e6b4ffe7d6c3?mode=deep",
+    "timestamp": "2026-04-28 21:21:07.271002",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply a fileId corresponding to an older, superseded address book file (e.g., file.id=101 instead of 102), causing getNetworkNodes() to return historical node data from a previous address book version, thereby presenting a tampered or outdated view of the Hashgraph network topology that could mislead clients about which nodes are currently active?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4cddd60-c393-436d-ac05-30d8d5dae68b?mode=deep",
+    "timestamp": "2026-04-28 21:21:21.300588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getRegisteredNodes()] Can an unprivileged external user supply a registeredNodeId with RangeOperator.GT and value=Long.MAX_VALUE-1, causing resolveRegisteredNodeIdBounds() to compute lowerBound = Long.MAX_VALUE via getInclusiveValue() overflow to Long.MIN_VALUE, which then passes the lowerBound > upperBound check and queries the repository with a negative lower bound, potentially returning unintended registered node records and misrepresenting the Hashgraph node registration history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03393c34-526a-4ced-a464-ac0bfb655136?mode=deep",
+    "timestamp": "2026-04-28 21:21:34.793449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: resolveRegisteredNodeIdBounds()] Can an unprivileged external user submit a registeredNodeId with RangeOperator.LT and value=0, causing getInclusiveValue() to return -1 as the upperBound in resolveRegisteredNodeIdBounds(), which then passes the lowerBound (0) > upperBound (-1) check as false (since 0 > -1 is true), throwing an IllegalArgumentException that reveals internal range validation logic and could be used to probe the registered node ID space for Hashgraph history manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3138e467-ab44-4e80-a303-48fe10be8c60?mode=deep",
+    "timestamp": "2026-04-28 21:21:49.247339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply a fileId of 0 or a very large number (e.g., file.id=9999999999) to getNetworkNodes(), causing the SQL query in findNetworkNodes() to join against an address_book with that file_id, returning an empty result set that falsely indicates no network nodes exist, thereby manipulating the perceived Hashgraph network topology for any client relying on this endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed8c1aab-c34e-4768-b2fc-4d198ca82420?mode=deep",
+    "timestamp": "2026-04-28 21:22:03.068630",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user provide two timestamp parameters with the same operator (e.g., timestamp=gte:X&timestamp=gte:Y), causing Bound to only retain the last lower-bound parameter (overwriting the first), silently ignoring one constraint and potentially allowing the attacker to query a broader historical range than intended, returning supply data from a manipulated historical period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61dac69c-f873-4bb2-9dd3-c3f500b8aa15?mode=deep",
+    "timestamp": "2026-04-28 21:22:17.116344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user craft a timestamp=eq:X parameter that is silently rewritten to timestamp=lte:X by Bound.of(), causing the supply query to span from the beginning of the relevant month up to timestamp X rather than exactly at X, returning a broader historical range of balance data than the user specified and potentially including manipulated historical records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b741e236-410e-41a0-9a20-0c1658d0b019?mode=deep",
+    "timestamp": "2026-04-28 21:22:31.107587",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user submit a request with both EQ and range nodeId operators (e.g., node.id=5&node.id=gte:3&node.id=lte:10), causing the EQ node IDs to be collected into a HashSet and filtered by the range, while the lowerBound and upperBound are also set from the range operators, resulting in a combined filter that may include or exclude nodes in ways that misrepresent the historical Hashgraph address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a57dc7e-f37a-41e3-9c20-6831017e8842?mode=deep",
+    "timestamp": "2026-04-28 21:22:44.281002",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply a limit value of Integer.MAX_VALUE to getNetworkNodes(), and since getEffectiveLimit() caps it at MAX_LIMIT=25, the cap is applied correctly, but can the attacker bypass this cap by directly manipulating the request object or exploiting a deserialization path to set limit beyond 25, causing the SQL query to return an unbounded number of historical address book entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c9c03c1-287b-4e1f-a7f1-3f46b6312a9f?mode=deep",
+    "timestamp": "2026-04-28 21:22:57.840397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user exploit the fact that the orderDirection string passed to findNetworkNodes() comes from request.getOrder().name() (which returns 'ASC' or 'DESC'), and if there is any path where a non-enum value reaches this code (e.g., via reflection or deserialization), inject a SQL fragment into the ORDER BY clause of the native query, causing SQL injection that could expose or manipulate historical Hashgraph address book data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b339d7bd-183b-4d59-9cf1-79776a7e3c78?mode=deep",
+    "timestamp": "2026-04-28 21:23:12.481119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestNetworkStake()] Can an unprivileged external user repeatedly call getLatestNetworkStake() at high frequency without any rate limiting enforced at the service layer, causing a denial-of-service that prevents legitimate users from querying the current Hashgraph staking state, effectively suppressing accurate network stake history from being accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be185812-c1df-4e62-bc30-fdcedc5d2e58?mode=deep",
+    "timestamp": "2026-04-28 21:23:26.312555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user submit a timestamp range spanning years (e.g., timestamp=gte:0&timestamp=lte:99999999999) to getSupply(), causing accountBalanceRepository.getSupplyHistory() to scan the entire account_balance table history, resulting in a resource exhaustion attack that degrades the mirror node's ability to serve accurate Hashgraph history to other clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e50f6009-6896-4e89-bbd4-4fb249c2be83?mode=deep",
+    "timestamp": "2026-04-28 21:23:41.132939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getSupply()] Can an unprivileged external user exploit the getFirstDayOfMonth() optimization that sets minTimestamp to the first day of the month before maxTimestamp, such that by choosing a maxTimestamp at the very start of a month (e.g., 2024-01-01T00:00:00.000000000Z), the optimalLowerBound is set to 2023-12-01, causing the query to include an entire extra month of historical balance data that may contain manipulated records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1d82c2e-5c07-4594-9d28-583251e62fd2?mode=deep",
+    "timestamp": "2026-04-28 21:23:57.066527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getNetworkNodes()] Can an unprivileged external user supply a fileId that corresponds to a system file other than 101/102 (e.g., file.id=111 or file.id=150), causing getNetworkNodes() to query address_book entries for that file, potentially exposing internal system file history or returning an empty/incorrect node list that misrepresents the Hashgraph network topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14c1b112-2004-4e72-a5a7-f17503619d0a?mode=deep",
+    "timestamp": "2026-04-28 21:24:10.647305",
+    "report_generated": false
+  }
+]
