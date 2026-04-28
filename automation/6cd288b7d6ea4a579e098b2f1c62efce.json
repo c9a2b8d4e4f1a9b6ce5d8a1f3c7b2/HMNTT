@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileCryptoTransfers()] Can an unprivileged external user inject a crafted crypto_transfer row with an extreme positive amount (near Long.MAX_VALUE) so that transfersBalance.merge(accountId, balance, Math::addExact) throws ArithmeticException, causing reconcile() to catch it as FAILURE_UNKNOWN and persist a misleading error status to reconciliation_job, masking a real balance discrepancy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c77efd1-a64c-4b2a-896a-1db65da79a46?mode=deep",
+    "timestamp": "2026-04-28 21:54:52.800744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileTokenTransfers()] Can an unprivileged external user submit token transfers with amounts that, when summed via tokenBalances.merge(tokenAccountId, balance, Math::addExact), overflow a long and throw ArithmeticException, causing the entire reconciliation run to abort with FAILURE_UNKNOWN instead of FAILURE_TOKEN_TRANSFERS, hiding the true nature of the discrepancy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76afa679-0eb8-428d-87aa-4ee32efa70c5?mode=deep",
+    "timestamp": "2026-04-28 21:55:04.766948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getAccountBalances()] Can an unprivileged external user cause negative balance values to be stored in the account_balance table so that total.addAndGet(balance) produces a sum that coincidentally equals FIFTY_BILLION_HBARS (5000000000000000000L) after signed overflow, bypassing the FIFTY_BILLION_HBARS check and allowing reconciliation to proceed on corrupted data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bca29242-517d-4053-be69-673c67bbacc5?mode=deep",
+    "timestamp": "2026-04-28 21:55:17.071360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getAccountBalances()] Can an unprivileged external user insert a large number of account_balance rows with large positive balances that cause total.addAndGet(balance) in AtomicLong to silently overflow (no overflow check unlike Math::addExact), producing a total that equals FIFTY_BILLION_HBARS and passing the integrity check on corrupted data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e07a90d9-d78e-4cf0-aa84-120630dac564?mode=deep",
+    "timestamp": "2026-04-28 21:55:29.826220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileTransfers()] Can an unprivileged external user trigger a reconciliation failure across millions of accounts so that Maps.difference(transfersBalance, currentBalances) produces an enormous MapDifference object whose toString() is called inside String.format(failureStatus.getMessage(), fromTimestamp, toTimestamp, difference), causing an out-of-memory condition or extreme heap pressure in the importer JVM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55ee2058-2848-48f7-84c3-c07c6b8e59c6?mode=deep",
+    "timestamp": "2026-04-28 21:55:43.179342",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileTransfers()] Can an unprivileged external user repeatedly trigger reconciliation failures under the ACCUMULATE remediation strategy so that StringUtils.joinWith('\\\\n', reconciliationJob.getError(), error) grows the error string unboundedly across many balance file pairs, eventually exceeding the text column capacity in the reconciliation_job table or causing an OOM error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5575c2c-7755-45f4-8d58-65f24448cda9?mode=deep",
+    "timestamp": "2026-04-28 21:55:56.780933",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user observe the Micrometer gauge hiero.mirror.importer.reconciliation (backed by the status AtomicReference) via a metrics endpoint to infer the current reconciliation state (RUNNING, FAILURE_CRYPTO_TRANSFERS, FAILURE_FIFTY_BILLION, etc.) and use that information to determine when balance discrepancies exist in the ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c746d22-966d-49d4-9d35-6aa58a988db3?mode=deep",
+    "timestamp": "2026-04-28 21:56:10.430285",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user read the reconciliation_job table (if accessible via the REST API or a public query endpoint) to obtain the error field populated by reconciliationJob.setError(e.getMessage()), which contains account IDs and balance values from Maps.difference output, leaking sensitive financial data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fab3d617-7178-48a5-94b1-c5f9751499f1?mode=deep",
+    "timestamp": "2026-04-28 21:56:24.393957",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user exploit the fact that reconcile() is public and synchronized to cause a thread to block indefinitely on the monitor lock if a previous invocation is stuck inside Uninterruptibles.sleepUninterruptibly(reconciliationProperties.getDelay()), effectively preventing any future scheduled reconciliation runs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4dc3e8c-dfc9-4e58-b962-ad91b8d85d62?mode=deep",
+    "timestamp": "2026-04-28 21:56:37.146542",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user, by injecting a large number of balance files into the account_balance_file table, cause the while(current.isPresent()) loop in reconcile() to iterate for an extremely long time, holding the synchronized lock and blocking the Spring scheduler thread pool, resulting in a denial-of-service for all scheduled tasks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a8cf0bd-5a4f-4577-8f14-3cad690eed5f?mode=deep",
+    "timestamp": "2026-04-28 21:56:51.828647",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getNextBalanceSnapshot()] Can an unprivileged external user insert an account_balance_file row with consensusTimestamp = Long.MAX_VALUE so that the expression t + 1L in .map(t -> t + 1L) overflows to Long.MIN_VALUE, causing findNextInRange(Long.MIN_VALUE, toTimestamp) to return an unexpected balance file and corrupt the reconciliation window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e6dfc7d-2695-4dc0-9dc9-9653c8a2ca2c?mode=deep",
+    "timestamp": "2026-04-28 21:57:05.810881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getNextBalanceSnapshot()] Can an unprivileged external user insert an account_balance_file with consensusTimestamp = 0 so that recordFileRepository.findNextBetween(timestamp - 1L, Long.MAX_VALUE) is called with -1L as the lower bound, potentially matching record files with consensus_end = 0 or causing unexpected query behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_adef637a-19ab-4c58-92a7-5098d2354a90?mode=deep",
+    "timestamp": "2026-04-28 21:57:18.676590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: BalanceSnapshot.getTimestamp()] Can an unprivileged external user manipulate the timeOffset field of an AccountBalanceFile so that consensusTimestamp + accountBalanceFile.getTimeOffset() overflows a long, producing a negative or wrapped timestamp used in CRYPTO_TRANSFER_QUERY and TOKEN_TRANSFER_QUERY, causing those queries to scan an incorrect time range and miss or double-count transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ac47e59-ec96-48ce-9bba-be02779522f9?mode=deep",
+    "timestamp": "2026-04-28 21:57:32.227585",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileCryptoTransfers()] Can an unprivileged external user insert crypto_transfer rows with errata = 'INSERT' (not 'DELETE') so that the CRYPTO_TRANSFER_QUERY filter (errata is null or errata <> 'DELETE') includes those errata rows in the sum, causing the reconciliation to count phantom transfers and produce a false SUCCESS result when a real discrepancy exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_edf76133-3126-49b0-8a86-5627872eb0f4?mode=deep",
+    "timestamp": "2026-04-28 21:57:45.754285",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user cause the reconcile() method to log sensitive balance difference data via log.warn(error) in reconcileTransfers(), where the error string contains the full Maps.difference output including account IDs and balance values, leaking this data to any log aggregation system accessible to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42a0e04f-2b4f-4a12-b6ec-867a58048816?mode=deep",
+    "timestamp": "2026-04-28 21:57:59.009650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user exploit the fact that reconciliationJob.setConsensusTimestamp() is only updated when !reconciliationJob.hasErrors(), so that by injecting a persistent balance discrepancy the attacker prevents the job's progress pointer from advancing, causing the next reconciliation run to re-process the same range indefinitely and waste DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d975eb6-4844-4982-826f-bb8470bac249?mode=deep",
+    "timestamp": "2026-04-28 21:58:13.489543",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user exploit the periodic save condition (reconciliationJob.getCount() % 100 == 0) to cause up to 99 balance file reconciliation results to be lost if the JVM crashes between saves, allowing a subsequent run to re-reconcile already-processed files and potentially produce inconsistent job records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0242d14-19d0-432c-a166-a15e3a40907b?mode=deep",
+    "timestamp": "2026-04-28 21:58:26.764789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getLatestJob()] Can an unprivileged external user insert a crafted reconciliation_job row with a very large consensusTimestamp into the reconciliation_job table so that findLatest() returns it, causing Math.max(startDate, consensusTimestamp) to skip all balance files before that timestamp and silently suppress reconciliation of a large historical range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc11d00c-c1f0-479a-885b-37656b23a02d?mode=deep",
+    "timestamp": "2026-04-28 21:58:40.040810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getLatestJob()] Can an unprivileged external user insert a reconciliation_job row with consensusTimestamp = Long.MAX_VALUE so that getLatestJob() sets the starting point to Long.MAX_VALUE, causing findNextInRange(Long.MAX_VALUE, toTimestamp) to return empty and the reconciliation to immediately report UNKNOWN status, permanently disabling effective reconciliation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11320bf3-55f9-4918-97dc-56e1a45df76e?mode=deep",
+    "timestamp": "2026-04-28 21:58:53.695736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user exploit the ACCUMULATE remediation strategy by injecting a balance discrepancy in the first balance file pair so that previous.get().getBalances() (the stale map) is reused in subsequent iterations via the toBuilder() call, causing all subsequent reconciliation comparisons to use incorrect baseline balances and produce false SUCCESS results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65886d6e-001d-4c30-8273-5d9270f98858?mode=deep",
+    "timestamp": "2026-04-28 21:59:08.191796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileCryptoTransfers()] Can an unprivileged external user exploit the fact that reconcileCryptoTransfers() mutates the previous snapshot's balances map in-place via transfersBalance.merge(accountId, balance, Math::addExact), so that under the ACCUMULATE strategy the same map object is shared between iterations, causing cumulative balance mutations to corrupt the baseline for all subsequent reconciliation steps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6ecf0b6-4b60-4c61-ad8d-c03915e75de5?mode=deep",
+    "timestamp": "2026-04-28 21:59:23.376050",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user cause the reconcile() method to store a RUNNING status in the reconciliation_job table (set in getLatestJob()) and then crash the JVM, leaving the job permanently in RUNNING state, which could mislead monitoring systems into believing reconciliation is in progress when it is not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7cb490c2-45b8-472a-9ff3-8819d553f1b8?mode=deep",
+    "timestamp": "2026-04-28 21:59:39.173537",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcileTransfers()] Can an unprivileged external user craft a scenario where Maps.difference(transfersBalance, currentBalances) is computed on maps with millions of entries, causing the difference object's toString() to allocate a multi-gigabyte string when passed to String.format() in the error message, triggering an OutOfMemoryError in the importer process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da49fc61-d1b5-47a6-939c-8d863b6170ff?mode=deep",
+    "timestamp": "2026-04-28 21:59:57.198347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: reconcile()] Can an unprivileged external user exploit the fact that reconcile() is annotated @Scheduled with a configurable cron expression (hiero.mirror.importer.reconciliation.cron) to observe timing side-channels in the Micrometer gauge transitions (UNKNOWN -> RUNNING -> SUCCESS/FAILURE) and infer when balance files are being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac26ba48-977f-4a9a-b25e-f7766d566a50?mode=deep",
+    "timestamp": "2026-04-28 22:00:14.376242",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: '] [Function: getAccountBalances()] Can an unprivileged external user insert an account_balance row with a NULL balance value so that rs.getLong(2) returns 0 (JDBC default for NULL) and total.addAndGet(0) silently skips the account, potentially allowing the FIFTY_BILLION_HBARS check to pass on an incomplete dataset?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28dc854d-2926-4e5c-9b79-3e512489b143?mode=deep",
+    "timestamp": "2026-04-28 22:00:32.531669",
+    "report_generated": false
+  }
+]
