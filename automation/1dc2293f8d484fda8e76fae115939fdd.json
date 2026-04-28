@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user cause the importer to be deployed with a crafted network name (e.g., 'mainnet-evil') such that importerProperties.getNetwork() strips the prefix and resolves to 'mainnet', forcing topicRunningHashV2AddedTimestamp to 1592499600000000000L, which then causes V1.23.1 migration to assign incorrect running_hash_version values, corrupting topic message state that downstream staking reward calculation queries depend on, leading to incorrect pending_reward values in entity_stake?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4da72fc-24c5-40b6-9aa4-d7125e5a3e61?mode=deep",
+    "timestamp": "2026-04-28 23:28:51.500883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user submit transactions that cause the importer's network property to be treated as a non-mainnet/non-testnet value (e.g., 'other'), so that RecalculatePendingRewardMigration.doMigrate() returns early without recalculating pending rewards, leaving entity_stake.pending_reward inflated from a prior double-accumulation bug, allowing the attacker's account to claim more staking rewards than legitimately earned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51b750db-b440-4ba0-b1c2-c3f3a552dbd8?mode=deep",
+    "timestamp": "2026-04-28 23:29:03.582214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that flywayConfigurationCustomizer() uses importerProperties.getNetwork() with equalsIgnoreCase for mainnet detection, but getNetwork() lowercases and strips prefix, so a network value like 'MAINNET-2024' resolves to 'mainnet' and injects timestamp 1592499600000000000L into the topicRunningHashV2AddedTimestamp placeholder, causing Flyway migration V1.23.1 to run with a timestamp that misclassifies topic messages, indirectly corrupting the staking period boundary calculations used in pending reward computation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c0aae408-be66-499e-9b30-d109e1bf135d?mode=deep",
+    "timestamp": "2026-04-28 23:29:16.126431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: SchedulingConfiguration] Can an unprivileged external user trigger a deployment configuration where spring.task.scheduling.enabled is set to false, causing @ConditionalOnProperty to suppress @EnableScheduling, which prevents EntityStakeCalculatorImpl.calculate() from ever being invoked on schedule, so that entity_stake.pending_reward is never updated after the initial migration, allowing an attacker's account to perpetually show a stale inflated pending_reward and claim rewards that were already paid out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4242abf-74bf-459e-9d2e-85e57f61c931?mode=deep",
+    "timestamp": "2026-04-28 23:29:29.224659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: SchedulingConfiguration] Can an unprivileged external user craft a scenario where the SchedulingConfiguration inner class is conditionally excluded (spring.task.scheduling.enabled=false) while the importer still processes record files, so that staking reward transfers are written to staking_reward_transfer but entity_stake.pending_reward is never decremented, causing the mirror node REST API to report inflated pending_reward values that mislead users or downstream systems into believing unclaimed rewards exist when they have already been paid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68fdd6f3-bed4-4ba9-9ac6-82e5d3f8b100?mode=deep",
+    "timestamp": "2026-04-28 23:29:42.659400",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: init()] Can an unprivileged external user exploit the @PostConstruct init() mutual exclusion check between blockProperties.isEnabled() and recordDownloaderProperties.isEnabled() by causing a configuration state where neither is enabled, so that no record stream files are downloaded or parsed, staking reward transfers (insertStakingRewardTransfers) are never ingested, and entity_stake.pending_reward is never reset after a reward payout, allowing an attacker to query the mirror node and observe that their pending_reward remains non-zero even after the reward was paid on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec18ab9b-85cf-41ab-9df7-6d555b8ac31d?mode=deep",
+    "timestamp": "2026-04-28 23:29:56.845445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the flywayDataSource() bean's setInitializationFailTimeout(-1) setting, which causes the HikariDataSource to wait indefinitely for a DB connection, to delay Flyway migrations (including RecalculatePendingRewardMigration) from running, leaving entity_stake.pending_reward in a double-accumulated state from a prior bug, so that staking reward amounts reported by the mirror node REST API are inflated and users are misled about claimable rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a3ccebb-f82a-4d72-90e8-23fe57c3e223?mode=deep",
+    "timestamp": "2026-04-28 23:30:11.651760",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user cause the flywayDataSource() to use a stale or incorrect jdbcUrl by manipulating the JdbcConnectionDetails bean (detailsObjectProvider.getIfAvailable()), so that Flyway migrations run against a different database instance where entity_stake.pending_reward has not been corrected by RecalculatePendingRewardMigration, resulting in the mirror node serving incorrect (inflated) pending reward data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2aa2db3-ea5a-45ab-8d07-4e8d387548f5?mode=deep",
+    "timestamp": "2026-04-28 23:30:28.601622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user cause importerProperties.getTopicRunningHashV2AddedTimestamp() to return null while the network is set to a non-mainnet value, so that flywayConfigurationCustomizer() injects timestamp 1588706343553042000L into the topicRunningHashV2AddedTimestamp placeholder, causing V1.23.1 migration to assign running_hash_version=1 to topic messages that should have version 2, corrupting the topic message state that is used as a boundary condition in staking period start calculations, leading to incorrect pending_reward accumulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99a49f7f-6a08-4e9a-a39b-ce7acd235023?mode=deep",
+    "timestamp": "2026-04-28 23:30:45.953903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user set topicRunningHashV2AddedTimestamp to 0 via the hiero.mirror.importer.topicRunningHashV2AddedTimestamp configuration property (which is not validated as non-null or positive), causing flywayConfigurationCustomizer() to inject '0' into the placeholder, so that V1.23.1 migration sets running_hash_version=2 for all topic messages including those before the actual v2 cutover, corrupting historical topic message integrity and indirectly affecting staking reward boundary calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89235e77-08db-40fd-b9df-96ae6c46e134?mode=deep",
+    "timestamp": "2026-04-28 23:31:03.626626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user set topicRunningHashV2AddedTimestamp to Long.MAX_VALUE (9223372036854775807), causing flywayConfigurationCustomizer() to inject this value into the placeholder, so that V1.23.1 migration sets running_hash_version=1 for all topic messages (since all timestamps are less than MAX_VALUE), corrupting all topic message running hash versions and potentially affecting any staking-related logic that depends on topic message sequence integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9872d58f-f18d-4f4c-a8b1-4ae431b69773?mode=deep",
+    "timestamp": "2026-04-28 23:31:21.275664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the fact that flywayDataSource() calls hikariConfig.copyStateTo(flywayHikariConfig) before overriding specific settings, so that if the base hikariConfig contains a malicious connectionInitSql or other property, it is copied into the Flyway datasource and executed with DB owner credentials during migration, potentially manipulating entity_stake.pending_reward values to inflate staking rewards for attacker-controlled accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b79b6ac-9ed9-422b-9c97-e625f1ed7e04?mode=deep",
+    "timestamp": "2026-04-28 23:31:40.253383",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the flywayDataSource() pool configuration (setMaximumPoolSize(10), setMinimumIdle(0)) to exhaust all 10 Flyway DB connections during a migration run, causing RecalculatePendingRewardMigration or FixStakedBeforeEnabledMigration to fail mid-execution, leaving entity_stake.pending_reward in a partially corrected state where some accounts have inflated rewards that were not yet zeroed out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_156e3de7-bae3-4912-85e8-ad96fed345dd?mode=deep",
+    "timestamp": "2026-04-28 23:31:59.793369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the network name comparison logic in flywayConfigurationCustomizer() where ImporterProperties.HederaNetwork.MAINNET.equalsIgnoreCase(importerProperties.getNetwork()) is used, but getNetwork() applies substringBefore on the NETWORK_PREFIX_DELIMITER '-', so that a network value of 'mainnet' (with trailing whitespace or unicode lookalike) bypasses the equalsIgnoreCase check and falls through to the else branch, injecting the testnet timestamp 1588706343553042000L for a mainnet deployment, causing V1.23.1 to misclassify topic messages and corrupt staking period boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_111a121c-8758-484f-8038-93095a53f350?mode=deep",
+    "timestamp": "2026-04-28 23:32:19.918463",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: init()] Can an unprivileged external user cause the @PostConstruct init() to throw IllegalStateException by enabling both blockProperties and recordDownloaderProperties simultaneously, crashing the importer on startup before any staking reward migrations run, leaving entity_stake.pending_reward in an uncorrected double-accumulated state from a prior bug, so that when the importer is restarted with a corrected config, the migration version check (VERSION = MigrationVersion.fromVersion('1.68.4')) prevents RecalculatePendingRewardMigration from re-running, permanently leaving inflated pending rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8374e059-029b-4def-99a4-d716b2ee80b7?mode=deep",
+    "timestamp": "2026-04-28 23:32:41.580350",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that flywayConfigurationCustomizer() injects topicRunningHashV2AddedTimestamp as a string placeholder into Flyway configuration, and if the value contains SQL-injectable content (e.g., via a crafted Long.toString() output that is not sanitized), it could alter the WHERE clause in V1.23.1 migration SQL, causing incorrect running_hash_version assignments that corrupt topic message state relied upon by staking reward period calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1000bf0-a265-4f43-aa5b-0fafe99d5357?mode=deep",
+    "timestamp": "2026-04-28 23:33:02.669140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: SchedulingConfiguration] Can an unprivileged external user exploit the comment 'This toggle exists only to disable scheduling for test execution and shouldn't be modified by operators' to identify that spring.task.scheduling.enabled=false is a known configuration path, and by influencing the deployment environment (e.g., via a crafted Spring Boot config file in the classpath), disable scheduling so that EntityStakeCalculatorImpl.calculate() never runs, preventing pending_reward from being updated and causing the mirror node to serve stale reward data that misleads users about their claimable staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df87ca80-a71a-4db5-afbe-cda190a65677?mode=deep",
+    "timestamp": "2026-04-28 23:33:24.691421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the dbWaiter.waitForDatabase() call in flywayDataSource() to cause a time-of-check-to-time-of-use (TOCTOU) race where the database is available during the wait check but becomes unavailable immediately after, causing Flyway migrations to fail after the datasource is created but before RecalculatePendingRewardMigration runs, leaving entity_stake.pending_reward in an inflated state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf5ee56a-398a-41f2-8dec-569174c0685e?mode=deep",
+    "timestamp": "2026-04-28 23:33:47.942030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that flywayConfigurationCustomizer() reads importerProperties.getNetwork() at bean initialization time (not at migration execution time), so that if the network property is changed between bean creation and Flyway migration execution (e.g., via a JMX endpoint or Spring Cloud Config refresh), the topicRunningHashV2AddedTimestamp placeholder could be set to the wrong value, causing V1.23.1 to run with an incorrect timestamp and corrupt topic message running hash versions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa8c1353-804c-4247-8a75-2517a57e80ba?mode=deep",
+    "timestamp": "2026-04-28 23:34:11.098147",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the flywayDataSource() bean's use of dbProperties.getOwnerPassword() and dbProperties.getOwner() credentials to connect with DB owner privileges, and if these credentials are exposed via an actuator endpoint or log output (since the URL is logged by dbWaiter.waitForDatabase()), use them to directly manipulate entity_stake.pending_reward values to inflate staking rewards for attacker-controlled accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fcce50d-c122-4f1c-94d0-229b6afbd53d?mode=deep",
+    "timestamp": "2026-04-28 23:34:36.264319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user cause the importer to run on a network where FIRST_NONZERO_REWARD_RATE_TIMESTAMP is not defined (e.g., network='demo' or 'previewnet'), so that RecalculatePendingRewardMigration.doMigrate() returns early, and then submit transactions that manipulate staked_node_id or stake_period_start to cause entity_stake.pending_reward to accumulate multiple times for the same staking period, effectively stealing rewards that should not be claimable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7016c745-e7b6-4943-9e3e-d728fb281a8a?mode=deep",
+    "timestamp": "2026-04-28 23:35:00.099286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the hardcoded timestamp 1592499600000000000L (mainnet) in flywayConfigurationCustomizer() by deploying a mirror node against a custom network that reuses mainnet-era timestamps, causing V1.23.1 migration to assign running_hash_version=1 to messages that should have version 2, corrupting the topic message state and indirectly affecting the staking period boundary logic in updateEntityStake()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83327c6e-aa18-48f2-ad7e-25c755259f40?mode=deep",
+    "timestamp": "2026-04-28 23:35:26.007408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: SchedulingConfiguration] Can an unprivileged external user exploit the @ConditionalOnProperty(matchIfMissing = true) default behavior of SchedulingConfiguration, where scheduling is enabled by default if the property is absent, to identify that removing the spring.task.scheduling.enabled property entirely still enables scheduling, but if an attacker can inject a property source that sets it to false, they can disable EntityStakeCalculatorImpl scheduling and prevent pending_reward updates, causing stale reward data to persist indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8fd1090-9765-4f54-8a96-067b15f417bc?mode=deep",
+    "timestamp": "2026-04-28 23:35:51.460757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayDataSource()] Can an unprivileged external user exploit the flywayDataSource() pool's setIdleTimeout(60000) (60 seconds) setting to cause connections to be dropped during long-running Flyway migrations like RecalculatePendingRewardMigration, causing the migration to fail mid-execution and leave entity_stake.pending_reward partially updated, with some accounts having inflated rewards that were not yet corrected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9dfa5d78-50d4-454c-8108-d0aaefaceb46?mode=deep",
+    "timestamp": "2026-04-28 23:36:18.044179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that configuration.getPlaceholders().put('topicRunningHashV2AddedTimestamp', timestamp.toString()) injects the timestamp as a mutable placeholder into the Flyway configuration object, and if another FlywayConfigurationCustomizer bean (registered by a malicious dependency or auto-configuration) overwrites this placeholder with a different value, the V1.23.1 migration runs with an incorrect timestamp, corrupting topic message state relied upon by staking reward calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11e01683-d10f-4510-b1eb-e9708e649be0?mode=deep",
+    "timestamp": "2026-04-28 23:36:45.511362",
+    "report_generated": false
+  }
+]
