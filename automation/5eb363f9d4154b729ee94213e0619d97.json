@@ -1,0 +1,86 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit a burst of transactions with aliases that collide with existing cached entries in the `CACHE_ALIAS` cache, causing cache eviction storms that force repeated `findByAlias` DB queries, amplifying database load and causing importer processing nodes to fall behind the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37b081d0-bf5a-4cf1-9778-23cb57d269dc?mode=deep",
+    "timestamp": "2026-04-28 21:20:45.117450",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit Ethereum transactions with EVM addresses that are valid 20-byte values but do not correspond to any entity, causing `EntityIdServiceImpl.findByEvmAddress()` to call `DomainUtils.fromEvmAddress()` first (which may return a valid EntityId for certain address patterns), bypassing the DB query but producing incorrect entity mappings that corrupt importer state and cause downstream processing failures on multiple nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_181e2492-39ae-4b36-bc97-9813f31bb663?mode=deep",
+    "timestamp": "2026-04-28 21:20:57.595325",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user submit transactions that cause `updateContractType` to be called concurrently from multiple importer threads with overlapping ID sets, causing row-level lock contention on the entity table that leads to transaction timeouts and importer processing stalls on 30%+ of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02c46f22-0673-45ce-a934-119a3a5e6b12?mode=deep",
+    "timestamp": "2026-04-28 21:21:10.094923",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions with null-equivalent alias byte arrays (e.g., empty byte array `new byte[0]`), causing `findByAlias` to execute `select id from entity where alias = '' and deleted <> true`, which may match unexpected rows or cause index misuse, leading to incorrect entity resolution and processing errors that accumulate across importer nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eeda7ad2-9330-4922-97ba-c91f4fec455c?mode=deep",
+    "timestamp": "2026-04-28 21:21:23.329849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause `findEvmAddressesByIds` to be called with an `Iterable` containing duplicate IDs, causing the DB to return duplicate `EvmAddressMapping` entries that are then inserted into the result map, potentially overwriting correct mappings with incorrect ones and causing synthetic log processing errors that stall importer nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2c54e35-5e76-4904-b55c-c58319421f81?mode=deep",
+    "timestamp": "2026-04-28 21:21:37.120222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit a high volume of contract transactions with EVM addresses that are 20 bytes but structured to avoid the `DomainUtils.fromEvmAddress()` fast path, forcing every lookup to hit `entityRepository.findByEvmAddress()` and execute a DB query, causing sustained high DB query rates that exhaust connection pool resources shared across importer nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b6fc3a4-f599-4bf5-8edd-ce5cfccd169d?mode=deep",
+    "timestamp": "2026-04-28 21:21:51.234924",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions with aliases that are valid but reference entities that were recently deleted (setting `deleted = true`), causing `findByAlias` to return empty results and triggering the `findByAliasEvmAddress` fallback path, which performs an additional `aliasToEvmAddress` computation and a second DB query, doubling per-lookup cost and degrading importer throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f16ba1b-f040-4c62-a705-01e20f0e766d?mode=deep",
+    "timestamp": "2026-04-28 21:22:05.176143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user submit transactions that cause `updateContractType` to be called with an empty `Iterable<Long>`, and if the implementation does not guard against empty iterables, cause a malformed SQL `update entity set type = 'CONTRACT' where id in ()` that throws a DB exception, crashing the importer transaction and stalling node processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba3fe556-e3d5-43c0-bce7-6ce79609e30c?mode=deep",
+    "timestamp": "2026-04-28 21:22:19.408047",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause the `SyntheticLogListener.onEnd()` to be called with a very large `logUpdaters` list, causing the `updateContractLog(entityMap)` loop to iterate over a massive number of entries and consume excessive CPU time, blocking the importer's record file processing thread and stalling 30%+ of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f47f878a-1e58-411a-a443-bce005b12b49?mode=deep",
+    "timestamp": "2026-04-28 21:22:34.594286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions with aliases that are exactly 35 bytes (ECDSA secp256k1 format), causing `findByAlias` to return empty (if not in DB), then `findByAliasEvmAddress` to be called, which calls `aliasToEvmAddress` and then `findByEvmAddress` as a second DB query, and if the EVM address is also not found, emits a recoverable error log, creating a two-query-plus-log overhead per transaction that degrades importer throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86a8e689-4714-4bfa-8741-d42adf881bf1?mode=deep",
+    "timestamp": "2026-04-28 21:22:49.954340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit contract transactions with EVM addresses that are exactly 32 bytes (non-standard length), causing `findByEvmAddress` to execute a query that cannot match any indexed 20-byte evm_address values, performing a full table scan on every call, and if done at scale, causing DB CPU exhaustion that stalls importer processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88ca91b4-6449-456b-917b-7aab786344a2?mode=deep",
+    "timestamp": "2026-04-28 21:23:04.673527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user exploit the `@Transactional` class-level annotation on `EntityRepository` to cause Spring's transaction proxy to open a new DB transaction for every `findByAlias` call that is not already within a transaction, increasing connection acquisition overhead and causing connection pool exhaustion when many importer threads call `findByAlias` concurrently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14a56138-cb00-4282-87af-3c1e2ee97890?mode=deep",
+    "timestamp": "2026-04-28 21:23:18.908907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user submit a large number of contract update transactions that each trigger `updateContractType` with a single ID, causing a high rate of individual UPDATE statements that each acquire and release row locks, generating excessive lock manager overhead in PostgreSQL that degrades query performance for all concurrent importer operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1a0a919-0ddd-4b35-b57c-f33dfe0992b1?mode=deep",
+    "timestamp": "2026-04-28 21:23:33.843502",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause `findEvmAddressesByIds` to be called with negative or zero entity IDs (e.g., system account IDs like -2), causing the `id in (?)` query to scan for non-existent rows and potentially confuse the query planner, leading to suboptimal execution plans that increase query latency across all importer nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ccf3e47-0be1-4e1d-b89f-36e0d232ea6b?mode=deep",
+    "timestamp": "2026-04-28 21:23:49.290892",
+    "report_generated": false
+  }
+]
