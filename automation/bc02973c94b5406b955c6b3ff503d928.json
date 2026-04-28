@@ -1,0 +1,86 @@
+[
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query that requests all available fields on the `Account` type (alias, autoRenewAccount, autoRenewPeriod, balance, createdTimestamp, declineReward, deleted, entityId, expirationTimestamp, id, key, maxAutomaticTokenAssociations, memo, nonce, obtainer, pendingReward, receiverSigRequired, stakedAccount, stakePeriodStart, timestamp, type) in a single query, causing maximum data retrieval and serialization overhead per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d09050e-ed2f-4385-9343-0851854178d4?mode=deep",
+    "timestamp": "2026-04-28 23:22:56.834030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query requesting `autoRenewAccount` nested inside `account`, which itself is an `Account` type that could trigger another DB lookup, and nest this recursively up to the `MaxQueryDepthInstrumentation(10)` limit, causing O(depth) DB queries per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68e99433-4a73-4c6c-afcb-02db2bc13b37?mode=deep",
+    "timestamp": "2026-04-28 23:23:08.604231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query requesting `stakedAccount` nested inside `account`, which is also an `Account` type, and nest this up to depth 10, causing the server to issue up to 10 sequential DB queries per request, and when done concurrently, exhaust the DB connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f558ab37-29c0-4753-8e71-a10a8632102e?mode=deep",
+    "timestamp": "2026-04-28 23:23:20.812030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query requesting `obtainer` (which implements `Accountable`) nested inside `account`, and further nest `stakedAccount` and `autoRenewAccount` within it up to the depth limit, causing a chain of DB queries per request that exhausts the connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c04a52d2-ce74-471a-a3d9-a3da0b1daeea?mode=deep",
+    "timestamp": "2026-04-28 23:23:32.995153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: balance()] Can an unprivileged external user request `balance(unit: TINYBAR)` and `balance(unit: HBAR)` and `balance(unit: GIGABAR)` as three separate aliased fields in a single `account` query, causing `convertCurrency()` to be called three times per account lookup, and when done at high concurrency, multiply the CPU overhead?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89005d03-5ff2-4ed4-8e97-056b42a240cb?mode=deep",
+    "timestamp": "2026-04-28 23:23:45.545902",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `evmAddress` set to a string that passes the regex `^(0x)?[a-fA-F0-9]{40}$` but where `Hex.decodeHex()` in `decodeEvmAddress()` throws a `DecoderException` due to an odd-length string after prefix removal, causing an `IllegalArgumentException` that propagates through `CustomExceptionResolver` and leaks internal path information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb2988f3-ca60-43b5-9318-590be3579ddb?mode=deep",
+    "timestamp": "2026-04-28 23:23:58.648259",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `alias` set to a string that passes the `@Pattern(regexp: '^[A-Z2-7]+$')` validation but is not valid Base32 (e.g., a string with characters that are valid individually but form an invalid Base32 sequence), causing `decodeBase32()` to return unexpected bytes or throw an exception?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b389f69b-0107-41a5-b1b9-fd8f2184e882?mode=deep",
+    "timestamp": "2026-04-28 23:24:12.462117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `id` set to a valid Base64 string (passing `@Pattern(regexp: '^[a-zA-Z0-9+/=]+$')`) that decodes to a string without a colon separator, causing `getId()` in `GraphQlUtils` to throw `IllegalArgumentException('Invalid Node.id')`, and if this is done at high concurrency, saturate the exception-handling path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1222f81-c4e0-4f86-bdd6-0f15b049c826?mode=deep",
+    "timestamp": "2026-04-28 23:24:27.308119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `id` set to a Base64 string that decodes to a very long string with many colon separators, causing `SPLITTER.splitToList()` in `getId()` to allocate a large list, contributing to memory pressure when done at high concurrency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9eb8cce-7956-4cf2-9d35-9c3372957f96?mode=deep",
+    "timestamp": "2026-04-28 23:24:42.606481",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `entityId: {shard: 9223372036854775807, realm: 9223372036854775807, num: 9223372036854775807}` (all Long.MAX_VALUE), causing `EntityId.of()` to potentially overflow or produce an invalid entity ID that causes a DB error or unexpected behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fde1b1a-9260-42d8-9057-482bc943e391?mode=deep",
+    "timestamp": "2026-04-28 23:24:58.843980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `evmAddress` set to `0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF` (all F's), causing `getByEvmAddressAndType()` to call `findByEvmAddress()` with a 20-byte array of all 0xFF values, and if the DB query is slow or causes a full table scan, contribute to connection pool exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff081d7d-7649-4e27-8d20-e09c0a70a832?mode=deep",
+    "timestamp": "2026-04-28 23:25:14.755353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `alias` set to a single character (e.g., 'A'), causing `decodeBase32()` to return a partial byte array, and `findByAlias()` to execute a DB query with a 1-byte parameter, potentially causing unexpected DB behavior or index misses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1254e6eb-671a-4963-947a-522178a7df06?mode=deep",
+    "timestamp": "2026-04-28 23:25:33.183604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user exploit the fact that `OnValidationErrorStrategy.RETURN_NULL` silently nullifies invalid fields, by sending an `AccountInput` where `evmAddress` fails the pattern (returning null) and `alias` also fails the pattern (returning null), causing `validateOneOf()` to receive all-null values and throw `IllegalArgumentException`, which when done at scale causes service degradation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f390329-ed9c-4ac6-a98b-8859b5b7f816?mode=deep",
+    "timestamp": "2026-04-28 23:25:51.100281",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: account()] Can an unprivileged external user send a GraphQL query with `evmAddress` set to a long-zero address (first 12 bytes zero) where the last 8 bytes represent a negative long value, causing `findById()` to be called with a negative ID, potentially causing a DB error or returning unexpected results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4623e7fe-3550-4cfd-8736-8b33872fda71?mode=deep",
+    "timestamp": "2026-04-28 23:26:09.590647",
+    "report_generated": false
+  }
+]
