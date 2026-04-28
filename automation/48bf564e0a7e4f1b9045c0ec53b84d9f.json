@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause sidecar records to be silently dropped for all transactions in a RecordFile by submitting a crafted record stream file whose getSidecars() list is empty, exploiting the early-return guard at line 112 (`recordFile.getSidecars().isEmpty()`), so that no sidecar data is ever associated with RecordItems and downstream mirror node consumers receive incomplete contract execution data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed5e0364-240a-4875-898f-47e1053d8bd2?mode=deep",
+    "timestamp": "2026-04-28 21:31:10.610052",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user cause a sidecar file to be silently skipped (no HashMismatchException, no retry) by ensuring the streamFileProvider.get(sidecarFilename) returns an empty Mono, exploiting the fact that flatMap on an empty Mono produces no element and the downstream collect simply omits that sidecar's records, leading to missing CONTRACT_STATE_CHANGE or CONTRACT_ACTION data in the exported mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f56dc175-9e7e-4ca8-a513-f419a310ba65?mode=deep",
+    "timestamp": "2026-04-28 21:31:22.358656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause all sidecar records to be silently omitted from exported mirror node data by triggering a Flux pipeline error (e.g., via a malformed sidecar file that causes sidecarFileReader.read() to throw an unchecked exception not caught by flatMap), exploiting the fact that if the reactive chain terminates with an error the `.block()` call returns null and the null-check at line 129 silently returns without associating any sidecar records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85fb747a-5cf6-4c9f-aecc-5a3be952b607?mode=deep",
+    "timestamp": "2026-04-28 21:31:34.686886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecarType()] Can an unprivileged external user cause sidecar records of an unknown type to be silently accepted and associated with RecordItems (rather than rejected) by crafting a TransactionSidecarRecord with a getSidecarRecordsCase() value that falls into the default branch, exploiting the fact that Utility.handleRecoverableError() is non-fatal and the method yields SIDECAR_TYPE_UNKNOWN_VALUE (0), which then passes the acceptedTypes filter when acceptedTypes is empty, resulting in incorrect/unexpected records being exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd0070af-e889-4cf8-9e24-7df1857c6470?mode=deep",
+    "timestamp": "2026-04-28 21:31:47.283616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause sidecar records to be incorrectly associated with the wrong RecordItems by crafting two sidecar TransactionSidecarRecords with identical consensusTimestamp values, exploiting the ArrayListMultimap keyed on TransactionSidecarRecord::getConsensusTimestamp at line 123-126, so that a single RecordItem receives sidecar records belonging to a different transaction, corrupting the exported mirror node data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_053d847a-3e13-40ec-96dc-4605faf23396?mode=deep",
+    "timestamp": "2026-04-28 21:32:00.339816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: setStreamFileIndex()] Can an unprivileged external user cause an incorrect block index to be assigned to a RecordFile by crafting a record stream file that reports a version field less than ProtoRecordFileReader.VERSION (6) but is actually a v6 file, exploiting the version check at line 104 (`recordFile.getVersion() < ProtoRecordFileReader.VERSION`) so that super.setStreamFileIndex() is called and overwrites the externalized block_number with last+1, causing downstream mirror node consumers to receive records with wrong block indices?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0f25569-599b-4853-991a-3295ef9521e9?mode=deep",
+    "timestamp": "2026-04-28 21:32:14.292774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: download()] Can an unprivileged external user cause the RecordFileDownloader to permanently stop downloading records by manipulating the CutoverService state so that cutoverService.get(StreamType.RECORD, ...) never executes the task lambda, exploiting the fact that shouldDownload() always returns true (line 97) but the outer cutoverService.get() gate can suppress execution, resulting in a complete halt of record export to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_241d614f-2c17-4cbb-a395-2c1d8090c35f?mode=deep",
+    "timestamp": "2026-04-28 21:32:27.580587",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: download()] Can an unprivileged external user cause the lastStreamFile state to be reset to an older RecordFile by triggering a scenario where cutoverService.getLastRecordFile() returns a stale or earlier record file, exploiting the unconditional assignment at line 84 (`lastStreamFile.set(Optional.of(rf))`), so that the downloader re-downloads already-processed files or skips files, causing duplicate or missing records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f3da378-d00d-42b6-8bf6-6230d9f1f395?mode=deep",
+    "timestamp": "2026-04-28 21:32:41.218265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: onVerified()] Can an unprivileged external user cause sidecar records to be associated with RecordItems using a stale lastStreamFile state by exploiting the ordering in onVerified() where downloadSidecars() is called at line 91 before super.onVerified() updates lastStreamFile at line 401, so that if downloadSidecars() relies on any state that super.onVerified() would have set, the sidecar association is performed with inconsistent state, leading to incorrect records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dee4d961-5a85-413a-8618-cf4ce2b14423?mode=deep",
+    "timestamp": "2026-04-28 21:32:54.732914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause sidecar records to be filtered out and missing from mirror node exports by crafting a sidecar file whose declared types in SidecarFile.getTypes() do not match any entry in sidecarProperties.getTypeOrdinals(), exploiting the filter at line 118-119 (`acceptedTypes.isEmpty() || sidecar.getTypes().stream().anyMatch(acceptedTypes::contains)`), so that the entire sidecar file is skipped before download even when it contains valid records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3a24dad-901e-41be-ae60-a30d6402139f?mode=deep",
+    "timestamp": "2026-04-28 21:33:07.648205",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause a type-filter bypass that results in incorrect records being exported by exploiting the mismatch between SidecarProperties.getTypeOrdinals() (which uses Java enum .ordinal()) and getSidecarType() (which returns protobuf _VALUE constants like CONTRACT_ACTION_VALUE=2), where if the ordinal and protobuf value differ for a given SidecarType enum entry, the second filter at line 122 would incorrectly include or exclude records, corrupting the sidecar data associated with RecordItems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cd7080d-0357-4c41-ab14-204a0ec107b8?mode=deep",
+    "timestamp": "2026-04-28 21:33:21.537329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user cause a path traversal or incorrect sidecar file to be fetched by crafting a SidecarFile whose getName() returns a filename with path separators or unexpected characters, exploiting StreamFilename.from(recordFilename, sidecar.getName()) at line 142 which uses the sidecar name directly, so that the wrong file is fetched from the stream provider and its (potentially valid) hash matches, causing incorrect sidecar data to be associated with RecordItems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31867646-f107-4bc3-8a4a-bcebf55d6abe?mode=deep",
+    "timestamp": "2026-04-28 21:33:34.996477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user cause sidecar bytes to be silently nulled out even when persistBytes is intended to be true by exploiting a race condition or configuration reload between the time sidecarFileReader.read() sets sidecar.setBytes() and the check at line 156 (`!sidecarProperties.isPersistBytes()`), resulting in the mirror node receiving sidecar records without their raw bytes, causing incomplete data export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0635c7ee-33e9-49d0-af1e-3dd38ad32536?mode=deep",
+    "timestamp": "2026-04-28 21:33:47.966557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause all sidecar records to be missing from mirror node exports by crafting a record file where every SidecarFile entry has a types list that is non-empty but contains only type ordinals not present in acceptedTypes, exploiting the pre-download filter at line 118-119, so that the Flux pipeline produces zero elements, the multimap is empty, and no RecordItem ever gets sidecar records assigned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e519557-2453-469c-9014-96fff59e1a21?mode=deep",
+    "timestamp": "2026-04-28 21:34:02.920686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user bypass the sidecar hash integrity check at line 146 (`Arrays.equals(sidecar.getHash(), sidecar.getActualHash())`) by crafting a scenario where sidecar.getHash() is null (not set in the SidecarFile built from the record stream), causing Arrays.equals(null, null) to return true and allowing a completely different sidecar file's content to be accepted and exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ae55cde-bb35-4bcc-a633-d770fb65ecd6?mode=deep",
+    "timestamp": "2026-04-28 21:34:17.095247",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause a denial-of-service that halts record export by crafting a sidecar file that causes sidecarFileReader.read() to throw a non-recoverable exception inside the flatMap at line 120, which propagates through the reactive chain and causes the .block() call to throw, and since downloadSidecars() is called from onVerified() before super.onVerified(), the lastStreamFile is never updated, causing the downloader to retry the same file indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66071d4b-b099-4f09-8617-7954894a6029?mode=deep",
+    "timestamp": "2026-04-28 21:34:31.710875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: shouldDownload()] Can an unprivileged external user exploit the fact that shouldDownload() unconditionally returns true (line 97) to cause the downloader to continue processing records even when the parent Downloader's downloaderProperties.isEnabled() would have returned false, bypassing the intended disable mechanism and causing records to be exported when they should not be, or causing the system to process files past the configured endDate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6200001-71be-418f-a2cd-62ea8512d2c5?mode=deep",
+    "timestamp": "2026-04-28 21:34:46.278875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause sidecar records to be associated with incorrect RecordItems by crafting a sidecar TransactionSidecarRecord whose consensusTimestamp matches a RecordItem from a different record file (e.g., a timestamp that was already processed), exploiting the fact that the multimap lookup at line 135 only checks if records.containsKey(timestamp) without validating that the timestamp falls within the current record file's consensus range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc6c690e-5ca2-453f-9132-87d788db5027?mode=deep",
+    "timestamp": "2026-04-28 21:35:00.859552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: download()] Can an unprivileged external user cause the downloader to skip an entire batch of record files by triggering a SignatureVerificationException in downloadNextBatch(), exploiting the catch block in Downloader.downloadNextBatch() at line 165 which only logs a warning and returns without updating lastStreamFile, so that the same batch is retried on the next scheduled invocation but if the condition persists, records are permanently missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cf0f8f6-1c76-48a2-90da-e3874e1d4620?mode=deep",
+    "timestamp": "2026-04-28 21:35:15.459331",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user cause incorrect sidecar data to be archived to disk (when isWriteFiles() is true) by crafting a sidecar file that passes the hash check (sidecar.getHash() == sidecar.getActualHash()) but contains manipulated protobuf records, exploiting the fact that the hash is computed over the raw bytes but the records are parsed from those bytes without additional field-level validation, resulting in incorrect contract execution data being persisted and exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b011515-9b3b-42b4-b570-c47d0ede0805?mode=deep",
+    "timestamp": "2026-04-28 21:35:31.340669",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause a memory exhaustion condition that disrupts record export by crafting a record file with an extremely large number of SidecarFile entries, each triggering a separate streamFileProvider.get() call via flatMap at line 120, exploiting the unbounded concurrency of Flux.flatMap, causing excessive parallel HTTP/S3 requests that exhaust connection pools and prevent legitimate record files from being downloaded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57bc899f-87ac-4e6c-90f6-79c2b9e7336b?mode=deep",
+    "timestamp": "2026-04-28 21:35:47.240945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: setStreamFileIndex()] Can an unprivileged external user cause a block index gap or collision in the mirror node database by crafting a sequence of record files where some report version >= 6 (using externalized block_number) and others report version < 6 (using last+1 sequential index), exploiting the version branch at line 104, so that the block_number from the protobuf and the computed sequential index produce non-contiguous or overlapping indices, causing incorrect record ordering in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e9a4533-1cc1-4a43-93a6-700de728511e?mode=deep",
+    "timestamp": "2026-04-28 21:36:03.241519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: downloadSidecars()] Can an unprivileged external user cause sidecar records to be silently dropped when the second type filter at line 122 (`acceptedTypes.contains(getSidecarType(t))`) rejects records that passed the first file-level filter at line 118-119, exploiting the two-level filtering inconsistency where a sidecar file is downloaded (consuming resources) but all its individual records are filtered out, resulting in missing contract execution data in the mirror node export without any error or warning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b19ace79-956c-42ed-b803-199a389d5418?mode=deep",
+    "timestamp": "2026-04-28 21:36:18.578049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSidecar()] Can an unprivileged external user cause a HashMismatchException to be thrown inside the flatMap reactive pipeline at line 147, which propagates as a reactive error and causes the entire .block() call to throw, resulting in all sidecar records for the current RecordFile being silently dropped (due to the null check at line 129) rather than causing a hard failure, so that the record file is still marked as verified and exported with missing sidecar data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d27d4920-ed24-4d6e-9b21-78d703a080c7?mode=deep",
+    "timestamp": "2026-04-28 21:36:33.380774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: download()] Can an unprivileged external user cause the lastStreamFile to be set to a RecordFile from the CutoverService that has a different consensus timestamp than expected, exploiting the unconditional overwrite at line 84 (`lastStreamFile.set(Optional.of(rf))`), so that getStartAfterFilename() in the parent Downloader returns an incorrect starting point, causing the downloader to skip or re-download record files and producing gaps or duplicates in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_883ef0c9-5389-4a62-93bc-c0a59f9a543e?mode=deep",
+    "timestamp": "2026-04-28 21:36:48.157502",
+    "report_generated": false
+  }
+]
