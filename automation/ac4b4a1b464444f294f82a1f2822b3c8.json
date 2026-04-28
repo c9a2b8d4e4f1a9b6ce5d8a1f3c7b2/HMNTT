@@ -1,0 +1,74 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (@UpsertColumn coalesce totalSupply)] Can an unprivileged external user exploit the SQL-level coalesce expression for totalSupply by triggering a token dissociate of a deleted token with a crafted negative delta, causing the PostgreSQL expression 'e_total_supply + coalesce(total_supply, 0)' to produce a bigint overflow exception in the database, which propagates as an unhandled SQL exception through the importer's batch commit, rolling back the entire batch and causing the importer to retry the same failing batch indefinitely, resulting in a permanent processing halt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8c8d5f0-7a3f-4e73-a5b4-6934fdb6eeaf?mode=deep",
+    "timestamp": "2026-04-28 21:51:32.143286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: metadata byte[])] Can an unprivileged external user create a large number of distinct tokens each with maximum-size metadata byte arrays, causing the importer's in-memory batch accumulation (where Token objects are cached in a map before batch upsert) to consume excessive heap memory, triggering JVM garbage collection pressure or OutOfMemoryError that crashes the importer service and halts all token and non-token record processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1eedfab0-c341-4f30-9078-b9e841a694d5?mode=deep",
+    "timestamp": "2026-04-28 21:51:44.171018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: name String)] Can an unprivileged external user create a token with a name containing a very long sequence of characters that are valid UTF-8 but require expensive processing by DomainUtils.sanitize() (e.g., strings with many null bytes requiring replacement), causing the sanitize() call to consume disproportionate CPU time when processing a large batch of such tokens, degrading the importer's throughput and causing it to fall behind the record file ingestion rate, eventually causing a DoS through processing backlog?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8340a5d1-7dbd-4685-b911-cda270c5133e?mode=deep",
+    "timestamp": "2026-04-28 21:51:56.584977",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: symbol String)] Can an unprivileged external user create a token with a symbol containing a crafted mix of null bytes and multi-byte Unicode characters that causes DomainUtils.sanitize() to produce a string that is valid Java but invalid for the target database encoding, causing the database to reject the insert with a character encoding error that crashes the importer's batch commit and halts all subsequent record processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_424c5102-ecc1-4839-825a-69c1cb274ac5?mode=deep",
+    "timestamp": "2026-04-28 21:52:09.177142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: timestampRange Range<Long>)] Can an unprivileged external user trigger a token update that produces a timestampRange where the lower bound is greater than the upper bound (an inverted range), causing the PostgreSQL int8range construction in the upsert_history.vm closeRange() substitution to throw an error (since PostgreSQL requires lower <= upper for ranges), crashing the batch commit and halting the importer's processing of all subsequent records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d0a2147-7e6e-4bed-a514-be3081a5a27d?mode=deep",
+    "timestamp": "2026-04-28 21:52:22.679601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: timestampRange Range<Long>)] Can an unprivileged external user submit a token operation with a timestampRange lower bound of 0 (epoch), causing the history table's timestamp range to overlap with existing history rows for the same tokenId, triggering a unique constraint violation in the token_history table during the upsert_history.vm 'insert into historyTable' step, crashing the batch commit and halting all token ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_873555b4-6334-437a-8e00-987cb158501c?mode=deep",
+    "timestamp": "2026-04-28 21:52:36.170215",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (@Upsertable history = true)] Can an unprivileged external user create a single token and then submit thousands of token update transactions (each changing name or symbol), causing the @Upsertable(history = true) mechanism to generate thousands of token_history rows per token, and when the importer processes these in a single batch, the bulk insert into token_history exhausts database transaction log space or causes lock contention that makes the database unresponsive for all other operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6081d73-3315-470c-b50b-26e336fcd935?mode=deep",
+    "timestamp": "2026-04-28 21:52:49.566547",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: feeScheduleKey byte[])] Can an unprivileged external user create a token with a maximum-size feeScheduleKey byte array and then repeatedly update the fee schedule, causing each update to be stored as a full copy of the large byte array in the token_history table (since history = true copies all fields), leading to rapid disk space exhaustion in the database that causes all write operations to fail and the mirror node to become completely unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f0faf7e-baa4-4aa8-bfee-bd62d6ca3e3e?mode=deep",
+    "timestamp": "2026-04-28 21:53:03.351218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: supplyKey byte[])] Can an unprivileged external user create a token with a maximum-size supplyKey byte array and then trigger repeated mint/burn operations that each generate a token_history row containing the full supplyKey byte array copy, causing the token_history table to grow at a rate proportional to the supplyKey size times the number of operations, exhausting database storage and causing a DoS of the entire mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5594cd29-90bc-4cad-92c4-ba6622293826?mode=deep",
+    "timestamp": "2026-04-28 21:53:15.874369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: metadataKey byte[])] Can an unprivileged external user create a token with a maximum-size metadataKey byte array and then repeatedly update the token metadata, causing each update to persist a full copy of the large metadataKey in the token_history table, leading to unbounded disk consumption that exhausts database storage and causes the mirror node to become unable to write any new data, resulting in a complete DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a24838cf-f9ff-47a0-9ac7-5832a2f78334?mode=deep",
+    "timestamp": "2026-04-28 21:53:29.044811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: freezeKey byte[])] Can an unprivileged external user create a token with a maximum-size freezeKey byte array and then repeatedly update the token's freeze key, causing each update to generate a token_history row with the full freezeKey copy, leading to rapid database disk exhaustion that causes all subsequent writes to fail and the mirror node to become completely unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_843c3992-06fc-47e0-a62d-abddd29fc265?mode=deep",
+    "timestamp": "2026-04-28 21:53:43.909750",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: AbstractToken (field: kycKey byte[])] Can an unprivileged external user create a token with a maximum-size kycKey byte array and then repeatedly update the KYC key, causing each update to generate a token_history row containing the full kycKey copy, leading to unbounded token_history table growth that exhausts database storage and causes a DoS of the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdb4c34f-c679-4d0a-84fa-ddae26fb8971?mode=deep",
+    "timestamp": "2026-04-28 21:53:57.023178",
+    "report_generated": false
+  }
+]
