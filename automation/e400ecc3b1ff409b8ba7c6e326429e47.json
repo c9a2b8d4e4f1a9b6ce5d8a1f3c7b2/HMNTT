@@ -1,0 +1,122 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: parseCryptoAllowances()] Can an unprivileged external user submit a `CryptoApproveAllowance` transaction with an empty `owner` field in a `CryptoAllowance`, causing `getOwnerAccountId()` to fall back to `payerAccountId`, and then craft the payer account to be an attacker-controlled account, effectively granting a spender allowance over an account the attacker does not own as recorded in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02cb92a8-01c3-4cfc-aa74-d4f28c549c61?mode=deep",
+    "timestamp": "2026-04-28 22:35:39.165118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: parseNftAllowances()] Can an unprivileged external user submit a `CryptoApproveAllowance` transaction with duplicate serial numbers across multiple `NftAllowance` entries for different spenders, exploiting the `nftSerialAllowanceState.putIfAbsent()` deduplication in `parseNftAllowances()` to ensure only the last-processed spender's allowance is persisted, potentially suppressing a legitimate allowance grant from the mirror node record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0dbb0bbe-8959-4848-b1e9-060b5b599c06?mode=deep",
+    "timestamp": "2026-04-28 22:35:51.059871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: doUpdateTransaction() in CryptoDeleteAllowanceTransactionHandler] Can an unprivileged external user submit a `CryptoDeleteAllowance` transaction with a tampered `nftAllowance.owner` field set to an empty `AccountID`, causing `doUpdateTransaction()` to fall back to `recordItem.getPayerAccountId()` as the owner, and then persist an NFT record with a null `spender` that incorrectly revokes an allowance for an account the attacker does not control?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55aa1f82-f28d-4c2b-a87b-fdc84b402e3f?mode=deep",
+    "timestamp": "2026-04-28 22:36:03.601790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: doUpdateTransaction() in CryptoTransferTransactionHandler] Can an unprivileged external user craft a `CryptoTransfer` transaction body with a `PreTxAllowanceHook` or `PrePostTxAllowanceHook` attached to an `AccountAmount`, causing `addHookCalls()` to enqueue hook execution IDs into the `hookExecutionQueue` via `HookExecutionCollector`, and if hook validation is absent, trigger unauthorized EVM hook execution against an account the attacker does not own?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0113bd3e-ae3d-432f-85a1-ef3c59c407fc?mode=deep",
+    "timestamp": "2026-04-28 22:36:16.000832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: addAllowExecHook() in HookExecutionCollector] Can an unprivileged external user submit a `CryptoTransfer` transaction with multiple `AccountAmount` entries each containing a `PreTxAllowanceHook` with the same `hookId`, causing `addAllowExecHook()` to add duplicate hook IDs to `allowExecHookIds`, resulting in the same hook being executed multiple times in the `buildExecutionQueue()` output and potentially causing double-execution side effects?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3eb0d76-0b7d-4a4b-9359-d7c24724228c?mode=deep",
+    "timestamp": "2026-04-28 22:36:29.639560",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: addPrePostExecHook() in HookExecutionCollector] Can an unprivileged external user craft a `CryptoTransfer` with a `PrePostTxAllowanceHook` on an NFT transfer, causing `addPrePostExecHook()` to add the same hook ID to both `allowPreExecHookIds` and `allowPostExecHookIds`, resulting in the hook appearing twice in the execution queue from `buildExecutionQueue()` and being executed in both pre and post phases without deduplication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c2915ad-0915-460f-92e8-7da3ebc124ec?mode=deep",
+    "timestamp": "2026-04-28 22:36:43.217665",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: processHookCreationDetail() in EVMHookHandler] Can an unprivileged external user submit a `CryptoCreate` transaction with a `HookCreationDetails` entry where `spec.contractId` resolves to `EntityId.EMPTY` via `entityIdService.lookup()`, causing `processHookCreationDetail()` to persist a `Hook` entity with an empty `contractId`, creating a dangling hook record in the database that references a non-existent contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_451243ec-7dd5-4ad2-a65c-7011384d52b2?mode=deep",
+    "timestamp": "2026-04-28 22:36:57.754300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: processStorageUpdates() in EVMHookHandler] Can an unprivileged external user submit a transaction with `EvmHookStorageUpdate` entries containing duplicate `slot` keys in the `storageUpdates` list, and since `StorageUpdateContext.process()` iterates in reverse order and uses `processed.add(ByteBuffer.wrap(key))` for deduplication, craft the ordering so that a malicious value for a given slot key is persisted instead of the legitimate last-written value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac317597-bcce-4240-a24a-8a8c60e78ea5?mode=deep",
+    "timestamp": "2026-04-28 22:37:13.744298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: process(EvmHookMappingEntries) in EVMHookHandler] Can an unprivileged external user submit a transaction with `EvmHookMappingEntries` where an entry has both `key` and `preimage` fields set, and since the code checks `entry.hasKey()` first and uses `leftPadBytes(toBytes(entry.getKey()), 32)` as the mapping key, craft a `key` value that produces a derived slot collision with a legitimate entry's `keccak256(preimage, mappingSlot)`, overwriting legitimate hook storage data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3555356a-7802-4c88-9d3d-553c98eda0a6?mode=deep",
+    "timestamp": "2026-04-28 22:37:29.896031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: processHookDeletion() in EVMHookHandler] Can an unprivileged external user submit a `CryptoUpdate` transaction with a `hookIdsToDelete` list containing hook IDs that belong to a different account, causing `processHookDeletion()` to persist `Hook` entities with `deleted=true` for those IDs under the attacker's `entityId`, potentially causing the upsert logic to soft-delete hooks owned by other accounts in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57b2d21e-8e93-49b3-9dec-e8774b77dfc5?mode=deep",
+    "timestamp": "2026-04-28 22:37:47.121564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: doParse(RecordFile)] Can an unprivileged external user submit a `RecordFile` where `recordFile.getItems()` contains a `RecordItem` with a tampered `consensusTimestamp` that falls outside the `dateRangeFilter` window, causing `doParse()` to skip the item via `dateRangeFilter.filter()` without calling `recordItemListener.onItem()`, silently dropping a legitimate transaction from the mirror node's persistent record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1dc0594-3c95-465f-9f24-6419cc3e1dc8?mode=deep",
+    "timestamp": "2026-04-28 22:38:04.952936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: RecordItemAggregator.accept()] Can an unprivileged external user submit a `RecordFile` containing a top-level `RecordItem` with a tampered `ContractFunctionResult` where `gasUsed` is set to `Long.MAX_VALUE`, causing `RecordItemAggregator.accept()` to overflow the `gasUsed` accumulator via `gasUsed += result.getGasUsed()`, resulting in a negative or wrapped gas value being stored in `recordFile.gasUsed` and misrepresenting block gas consumption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dabcfe03-2b9d-40c7-a649-8ddca7475bad?mode=deep",
+    "timestamp": "2026-04-28 22:38:23.224334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: RecordItemAggregator.accept()] Can an unprivileged external user submit a `RecordFile` with multiple top-level `RecordItem` entries each containing a `ContractFunctionResult` with a crafted `bloom` filter value, causing `logsBloom.or()` to be called repeatedly in `RecordItemAggregator.accept()`, producing a saturated bloom filter that causes false positives in log lookups for all subsequent queries against that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cca664d-4b79-4472-8104-60973f2f34cf?mode=deep",
+    "timestamp": "2026-04-28 22:38:41.094168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateIndex(RecordFile)] Can an unprivileged external user submit a version 6+ `RecordFile` with a tampered `index` value that is much larger than the last v5 file's index, causing `updateIndex()` to compute a large positive `offset` and call `repository.updateIndex(offset)` to bulk-update all previously stored block indices, corrupting the block number mapping for all historical transactions in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_601e7bd0-cacb-4d81-b819-5e62685a5520?mode=deep",
+    "timestamp": "2026-04-28 22:39:00.109168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateIndex(RecordFile)] Can an unprivileged external user submit a `RecordFile` with version >= 6 and a tampered `index` value that is lower than the last v5 file's index, causing `updateIndex()` to compute a negative `offset` and call `repository.updateIndex(offset)` to decrement all historical block indices, causing block number collisions and corrupting the block-to-transaction mapping in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_685013af-85e9-4aa4-bc71-46002d425983?mode=deep",
+    "timestamp": "2026-04-28 22:39:19.541345",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: insertStakingRewardTransfers()] Can an unprivileged external user submit a transaction record with a tampered `paidStakingRewards` list containing account IDs and amounts that do not correspond to actual staking rewards, causing `insertStakingRewardTransfers()` to persist fabricated staking reward transfers in the `staking_reward_transfer` table, misrepresenting reward distributions to mirror node API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c340094-f105-4b83-ad0e-e6cc826ac74e?mode=deep",
+    "timestamp": "2026-04-28 22:39:39.989194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: insertAssessedCustomFees()] Can an unprivileged external user submit a transaction record with a tampered `assessedCustomFees` list where `feeCollectorAccountId` is set to an attacker-controlled account, causing `insertAssessedCustomFees()` to persist fabricated custom fee collection records that falsely attribute fee income to the attacker's account in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9809bb91-7659-4e18-a8dc-6400edb2564d?mode=deep",
+    "timestamp": "2026-04-28 22:40:00.837085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: insertAssessedCustomFees()] Can an unprivileged external user submit a transaction record with an `assessedCustomFee` entry where `effectivePayerAccountIdList` contains account IDs not involved in the transaction, causing `insertAssessedCustomFees()` to persist those accounts as effective payers and add them to `recordItem.entityIds`, falsifying the set of accounts associated with the transaction in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a10e2057-6126-46d2-8419-ecfa19a319cf?mode=deep",
+    "timestamp": "2026-04-28 22:40:22.217055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: insertAutomaticTokenAssociations()] Can an unprivileged external user submit a non-`TokenCreate` transaction record with a tampered `automaticTokenAssociations` list containing arbitrary account and token IDs, causing `insertAutomaticTokenAssociations()` to persist fabricated `TokenAccount` entries with `automaticAssociation=true`, falsely recording token associations that never occurred on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_525a370c-eeb8-467c-befa-886cb6928a80?mode=deep",
+    "timestamp": "2026-04-28 22:40:44.606156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onScheduledTransaction()] Can an unprivileged external user submit a transaction record with `txRecord.hasScheduleRef()` returning true and a tampered `scheduleRef` pointing to an arbitrary schedule ID, causing `onScheduledTransaction()` to update the `executedTimestamp` of a schedule the attacker does not own, falsifying the execution time of that schedule in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64976d87-c57e-41b7-af48-74c5330be186?mode=deep",
+    "timestamp": "2026-04-28 22:41:06.783185",
+    "report_generated": false
+  }
+]
