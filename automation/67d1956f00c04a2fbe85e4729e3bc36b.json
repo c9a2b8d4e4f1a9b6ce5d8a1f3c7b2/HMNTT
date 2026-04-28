@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user send a flood of concurrent GET /balances requests with no query parameters, causing pool.queryQuietly() to exhaust all PostgreSQL connection slots in the shared pool, starving the importer and consensus-critical services of DB connections and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cec7582c-5023-44d5-97bc-e02baa58b102?mode=deep",
+    "timestamp": "2026-04-28 20:43:04.574128",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user supply a timestamp query parameter (e.g., timestamp=lte:9999999999) that forces getAccountBalanceTimestampRange() to perform a full sequential scan of the account_balance table, consuming all available DB CPU and I/O and preventing the importer from writing new consensus records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07d9e097-4135-4743-b771-a716a00b2564?mode=deep",
+    "timestamp": "2026-04-28 20:43:16.647067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user craft a timestamp=gte:1&timestamp=lte:9999999999 pair that produces a lowerBound/upperBound spanning many monthly partitions, causing getOptimizedTimestampRange() to generate a query that touches every partition simultaneously and saturates DB I/O, blocking all other writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42c6cbb5-49e2-40f8-bf1e-3b6e28cd177f?mode=deep",
+    "timestamp": "2026-04-28 20:43:29.149514",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountIdsByPublicKey()] Can an unprivileged external user supply a valid public_key parameter and trigger getAccountIdsByPublicKey() to execute entityPublicKeyQuery against the entity table at high concurrency, exhausting DB worker threads and preventing consensus transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7e1f0fd-4bec-4889-bb3c-5156336d6d12?mode=deep",
+    "timestamp": "2026-04-28 20:43:42.502626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalancesQuery()] Can an unprivileged external user craft a request with timestamp and account.id filters that causes getBalancesQuery() to build a SELECT DISTINCT ON query with a correlated getTokenBalanceSubQuery() executed per row, resulting in N+1 query amplification that saturates the DB and halts new transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04c64925-fe04-40f2-90ab-8a74417d29eb?mode=deep",
+    "timestamp": "2026-04-28 20:43:55.601457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenBalanceSubQuery()] Can an unprivileged external user send a timestamped /balances request that causes getTokenBalanceSubQuery() to execute a nested SELECT with DISTINCT ON (token_id) per account row, and by requesting the maximum limit, amplify DB load to the point where the connection pool is fully consumed and transaction confirmation stalls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63d3092f-ca04-45b7-8d1f-405e7e99e4bc?mode=deep",
+    "timestamp": "2026-04-28 20:44:09.297805",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenAccountBalanceSubQuery()] Can an unprivileged external user send a /balances request without a timestamp filter, causing getTokenAccountBalanceSubQuery() to execute a correlated subquery against token_account for every row returned, and by maximizing the limit parameter, generate enough DB load to exhaust connection pool resources and block transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_819af1d8-c302-406d-a692-5c9c86dd2114?mode=deep",
+    "timestamp": "2026-04-28 20:44:23.145021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user submit repeated requests with timestamp=eq:X where X maps to a very old snapshot, forcing getTsQuery() to scan the account_balance table across many partitions, holding long-running DB transactions that block autovacuum and cause table bloat that eventually prevents new transaction inserts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_359dbb24-b7fb-49a6-87c2-174952e0e6a4?mode=deep",
+    "timestamp": "2026-04-28 20:44:37.055260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: parseAccountIdQueryParam()] Can an unprivileged external user supply a large array of account.id values (e.g., account.id=0.0.1&account.id=0.0.2&...&account.id=0.0.N) to parseAccountIdQueryParam(), generating an IN clause with thousands of values that causes a full index scan and saturates DB CPU, preventing transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_463cfaa2-50b6-4707-9c74-058c8ba8de41?mode=deep",
+    "timestamp": "2026-04-28 20:44:51.314710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user exploit the fact that getBalances() calls await Promise.all(accountParamsPromise) which may resolve multiple async EntityService.getEncodedId() or EntityService.getAccountIdFromAlias() DB lookups in parallel, and by sending many concurrent requests each with an EVM address, exhaust the DB connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6eaf7eed-be17-4778-ba4a-22c0ca865b74?mode=deep",
+    "timestamp": "2026-04-28 20:45:05.209897",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountBalanceTimestampRange()] Can an unprivileged external user supply a timestamp=ne:X filter repeatedly with many distinct ne values, causing getAccountBalanceTimestampRange() to build a query with a large NOT consensus_timestamp = any($4) array, resulting in an expensive index exclusion scan that blocks DB resources needed for transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a374b086-79a3-4c38-b275-0afc20529d76?mode=deep",
+    "timestamp": "2026-04-28 20:45:20.078660",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user supply timestamp=lt:1 (a value near zero) to force lowerBound > upperBound, and while this returns early, can they combine this with high-frequency requests to cause repeated DB round-trips in getAccountBalanceTimestampRange() before the empty check, exhausting connection pool slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4004c549-b196-418a-9050-60a47292d01f?mode=deep",
+    "timestamp": "2026-04-28 20:45:35.706791",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user send requests with both a timestamp filter and a public_key filter, causing getBalances() to sequentially await getTsQuery() and then getAccountIdsByPublicKey(), each consuming a DB connection, and at high concurrency double the connection consumption rate to exhaust the pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c71cb7d-f823-4701-a824-bf78115c9ecf?mode=deep",
+    "timestamp": "2026-04-28 20:45:50.904515",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenBalanceSubQuery()] Can an unprivileged external user craft a timestamp range that is valid but spans the boundary between two monthly partitions, causing getTokenBalanceSubQuery() to perform cross-partition joins on token_balance for every account row, multiplying I/O load and starving the importer of DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ca6e218-335f-4255-ad8a-5babbe2f2c44?mode=deep",
+    "timestamp": "2026-04-28 20:46:06.260817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalancesQuery()] Can an unprivileged external user observe that tsParams = [upper, lower, upper, lower, upper] passes the same timestamp values five times into the query, and craft a timestamp that forces the query planner to choose a sequential scan over all account_balance partitions, causing sustained high I/O that blocks transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb54c1e8-c375-4c35-a107-4299c269b0c3?mode=deep",
+    "timestamp": "2026-04-28 20:46:20.709475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user send a /balances request with limit=N at the maximum allowed value combined with a timestamp filter, causing the SELECT DISTINCT ON query to fetch the maximum number of rows each with a correlated token balance subquery, generating enough DB load to exhaust statement_timeout-protected connections and block new transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b9af19b-5167-43fa-b904-77f738418f2b?mode=deep",
+    "timestamp": "2026-04-28 20:46:35.023361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: formatBalancesResult()] Can an unprivileged external user trigger a response where rows contains a very large number of entries each with large token_balances arrays, causing formatBalancesResult() to consume excessive Node.js heap memory via rows.map() and utils.parseTokenBalances(), leading to OOM crashes of the REST service and network-wide unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b3a5171e-b4b2-4b6c-9e80-ed262246d068?mode=deep",
+    "timestamp": "2026-04-28 20:46:50.722900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user exploit the absence of rate limiting on the /balances endpoint to send thousands of requests per second, each triggering at least one pool.queryQuietly() call, exhausting the PostgreSQL max_connections limit and preventing the importer from persisting new consensus transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26160a96-9734-4081-bc45-7fb86c27c9ce?mode=deep",
+    "timestamp": "2026-04-28 20:47:04.489291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountBalanceTimestampRange()] Can an unprivileged external user supply a timestamp=lte:X where X is the current time in nanoseconds, causing getAccountBalanceTimestampRange() to always find a valid snapshot and execute the full balance query path, and by flooding requests, hold many long-running DB queries that block autovacuum and prevent table maintenance needed for transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c9b7a17-6fc1-4d13-8d35-3e13e4efd337?mode=deep",
+    "timestamp": "2026-04-28 20:47:16.802402",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user supply multiple timestamp=gte:X and timestamp=lte:Y filters where the range spans exactly two monthly partitions, causing getOptimizedTimestampRange() to produce a range that forces the query to scan both partitions fully, doubling I/O and contributing to DB saturation under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_362d454b-1d1a-4b5d-90ed-7161a49f0011?mode=deep",
+    "timestamp": "2026-04-28 20:47:30.033985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user send a /balances request with account.id=eq:0x<valid_evm_address> causing parseAccountIdQueryParam() to call EntityService.getEncodedId() which performs an async DB lookup, and by sending many such requests concurrently, exhaust DB connections allocated to entity lookups and starve the transaction confirmation pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_349877b0-e3b4-4d5c-bec9-e0a5770c0a1b?mode=deep",
+    "timestamp": "2026-04-28 20:47:43.233875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: parseAccountIdQueryParam()] Can an unprivileged external user supply account.id=<valid_alias> causing parseAccountIdQueryParam() to call EntityService.getAccountIdFromAlias() which performs an async DB lookup, and by flooding with many distinct alias values, generate a sustained stream of DB queries that exhaust connection pool capacity and halt transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75907db4-fc2f-4703-a665-f6acd6244393?mode=deep",
+    "timestamp": "2026-04-28 20:47:56.880811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user craft a request with a public_key filter that matches a very large number of accounts, causing getAccountIdsByPublicKey() to return a large IN clause string like 'ab.account_id in (1,2,...,N)' that is then embedded unsanitized into the SQL query, potentially causing query plan degradation and DB overload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f068186-7cc5-4ffb-b922-15c55e31abf8?mode=deep",
+    "timestamp": "2026-04-28 20:48:12.284863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountIdsByPublicKey()] Can an unprivileged external user observe that getAccountIdsByPublicKey() builds the IN clause by directly interpolating ids array values into the SQL string as `ab.account_id in (${ids})` without parameterization, and craft a scenario where ids contains values that break query structure, causing malformed queries that crash the DB session and disrupt transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c796e0b1-553d-4c2f-99db-59a758fa5cfc?mode=deep",
+    "timestamp": "2026-04-28 20:48:27.112896",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getBalances()] Can an unprivileged external user send a /balances request with account.balance=gte:0 (matching all accounts) combined with the maximum limit, causing the entity_balance CTE to scan the entire entity table and return maximum rows each with a correlated token subquery, generating a query that runs for the full statement_timeout duration and blocks DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d73194f4-73b4-4eab-a4cf-c36579b7850f?mode=deep",
+    "timestamp": "2026-04-28 20:48:41.092715",
+    "report_generated": false
+  }
+]
