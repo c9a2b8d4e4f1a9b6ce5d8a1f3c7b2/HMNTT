@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractStateByIdAndFilters()] Can an unprivileged user exploit the `buildWhereSqlStatement(whereConditions)` call where `whereConditions` is an array of condition objects, by crafting conditions that produce a WHERE clause that is valid SQL but semantically different from what the caller intended, causing the `contractStateTimestampQuery` to return a different set of slots than `contractStateQuery` for the same logical filter, inducing divergent state views across clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08da2ade-8f87-4f8c-9ebb-e02ee8907e17?mode=deep",
+    "timestamp": "2026-04-28 23:33:59.573409",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractStateByIdAndFilters()] Can an unprivileged user trigger the `timestamp=true` path in `getContractStateByIdAndFilters()` where `contractStateTimestampQuery` uses `DISTINCT ON (slot)` ordered by `CONSENSUS_TIMESTAMP DESC`, and by submitting a timestamp that falls between two consensus events for the same slot, cause the DISTINCT ON to select a different row than expected, returning a stale slot value that diverges from what other clients see via the non-timestamp path, constituting a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9bfc4b8-b449-4a57-8ec2-3958a3978b02?mode=deep",
+    "timestamp": "2026-04-28 23:34:11.473521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractLogsQuery()] Can an unprivileged user craft pagination parameters that cause `getContractLogsQuery()` to produce a UNION of subqueries where the `params` array is mutated by multiple `buildSelectQuery()` calls (each pushing filter values), causing parameter index misalignment between subqueries in the UNION, resulting in wrong parameter bindings that return different log sets to different clients and constituting a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4ffc59c-8914-4336-976d-4f1dbf59481f?mode=deep",
+    "timestamp": "2026-04-28 23:34:23.901672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractLogsQuery()] Can an unprivileged user supply `lower`, `inner`, and `upper` filter arrays where each filter's `column` is computed as `ContractLog.getFullName(ContractService.contractLogsPaginationColumns[filter.key])`, and by providing a `filter.key` not in `contractLogsPaginationColumns`, cause `column` to be `undefined`, producing a SQL fragment `undefined${operator}$N` that is syntactically valid in some DB versions but returns wrong results, causing divergent log responses across clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b713ca4-ff97-4fef-8a4f-0e4f250fb432?mode=deep",
+    "timestamp": "2026-04-28 23:34:36.816961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractLogs()] Can an unprivileged user craft a query that returns rows where `row.consensus_timestamp` values are not strictly ordered (e.g., due to a database index scan returning rows out of order), causing the deduplication logic `if (row.consensus_timestamp !== timestamps[timestamps.length - 1])` to miss duplicates and pass extra timestamps to `RecordFileService.getRecordFileBlockDetailsFromTimestampArray()`, resulting in a `recordFileMap` with extra entries that cause some logs to have incorrect block numbers, constituting a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69192936-8e40-4d0b-9187-0163ae0b2aea?mode=deep",
+    "timestamp": "2026-04-28 23:34:50.181195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractLogs()] Can an unprivileged user trigger a scenario where `RecordFileService.getRecordFileBlockDetailsFromTimestampArray(timestamps)` returns a Map that is missing some timestamp keys (due to a partial failure or partition in the RecordFile service), causing `recordFileMap.get(cr.consensus_timestamp)` to return `undefined` for some rows, resulting in `ContractLog` objects with `blockHash = undefined` and `blockNumber = null`, while other concurrent requests get complete data, constituting a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a57c1a4-2324-4bce-9a88-d5099150d9a0?mode=deep",
+    "timestamp": "2026-04-28 23:35:04.209396",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractResultsByIdAndFilters()] Can an unprivileged user exploit the `contractResultsFields` CASE expression `case when sender_id is null then function_result else '' end as function_result` to cause different clients to receive different `function_result` values for the same contract result, where one client queries before a `sender_id` is set and another queries after, creating a divergent view of contract execution results that constitutes a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be00016a-98b3-493c-8198-5dc4ebd1d94d?mode=deep",
+    "timestamp": "2026-04-28 23:35:18.591009",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractResultsByTimestamps()] Can an unprivileged user supply an empty array `[]` as `timestamps` to `getContractResultsByTimestamps()`, causing `params = []` and `positions = []`, resulting in `timestampsOpAndValue = 'in ()'` which is invalid SQL in some databases, causing the query to throw an error for some clients while succeeding for others (if the DB handles empty IN differently), constituting a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fcee06f-1444-44ad-812a-26bd7bac5e35?mode=deep",
+    "timestamp": "2026-04-28 23:35:34.337028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractLogsByTimestamps()] Can an unprivileged user supply an empty array `[]` as `timestamps` to `getContractLogsByTimestamps()`, causing `params = []` and `timestampsOpAndValue = 'in ()'`, producing invalid SQL `CONSENSUS_TIMESTAMP in ()` that fails in PostgreSQL, while a concurrent request with a single timestamp succeeds, causing divergent availability across clients and constituting a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ae395d4-75cf-4e71-ba70-331c02411225?mode=deep",
+    "timestamp": "2026-04-28 23:35:50.777414",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged user supply an empty array `[]` as `timestamps` to `getContractStateChangesByTimestamps()`, causing `params = []` and `timestampsOpAndValue = 'in ()'`, producing invalid SQL that causes the query to fail, while concurrent requests with valid timestamps succeed, creating a divergent service state that constitutes a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41c6cfb9-f510-4334-b89c-7d0f21c0302f?mode=deep",
+    "timestamp": "2026-04-28 23:36:07.310508",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getInvolvedContractsByTimestampAndContractId()] Can an unprivileged user craft a request where `timestamp` is a valid value but `contractId` is `0` (falsy in JavaScript), causing the `!timestamp || contractId === null || contractId === undefined` check to pass (since `0` is not null/undefined), but the query `involvedContractsQuery` with `contractId = 0` returns no rows, causing `getSingleRow()` to return null, while a concurrent request with a valid contractId returns data, creating divergent responses that constitute a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_286c6b17-840a-47ae-b663-d19214210e8f?mode=deep",
+    "timestamp": "2026-04-28 23:36:24.397035",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractIdByEvmAddress()] Can an unprivileged user supply a `create2_evm_address` string with an odd number of hex characters to `getContractIdByEvmAddress()`, causing `Buffer.from(create2EvmAddress, 'hex')` to silently truncate the last character and produce a different buffer than intended, causing the query to match a different contract than expected, and if two concurrent requests use slightly different address strings that map to the same buffer, return the same contract ID for different intended addresses, constituting a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df85d37d-7ab0-47d6-a474-7dd1eebef7eb?mode=deep",
+    "timestamp": "2026-04-28 23:36:42.350043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractIdByEvmAddress()] Can an unprivileged user supply a `create2_evm_address` with uppercase hex characters to `getContractIdByEvmAddress()`, where `Buffer.from(create2EvmAddress, 'hex')` normalizes the case, but the database `evm_address = $1` comparison is case-sensitive for bytea, causing the query to return zero rows and throw `NotFoundError` while a request with lowercase hex succeeds, creating divergent contract resolution across clients that constitutes a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b989763-a00a-4c71-9c64-4ff6a2c07c1a?mode=deep",
+    "timestamp": "2026-04-28 23:37:01.261056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractActions()] Can an unprivileged user submit a request to `getContractActions()` with a very large `limit` value, causing the query to consume excessive database resources and time out for some concurrent requests while succeeding for others, creating a divergent availability state where some clients receive action data and others receive errors, constituting a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d330380d-c76e-47cd-8dde-025b79bdb8a0?mode=deep",
+    "timestamp": "2026-04-28 23:37:21.217105",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractActions()] Can an unprivileged user supply multiple `index` filters to `getContractActions()`, causing the `for (const filter of filters)` loop to append multiple `and INDEX${operator}$N` clauses to `whereClause`, and if the operators are contradictory (e.g., `> 5` and `< 3`), cause the query to return zero rows while a concurrent request with a single filter returns data, creating divergent result sets that constitute a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8bc1d93-96b9-4a81-94f5-c49884fa1b0a?mode=deep",
+    "timestamp": "2026-04-28 23:37:40.814056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged user supply a `timestamps` array containing duplicate values to `getEthereumTransactionsByPayerAndTimestampArray()`, causing the `transactionMap.set(row.consensus_timestamp, ...)` to overwrite earlier entries with later ones (last-write-wins), and if the database returns rows in different orders under concurrent load, cause different clients to receive different `EthereumTransaction` objects for the same timestamp, constituting a network partition outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70660f76-ef14-4de7-9c97-850474e9fbe5?mode=deep",
+    "timestamp": "2026-04-28 23:38:01.554527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged user craft a request where `timestamps` contains BigInt values that overflow when compared with `MAX_LONG` (imported from constants), causing the `minTimestamp`/`maxTimestamp` computation to produce incorrect bounds, and the `CONSENSUS_TIMESTAMP >= $3 AND CONSENSUS_TIMESTAMP <= $4` filter to exclude valid transactions, causing different clients to receive different transaction sets and constituting a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_955495c3-1872-4cea-acc0-7c84ca96bee1?mode=deep",
+    "timestamp": "2026-04-28 23:38:22.100124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getContractStateByIdAndFilters()] Can an unprivileged user exploit the fact that `getContractStateByIdAndFilters()` uses `getLimitQuery(params.push(limit))` where `params.push()` returns the new array length, and if `buildWhereSqlStatement()` has already pushed parameters, the limit parameter position is correct, but if `whereConditions` is empty and `buildWhereSqlStatement()` returns `params = []`, the limit is at position 1, while a concurrent request with conditions has limit at a different position, causing parameter binding errors that return wrong data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f423ee6d-e43d-44a4-b0ac-2a499c1d1608?mode=deep",
+    "timestamp": "2026-04-28 23:38:43.677218",
+    "report_generated": false
+  }
+]
