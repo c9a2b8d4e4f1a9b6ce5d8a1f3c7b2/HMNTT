@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user flood GET /health/readiness at high concurrency to exhaust the 10-second Timeout budget on the 'network' health.Config check, causing the server to treat a self-induced resource exhaustion as a network partition and return HTTP 503 to all legitimate orchestrators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f314d01-619f-42f1-84b9-a802caaa5f1c?mode=deep",
+    "timestamp": "2026-04-28 20:06:56.796224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user send a burst of GET /health/readiness requests that each trigger rosettaClient.NetworkAPI.NetworkList() loopback calls, creating a feedback loop where the server's own port becomes saturated and checkNetworkStatus() reports a partition that does not exist in the real network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_392bb501-3399-44c1-874a-50f554221c4a?mode=deep",
+    "timestamp": "2026-04-28 20:07:08.526588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the fact that checkNetworkStatus() dials http://localhost:{port} over plain HTTP with no authentication, by racing concurrent readiness probes to starve the loopback listener's accept queue, causing the network check to time out and falsely signal a network partition to Kubernetes liveness/readiness controllers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93e443d0-73e4-438d-bf0c-15eee99a43fb?mode=deep",
+    "timestamp": "2026-04-28 20:07:20.519424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user trigger a false network-partition signal by sending enough simultaneous GET /health/readiness requests that the goroutine pool servicing rosettaClient.NetworkAPI.NetworkList() loopback calls is exhausted within the 10-second Timeout window, causing SkipOnErr: false to propagate the error and mark the node as unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_701f807d-f9be-426b-a764-5d52c1febe92?mode=deep",
+    "timestamp": "2026-04-28 20:07:32.968257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the absence of rate-limiting on GET /health/readiness to repeatedly trigger the 'network' health check, each of which opens a new HTTP connection to http://localhost:{port}, exhausting ephemeral port space and simulating a network partition from the node's own perspective?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3802e2c7-359c-4fb6-a4ef-2954a4cf0625?mode=deep",
+    "timestamp": "2026-04-28 20:07:46.838459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user cause a cascading network-partition false positive by sending slow-loris-style requests to GET /health/readiness, holding connections open for nearly 10 seconds so that the loopback NetworkList() call inside checkNetworkStatus() times out and the node reports itself as partitioned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26e78648-4197-493b-bc74-7c40bc24b9c4?mode=deep",
+    "timestamp": "2026-04-28 20:08:00.718414",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the self-referential design of checkNetworkStatus() — where the readiness check calls the same server it is running on — to create a deadlock under high load, where the server cannot respond to its own health probe and falsely declares a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d7fde1a-78e5-402a-b01d-8191990c4b4f?mode=deep",
+    "timestamp": "2026-04-28 20:08:14.831170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user abuse the fact that checkNetworkStatus() constructs a new rosettaClient per NewHealthController() call with no connection pooling limits, by triggering repeated health checks that open unbounded TCP connections to localhost:{port}, simulating a network partition through socket exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ecc86b6-7737-4e98-8cf4-65b63c3199e1?mode=deep",
+    "timestamp": "2026-04-28 20:08:29.321293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the 10-second Timeout on the 'network' health.Config check by sending requests that cause the /network/list handler to block for just under 10 seconds, making every readiness probe return 503 and causing orchestrators to treat the node as partitioned from the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58898387-ec64-454b-b2e1-82cf77771cc8?mode=deep",
+    "timestamp": "2026-04-28 20:08:43.765190",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the fact that networkList.NetworkIdentifiers[0] is accessed without a length check, by crafting a scenario where the /network/list endpoint returns an empty NetworkIdentifiers slice (e.g., via a concurrent config reload during a network partition), causing a panic that crashes the health check goroutine and permanently marks the node as unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfb988ff-f823-46a8-ac53-ae450c72d697?mode=deep",
+    "timestamp": "2026-04-28 20:08:57.853890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user trigger an index-out-of-bounds panic at networkList.NetworkIdentifiers[0] by flooding /network/list with requests that cause it to return an empty list under memory pressure, simulating a network partition and crashing the readiness check permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f192490f-6efd-4cfc-af6a-8549e952c3aa?mode=deep",
+    "timestamp": "2026-04-28 20:09:12.040765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: NewHealthController()] Can an unprivileged external user exploit the SkipOnErr: false setting on the 'network' health.Config to ensure that any transient loopback connection failure — caused by the attacker flooding the server — is treated as a hard network partition, with no fallback or retry, causing the node to be removed from load balancer rotation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2394b641-14cb-4d70-b024-fc210419b155?mode=deep",
+    "timestamp": "2026-04-28 20:09:24.752704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: NewHealthController()] Can an unprivileged external user exploit the SkipOnErr: false setting on both the 'postgresql' and 'network' health.Config checks to amplify a single induced failure into a full service-unavailable response, making it impossible to distinguish a real network partition from an attacker-induced one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de7e2095-a196-41cb-9740-3aefb1c88701?mode=deep",
+    "timestamp": "2026-04-28 20:09:38.346061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the plain HTTP scheme in fmt.Sprintf('http://localhost:%d', port) to perform a loopback HTTP request injection, where a malicious proxy or iptables rule on a shared-tenant host intercepts the loopback call and returns a crafted response that makes checkNetworkStatus() believe the network is healthy when a real partition exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9245493f-cd9a-4649-9c79-8a5f7ea59f0b?mode=deep",
+    "timestamp": "2026-04-28 20:09:51.628451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user on a shared-tenant host exploit the unencrypted http://localhost:{port} loopback call in checkNetworkStatus() to inject a fake /network/list response that suppresses a real network partition signal, causing the node to remain in service rotation while actually partitioned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07176cf3-5f86-4a01-a4b2-8c9a885dafc2?mode=deep",
+    "timestamp": "2026-04-28 20:10:04.428256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the absence of TLS on the loopback call in checkNetworkStatus() to perform a man-in-the-middle attack on the loopback interface in a container environment, injecting a response that masks a real network partition from the health check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5c8d460-0505-4fcf-8d48-65e8f8f16eb8?mode=deep",
+    "timestamp": "2026-04-28 20:10:17.950214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the fact that checkNetworkStatus() uses client.NewConfiguration() with a nil HTTP client (no custom timeouts beyond the health.Config Timeout), meaning the underlying HTTP transport may hang indefinitely if the loopback connection is accepted but never responded to, causing the health check to block beyond the intended 10-second window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdd0a560-5086-45a5-acd5-4c2ce65f69c0?mode=deep",
+    "timestamp": "2026-04-28 20:10:31.461691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the fact that the context passed to checkNetworkStatus() is the same context used by the health framework, by sending requests that cause context cancellation to propagate into the rosettaClient.NetworkAPI.NetworkList() call, making the health check report a network partition on every probe?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f60f11ea-7a1f-4f2f-a273-7f8a32b45475?mode=deep",
+    "timestamp": "2026-04-28 20:10:45.164572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the recursive nature of the readiness check — where GET /health/readiness triggers a call to GET /network/list on the same server — to create a request amplification loop that degrades server performance and causes the network check to time out, falsely signaling a partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2ed5ff5-afa4-4874-823d-be3dc813d264?mode=deep",
+    "timestamp": "2026-04-28 20:10:59.733491",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: Routes()] Can an unprivileged external user exploit the publicly accessible GET /health/readiness endpoint to enumerate internal service state (postgresql connectivity, network reachability) without any authentication, using the JSON response body to map out which components are partitioned and plan further attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17fa6b77-ea9a-47d5-ac1c-d7bef44b7c5c?mode=deep",
+    "timestamp": "2026-04-28 20:11:12.956266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: Routes()] Can an unprivileged external user repeatedly poll GET /health/readiness to detect the exact moment a network partition begins or ends, using the transition from HTTP 200 to HTTP 503 as a timing oracle to correlate with other attack activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_687a3675-1e7e-4a41-9790-ec67aa07b2cb?mode=deep",
+    "timestamp": "2026-04-28 20:11:26.847975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: Routes()] Can an unprivileged external user exploit the unauthenticated GET /health/liveness endpoint to confirm that the process is alive even during a network partition, using this information to determine that the partition is external rather than a process crash, and tailor subsequent attacks accordingly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7de606b-235b-4a60-a777-b9bdc5dc4a8a?mode=deep",
+    "timestamp": "2026-04-28 20:11:41.269934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the fact that log.Errorf('Readiness check, /network/list failed: %v', err) logs the full error including connection details to a shared log sink, by inducing repeated network partition errors to fill the log with noise that obscures real attack indicators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4bb22368-d765-47c2-a528-c17d4a280a7c?mode=deep",
+    "timestamp": "2026-04-28 20:11:54.302044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the log.Errorf output in checkNetworkStatus() to perform log injection by crafting a /network/list response error message containing newline characters, inserting fake log entries that obscure evidence of a real network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12b8a428-b02a-4e97-9ff6-65d91667bb49?mode=deep",
+    "timestamp": "2026-04-28 20:12:09.024844",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/middleware/health.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: checkNetworkStatus()] Can an unprivileged external user exploit the absence of a retry mechanism in checkNetworkStatus() — where a single failed NetworkList() call immediately returns an error — to make transient network glitches (e.g., a single dropped packet) indistinguishable from a sustained network partition, causing unnecessary node removal from rotation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7549e230-0b80-4e1f-9729-2d7682a63d1e?mode=deep",
+    "timestamp": "2026-04-28 20:12:22.213855",
+    "report_generated": false
+  }
+]
