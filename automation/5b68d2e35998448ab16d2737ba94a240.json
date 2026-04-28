@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user inject a zero-millisecond value for `hiero.mirror.importer.downloader.record.frequency` via an exposed Spring Boot Actuator `/actuator/env` endpoint, causing `@Scheduled(fixedDelayString = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17bea278-f82b-4fa2-b053-f8f769bc81be?mode=deep",
+    "timestamp": "2026-04-28 20:01:26.192930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user set `frequency` to a negative `Duration` value (e.g., `-1ms`) through an unauthenticated configuration endpoint, given that `frequency` only carries `@NotNull` but no `@DurationMin` constraint unlike `CommonDownloaderProperties.timeout`, causing `getFrequency().toMillis()` to return a negative long that breaks the Spring `@Scheduled` fixed-delay, halting all record file downloads and freezing the mirror node's view of transaction fees at a stale value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75c50e4c-0599-4f35-85db-7b796fbe01d5?mode=deep",
+    "timestamp": "2026-04-28 20:01:38.284959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isEnabled() / setEnabled()] Can an unprivileged external user toggle `enabled` from `true` to `false` via an exposed `/actuator/env` + `/actuator/refresh` endpoint, causing `RecordFileDownloader.shouldDownload()` to always return `true` (overriding the base `Downloader.shouldDownload()` which checks `downloaderProperties.isEnabled()`), yet the CutoverService's `isActive()` check at line 134 of CutoverServiceImpl to treat the record stream as inactive, creating a split-brain state where fee records are partially ingested and `chargedTxFee` data becomes inconsistent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85c26a30-823c-42f0-bc5f-856e130b12ef?mode=deep",
+    "timestamp": "2026-04-28 20:01:51.383178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user flip `enabled` to `false` at a precise moment during a batch download cycle, causing the `Downloader.verifySignatures()` method to call `downloaderProperties.setEnabled(false)` redundantly while a fee-containing record file is mid-verification, resulting in the file being silently dropped and its `chargedTxFee` never written to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3190c646-d8b8-4c50-be23-5322d1389f0c?mode=deep",
+    "timestamp": "2026-04-28 20:02:04.129790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isPersistBytes() / setPersistBytes()] Can an unprivileged external user enable `persistBytes` via an exposed configuration endpoint, causing raw record file bytes (which encode `transactionFee` protobuf fields) to be stored in the database, and then query those bytes through the REST API to reconstruct and compare fee values against the parsed `chargedTxFee` column, identifying discrepancies that reveal fee manipulation by a compromised consensus node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_680188ad-d679-4fc0-9310-b912816b76dc?mode=deep",
+    "timestamp": "2026-04-28 20:02:16.786113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isPersistBytes() / setPersistBytes()] Can an unprivileged external user set `persistBytes = true` at runtime, causing `Downloader.verifySignatures()` to skip the `streamFile.setBytes(null)` call at line 352, so that raw record file bytes containing fee protobuf data are persisted to the database, and if those bytes are later accessible via an API endpoint, an attacker can extract and replay fee structures to craft transactions that appear to have lower fees than actually charged?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45810876-fb20-42fa-967c-f645d801320f?mode=deep",
+    "timestamp": "2026-04-28 20:02:30.157046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isWriteFiles() / setWriteFiles()] Can an unprivileged external user enable `writeFiles` via an exposed actuator endpoint, causing `Utility.archiveFile()` to write verified record stream files (containing fee data) to the filesystem at a path derived from `importerProperties.getArchiveDestinationFolderPath()`, and if that path is world-readable, the attacker can read raw fee records and identify patterns in `transactionFee` fields to predict or manipulate future fee calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8959ed2f-6f98-4991-a12e-6fd9719da76d?mode=deep",
+    "timestamp": "2026-04-28 20:02:43.284126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isWriteSignatures() / setWriteSignatures()] Can an unprivileged external user enable `writeSignatures` via a misconfigured Spring Boot Actuator endpoint, causing signature files to be written to the archive directory, and then replace those signature files on disk before the next verification cycle, causing the downloader to accept a tampered record file with modified `transactionFee` values as if it had valid node consensus?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc4aa8b0-b708-45f0-a3b7-aa0087219161?mode=deep",
+    "timestamp": "2026-04-28 20:02:56.083953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user set `frequency` to an extremely large `Duration` (e.g., `Duration.ofDays(365)`) via environment variable injection (`HIERO_MIRROR_IMPORTER_DOWNLOADER_RECORD_FREQUENCY=365d`), causing the `@Scheduled` task in `RecordFileDownloader.download()` to effectively stop polling, so that the mirror node's fee data becomes permanently stale and users querying `charged_tx_fee` receive outdated values that no longer reflect current network fee schedules?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d9935c2-6d31-422e-81c4-59e092787152?mode=deep",
+    "timestamp": "2026-04-28 20:03:09.241746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user exploit the absence of a `@DurationMin` constraint on `frequency` (unlike `CommonDownloaderProperties` which enforces `@DurationMin(seconds = 1)` on `timeout`) to inject `frequency=0` via a Kubernetes ConfigMap or environment variable, causing `toMillis()` to return 0 and the Spring scheduler to execute `RecordFileDownloader.download()` in a tight loop, creating a race condition where the same fee-bearing record file is processed multiple times and `chargedTxFee` is double-counted in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fa0db69-227d-43b4-86d8-83c073e0ec3f?mode=deep",
+    "timestamp": "2026-04-28 20:03:22.530098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user exploit the `@Data`-generated public `setEnabled(boolean)` method on this Spring `@Component` bean by triggering a Spring Cloud Config refresh that sets `enabled=false`, causing `CutoverServiceImpl.isActive()` to see both `blockProperties.isEnabled()` and `recordDownloaderProperties.isEnabled()` as false and skip cutover entirely, resulting in a window where no fee records are ingested and the database contains a gap in `charged_tx_fee` history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06a0a694-ad5b-47ce-b6ed-4f396dbabefd?mode=deep",
+    "timestamp": "2026-04-28 20:03:35.722046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getStreamType()] Can an unprivileged external user craft a scenario where `getStreamType()` returning `StreamType.RECORD` is exploited by manipulating the `hiero.mirror.importer.downloader.record` namespace in a shared configuration store (e.g., Kubernetes ConfigMap with insufficient RBAC), causing the record downloader to be misconfigured while the balance downloader remains active, creating a state where balance files reflect fee transfers but record files do not, leading to reconciliation failures that mask fee modifications?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d753e5b8-6368-4158-8736-80a196dcdcc3?mode=deep",
+    "timestamp": "2026-04-28 20:03:48.704020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user inject a `frequency` value of `1ms` (the minimum parseable positive duration) via an environment variable, causing the record downloader to poll so aggressively that it overwhelms the cloud storage provider's rate limits, triggering `TransientProviderException` errors in `Downloader.verifySignatures()`, which causes fee-bearing record files to be silently skipped via the `onErrorContinue` handler, leaving gaps in `chargedTxFee` data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91f012b6-75a1-46fb-870a-c88e5d2ca4eb?mode=deep",
+    "timestamp": "2026-04-28 20:04:02.127601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isPersistBytes()] Can an unprivileged external user toggle `persistBytes` from `false` to `true` mid-stream via an actuator endpoint, causing some record files to have their raw bytes persisted (with fee protobuf data) while others have `streamFile.setBytes(null)` called, creating an inconsistent database state where fee data can be cross-referenced between raw bytes and parsed columns to identify nodes that are reporting different `transactionFee` values than consensus?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fb29530-e556-403b-953f-0a424734dd7b?mode=deep",
+    "timestamp": "2026-04-28 20:04:15.580025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user exploit the fact that `RecordFileDownloader.shouldDownload()` always returns `true` (hardcoded, ignoring `enabled`) while `Downloader.downloadAndParseSigFiles()` uses `downloaderProperties.isEnabled()` to set `listLimit`, so that setting `enabled=false` via config causes `listLimit=1` (only one signature file downloaded per node), reducing the consensus sample size and making it easier for a minority of malicious nodes to push a tampered record file with modified fee data past the `consensusRatio` threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56cb5956-c155-412a-be32-cae0d2a88e3b?mode=deep",
+    "timestamp": "2026-04-28 20:04:28.792223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user set `frequency` to `Duration.ofMillis(Long.MAX_VALUE)` via a crafted configuration value, causing `getFrequency().toMillis()` to overflow when used in `@Scheduled(fixedDelayString = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16b712e4-b4a0-45a4-87f8-2b0487322630?mode=deep",
+    "timestamp": "2026-04-28 20:04:42.067471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isWriteFiles()] Can an unprivileged external user enable `writeFiles=true` via environment variable injection, causing verified record files to be written to the archive path, and if the archive path is on a shared or network filesystem accessible to the attacker, they can replace archived record files with tampered versions containing modified `transactionFee` fields, which could be re-ingested if the system is restarted with a reset `startDate`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac39f6af-2dc5-409c-adc3-8c45db05e816?mode=deep",
+    "timestamp": "2026-04-28 20:04:56.707871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user cause a denial-of-service on fee record ingestion by repeatedly toggling `enabled` between `true` and `false` via a Spring Cloud Config refresh loop, causing the `CutoverServiceImpl.updateActiveStreamType()` to oscillate between RECORD and BLOCK stream types, creating a state where neither stream is consistently active and fee-bearing transactions are never fully persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29267feb-f0d9-43bc-9d82-53332529d27f?mode=deep",
+    "timestamp": "2026-04-28 20:05:09.908912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user exploit the Spring `@ConfigurationProperties` binding for `hiero.mirror.importer.downloader.record.frequency` by injecting a malformed duration string (e.g., `PT-0.001S`) that parses to a negative `Duration`, bypassing the `@NotNull` constraint (which only checks for null, not sign), causing `toMillis()` to return a negative value and breaking the `@Scheduled` task that drives fee record downloads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8db66c1-34c8-4bfc-8e74-e72dd96e2823?mode=deep",
+    "timestamp": "2026-04-28 20:05:23.937514",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isPersistBytes() / isWriteFiles()] Can an unprivileged external user enable both `persistBytes=true` and `writeFiles=true` simultaneously via environment variables, causing record files to be both stored in the database as raw bytes and written to the filesystem, doubling the storage footprint and potentially causing disk exhaustion that halts the importer, creating a window where new fee-bearing transactions are not ingested and the mirror node serves stale fee data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ccfdb8b-ee69-484d-83c6-95ef1f21ea1a?mode=deep",
+    "timestamp": "2026-04-28 20:05:38.123110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user set `frequency` to `Duration.ZERO` via a Kubernetes ConfigMap update (if the ConfigMap lacks proper RBAC), causing `getFrequency().toMillis()` to return `0L`, which when used as `fixedDelay=0` in Spring's `@Scheduled` annotation causes the scheduler to execute `RecordFileDownloader.download()` without any delay between invocations, creating a CPU-exhaustion DoS that prevents fee records from being processed correctly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76b5e028-32a3-4d8a-b6d9-e408f72cb5fb?mode=deep",
+    "timestamp": "2026-04-28 20:05:52.401975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user exploit the interaction between `RecordDownloaderProperties.enabled` and `CutoverServiceImpl.hasCutover()` by setting `enabled=false` on a network where `ImporterProperties.HederaNetwork.hasCutover()` returns `true` (mainnet/testnet), causing the cutover service to skip the cutover process entirely (line 128-130 of CutoverServiceImpl), resulting in the block stream never activating and fee records from the new block stream format never being ingested?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbc198b7-36c9-4147-9fbb-e5dab8689ef1?mode=deep",
+    "timestamp": "2026-04-28 20:06:06.844373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFrequency()] Can an unprivileged external user inject `frequency=PT0.000000001S` (1 nanosecond) via a Spring Boot external configuration file, causing `toMillis()` to return `0` due to nanosecond-to-millisecond truncation, effectively setting the scheduler delay to 0ms and causing the record downloader to spin without pause, exhausting thread pool resources and causing fee record processing to fail with thread starvation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dade506b-7ae1-451b-b705-21ab35858ecc?mode=deep",
+    "timestamp": "2026-04-28 20:06:21.558983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isWriteSignatures() / setWriteSignatures()] Can an unprivileged external user enable `writeSignatures=true` via an exposed configuration endpoint, causing signature files from all consensus nodes to be written to the archive directory, and if the attacker has read access to that directory, they can harvest node public keys and signature patterns to forge future signature files that would allow a tampered record file with modified `transactionFee` values to pass the `NodeSignatureVerifier` check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d48aa4e-5cb0-40df-b7e4-475e72ee832e?mode=deep",
+    "timestamp": "2026-04-28 20:06:36.156624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordDownloaderProperties.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: setEnabled()] Can an unprivileged external user set `enabled=false` via environment variable at container startup, causing the record downloader to start in a disabled state where `listLimit=1` in `downloadAndParseSigFiles()`, meaning only one signature file per node is fetched, reducing the effective consensus check to a single file and making it trivial for a single malicious node to push a record file with inflated `transactionFee` values past the `consensusRatio` threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b3f2ee4c-0b62-419f-8431-425e2a0c8b7e?mode=deep",
+    "timestamp": "2026-04-28 20:06:49.906516",
+    "report_generated": false
+  }
+]
