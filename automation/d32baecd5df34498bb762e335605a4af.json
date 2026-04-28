@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user craft a consensusTimestamp value that, after roundDownToHour(), maps to an earlier hour bucket than the actual transaction time, causing load() to serve a stale fee schedule with lower fees than currently in effect, allowing the user to execute transactions at below-current rates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0607a106-f651-4c18-867d-5715d96abb10?mode=deep",
+    "timestamp": "2026-04-28 22:52:54.002453",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user trigger the genesis fee schedule fallback in loadWithRetry() by submitting requests at a consensusTimestamp for which all 9 retry attempts find only unparseable fee schedule entries in the DB, causing the system to apply genesis-era fees (potentially lower than current) to their transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eedf46c9-0cdb-498b-b011-fad3643122eb?mode=deep",
+    "timestamp": "2026-04-28 22:53:06.041444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user exploit the nanoSeconds.set(fileData.getConsensusTimestamp() - 1) retry decrement in loadWithRetry() to force the loader to walk backwards through fee schedule history until it reaches a version with lower fees, by submitting a consensusTimestamp just after a sequence of invalid fee schedule entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_855625c6-2459-4188-9991-9edd4e8275c2?mode=deep",
+    "timestamp": "2026-04-28 22:53:18.340464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: roundDownToHour(long)] Can an unprivileged external user pass a consensusTimestamp of 0 or a value less than NANOS_PER_HOUR to roundDownToHour(), causing it to return 0 and thereby force load() to query the fee schedule at the very beginning of chain history (genesis fees), resulting in transaction fees being calculated at genesis-era rates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_470efead-21c5-4802-80fb-450b643cc11d?mode=deep",
+    "timestamp": "2026-04-28 22:53:31.099645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user supply a negative consensusTimestamp to load(), which after roundDownToHour() produces a negative rounded value, causing getFileAtTimestamp() to return no result and triggering the genesis fee schedule fallback via orElse(systemFile.genesisFile()), applying genesis fees to their transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3db31353-23d6-4240-8d17-58b2b2ca2ca1?mode=deep",
+    "timestamp": "2026-04-28 22:53:45.592654",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: roundDownToHour(long)] Can an unprivileged external user pass Long.MIN_VALUE as consensusTimestamp, causing integer overflow in (consensusTimestampNanos / NANOS_PER_HOUR) * NANOS_PER_HOUR inside roundDownToHour(), producing an unexpected timestamp that maps to a fee schedule version with lower fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8d37206-bb4a-4ca6-aa6a-d292c8f88794?mode=deep",
+    "timestamp": "2026-04-28 22:53:59.617652",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the hour-granularity cache key in CacheKey(fileId, roundedTimestamp) to retrieve a fee schedule cached at the start of the current hour even when a fee schedule update occurred mid-hour, causing all transactions in that hour to use the pre-update (potentially lower) fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79508153-845c-4966-86bd-b65fa4da4ad6?mode=deep",
+    "timestamp": "2026-04-28 22:54:14.869091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user submit a transaction with a consensusTimestamp just before an hourly boundary (e.g., 59:59.999999999 of an hour) to force load() to use the previous hour's cached fee schedule via roundDownToHour(), bypassing a fee increase that took effect at the start of the current hour?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a92b3f2d-b84b-4462-ad3e-da5da86cf37f?mode=deep",
+    "timestamp": "2026-04-28 22:54:29.722544",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user cause loadWithRetry() to exhaust all 9 retries by triggering ParseException on each attempt (e.g., by ensuring the DB contains 9+ consecutive malformed fee schedule entries at the target timestamp range), forcing a return of systemFile.genesisFile() with genesis-era fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f83e731c-97d5-4846-b7a8-a106cb9ef3b9?mode=deep",
+    "timestamp": "2026-04-28 22:54:45.931978",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user exploit the fact that loadWithRetry() uses codec.parse() (non-strict) rather than a strict parser, allowing a malformed protobuf fee schedule that passes parse() but contains zero or minimal fee values to be accepted and cached, causing all subsequent requests in that hour to use near-zero fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c015b88a-3680-4f11-b4a3-202562bd7c03?mode=deep",
+    "timestamp": "2026-04-28 22:55:04.036264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the cache.put(cacheKey, result) call in load() by racing two concurrent requests for the same CacheKey where the first request loads a stale fee schedule from DB and caches it before a fee update is committed, causing all subsequent requests in that hour window to use the stale (lower) fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e70db2e8-3d6b-4d97-bdb0-63bd3f3e8bfd?mode=deep",
+    "timestamp": "2026-04-28 22:55:21.940828",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the absence of a null-result cache entry (load() only calls cache.put() when result != null) to repeatedly bypass the cache and hammer the DB with fee schedule queries at a timestamp where no data exists, causing the genesis fee schedule to be returned on every call without caching?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb5c3054-71c8-4562-bd7e-95f5327a4f18?mode=deep",
+    "timestamp": "2026-04-28 22:55:40.912836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadAll()] Can an unprivileged external user trigger a race condition during the lazy initialization of the systemFiles map (via @Getter(lazy=true)) by sending concurrent requests before the map is fully populated, causing some requests to see an incomplete systemFiles map that returns null for feeSchedulesFileId, leading to loadFromDB() returning null and bypassing fee validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9f4d1d4-8c1c-401d-ade5-34cb0d951ad1?mode=deep",
+    "timestamp": "2026-04-28 22:55:58.824782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user craft a FileID with matching fileNum but different shardNum or realmNum values to bypass the fileId.equals(feeSchedulesFileId) check in load(), causing the request to use the defaultSystemFileCacheManager instead of exchangeRatesCacheManager and skip the roundDownToHour() normalization, potentially loading a different fee schedule version?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07e6c0c6-9318-4e9d-b37e-97a9cc29fbfd?mode=deep",
+    "timestamp": "2026-04-28 22:56:18.401053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the fact that when cacheManager.getCache(CACHE_NAME) returns null, load() falls through to loadFromDB() without caching the result, allowing repeated requests to always hit the DB and potentially retrieve different fee schedule versions if the DB is updated between requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb736145-4120-4279-8454-b28ff3b38d2e?mode=deep",
+    "timestamp": "2026-04-28 22:56:37.747743",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user exploit the AtomicLong nanoSeconds shared state in loadWithRetry() under concurrent execution, where two threads retrying the same fee schedule load simultaneously decrement nanoSeconds past the intended timestamp, causing both to load an older fee schedule version with lower fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21e93293-cd7d-4ced-95f5-9a1669bbf7d0?mode=deep",
+    "timestamp": "2026-04-28 22:56:58.826551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user cause nanoSeconds.set(fileData.getConsensusTimestamp() - 1) to underflow to Long.MIN_VALUE when fileData.getConsensusTimestamp() returns 0, causing the next retry's getFileAtTimestamp() call to use Long.MIN_VALUE as the timestamp and potentially return an unexpected fee schedule entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14094715-8c7d-4947-86f8-2f475fadb650?mode=deep",
+    "timestamp": "2026-04-28 22:57:21.219975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user submit a transaction with a far-future consensusTimestamp (e.g., year 2100) to load(), causing roundDownToHour() to produce a future-hour cache key that has no DB entry, triggering the genesis fee schedule fallback and applying genesis-era fees to the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6281f8e5-8066-45a2-a971-d9c7520ea286?mode=deep",
+    "timestamp": "2026-04-28 22:57:43.485818",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user exploit the fact that loadWithRetry() wraps file bytes with Bytes.wrap(fileData.getFileData()) without copying, so if the underlying byte array in the DB result is mutated between the wrap and the cache.put() call, the cached fee schedule contents could be corrupted to contain lower fee values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00badd72-745c-41d6-a5fa-ed0715ae5a65?mode=deep",
+    "timestamp": "2026-04-28 22:58:06.135404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadAll()] Can an unprivileged external user exploit the fact that loadAll() uses fileSchema.genesisFeeSchedules(configuration) as the genesis fallback for feeScheduleFile, where the genesis fee schedule may contain significantly lower fees than the current network fee schedule, by forcing the genesis fallback path to be taken for their transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_700ebab6-f8ad-443d-9bf3-7c8120227ff3?mode=deep",
+    "timestamp": "2026-04-28 22:58:28.806491",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the two-phase cache check (cache.get() then loadFromDB() then cache.put()) in load() to create a TOCTOU window where a fee schedule update is committed to DB between the cache miss and the DB load, causing the old (lower) fee schedule to be cached and served for the entire hour?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdf927ff-e9c8-4599-823c-0010edc11fb2?mode=deep",
+    "timestamp": "2026-04-28 22:58:52.851709",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user pass a consensusTimestamp of exactly NANOS_PER_HOUR - 1 (just before the first hour boundary) to load(), causing roundDownToHour() to return 0 and load the fee schedule at timestamp 0 (genesis), applying genesis fees instead of current fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d3fb338-0e72-461a-8a80-1f6b33b1995b?mode=deep",
+    "timestamp": "2026-04-28 22:59:17.927851",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: loadWithRetry(FileID, long, SystemFile)] Can an unprivileged external user exploit the fact that the retryTemplate only retries on InvalidFileException (wrapping ParseException), so if the DB returns a fee schedule with valid protobuf structure but semantically incorrect fee values (e.g., all fees set to 1 tinycent), the codec.parse() succeeds and the malformed fee schedule is accepted and cached?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d60a1c2-b157-48fe-bf73-ce762763d698?mode=deep",
+    "timestamp": "2026-04-28 22:59:43.625832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the fact that simpleFeeSchedulesFileId and feeSchedulesFileId both use the same exchangeRatesCacheManager and CACHE_NAME, potentially causing a cache collision if the CacheKey equality check has a flaw, where a simpleFeeSchedule entry is returned when a feeSchedule is requested, applying wrong fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9daea59-3c8d-48c7-a2df-59fe9a8f849a?mode=deep",
+    "timestamp": "2026-04-28 23:00:09.959864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: load(FileID, long)] Can an unprivileged external user exploit the fact that the exchangeRateFileId also uses the same exchangeRatesCacheManager and roundDownToHour() as feeSchedulesFileId, and if the exchange rate used in fee calculation is stale (from an earlier hour), the computed USD-denominated fee in tinybars is lower than intended, effectively reducing the fee paid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fc8d929-db4d-423d-bb06-a7abc9bf4658?mode=deep",
+    "timestamp": "2026-04-28 23:00:36.015491",
+    "report_generated": false
+  }
+]
