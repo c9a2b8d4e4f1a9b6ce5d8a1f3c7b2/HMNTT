@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user rapidly paginate through all balance results by following the `links.next` URL returned in `formatBalancesResult()`, issuing sequential requests that each trigger a full DB query, causing sustained DB load that degrades response times for all other users without any rate limiting enforced at the application layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02bb16bb-6c4a-458f-9f09-43a31854d72d?mode=deep",
+    "timestamp": "2026-04-28 21:28:29.176214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: formatBalancesResult()] Can an unprivileged external user trigger a response where `getPaginationLink()` constructs a `next` URL containing all original query parameters plus the new `account.id=lt:<anchor>` cursor, and by immediately following each next link in a tight loop, cause the server to execute a continuous stream of expensive paginated queries that exhaust DB resources for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6646777b-f425-4582-8f46-5ad9ec8cfe17?mode=deep",
+    "timestamp": "2026-04-28 21:28:41.361884",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.publickey=<64-hex-char-key>` where the key matches many accounts, causing `getAccountIdsByPublicKey()` to return a large `IN(...)` clause, and then `getBalancesQuery()` to execute an expensive filtered scan on `account_balance`, consuming disproportionate DB resources per request and degrading service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22160694-a7a8-40e3-a0d9-d1c861bcfca9?mode=deep",
+    "timestamp": "2026-04-28 21:28:53.837680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user supply `timestamp=lte:<far-future-ns>` where the value exceeds `nowInNs()`, causing `effectiveUpperBound` to be capped at `nowInNs()` but `optimalLowerBound` to be computed as the first day of the previous month, resulting in a two-month partition scan on every request that is more expensive than a targeted single-timestamp query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_441356b0-98a5-45c5-b64f-dcafb865c671?mode=deep",
+    "timestamp": "2026-04-28 21:29:06.736963",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.balance=lte:999999999999` (matching nearly all accounts) combined with `limit=<max>` and `order=asc`, causing the `entity_balance` CTE to return the maximum number of rows sorted ascending with correlated token subqueries, consuming maximum DB resources per request and degrading throughput for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33082124-153c-4c22-be4e-be3254cd4f80?mode=deep",
+    "timestamp": "2026-04-28 21:29:20.138781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.balance=gte:0&account.balance=lte:999999999999` (two balance filters that together match all accounts), causing `parseBalanceQueryParam()` to build a compound `ab.balance >= ? and ab.balance <= ?` clause that still matches all rows, resulting in a full table scan that wastes DB resources compared to a no-filter request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd6ff0ca-7eb8-4c0e-a6d1-f9f73c9f468b?mode=deep",
+    "timestamp": "2026-04-28 21:29:34.621931",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccountIdsByPublicKey()] Can an unprivileged external user supply a valid DER-encoded 88-character hex public key that passes `isValidPublicKeyQuery()` validation, causing `parsePublicKey()` to invoke `ed25519.derToEd25519()` for key decoding on every request, and by flooding at scale, consume CPU cycles for key decoding that degrade Node.js event loop throughput for all concurrent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8aea3b97-25ee-4a99-9e1f-43fa2f8d5334?mode=deep",
+    "timestamp": "2026-04-28 21:29:48.935428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `timestamp=ne:<ts1>&timestamp=ne:<ts2>&...&timestamp=ne:<tsN>` (up to `maxRepeatedQueryParameters` ne values) combined with a `timestamp=lte:<recent>` filter, causing `getOptimizedTimestampRange()` to accumulate a large `neParams` array that is passed to `getAccountBalanceTimestampRange()` as a `not consensus_timestamp = any($4)` condition, forcing Postgres to evaluate array exclusion on every scanned row?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a1d3703-7b3f-4127-a1cd-5e1c22d73f07?mode=deep",
+    "timestamp": "2026-04-28 21:30:04.633182",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `timestamp=gt:<X>&timestamp=lt:<X+2>` (a 1-nanosecond effective range after gt/lt-to-gte/lte conversion in `getOptimizedTimestampRange()`), causing `getAccountBalanceTimestampRange()` to execute a DB query that likely returns no rows, wasting a DB round-trip per request that can be repeated at scale to exhaust connection pool slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2328c7c-31ff-4aad-9339-030977e6f403?mode=deep",
+    "timestamp": "2026-04-28 21:30:18.777642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=eq:<evmAddress>` where the EVM address does not exist in the entity table, causing `EntityService.getEncodedId()` to execute a DB lookup that returns null, and `getBalances()` to return an empty result after two DB round-trips (entity lookup + balance query), wasting DB resources per request that can be amplified at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_683af731-f517-451f-8cec-c8275ecef785?mode=deep",
+    "timestamp": "2026-04-28 21:30:33.435107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=eq:<accountAlias>` where the alias does not resolve to any account, causing `EntityService.getAccountIdFromAlias()` to execute a DB lookup that returns null, and `getBalances()` to return an empty result after wasted DB round-trips, which when repeated at scale exhausts DB connection pool slots for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4ba7012-867b-4059-b989-a899e7b9d2d2?mode=deep",
+    "timestamp": "2026-04-28 21:30:48.927196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalancesQuery()] Can an unprivileged external user supply `timestamp=lte:<recent>` and `account.publickey=<key-matching-many-accounts>` causing `getAccountIdsByPublicKey()` to return a large `IN(...)` clause that is embedded in `getBalancesQuery()`'s WHERE clause, forcing Postgres to evaluate both the timestamp range condition and the large IN-list on every row of the `account_balance` partition, consuming disproportionate DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c748a7f-b29c-4d60-9920-a745a2cd16af?mode=deep",
+    "timestamp": "2026-04-28 21:31:02.831173",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `limit=1` and `order=asc` combined with `account.id=gt:0.0.1`, then follow each `links.next` cursor to paginate through all accounts one at a time, causing the server to execute one DB query per account in the system, resulting in a sustained stream of DB queries that degrades performance for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33c2d297-b2bd-4558-bffd-0af7c6eafd4c?mode=deep",
+    "timestamp": "2026-04-28 21:31:18.814955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getTokenBalanceSubQuery()] Can an unprivileged external user send a timestamp-filtered request with `limit=<max>` where each returned account has a large number of token balances, causing the correlated `getTokenBalanceSubQuery()` to scan and aggregate many `token_balance` rows per account, resulting in O(N * T) DB work (N accounts × T tokens) that consumes disproportionate DB I/O and degrades performance for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11324b52-5a1b-42e8-b89e-cfd22fb19fbf?mode=deep",
+    "timestamp": "2026-04-28 21:31:32.760134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getTokenAccountBalanceSubQuery()] Can an unprivileged external user send a no-timestamp request with `limit=<max>` targeting accounts with many token associations, causing `getTokenAccountBalanceSubQuery()` to scan up to `tokenBalanceLimit.multipleAccounts` rows from `token_account` per account, resulting in O(N * tokenBalanceLimit) DB work that saturates DB I/O and degrades throughput for all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b2d161b-d4c6-429a-99d9-3b74a2e57860?mode=deep",
+    "timestamp": "2026-04-28 21:31:47.935234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=gte:0.0.1&account.id=lte:0.0.999999999` (a wide account ID range) combined with `limit=<max>` and no timestamp filter, causing the `entity_balance` CTE to scan a large portion of the `entity` table and return the maximum number of rows with correlated token subqueries, consuming maximum DB resources per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65dc16c4-dcd7-47ef-b207-51ce192740b0?mode=deep",
+    "timestamp": "2026-04-28 21:32:03.804238",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=lt:0.0.999999999` (matching nearly all accounts) combined with `timestamp=lte:<recent>` and `limit=<max>`, causing `getBalancesQuery()` to scan the full timestamp-filtered partition with a wide account ID range, consuming maximum DB resources per request and degrading throughput for all users when repeated at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41399a31-0011-4c07-8089-97c81c8d051a?mode=deep",
+    "timestamp": "2026-04-28 21:32:20.099245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.publickey=<88-char-DER-key>` at high frequency, causing `parsePublicKey()` to call `ed25519.derToEd25519()` for DER-to-raw key conversion on every request, consuming CPU cycles for cryptographic decoding that accumulate under load and degrade Node.js event loop throughput for all concurrent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33be0a91-5fbb-40ea-9933-ce673a0a0529?mode=deep",
+    "timestamp": "2026-04-28 21:32:36.866967",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `timestamp=gte:<X>` where X is a timestamp from two months ago, causing `getOptimizedTimestampRange()` to set `lowerBound` to the first day of the month before last and `upperBound` to `MAX_LONG`, resulting in a range that spans multiple monthly partitions and forces a multi-partition scan on `account_balance`, degrading DB performance for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2e6a1b8-0823-4ea4-80dc-e3ca7cddcd48?mode=deep",
+    "timestamp": "2026-04-28 21:32:53.573983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalancesQuery()] Can an unprivileged external user supply `timestamp=lte:<recent>` and `account.balance=gte:0` (matching all accounts), causing `getBalancesQuery()` to build a WHERE clause with only the timestamp range condition and the balance condition, resulting in a near-full partition scan with `distinct on (account_id)` that consumes maximum DB resources per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7c0cb17-9f68-451d-81bd-50ed2e13ffa7?mode=deep",
+    "timestamp": "2026-04-28 21:33:08.731241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=eq:<evmAddress>` where the EVM address is a valid 40-hex-char address that triggers `EntityService.getEncodedId()`, combined with `timestamp=lte:<recent>`, causing three sequential DB operations (entity lookup + timestamp range lookup + balance query) per request, tripling the DB round-trips compared to a simple entity-ID request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92da070f-75b9-4d60-a0da-c55ae3b5314e?mode=deep",
+    "timestamp": "2026-04-28 21:33:25.040456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=eq:<alias>` where the alias triggers `EntityService.getAccountIdFromAlias()`, combined with `timestamp=lte:<recent>` and `account.publickey=<key>`, causing four sequential DB operations per request (alias lookup + public key lookup + timestamp range lookup + balance query), exhausting DB connection pool slots for legitimate users when repeated at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13184d71-f6c9-426c-8521-3e502afba66d?mode=deep",
+    "timestamp": "2026-04-28 21:33:42.859475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user supply `timestamp=lte:<1-nanosecond-before-epoch>` (e.g., `timestamp=lte:0.000000001`) causing `effectiveUpperBound` to be near zero, `optimalLowerBound` to be computed as the first day of the month before epoch (potentially a negative or zero BigInt), and `lowerBound` to be set to 0n, resulting in an unexpected timestamp range that causes `getAccountBalanceTimestampRange()` to scan from epoch to the given timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d158aa77-1348-4abd-8e2b-02a7b31875fb?mode=deep",
+    "timestamp": "2026-04-28 21:33:59.772264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.id=gt:0.0.1&account.id=lt:0.0.2` (a range that matches only account 0.0.1 if it exists, or nothing), causing the server to execute a full DB query that returns zero or one result after scanning the index, wasting DB resources per request that can be amplified at scale to exhaust connection pool slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_548280ac-20fd-4437-bb25-ed6aa249a3a9?mode=deep",
+    "timestamp": "2026-04-28 21:34:15.473007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalances()] Can an unprivileged external user send requests with `account.balance=eq:0` (matching all zero-balance accounts) combined with `limit=<max>` and no timestamp filter, causing the `entity_balance` CTE to scan the entire `entity` table and filter by balance, returning the maximum number of zero-balance accounts with correlated token subqueries, consuming maximum DB resources per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_739f91af-7f9a-4e3f-84f8-734b5e3235af?mode=deep",
+    "timestamp": "2026-04-28 21:34:31.187647",
+    "report_generated": false
+  }
+]
