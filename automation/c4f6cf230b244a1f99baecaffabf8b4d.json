@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user submit a high volume of Hedera transactions that produce an extremely large number of record files with densely packed consensus timestamps, causing the `RecordFileIterator` loop in `prune()` to iterate an unbounded number of times per scheduled run, exhausting CPU and database connection pool resources and rendering the importer service unresponsive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_436c2a39-3dbb-4722-8678-b09cb288fd2d?mode=deep",
+    "timestamp": "2026-04-28 22:25:49.430471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user craft a pattern of transactions that results in record files with `consensusEnd` values spaced exactly 1 nanosecond apart, causing `batchPeriod` (default 1 day in nanos) to never advance the iterator meaningfully and triggering an effectively infinite number of `findNextBetween()` database queries per `prune()` invocation, starving the database of connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de5c3a01-6890-40c9-9de5-241e70aa4ddc?mode=deep",
+    "timestamp": "2026-04-28 22:26:01.438394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user generate enough on-chain data so that each call to `transactionOperations.executeWithoutResult()` inside `prune(RecordFileIterator)` holds a long-running database transaction that locks multiple tables simultaneously, causing all other importer write operations to queue indefinitely and producing a non-network DoS of the mirror node's data ingestion pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57763767-ab38-4f3d-8edc-570ca5e35c76?mode=deep",
+    "timestamp": "2026-04-28 22:26:14.233728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the `synchronized` modifier on `prune()` combined with a very large dataset to hold the monitor lock indefinitely, blocking the Spring scheduler thread from ever completing the method and preventing any subsequent scheduled retention runs from executing, effectively disabling the retention mechanism and causing unbounded database growth?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfbd7211-c7a6-4440-a731-a9dc67620407?mode=deep",
+    "timestamp": "2026-04-28 22:26:27.931697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user produce record files whose `consensusEnd` values cause `current.getConsensusEnd() + batchPeriod` to overflow a `long`, resulting in a negative `endTimestamp` passed to `findNextBetween()`, which then returns unexpected results and causes the iterator to loop infinitely or skip pruning entirely, leading to unbounded disk and memory growth?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f654b077-4cd7-4054-95ac-7529bec243b0?mode=deep",
+    "timestamp": "2026-04-28 22:26:41.531008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user flood the network with transactions that populate every `RetentionRepository` table with billions of rows, causing each `repository.prune(endTimestamp)` call inside the `retentionRepositories.forEach()` lambda to execute a full-table DELETE that holds an exclusive lock for minutes, blocking all concurrent reads and writes and causing a non-network DoS of the mirror node REST API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98f21531-d793-4573-b3b8-3c7f97aaba35?mode=deep",
+    "timestamp": "2026-04-28 22:26:56.431130",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTableName()] Can an unprivileged external user trigger registration of a `RetentionRepository` implementation that has no declared interfaces (e.g., via a proxy with no interfaces), causing `repository.getClass().getInterfaces()[0]` to throw `ArrayIndexOutOfBoundsException`, which propagates out of `prune()` and permanently disables the retention job's scheduled execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82b09af9-74b1-46df-b2c0-4dfb1fb3ed11?mode=deep",
+    "timestamp": "2026-04-28 22:27:11.958962",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user submit transactions that cause `recordFileRepository.findLatestWithOffset(retentionPeriod.toNanos())` to return a record file with `consensusEnd` equal to `Long.MAX_VALUE`, causing `toInstant(maxTimestamp)` to throw `DateTimeException` inside the log statement, crashing the scheduled task and halting all future retention runs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1fd9898-a5c6-4bd6-b29c-963a17d74bc1?mode=deep",
+    "timestamp": "2026-04-28 22:27:28.293151",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user produce a dataset where `recordFileRepository.findNextBetween(0, max.getConsensusEnd())` always returns the same record file object (due to caching or ORM identity map), causing the `current == max` reference equality check to never be true and creating an infinite loop that permanently blocks the `prune()` synchronized method?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89d64452-535b-405e-aea4-c960a2eac24b?mode=deep",
+    "timestamp": "2026-04-28 22:27:45.719334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user generate a workload where `counters.values().stream().reduce(0L, Long::sum)` is called twice per batch iteration across thousands of iterations, and the `counters` TreeMap grows to contain hundreds of table entries, causing O(n*m) stream reduction overhead per run that cumulatively exhausts CPU resources and delays the importer's normal processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a5e127e-74dc-4f97-9838-cfef46b51853?mode=deep",
+    "timestamp": "2026-04-28 22:28:04.554064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the absence of a transaction timeout on `transactionOperations.executeWithoutResult()` by generating a dataset that causes each batch's DELETE operations to run for hours, holding database locks and preventing the importer from writing newly ingested record files, causing a non-network DoS of the entire mirror node ingestion pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26031f98-ad0d-4c70-8816-624bd358b3ae?mode=deep",
+    "timestamp": "2026-04-28 22:28:23.179161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user craft a sequence of record files where `max.getConsensusEnd()` equals `current.getConsensusEnd() + batchPeriod - 1`, causing the iterator to always set `current = max` and then immediately terminate, but the prune operation deletes all data up to `max` in a single unbounded transaction that locks the entire database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50e4b21f-a587-4a28-9ae0-2c803f65e200?mode=deep",
+    "timestamp": "2026-04-28 22:28:42.362933",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user submit transactions that cause `repository.prune(endTimestamp)` to return a count value close to `Long.MAX_VALUE`, and repeated `counters.merge(table, count, Long::sum)` calls to overflow the `long` counter, causing incorrect rate calculations and potentially triggering downstream monitoring alerts that disable the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e58365b-ad2b-49dd-af7b-ffee6251627b?mode=deep",
+    "timestamp": "2026-04-28 22:29:01.161287",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the `@Scheduled(fixedDelayString = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c67fec4-8f64-4c6b-919c-3c757dd0fe3d?mode=deep",
+    "timestamp": "2026-04-28 22:29:21.776195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user generate record files with `consensusEnd` timestamps that are all identical, causing `findNextBetween(endTimestamp, max.getConsensusEnd())` to always return the same record file and the iterator to loop indefinitely, consuming all available database connections and CPU cycles?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b1e7487-9250-4498-911d-2f02579dff84?mode=deep",
+    "timestamp": "2026-04-28 22:29:43.847435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user flood the `contract_action` table via smart contract calls so that `ContractActionRepository.prune(endTimestamp)` must delete hundreds of millions of rows per batch, causing the DELETE statement to run for an extended period and holding row-level locks that block all concurrent contract-related queries on the mirror node REST API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64421a71-e059-4996-bdf2-4ad8adfbbf50?mode=deep",
+    "timestamp": "2026-04-28 22:30:06.053457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the fact that `prune()` catches all `Exception` types but does not re-schedule or reset state, so a carefully crafted exception thrown by one `RetentionRepository.prune()` call leaves the `counters` map in a partially updated state, causing subsequent runs to compute incorrect rates and potentially skip pruning, leading to unbounded database growth that eventually causes an out-of-disk DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f739260-dd5a-4d47-a4a3-f135bd180d65?mode=deep",
+    "timestamp": "2026-04-28 22:30:28.764172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user produce a workload where `recordFileRepository.findNextBetween()` is called millions of times per `prune()` run due to a very small effective batch window, each call executing a database query, exhausting the JDBC connection pool and causing all other database-dependent components of the mirror node to fail with connection timeout errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b35cf905-c338-4976-9cab-4c297aa9c263?mode=deep",
+    "timestamp": "2026-04-28 22:30:51.669602",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user generate a large volume of `nft_allowance_history` records via NFT approval transactions, causing the `NftAllowanceHistoryRepository.prune()` native query `delete from nft_allowance_history where timestamp_range << int8range(?1, null)` to perform a full sequential scan and delete of a massive table, holding an exclusive lock that blocks all NFT-related API queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc284925-6f82-41df-b8ad-57d7912960ad?mode=deep",
+    "timestamp": "2026-04-28 22:31:15.490166",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the absence of a maximum iteration count in the `while (iterator.hasNext())` loop to cause the retention job to run indefinitely when the database contains a pathological distribution of record file timestamps, preventing the Spring scheduler from reclaiming the thread and starving other scheduled tasks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f84ada06-f1fd-4a8d-b19e-da7fff25acea?mode=deep",
+    "timestamp": "2026-04-28 22:31:40.327784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTableName()] Can an unprivileged external user trigger a scenario where `ClassUtils.getSimpleName(targetClass)` returns an empty string or a string not ending in `Repository`, causing `Utility.toSnakeCase()` to produce an unexpected table name that matches no `include` filter, silently skipping all pruning and allowing unbounded database growth that eventually causes an out-of-disk DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04585a7f-6309-41f3-84a6-ec24ade6be68?mode=deep",
+    "timestamp": "2026-04-28 22:32:04.718309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user submit a burst of Ethereum transactions to populate the `ethereum_transaction` table with billions of rows, causing `EthereumTransactionRepository.prune(endTimestamp)` to execute a DELETE that generates a massive write-ahead log (WAL) entry, exhausting disk I/O and storage, and causing a non-network DoS of the entire PostgreSQL instance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42ae4cbf-0bd0-4a83-aa77-00c007d3dcb2?mode=deep",
+    "timestamp": "2026-04-28 22:32:30.723194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: hasNext()] Can an unprivileged external user produce record files where `max.getConsensusEnd()` is exactly `Long.MIN_VALUE`, causing `endTimestamp >= max.getConsensusEnd()` to always be true on the first iteration, setting `current = max` immediately, but then the prune deletes all data in a single unbounded transaction that causes a database OOM or lock timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18c71ef1-7638-4887-b85b-95022944117c?mode=deep",
+    "timestamp": "2026-04-28 22:32:56.950184",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune()] Can an unprivileged external user exploit the fact that `retentionPeriod.toNanos()` can overflow for `Duration` values larger than approximately 292 years, causing `findLatestWithOffset()` to receive a negative offset and return a record file far in the future, triggering deletion of all data and causing a non-network DoS by destroying the mirror node's entire historical dataset?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_468d4365-b84d-493c-af10-c30c281c8708?mode=deep",
+    "timestamp": "2026-04-28 22:33:24.885014",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/retention/RetentionJob.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: prune(RecordFileIterator)] Can an unprivileged external user generate a workload that causes `retentionRepositories.forEach()` to iterate over a very large collection of `RetentionRepository` beans (e.g., via dynamic bean registration), causing each batch to execute hundreds of DELETE statements within a single transaction, holding locks on all tables simultaneously and causing a complete write-lock DoS of the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9e1cad9-cb02-4748-b45a-bb9ad7883afe?mode=deep",
+    "timestamp": "2026-04-28 22:33:52.962289",
+    "report_generated": false
+  }
+]
