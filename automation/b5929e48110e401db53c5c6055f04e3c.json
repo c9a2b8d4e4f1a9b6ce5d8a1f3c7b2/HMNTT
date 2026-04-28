@@ -1,0 +1,104 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `ConsensusValidatorImpl.validate()` uses `signature.getNode().getTotalStake()` from only the first signature in the collection to set `totalStake` for all consensus calculations, by placing a signature with an artificially inflated `totalStake` value first in the collection, causing the stake threshold to be miscalculated and allowing a minority of nodes signing a reorganized history file to satisfy the 1/3 consensus requirement?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74bbe582-6933-4f7b-8778-8ffe30085303?mode=deep",
+    "timestamp": "2026-04-28 23:40:48.434077",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user exploit the fact that `sig.update(streamFileSignature.getFileHash())` is called before `sig.verify(streamFileSignature.getFileHashSignature())`, and then `sig.update(streamFileSignature.getMetadataHash())` is called on the same `sig` instance after `verify()` without calling `sig.initVerify()` again, causing the JCA Signature object to accumulate state from both updates before the metadata verify, potentially allowing a metadata hash that was not independently signed to pass verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_635ed67a-b4c7-4795-8685-b0e06c599d78?mode=deep",
+    "timestamp": "2026-04-28 23:41:00.477043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user submit a `Collection<StreamFileSignature>` containing signatures from nodes with zero individual stake but non-zero total stake, exploiting the `ConsensusValidatorImpl` fallback where `totalStake == 0` triggers a node-count-based consensus check, to make a small number of attacker-influenced nodes satisfy the 1/3 threshold for a reorganized history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a304925-3d4b-42af-938d-faba8c9073f9?mode=deep",
+    "timestamp": "2026-04-28 23:41:13.162457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user supply a `StreamFileSignature` where `getFileHash()` returns a byte array containing only zeros (a trivially predictable value), and `getFileHashSignature()` contains a valid RSA signature over that zero array using a node's private key obtained through key compromise, causing `verifySignature()` to return true for a stream file whose actual content hash is never validated against the signature?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00e9fdfd-0dab-446a-8d59-01ecdf2db7ac?mode=deep",
+    "timestamp": "2026-04-28 23:41:26.421632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `verify()` iterates the collection and mutates each `StreamFileSignature`'s status in-place, and that the same collection reference is then passed to `consensusValidator.validate()`, to inject a `StreamFileSignature` implementation that overrides `setStatus()` to also modify `getFileHashAsHex()` return value, causing `ConsensusValidatorImpl`'s `HashMultimap` to group the signature under an attacker-chosen hash key for a reorganized history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf9a1616-1933-426c-a444-8c1bdbb783e9?mode=deep",
+    "timestamp": "2026-04-28 23:41:39.959307",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user exploit the fact that `verifySignature()` does not validate that `streamFileSignature.getSignatureType()` is non-null before calling `getSignatureType().getAlgorithm()`, causing a NullPointerException caught by the broad exception handler, silently returning false for legitimate signatures and potentially allowing attacker-supplied signatures with valid types to dominate the consensus for a reorganized history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b98f3856-d0af-417b-9e72-31dc4413cc64?mode=deep",
+    "timestamp": "2026-04-28 23:41:54.616626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `ConsensusValidatorImpl` groups signatures by `getFileHashAsHex()` — which calls `DomainUtils.bytesToHex(fileHash)` — and that if `fileHash` is null, `getFileHashAsHex()` may return 'null' as a string, causing all null-hash signatures to be grouped together under the key 'null' and potentially reaching consensus for a non-existent or reorganized transaction history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c579fde-5a74-4590-8223-e251eddce802?mode=deep",
+    "timestamp": "2026-04-28 23:42:09.490954",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user supply a `StreamFileSignature` where the `fileHash` byte array has been truncated to fewer than 48 bytes (the expected SHA-384 size), causing `sig.update()` to process a shorter-than-expected hash, and then provide a valid RSA signature over that truncated hash, allowing a stream file with a different full-length hash (and thus different transaction content) to be accepted as verified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f30d3f45-bfc6-408f-a9c5-8b65af29f41f?mode=deep",
+    "timestamp": "2026-04-28 23:42:25.890604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `verify()` does not enforce that all `StreamFileSignature` objects in the collection share the same `filename`, allowing an attacker to mix signatures from multiple different stream files into a single collection, causing `ConsensusValidatorImpl` to use the filename from the first signature for error messages while potentially reaching consensus on a hash that corresponds to a reorganized history file from a different time period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7622849e-1e0f-4ada-adeb-80dcf1faece4?mode=deep",
+    "timestamp": "2026-04-28 23:42:43.370912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user exploit the fact that `Signature.getInstance(algorithm, provider)` is called fresh for each `StreamFileSignature` in the loop, and that JCA provider lookup involves a global registry, to perform a provider-registration race condition attack where a malicious provider is registered between calls, causing some signatures to be verified with a weakened implementation that accepts forged signatures for reorganized history files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4da59db-3daa-4972-8d9e-2607946477f1?mode=deep",
+    "timestamp": "2026-04-28 23:43:00.115939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `ConsensusValidatorImpl` only checks `signature.getStatus() == SignatureStatus.VERIFIED` when building the `signatureHashMap`, and that signatures with `SignatureStatus.CONSENSUS_REACHED` (already promoted) are not re-added to the map, to inject pre-promoted signatures that bypass the per-signature verification in `verifySignature()` and directly contribute to consensus for a reorganized history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce0298d4-d26c-40e2-89d6-3eabf4a46535?mode=deep",
+    "timestamp": "2026-04-28 23:43:18.207824",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user supply a `StreamFileSignature` where `getFileHashSignature()` returns a byte array that is a valid RSA signature under a different hash algorithm than SHA-384 (e.g., SHA-1), and `getSignatureType().getAlgorithm()` returns 'SHA1withRSA', causing `verifySignature()` to successfully verify the signature under the weaker algorithm and accept a stream file whose SHA-384 hash was never actually signed by the node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9865c8b5-3e2f-4a73-bb3d-414191ff2fc2?mode=deep",
+    "timestamp": "2026-04-28 23:43:37.905921",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `verify()` does not validate the size of the input `Collection<StreamFileSignature>` — allowing arbitrarily large collections — to submit thousands of signatures with different `fileHash` values, causing `ConsensusValidatorImpl`'s `HashMultimap` to consume excessive memory and CPU, creating a denial-of-service that prevents the mirror node from processing legitimate transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b33dbfb-955d-4ad8-88cf-707035a533ca?mode=deep",
+    "timestamp": "2026-04-28 23:43:57.612990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user exploit the fact that `verifySignature()` calls `sig.initVerify(publicKey)` with a `PublicKey` object whose encoded form may have been tampered with (e.g., a SubjectPublicKeyInfo structure with extra trailing bytes), causing the JCA implementation to accept a key that is subtly different from the legitimate node key, allowing the attacker to generate valid signatures for reorganized history files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a05c584-ba54-48fa-91a8-a78df6cf9ca5?mode=deep",
+    "timestamp": "2026-04-28 23:44:16.619907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `ConsensusValidatorImpl.validate()` iterates `signatureHashMap.keySet()` and for each key sums up `signature.getNode().getStake()`, and that if a node's `getStake()` returns `Long.MAX_VALUE`, the stake summation overflows to a negative value, causing `canReachConsensus()` to return false for the legitimate hash group while potentially returning true for an attacker-controlled hash group with a reorganized history file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00bdf0ab-d14c-43f9-b15d-56a98c4a64c4?mode=deep",
+    "timestamp": "2026-04-28 23:44:38.436574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifySignature()] Can an unprivileged external user supply a `StreamFileSignature` where `getFileHash()` returns a byte array that is identical to the hash of a legitimate stream file but `getFileHashSignature()` contains a signature over a different (reorganized) file's hash, exploiting a hash collision or length-extension vulnerability in the SHA-384 implementation to cause `sig.verify()` to return true for the wrong content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4bc0bbc8-8e8c-420b-8062-b4788d83a607?mode=deep",
+    "timestamp": "2026-04-28 23:45:00.052938",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/NodeSignatureVerifier.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verify()] Can an unprivileged external user exploit the fact that `verify()` modifies the `SignatureStatus` of `StreamFileSignature` objects in the passed collection in-place, and that the caller may reuse the same collection for subsequent calls, to cause a previously-VERIFIED signature to be re-verified in a subsequent `verify()` call with a different `fileHash` value (mutated between calls), causing the mirror node to accept a reorganized history file in the second call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1dfdcf0-f11a-4c30-9796-5d82d301287b?mode=deep",
+    "timestamp": "2026-04-28 23:45:23.401943",
+    "report_generated": false
+  }
+]
