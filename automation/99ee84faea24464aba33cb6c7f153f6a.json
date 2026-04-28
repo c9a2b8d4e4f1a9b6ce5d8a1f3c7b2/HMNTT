@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user submit a TopicMessageFilter with a startTime set to the maximum long value, causing the filter validation in isValidStartTime() to pass (since startTime <= DomainUtils.now() is checked at construction time but the toBuilder() copies bypass re-validation), resulting in the historical Flux retrieving zero records and silently delivering an empty stream to the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df0b20c2-4de7-4333-97c2-9ae19d9595a3?mode=deep",
+    "timestamp": "2026-04-28 21:59:56.410271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user craft a subscription where the live topicListener delivers a TopicMessage with a very high sequenceNumber, causing numMissingMessages = current.getSequenceNumber() - last.getSequenceNumber() - 1 to overflow or produce an extremely large value, triggering a gap-fill query with an unbounded limit that exhausts database resources and causes missing records for other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a82bc073-dbb4-46bb-88bf-d79a9dc85b03?mode=deep",
+    "timestamp": "2026-04-28 22:00:08.099193",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: topicExists()] Can an unprivileged external user subscribe to a non-existent topicId when grpcProperties.isCheckTopicExists() returns false, causing the service to create a synthetic Entity with type TOPIC and proceed to deliver messages for a topic that does not exist on the network, resulting in incorrect records being exported to the mirror node subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35e571b4-513f-4659-8961-ba1501227a27?mode=deep",
+    "timestamp": "2026-04-28 22:00:22.783642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: incomingMessages()] Can an unprivileged external user exploit the limit recalculation logic (limit = filter.getLimit() - topicContext.getCount().get()) in incomingMessages() by racing concurrent onNext() increments against the count snapshot, causing the newFilter to be built with a stale limit value that delivers more or fewer messages than the subscriber requested?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6069eddd-3c20-4522-9190-d2b0bc160087?mode=deep",
+    "timestamp": "2026-04-28 22:00:35.104232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user open a subscription with no endTime and no limit, causing the pastEndTime() to return Flux.never() and the subscription to remain open indefinitely, consuming a slot in subscriberCount and preventing the mirror node from accurately tracking active subscribers, leading to resource exhaustion that causes missing records for legitimate subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74f9e1c5-6e9e-471a-b335-8b1b5a2b6134?mode=deep",
+    "timestamp": "2026-04-28 22:00:48.767291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user trigger the safety check path (current == null) by subscribing to a topic during importer downtime, causing missingMessages() to issue a gap recovery query with a gapFilter that has no endTime and no limit, resulting in the retriever returning an unbounded set of records that floods the subscriber stream with duplicate or out-of-order messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6403954-c99f-41b3-939b-4b4ba6893448?mode=deep",
+    "timestamp": "2026-04-28 22:01:02.375598",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.isComplete()] Can an unprivileged external user supply an endTime that is only slightly greater than startTime (e.g., endTime = startTime + 1 nanosecond), causing isComplete() to return false until the endTimeInterval (default 30 seconds) elapses, keeping the subscription alive far longer than intended and delivering records beyond the requested window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b98eb6da-8aa5-4c78-aaed-df8ea96dea17?mode=deep",
+    "timestamp": "2026-04-28 22:01:17.713964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.isComplete()] Can an unprivileged external user set endTime to a value in the past (but still > startTime to pass isValidEndTime()), causing isComplete() to immediately return true via the check filter.getEndTime() < startTime, but the flux pipeline still emits historical messages before the isComplete() check is evaluated, resulting in records being delivered outside the requested time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a04b5685-950f-41e5-8639-9b4e1d7ef058?mode=deep",
+    "timestamp": "2026-04-28 22:01:33.465356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user exploit the filter() predicate (t.getSequenceNumber() > last.getSequenceNumber()) in subscribeTopic() by subscribing when last is null, causing all messages regardless of sequence number to pass the filter, including messages that were already delivered in the historical phase, resulting in duplicate records being exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97dd6237-c880-420f-b876-0546772a3b60?mode=deep",
+    "timestamp": "2026-04-28 22:01:50.539367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: incomingMessages()] Can an unprivileged external user exploit the startTime recalculation (startTime = last.getConsensusTimestamp() + 1) in incomingMessages() when last is not null, causing the newFilter to skip messages whose consensusTimestamp equals last.getConsensusTimestamp() + 1 if the database uses inclusive range queries, resulting in missing records in the live phase?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40ed0785-d4ca-462d-8006-764e9223255f?mode=deep",
+    "timestamp": "2026-04-28 22:02:08.159619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user cause numMissingMessages to equal zero (current.getSequenceNumber() == last.getSequenceNumber() + 1 is false but difference is exactly 1) by manipulating the sequence number of the live message, causing the gap-fill query to be issued with limit=0, which may be interpreted as unlimited by topicMessageRetriever.retrieve(), flooding the stream with all historical records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6c6e4bd-e9c4-43fe-b960-aa952dbda8f8?mode=deep",
+    "timestamp": "2026-04-28 22:02:24.760788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.onNext()] Can an unprivileged external user trigger the IllegalStateException in onNext() by engineering a scenario where the safetyCheck Flux and the live Flux both emit messages concurrently, causing out-of-order delivery that terminates the subscription prematurely and results in missing records for the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_035b9e0c-c98e-48d4-b1cf-84c169dfbc44?mode=deep",
+    "timestamp": "2026-04-28 22:02:42.205520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user open thousands of concurrent subscriptions to the same topicId, causing subscriberCount to grow unboundedly and the Schedulers.boundedElastic() thread pool used by safetyCheck to be exhausted, resulting in safety check gap-fill queries never executing and missing records for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_300364c0-7317-4def-8a3a-39cca65097f0?mode=deep",
+    "timestamp": "2026-04-28 22:03:00.569503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: pastEndTime()] Can an unprivileged external user set endTime to a value just beyond the current time, causing pastEndTime() to poll with RepeatSpec using grpcProperties.getEndTimeInterval() (30s default) and the takeUntilOther() to terminate the live+safetyCheck merge prematurely before all messages in the window are delivered, resulting in missing records near the endTime boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ace51c3c-3eac-48b7-9b93-282705b56a9e?mode=deep",
+    "timestamp": "2026-04-28 22:03:19.290531",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user exploit the duplicate-message suppression logic (numMissingMessages <= -1) in missingMessages() by subscribing with a filter that causes the live listener to replay already-seen sequence numbers, causing legitimate gap-fill messages to be silently dropped as duplicates, resulting in missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7f5cc8e-c774-4e86-af23-7675ce6d3ed2?mode=deep",
+    "timestamp": "2026-04-28 22:03:37.918487",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user set limit=1 and subscribe to a high-volume topic, causing the flux.take(filter.getLimit()) to terminate after the first historical message, while the live Flux and safetyCheck Flux are still running and emitting messages that are silently discarded, resulting in the subscriber receiving only a partial and potentially incorrect record set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38200792-02d3-4e29-9ac1-96322b3c329b?mode=deep",
+    "timestamp": "2026-04-28 22:03:58.599657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.isNext()] Can an unprivileged external user exploit the isNext() check (topicMessage.getSequenceNumber() == getLast().getSequenceNumber() + 1) by subscribing to a topic where the importer has a gap in sequence numbers, causing isNext() to return false for the first live message after the gap, triggering missingMessages() to issue a gap-fill query that may return zero results if the gap is genuine, resulting in missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8b1856b-6de4-4c4d-ba3f-e51a99a6f806?mode=deep",
+    "timestamp": "2026-04-28 22:04:19.368170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user exploit the concatWith() ordering between historical and live Flux by subscribing at a moment when the historical retriever is slow, causing the live Flux to buffer messages that overlap with the historical range, and the sequence-number deduplication filter (t.getSequenceNumber() > last.getSequenceNumber()) to drop live messages that arrived before historical processing completed, resulting in missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97d760bd-3204-47c9-b1f3-ead259436453?mode=deep",
+    "timestamp": "2026-04-28 22:04:39.211744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user cause the gap-fill query in missingMessages() to use an endTime equal to current.getConsensusTimestamp() (exclusive), causing messages with consensusTimestamp == current.getConsensusTimestamp() to be excluded from the gap-fill but also excluded from the concatWithValues(current) if current is a duplicate, resulting in missing records at the boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84047887-6677-4b73-8735-5c5551726bde?mode=deep",
+    "timestamp": "2026-04-28 22:05:02.008482",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.isComplete()] Can an unprivileged external user set endTime to exactly DomainUtils.now() at subscription time, causing the isComplete() check (Instant.ofEpochSecond(0, filter.getEndTime()).plus(grpcProperties.getEndTimeInterval()).isBefore(Instant.now())) to return false for 30 seconds, keeping the subscription alive and delivering records beyond the intended window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0076101-86e8-4d9f-80bc-c1f0af131890?mode=deep",
+    "timestamp": "2026-04-28 22:05:24.431909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: incomingMessages()] Can an unprivileged external user exploit the toBuilder() copy of the filter in incomingMessages() to bypass the @Validated constraint on TopicMessageFilter, since the builder copy does not re-trigger Bean Validation, allowing a newFilter with startTime > endTime to be passed to topicListener.listen(), causing the listener to return incorrect or empty results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08f085f5-e539-4aad-bf54-50a7405b275e?mode=deep",
+    "timestamp": "2026-04-28 22:05:48.294592",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a topicId that maps to a non-TOPIC entity type (e.g., ACCOUNT), and when checkTopicExists=false the synthetic entity is built with type TOPIC bypassing the real entity type check, causing the subscriber to receive messages intended for a different entity type, resulting in incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22cc1860-672d-4fe5-96af-9aac7efd3712?mode=deep",
+    "timestamp": "2026-04-28 22:06:11.025539",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: missingMessages()] Can an unprivileged external user trigger repeated safety check invocations by maintaining a subscription where topicContext.isComplete() always returns false and no live messages arrive, causing the safetyCheck Flux (Mono.delay(1s).flatMapMany()) to fire once and issue a gap-fill query, but since safetyCheck only fires once (not in a loop), subsequent gaps after the first second are never recovered, resulting in permanently missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8a350c1-3e1e-4810-b873-7f9c60a2f6b8?mode=deep",
+    "timestamp": "2026-04-28 22:06:35.285064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: TopicContext.onNext()] Can an unprivileged external user exploit the non-atomic pair of last.set(topicMessage) and count.incrementAndGet() in onNext() under concurrent access from the merged safetyCheck and live Flux, causing count to be incremented without last being updated (or vice versa), leading to an incorrect rate() calculation and potentially incorrect limit enforcement in incomingMessages()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98570c75-1ab3-455d-8097-b89265fc7f82?mode=deep",
+    "timestamp": "2026-04-28 22:07:00.619651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribeTopic()] Can an unprivileged external user set startTime=0 (minimum valid value per @Min(0)) to request all messages from the beginning of the topic, causing topicMessageRetriever.retrieve() to perform a full table scan that times out or returns a truncated result set, resulting in missing records in the historical phase?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caef761c-e470-409d-adeb-ae158c3f9de8?mode=deep",
+    "timestamp": "2026-04-28 22:07:26.326260",
+    "report_generated": false
+  }
+]
