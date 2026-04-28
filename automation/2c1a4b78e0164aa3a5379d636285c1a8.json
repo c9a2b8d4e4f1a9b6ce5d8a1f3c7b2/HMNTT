@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user request a block whose consensus timestamp range spans a very large interval, causing the batching loop (start <= end) to execute hundreds of iterations each issuing a full selectTransactionsInTimestampRangeOrdered query with two correlated subqueries, sustaining CPU and DB connection load above 30% for the duration of a single API call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73ad003b-44a6-424b-b746-dc385cc36b27?mode=deep",
+    "timestamp": "2026-04-28 21:42:56.717148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user trigger the batching loop in FindBetween() by targeting a block that contains exactly a multiple of batchSize (2000) transactions, causing the loop to never break early (len(transactionsBatch) < batchSize is never true until the final batch), thereby issuing the maximum number of DB round-trips and accumulating all 2000*N transaction structs in memory before any processing begins?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ffd59a46-9db2-4276-b54c-1383c18d5500?mode=deep",
+    "timestamp": "2026-04-28 21:43:09.029750",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause unbounded heap growth by requesting a block with a timestamp range that returns many full batches of 2000 transactions, since transactions = append(transactions, transactionsBatch...) accumulates all batches into a single in-memory slice before the sameHashMap and hashes slice are built, with no cap or streaming processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da73f11c-8dae-4373-b5e1-ef90f59d912a?mode=deep",
+    "timestamp": "2026-04-28 21:43:21.820873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user exploit the fact that FindBetween() holds a DB connection (via tr.dbClient.GetDbWithContext) open for the entire duration of the batching loop, causing connection pool exhaustion on the mirror node when a single large-range request keeps a connection occupied for an extended period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc285ea9-d41a-4162-aea6-e7a1f383383c?mode=deep",
+    "timestamp": "2026-04-28 21:43:34.654480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: selectTransactionsInTimestampRange] Can an unprivileged external user cause amplified database CPU load by requesting a block whose timestamp range contains many transactions, since selectTransactionsInTimestampRange executes two correlated subqueries (one against crypto_transfer and one against staking_reward_transfer) per transaction row returned, multiplying DB work by 2x the transaction count?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a5d6fa5-b8dd-4493-97ee-55d1cd48604b?mode=deep",
+    "timestamp": "2026-04-28 21:43:48.149679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: constructTransaction()] Can an unprivileged external user cause repeated CPU-intensive json.Unmarshal calls by requesting a block containing many transactions each with large CryptoTransfers JSON strings, since constructTransaction() calls json.Unmarshal([]byte(transaction.CryptoTransfers), &cryptoTransfers) for every transaction in sameHashTransactions without any size limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c114184a-4b39-4fe5-babf-ecf28f11563f?mode=deep",
+    "timestamp": "2026-04-28 21:44:02.150806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: constructTransaction()] Can an unprivileged external user cause repeated CPU-intensive json.Unmarshal calls by requesting a block containing many transactions each with large StakingRewardPayouts JSON strings, since constructTransaction() calls json.Unmarshal([]byte(transaction.StakingRewardPayouts), &stakingRewardPayouts) for every transaction without any size limit on the JSON payload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_800ccb51-c45e-4e91-9bff-979dfbf0bd28?mode=deep",
+    "timestamp": "2026-04-28 21:44:16.214490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause O(N*M) CPU work by requesting a block where transactions have large hbarTransfers slices and large itemizedTransfer slices, since categorizeHbarTransfers() builds an entityIds map from hbarTransfers and then iterates over every itemizedTransfer entry checking map membership, with no bound on either slice size?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41251488-8e97-42d1-af9a-374d8e0c3ced?mode=deep",
+    "timestamp": "2026-04-28 21:44:30.247359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: aggregateHbarTransfers()] Can an unprivileged external user cause excessive map allocation and iteration by requesting a block with transactions containing very large ItemizedTransferSlice and hbarTransfers slices, since aggregateHbarTransfers() builds a transferMap by iterating both slices in full with no size cap, allocating a new map per constructTransaction() call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6de2f733-a309-44d8-8b44-e8a34fb2f55b?mode=deep",
+    "timestamp": "2026-04-28 21:44:44.496231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getFeeHbarTransfers()] Can an unprivileged external user cause excessive memory allocation by requesting a block with transactions that have many crypto transfers, since getFeeHbarTransfers() builds a cryptoTransferMap and accountIds slice by iterating all cryptoTransfers, then builds an adjusted slice, all without any size limit on the input?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c4eae19-f410-4438-8377-96e0375b30bc?mode=deep",
+    "timestamp": "2026-04-28 21:45:00.083917",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: appendTransferOperations()] Can an unprivileged external user cause unbounded growth of the operations slice by requesting a block with transactions that have many transfers, since appendTransferOperations() appends one types.Operation per transfer with no cap on the total number of operations, and this is called three times per transaction (itemized, fee, staking reward)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_409bc69f-df62-46c2-9213-6f0cc0add59b?mode=deep",
+    "timestamp": "2026-04-28 21:45:16.188086",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the node to perform redundant full-table-scan-equivalent work by issuing concurrent /block requests for the same large block, since FindBetween() has no result caching and each concurrent call independently executes the full batching loop against the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_842c9b1b-7186-44aa-a1f2-5d0ab1749520?mode=deep",
+    "timestamp": "2026-04-28 21:45:31.456228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user exploit the absence of any pagination or result-size limit in FindBetween() to force the node to load all transactions in a historically large block into memory at once, causing a memory spike that degrades processing of other concurrent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d967ce58-b52c-4916-9657-4ebe4f2ec62a?mode=deep",
+    "timestamp": "2026-04-28 21:45:46.828504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the node's goroutine scheduler to be saturated by issuing many concurrent /block requests each triggering FindBetween() with a large timestamp range, since each request holds a DB connection and performs CPU-intensive in-memory processing with no concurrency limit at the persistence layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c725f668-2fb1-47c1-b02d-16be14017c9f?mode=deep",
+    "timestamp": "2026-04-28 21:46:03.230090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindByHashInBlock()] Can an unprivileged external user cause repeated expensive DB queries by issuing many /block/transaction requests with valid but non-existent transaction hashes within a large timestamp range, since FindByHashInBlock() executes selectTransactionsByHashInTimestampRange (which includes two correlated subqueries) for every request with no caching?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5afa135-f467-41b8-b712-80f39c93e1ad?mode=deep",
+    "timestamp": "2026-04-28 21:46:20.425025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindByHashInBlock()] Can an unprivileged external user cause the DB to perform expensive range scans by supplying a very wide consensusStart/consensusEnd range in a /block/transaction request, since selectTransactionsByHashInTimestampRange filters by both hash and timestamp range but the range scan cost scales with the range width?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8a5aa24-16c1-4fe7-af27-eab177bac48d?mode=deep",
+    "timestamp": "2026-04-28 21:46:38.671981",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: constructTransaction()] Can an unprivileged external user cause repeated allocation of large OperationSlice objects by requesting a block with many transactions each having many transfers, since constructTransaction() initializes operations := make(types.OperationSlice, 0) and grows it unboundedly via appendHbarTransferOperations() calls, with no pre-allocation cap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51734fd5-c196-4a8f-8dba-e533be1f9c25?mode=deep",
+    "timestamp": "2026-04-28 21:46:58.071053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the sameHashMap to grow to an arbitrarily large size by requesting a block with many unique transaction hashes, since sameHashMap := make(map[string][]*transaction) is populated with one entry per unique hash and there is no limit on the map size?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c652abc7-cf93-4c5a-b408-a5e25ddcb05c?mode=deep",
+    "timestamp": "2026-04-28 21:47:18.046793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the hashes slice to grow unboundedly by requesting a block with many unique transaction hashes, since hashes := make([]string, 0) is appended to for every unique hash in the accumulated transactions slice with no size limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6875389e-ca49-4571-a72b-51d2618af8e1?mode=deep",
+    "timestamp": "2026-04-28 21:47:38.844012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the node to perform O(N) constructTransaction() calls (one per unique hash) after accumulating all batches, where N is the total number of unique transaction hashes in the block, each constructTransaction() call itself performing multiple JSON unmarshal and map-building operations, compounding CPU usage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e369b95-2f91-4ad4-84bb-58fa14bc035f?mode=deep",
+    "timestamp": "2026-04-28 21:48:00.732659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getHashString()] Can an unprivileged external user cause repeated hex encoding CPU work by requesting a block with many transactions, since getHashString() calls hex.EncodeToString(t.Hash) for every transaction in the accumulated slice during the sameHashMap building loop, with no caching of the encoded hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9b09b88-43f3-4bc3-bbfb-fb913c18a16e?mode=deep",
+    "timestamp": "2026-04-28 21:48:23.052885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user cause the node to allocate and then immediately discard large transactionsBatch slices on each loop iteration (transactionsBatch := make([]*transaction, 0)), creating GC pressure that degrades overall node throughput when many large-block requests are processed concurrently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02bae523-50e3-4666-8842-0900e498e159?mode=deep",
+    "timestamp": "2026-04-28 21:48:46.688029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: FindBetween()] Can an unprivileged external user exploit the fact that the batching loop advances start by only 1 nanosecond (start = transactionsBatch[len(transactionsBatch)-1].ConsensusTimestamp + 1) when a full batch is returned, meaning that if transactions are densely packed at the same nanosecond boundary, the loop could stall or make minimal progress per iteration, maximizing DB round-trips?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29cec7dc-00d1-4f20-9140-25ca03fd46cb?mode=deep",
+    "timestamp": "2026-04-28 21:49:10.953084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause excessive memory allocation by requesting a block with transactions that have large stakingRewardPayouts slices, since categorizeHbarTransfers() appends every stakingRewardPayout to stakingRewardTransfers and also computes rewardPayoutTotal by iterating the full slice, with no size limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4f04123-e2fc-4509-a3d1-72027425d8e4?mode=deep",
+    "timestamp": "2026-04-28 21:49:35.796568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause a large adjustedItemizedTransfers slice to be built by requesting a block with transactions that have many itemizedTransfer entries all matching entityIds in the hbarTransfers map, since adjustedItemizedTransfers is appended to for every matching entry with no size cap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5e0c103-7644-4c87-8391-86649ac850d9?mode=deep",
+    "timestamp": "2026-04-28 21:50:01.779054",
+    "report_generated": false
+  }
+]
