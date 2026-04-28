@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the coalesce(value_written, value_read) logic in the findStorageByBlockTimestamp SQL query by targeting a contract_state_change record where value_written is null, causing the query to return value_read instead, which may represent a pre-transaction read value rather than the actual written state, leading to incorrect historical state being used in transaction simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fa0c86d-717e-492b-a20a-3a7a050417b3?mode=deep",
+    "timestamp": "2026-04-28 21:45:44.887772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorage()] Can an unprivileged external user exploit the fact that findStorage() does not validate the length of the key byte array (expected to be 32 bytes for EVM slot keys), by passing a key shorter or longer than 32 bytes, causing the SQL query in findStorage() to match no records (since slot column expects 32-byte values), making the EVM simulation treat a populated slot as zero and producing incorrect transaction results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abee3a83-be1c-44dd-8598-fbdb38668f6e?mode=deep",
+    "timestamp": "2026-04-28 21:45:56.801996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user submit requests with a crafted contractId whose toString() representation collides with another contract's toString() representation, causing cacheManagerSlotsPerContract.getCache(contractId.toString()) at line 87 to return the wrong per-contract cache, mixing slot keys from two different contracts and causing cross-contract state contamination in transaction simulations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ee0e78d-c089-4a09-98a0-d3d5b7fb56ed?mode=deep",
+    "timestamp": "2026-04-28 21:46:09.355716",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that cachedSlots list at line 93 is built from the live keySet() snapshot of the Caffeine cache, which may include entries added by concurrent threads after the current request's putIfAbsent(), causing the batch query to fetch and cache slot values for slots belonging to other users' concurrent transaction simulations, potentially leaking state information across requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19a5ec81-825a-466d-8acb-3aef7bbf2fc9?mode=deep",
+    "timestamp": "2026-04-28 21:46:22.033375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorage()] Can an unprivileged external user repeatedly call findStorage() for a slot that has EMPTY_VALUE as its cached sentinel (meaning it was registered but not yet fetched), exploiting the fact that the check (cachedValue != EMPTY_VALUE) at line 65 always falls through to findStorageBatch(), causing repeated batch DB queries for the same slot and amplifying DB load proportional to request rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7310f1dd-0063-4c7e-8140-0ab54843f0b4?mode=deep",
+    "timestamp": "2026-04-28 21:46:35.126665",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractStateCache.put() at line 109 is called for every slot returned by the batch query, not just the requested key, causing the cache to be populated with values for slots the attacker pre-seeded in contractSlotsCache, effectively allowing the attacker to pre-warm the cache with arbitrary slot keys and force the system to fetch and cache those values on behalf of other users' transaction simulations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_368ee9df-c94f-4b60-ab29-c4fb5e55b421?mode=deep",
+    "timestamp": "2026-04-28 21:46:48.899678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the absence of size validation on the cachedSlots list passed to contractStateRepository.findStorageBatch() at line 103, by accumulating up to 1500 slot keys in the per-contract slotsPerContract cache, causing a single findStorageBatch() call to generate a SQL IN clause with 1500 parameters that exceeds DB query plan limits, causing query failure and transaction simulation denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eefd4409-47f0-44f9-a0a1-6c65060c228a?mode=deep",
+    "timestamp": "2026-04-28 21:47:01.285971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorage()] Can an unprivileged external user exploit the fact that the contractStateCache TTL (2 seconds) is shorter than the contractSlotsCache TTL (5 minutes), creating a window where a slot key exists in contractSlotsCache but its value has expired from contractStateCache, causing findStorage() to always invoke findStorageBatch() for that slot and re-fetch from DB on every request within the 5-minute window, amplifying DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1718f5be-e80e-49d7-9680-bdb8d9a2d156?mode=deep",
+    "timestamp": "2026-04-28 21:47:15.565516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user submit concurrent requests for the same contractId and key, causing multiple threads to simultaneously execute findStorageBatch() for the same slot, each independently calling contractStateRepository.findStorageBatch() with overlapping cachedSlots lists, resulting in N redundant DB queries (one per concurrent thread) and amplified DB load that degrades transaction simulation performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50cac3ef-bf14-471d-81d1-0f3f366232f9?mode=deep",
+    "timestamp": "2026-04-28 21:47:29.747486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE) at line 90 uses the ByteBuffer as a cache key, and ByteBuffer.equals() compares content not identity, such that two different byte arrays with the same content produce equal ByteBuffers, causing putIfAbsent() to silently skip insertion for a key that was already evicted and re-inserted with different backing array identity, leading to incorrect isKeyEvictedFromCache detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_062445be-ea96-4abf-ae8d-045752575b2a?mode=deep",
+    "timestamp": "2026-04-28 21:47:43.022179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user submit thousands of findStorageByBlockTimestamp() requests with varying blockTimestamp values for the same contract and slot, exploiting the absence of caching on this path (unlike findStorage()), causing each request to hit the DB independently and sustain high DB load that degrades transaction simulation throughput for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da7e9069-36e0-4848-8d43-3b14e9d91445?mode=deep",
+    "timestamp": "2026-04-28 21:47:56.116240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that the per-contract slotsPerContract cache is created lazily via cacheManagerSlotsPerContract.getCache(contractId.toString()) and stored in contractSlotsCache, such that if contractSlotsCache evicts the entry for a contractId (after 5 minutes of inactivity), the per-contract cache is lost but the underlying CacheManager still holds a reference, causing a memory leak of abandoned per-contract cache instances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df288291-9216-4456-81ac-7fdf53fbe95b?mode=deep",
+    "timestamp": "2026-04-28 21:48:09.948580",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorage()] Can an unprivileged external user exploit the fact that findStorage() returns Optional.of(cachedValue) at line 66 without defensive copying of the byte array, allowing the caller to mutate the returned byte array and corrupt the cached value in contractStateCache, causing subsequent transaction simulations for the same slot to receive the mutated (attacker-controlled) value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2cd38ef4-3f00-42fd-855c-3001ae4a1dc1?mode=deep",
+    "timestamp": "2026-04-28 21:48:23.127435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractStateCache.put() at line 109 stores slotValue directly without defensive copying, allowing a caller that receives the value via findStorage() to mutate the byte array and corrupt the cached entry, causing all subsequent transaction simulations reading that slot to receive the attacker-modified value until the cache expires?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96d29bc4-0a7d-40a4-9ef1-65580ec618a4?mode=deep",
+    "timestamp": "2026-04-28 21:48:37.898614",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that ((ByteBuffer) slot).array() at line 97 returns the full backing array of the ByteBuffer regardless of its current position and limit, such that if a ByteBuffer in the cache was created with ByteBuffer.wrap(largeArray, offset, length), the extracted array is largeArray rather than the intended sub-array, causing the batch query to use wrong slot keys and return incorrect state for transaction simulations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d44f1c1f-b56d-4a46-a107-0031b6c72e0d?mode=deep",
+    "timestamp": "2026-04-28 21:48:53.214656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findStorage()] Can an unprivileged external user exploit the fact that the contractStateCache check at line 63-67 uses get() which may return null for both cache miss and cache eviction, causing findStorage() to always invoke findStorageBatch() even when the slot value was recently cached and then evicted under memory pressure, leading to repeated DB queries and amplified load during high-traffic transaction simulation periods?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f432465b-01fc-416a-b8b4-611f9c2af5ca?mode=deep",
+    "timestamp": "2026-04-28 21:49:07.901443",
+    "report_generated": false
+  }
+]
