@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7a5b15d-6ece-49e3-b73d-26014e437810?mode=deep",
     "timestamp": "2026-04-28 14:26:11.202605",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user cause sustained CPU and heap exhaustion by injecting a large collection of StreamFileSignature objects each carrying a distinct getFileHashAsHex() value into validate(), forcing the outer HashMultimap iteration to scale as O(N) unique keys while the inner per-key stake accumulation loop also runs O(N) times, resulting in O(N²) total work per validate() invocation and a measurable 30%+ increase in importer CPU utilization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78c33345-fa57-4ccd-b06e-8fbe3004d4e1?mode=deep",
+    "timestamp": "2026-04-28 18:19:41.917810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user craft stream files that produce a large number of VERIFIED-status StreamFileSignature entries all with unique fileHash byte arrays, so that signatureHashMap.put(signature.getFileHashAsHex(), signature) inserts N distinct keys into the HashMultimap, causing the subsequent for (String key : signatureHashMap.keySet()) loop to iterate N times and allocate N BigDecimal objects via BigDecimal.valueOf(stake), driving heap allocation rate above the 30% resource increase threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e18200fb-8f65-4af8-aa10-9f5f4cea9a67?mode=deep",
+    "timestamp": "2026-04-28 18:19:53.937578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getStakeRequiredForConsensus()] Can an unprivileged external user supply a StreamFileSignature whose node reports getTotalStake() equal to Long.MAX_VALUE (9223372036854775807), causing BigDecimal.valueOf(totalStake).multiply(commonDownloaderProperties.getConsensusRatio()).setScale(0, RoundingMode.CEILING) to operate on a 19-digit BigDecimal with full precision arithmetic, significantly increasing CPU time per validate() call and pushing importer resource consumption above the 30% threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ac3f855-0221-4c17-ad7c-c8e6d32985b7?mode=deep",
+    "timestamp": "2026-04-28 18:20:06.422826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user trigger repeated validate() invocations by continuously publishing new stream files to the monitored bucket, where each invocation allocates a fresh HashMultimap via HashMultimap.create() and performs full signature iteration, causing cumulative GC pressure from repeated short-lived object allocation (HashMultimap, BigDecimal, String keys) that increases JVM GC pause time and overall node resource consumption by more than 30%?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_107a1930-463a-4b28-b4ac-7ec4784d1fa6?mode=deep",
+    "timestamp": "2026-04-28 18:20:19.594959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user publish stream signature files with maximum-length fileHash byte arrays (e.g., 256 bytes as used in tests), so that getFileHashAsHex() produces 512-character hex strings for each of N signatures, causing large String object allocation in the heap during signatureHashMap.put(signature.getFileHashAsHex(), signature) and increasing GC frequency and memory bandwidth consumption above the 30% threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2314f355-5853-4fa7-b668-e149e70d8117?mode=deep",
+    "timestamp": "2026-04-28 18:20:33.060630",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user craft a batch of StreamFileSignature objects where every signature has status VERIFIED and a unique fileHash, so that the signatureHashMap grows to N keys, and then for each key canReachConsensus(stake, stakeRequiredForConsensus) calls BigDecimal.valueOf(stake).compareTo(stakeRequiredForConsensus) creating N transient BigDecimal objects, causing measurable heap churn and CPU overhead that exceeds the 30% resource increase threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e04a8e99-5700-4798-9574-fc56f837ff36?mode=deep",
+    "timestamp": "2026-04-28 18:20:45.763873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the fact that totalStake and stakeRequiredForConsensus are computed only from the first signature in the collection, by ordering a crafted signature collection so the first entry has an extreme getTotalStake() value, causing getStakeRequiredForConsensus() to perform expensive BigDecimal arithmetic that inflates CPU usage for all subsequent consensus checks in the same validate() call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be1bc464-df8a-47a8-a63d-689d05cf5fdc?mode=deep",
+    "timestamp": "2026-04-28 18:20:58.556859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user cause the debugStake tracking branch (if (debugStake < stake)) to execute N times per validate() call by ensuring N unique hash groups exist in signatureHashMap, where each iteration performs a long comparison and a potential assignment, and by maximizing N across many concurrent validate() calls, drive CPU instruction throughput above the 30% resource increase threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6dec5df0-34bd-48f3-b14c-57d1b781bcdc?mode=deep",
+    "timestamp": "2026-04-28 18:21:11.655044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user submit stream files that produce a large number of StreamFileSignature objects all sharing the same fileHash (same key in signatureHashMap), causing the inner for (var signature : validatedSignatures) loop to iterate over all N signatures to accumulate stake, and then validatedSignatures.forEach(s -> s.setStatus(CONSENSUS_REACHED)) to iterate again over all N signatures, resulting in 2N status-mutation operations per validate() call and elevated CPU usage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1946774-e07b-40cf-a1a0-e2b544158b3b?mode=deep",
+    "timestamp": "2026-04-28 18:21:25.224925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the absence of an upper bound on the size of the signatures collection passed to validate(), by publishing a stream file that causes the downloader to collect an unbounded number of node signatures before calling validate(), so that the O(N) first loop and O(K) second loop (K = unique hash groups) together consume disproportionate CPU time and increase node resource usage by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66dc2486-5750-4b8d-9843-323b565be0a9?mode=deep",
+    "timestamp": "2026-04-28 18:21:38.070703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getStakeRequiredForConsensus()] Can an unprivileged external user craft a signature whose node returns a getTotalStake() value that, when multiplied by consensusRatio (a 19-digit precision BigDecimal), produces a result requiring maximum internal BigDecimal array allocation during multiply(), causing each validate() call to allocate large internal int[] arrays inside BigDecimal and increasing heap allocation rate above the 30% resource threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6330ca6d-557a-4260-8996-8bb848c2eb42?mode=deep",
+    "timestamp": "2026-04-28 18:21:50.935911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user cause the HashMultimap.create() call to repeatedly resize its internal backing HashMap by submitting signatures with incrementally increasing numbers of unique fileHash values across successive validate() calls, causing repeated HashMap rehashing and memory copying that increases GC and CPU overhead above the 30% resource increase threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cb3ce1f-2b8c-41cc-b45e-1e4733465732?mode=deep",
+    "timestamp": "2026-04-28 18:22:04.224516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the fact that BigDecimal.ZERO.equals(commonDownloaderProperties.getConsensusRatio()) uses object equality semantics (not compareTo), so that a consensusRatio of 0.0 with a different scale (e.g., BigDecimal('0.00')) does not short-circuit the consensus check, forcing the full O(N) + O(K) loop to execute even when consensus checking should be skipped, wasting CPU resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1432818-26a3-4f5c-86ac-ea8189f2af57?mode=deep",
+    "timestamp": "2026-04-28 18:22:16.995434",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user publish stream files at a rate that causes the importer's downloader to queue many pending validate() calls, where each call allocates a new HashMultimap, iterates over all signatures, and performs BigDecimal arithmetic, causing cumulative thread pool saturation and CPU utilization increase of 30%+ compared to the baseline 24-hour average?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93db7a52-123a-41ec-99d5-7c534206ae0d?mode=deep",
+    "timestamp": "2026-04-28 18:22:30.075105",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user craft stream files that produce signatures with fileHash byte arrays of varying lengths (e.g., alternating between 1 byte and 384 bytes), causing getFileHashAsHex() to produce strings of varying lengths that defeat String pool optimizations and increase heap fragmentation, leading to more frequent GC cycles and a 30%+ increase in GC overhead?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca7fdf2a-8b20-47ea-a78f-56e7ab2b0900?mode=deep",
+    "timestamp": "2026-04-28 18:22:43.491484",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user cause the inner stake accumulation loop (stake += signature.getNode().getStake()) to execute a very large number of times by ensuring a single fileHash key maps to a large number of VERIFIED signatures in the HashMultimap, where each getStake() call involves a database or cache lookup, amplifying I/O and CPU cost per validate() invocation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47e27142-2add-45cb-a010-d4b26b923815?mode=deep",
+    "timestamp": "2026-04-28 18:22:56.697180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the lack of deduplication on the signatures collection before it is passed to validate(), so that the same StreamFileSignature object appears multiple times in the collection, causing the first loop to insert duplicate entries into signatureHashMap and the inner stake loop to double-count stake values, inflating processing work without a corresponding increase in legitimate network activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c83c556-113a-4cb6-ba64-8e994a72f4cd?mode=deep",
+    "timestamp": "2026-04-28 18:23:10.555300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user publish a stream file that causes the importer to download and parse a very large number of node signature files (one per network node), where each parsed signature is passed to validate() as a VERIFIED entry, causing the signatureHashMap to grow proportionally to the number of nodes and the subsequent iteration to consume CPU proportional to node count squared?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5073b9d2-8e65-4742-b6c6-5e2cca8f1854?mode=deep",
+    "timestamp": "2026-04-28 18:23:24.540926",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getStakeRequiredForConsensus()] Can an unprivileged external user cause getStakeRequiredForConsensus() to be called with totalStake values that produce BigDecimal results requiring maximum scale normalization in setScale(0, RoundingMode.CEILING), where the internal rounding operation allocates additional BigDecimal intermediate objects, and by triggering many such calls per second, increase JVM heap allocation rate above the 30% resource threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4be8e649-6d5c-4e4c-a378-fd4fe8453e8b?mode=deep",
+    "timestamp": "2026-04-28 18:23:38.755251",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user craft a stream file whose signature collection contains signatures from nodes with getStake() values that sum to exactly the consensus threshold for many different hash groups, causing canReachConsensus() to return true for all N groups and triggering validatedSignatures.forEach(s -> s.setStatus(CONSENSUS_REACHED)) for all N groups, maximizing the number of setStatus() calls and associated object mutations per validate() invocation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75ef53e3-dc25-4c02-b7a7-24fee3b7fb5d?mode=deep",
+    "timestamp": "2026-04-28 18:23:53.348208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the fact that the signatureHashMap is a HashMultimap (backed by a HashMap of Sets) to cause hash collision degradation by crafting fileHash byte arrays whose hex representations have the same Java String hashCode(), forcing the HashMultimap's internal HashMap to degrade to O(N) bucket traversal and increasing CPU time per put() and get() operation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f78dd36f-883b-456c-8625-46cd32fc8835?mode=deep",
+    "timestamp": "2026-04-28 18:24:06.996557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user cause the String.format() call in the SignatureVerificationException constructor (String.format('Consensus not reached for file %s with %d/%d stake', filename, debugStake, totalStake)) to be invoked repeatedly by triggering many failed consensus validations, where each String.format() call allocates a new formatted String object and increases heap allocation rate above the 30% resource threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bacf1fdb-3514-474e-8d74-59f88603149b?mode=deep",
+    "timestamp": "2026-04-28 18:24:20.961971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user publish stream files at a rate that causes the importer to invoke validate() concurrently from multiple downloader threads, where each thread allocates its own HashMultimap and BigDecimal objects, causing thread-level memory allocation contention and increased GC stop-the-world pauses that raise overall node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c74c4f84-a613-499c-8c36-551d74449b1a?mode=deep",
+    "timestamp": "2026-04-28 18:24:34.451790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user craft signatures where getFileHashAsHex() returns null (by setting fileHash to null on a VERIFIED-status signature), causing signatureHashMap.put(null, signature) to insert a null key into the HashMultimap, and then the subsequent for (String key : signatureHashMap.keySet()) iteration to process the null key group, potentially causing NullPointerException handling overhead or unexpected processing paths that increase CPU usage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_142c66b0-77fd-4278-bc7a-6972c22bfb5b?mode=deep",
+    "timestamp": "2026-04-28 18:24:48.609884",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/ConsensusValidatorImpl.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: validate()] Can an unprivileged external user exploit the sequential nature of the first for loop (for (var signature : signatures)) by submitting a very large signatures collection where the first element has a node with getTotalStake() that triggers expensive BigDecimal initialization in getStakeRequiredForConsensus(), and all subsequent elements are VERIFIED with unique hashes, maximizing both the initialization cost and the per-key processing cost in a single validate() call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_433cc73c-6978-4882-a00c-b727ad15e09b?mode=deep",
+    "timestamp": "2026-04-28 18:25:01.519016",
+    "report_generated": false
   }
 ]
