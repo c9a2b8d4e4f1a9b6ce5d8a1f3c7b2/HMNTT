@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import shutil
 import time
 import uuid
@@ -249,7 +250,7 @@ def generate_file_path_for_scope():
         raise FileNotFoundError(f"No scope files found in {scope_directory}")
 
     # Get the first file
-    source_file = scope_files[0]
+    source_file = random.choice(scope_files)
     file_name = source_file.name
 
     # Define destination path in pending directory
