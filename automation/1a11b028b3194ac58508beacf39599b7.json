@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user trigger an integer overflow in `(int) (filter.getLimit() - context.getCount().get())` by subscribing with a limit value near Integer.MAX_VALUE, causing `pageSize` to become negative, which propagates a negative limit into `topicMessageRepository.findByFilter(newFilter)` and causes the DB query to skip or return zero messages, resulting in financial instructions encoded in topic messages being silently dropped and never delivered to downstream fund-processing consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d7da800-e7c3-4536-a24c-f06e9d450b0a?mode=deep",
+    "timestamp": "2026-04-28 20:54:42.824118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user set `filter.getLimit()` to a value smaller than the current `context.getCount().get()` (e.g., by reconnecting mid-stream), causing `(int)(filter.getLimit() - context.getCount().get())` to produce a negative int, which is then passed as `pageSize` to `findByFilter`, causing the repository to return no messages and permanently skipping undelivered financial topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e28db6c-efca-4c91-835a-6f37e9f7ecac?mode=deep",
+    "timestamp": "2026-04-28 20:54:54.697891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user open an unbounded number of concurrent `listen()` subscriptions against the same `topicId` with no rate limiting, exhausting the `Schedulers.boundedElastic()` thread pool, causing all other legitimate subscribers' polling loops to stall and miss time-sensitive financial messages that expire or are acted upon only once?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b390f876-c3e7-4b52-95cc-2a4a7638669b?mode=deep",
+    "timestamp": "2026-04-28 20:55:06.982096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user flood the gRPC endpoint with `listen()` calls using `RepeatSpec.times(Long.MAX_VALUE)`, creating effectively infinite polling loops that saturate the `boundedElastic` scheduler, starving legitimate fund-transfer-related topic subscribers and causing them to miss critical financial messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfa4da5e-ed32-4fef-a183-b9386d9a88a5?mode=deep",
+    "timestamp": "2026-04-28 20:55:19.860048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user craft a `TopicMessageFilter` with `startTime` set to a very old timestamp, causing `poll()` to repeatedly query and re-deliver already-processed financial messages from `topicMessageRepository.findByFilter(newFilter)`, leading to double-execution of fund-transfer instructions by downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e9a0787-bbc7-4b37-98d9-7626ad490593?mode=deep",
+    "timestamp": "2026-04-28 20:55:33.781838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: onNext()] Can an unprivileged external user exploit the non-atomic update between `last.set(topicMessage)` and `count.incrementAndGet()` in `onNext()` under concurrent poll emissions, causing `count` and `last` to become inconsistent, so that `poll()` computes a wrong `startTime` or wrong remaining `limit`, skipping a batch of financial topic messages and causing fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c41d00a-476a-4bd5-8b99-696528571c74?mode=deep",
+    "timestamp": "2026-04-28 20:55:48.247849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user trigger a `consensusTimestamp` overflow by subscribing to a topic whose last message has `consensusTimestamp == Long.MAX_VALUE`, causing `last.getConsensusTimestamp() + 1` to overflow to `Long.MIN_VALUE`, setting `startTime` to a negative value and causing `findByFilter` to return all historical messages from the beginning of time, flooding the consumer with replayed financial messages and triggering duplicate fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f0a8511-5fb8-4b82-932f-b84f8731148e?mode=deep",
+    "timestamp": "2026-04-28 20:56:01.151466",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user set `filter.getLimit()` to `Long.MAX_VALUE` and rely on `(int)(Long.MAX_VALUE - count)` producing a negative int due to narrowing cast, causing `Math.min(negativeLimit, listenerProperties.getMaxPageSize())` to return the negative value, which is passed to `findByFilter` as a negative page size, causing the query to return no results and permanently halting delivery of financial messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c23f7e7-7a20-4c6e-863e-987c50da0c98?mode=deep",
+    "timestamp": "2026-04-28 20:56:14.259508",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user subscribe with a very small `startTime` (e.g., epoch 0) and no `endTime`, causing `listen()` to continuously poll and stream the entire historical topic message backlog on every repeat cycle, replaying financial instructions to a downstream processor and causing repeated fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46f77b9c-f5d5-4b9a-ba80-818ba65a280e?mode=deep",
+    "timestamp": "2026-04-28 20:56:28.117358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user exploit the fact that `newFilter` is built with `filter.toBuilder().limit(pageSize).startTime(startTime).build()` but retains the original `topicId`, allowing the user to subscribe to a high-value financial topic they do not own and receive all its messages, enabling front-running or information-based fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74659232-a861-48e6-a532-2e101a14ca63?mode=deep",
+    "timestamp": "2026-04-28 20:56:42.999891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user abuse `RepeatSpec.times(Long.MAX_VALUE).withFixedDelay(interval)` to create a subscription that never terminates, holding a database connection open indefinitely through `topicMessageRepository.findByFilter()`, exhausting the DB connection pool and preventing legitimate financial message writes from being committed, causing fund-transfer transactions to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90efc39b-d872-4990-a59b-2651ab59a88e?mode=deep",
+    "timestamp": "2026-04-28 20:56:56.345362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user set `limit=1` in the filter, causing `poll()` to compute `pageSize=1` and retrieve only one message per poll cycle, while the `count` reaches the limit after the first message and subsequent polls compute `limit - count = 0`, causing `Math.min(0, maxPageSize) = 0` to be passed to `findByFilter`, silently stopping delivery of remaining financial messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2199e3cb-0788-48e5-a956-a51f12cd640d?mode=deep",
+    "timestamp": "2026-04-28 20:57:10.047155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user exploit the `jitter(0.1)` on `RepeatSpec` to cause timing desynchronization between multiple competing subscribers, creating a race window where two subscribers both poll the same new financial message batch and both deliver it to their respective downstream processors, causing double-spend of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5d998f0-9db0-4d31-afeb-ffaf07c718ca?mode=deep",
+    "timestamp": "2026-04-28 20:57:23.915807",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user craft a filter with `startTime` just before a known high-value financial message's `consensusTimestamp`, subscribe, receive the message, then immediately re-subscribe with the same `startTime` to receive the same message again, exploiting the stateless nature of `PollingContext` initialization to replay financial instructions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_defada63-809d-40e3-aed1-122e8135877a?mode=deep",
+    "timestamp": "2026-04-28 20:57:39.868799",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user open thousands of `listen()` subscriptions with `limit=0` (no limit, `hasLimit()` returns false), causing each to use `Integer.MAX_VALUE` as the page size in `poll()`, generating massive DB queries on every poll interval and causing a denial-of-service that prevents financial message delivery to legitimate subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d4e050a-e215-415f-b6b2-2fb825ed7b65?mode=deep",
+    "timestamp": "2026-04-28 20:57:53.445045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user exploit `Flux.fromStream(topicMessageRepository.findByFilter(newFilter))` where the underlying Java Stream is not closed after consumption, causing resource leaks that accumulate across `Long.MAX_VALUE` repeat cycles, eventually exhausting file descriptors or DB cursors and causing financial message delivery to halt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64b658b2-a367-4251-aa0b-9ade9dd1e442?mode=deep",
+    "timestamp": "2026-04-28 20:58:07.556156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: onNext()] Can an unprivileged external user trigger a scenario where `last.set(topicMessage)` succeeds but `count.incrementAndGet()` is never called (e.g., due to a downstream error that cancels the flux after `doOnNext` but before count update), causing `poll()` to re-query from the same `consensusTimestamp` on the next cycle and re-deliver the same financial message, leading to duplicate fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3251e58f-e342-4f19-82b8-756b4d14dd3a?mode=deep",
+    "timestamp": "2026-04-28 20:58:21.417522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user subscribe to a topic used by a DeFi protocol with `startTime` set to a past timestamp, receive a large batch of historical financial instructions via `poll()`, and feed them into a replay attack against the protocol's off-chain processor, causing unauthorized fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17f31f82-d711-49cd-a19e-a9b885470c47?mode=deep",
+    "timestamp": "2026-04-28 20:58:34.559342",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user exploit the fact that `filter.toBuilder()` creates a new filter with the same `subscriberId` as the original, causing the repository's `findByFilter` to treat the re-polled query as a continuation of the same subscriber session and potentially return cached or stale results, causing financial messages to be skipped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6fbf86b-97f9-4426-ade9-a06901898aa7?mode=deep",
+    "timestamp": "2026-04-28 20:58:47.059876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user set `interval` to the minimum allowed value (50ms per `@DurationMin(millis=50)`) by manipulating the subscription parameters, causing `poll()` to fire at maximum frequency and overwhelm `topicMessageRepository.findByFilter()` with DB queries, causing DB lock contention that delays financial message writes and creates a window for front-running?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_54a0d444-0bb9-4f89-b398-2da785380410?mode=deep",
+    "timestamp": "2026-04-28 20:59:00.337518",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user exploit the absence of a check that `pageSize > 0` before calling `topicMessageRepository.findByFilter(newFilter)`, so that when `limit - count.get() = 0` (limit exactly reached), `Math.min(0, maxPageSize) = 0` is passed as the page size, causing the repository to execute a query with `LIMIT 0` that returns no rows, silently terminating message delivery before all financial messages are consumed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f71a32e-e991-4d20-b65e-43e0bb85b296?mode=deep",
+    "timestamp": "2026-04-28 20:59:13.140717",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user exploit the `delaySubscription(interval, scheduler)` initial delay to create a timing gap between subscription and first poll, during which high-frequency financial messages are published to the topic, and since `startTime` is set at filter construction time (not at first poll time), those messages are missed if `startTime` was set to `DomainUtils.now()` at construction, causing fund-transfer instructions to be permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dff4fde9-a938-4294-bb65-43a9acf20066?mode=deep",
+    "timestamp": "2026-04-28 20:59:25.699974",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user subscribe with a `topicId` that belongs to a high-value payment channel, and by observing the sequence of `consensusTimestamp` values in received `TopicMessage` objects, infer the exact timing of financial transactions and use this information to front-run trades or payments on the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2616a41-ca1b-4c96-a7dd-a57f3fe057e7?mode=deep",
+    "timestamp": "2026-04-28 20:59:38.540812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: listen()] Can an unprivileged external user create a subscription with `limit = Integer.MAX_VALUE + 1` (as a long), causing `hasLimit()` to return true, and then `(int)(filter.getLimit() - context.getCount().get())` to produce a negative int immediately due to narrowing cast overflow, causing `pageSize` to be negative and `findByFilter` to return no messages, permanently blocking financial message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7898d6ab-9e04-4ff6-a724-6a0477cdc5dd?mode=deep",
+    "timestamp": "2026-04-28 20:59:51.618382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Direct loss of funds'] [Function: poll()] Can an unprivileged external user exploit the fact that `PollingContext` is created fresh per `listen()` call with `count = 0` and `last = null`, so that re-subscribing after a disconnect always resets the cursor to `filter.getStartTime()`, causing all messages since `startTime` to be re-delivered and potentially re-processed as financial instructions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aeee1266-0ca9-4071-8aef-f39bda815c84?mode=deep",
+    "timestamp": "2026-04-28 21:00:04.939574",
+    "report_generated": false
+  }
+]
