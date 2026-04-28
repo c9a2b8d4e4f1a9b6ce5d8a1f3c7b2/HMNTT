@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user insert a large number of account_balance_file records to cause the reconcile() loop to run for an extremely long time, and during that window insert reorganized transaction data that only becomes visible after the reconciliation window has already passed, causing the reorganization to be permanently missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_286a1682-5a4f-471f-ac41-a5f7f34d7530?mode=deep",
+    "timestamp": "2026-04-28 22:58:04.247739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNextBalanceSnapshot()] Can an unprivileged external user manipulate the AccountBalanceFile.timeOffset to a large negative value so that getTimestamp() returns a timestamp earlier than the previous snapshot's timestamp, causing the CRYPTO_TRANSFER_QUERY window `> previous.getTimestamp() and <= current.getTimestamp()` to cover a negative or zero range and exclude all transfers, making any balance change appear unaccounted for?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6609165-f321-407a-851b-f0f970a422f6?mode=deep",
+    "timestamp": "2026-04-28 22:58:16.479838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileCryptoTransfers()] Can an unprivileged external user exploit the Math.addExact() call in `transfersBalance.merge(accountId, balance, Math::addExact)` to trigger an ArithmeticException overflow by inserting crypto_transfer rows with extreme amounts for the same entity_id, causing reconcile() to catch the exception and set FAILURE_UNKNOWN status, suppressing the actual reconciliation result and hiding a history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8865c502-6a0e-476c-91e0-cf49f52beffc?mode=deep",
+    "timestamp": "2026-04-28 22:58:28.868068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileTokenTransfers()] Can an unprivileged external user exploit the Math.addExact() call in `tokenBalances.merge(tokenAccountId, balance, Math::addExact)` to trigger an ArithmeticException by inserting token_transfer rows with extreme amounts for the same (account_id, token_id), causing the reconciliation to abort with FAILURE_UNKNOWN and masking a token history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6027040f-712f-4894-865d-f48987239eb5?mode=deep",
+    "timestamp": "2026-04-28 22:58:41.883725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the fact that the status AtomicReference is set to RUNNING at the start of getLatestJob() and only updated in the finally block, so that if a concurrent reader checks the Micrometer gauge during reconciliation, it always sees RUNNING and never sees a FAILURE status that would indicate a detected history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_507db882-9c56-4b63-83a0-fa7fe9c82c6a?mode=deep",
+    "timestamp": "2026-04-28 22:58:55.420841",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestJob()] Can an unprivileged external user insert a reconciliation_job record with a consensusTimestamp set to Long.MAX_VALUE, causing Math.max(startDate, consensusTimestamp) to return Long.MAX_VALUE, so that findNextInRange(Long.MAX_VALUE, toTimestamp) returns empty and reconcile() exits with UNKNOWN status, permanently disabling reconciliation and hiding any reorganized history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec897e33-4c21-483a-83c6-560d14b73a27?mode=deep",
+    "timestamp": "2026-04-28 22:59:09.684899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the `Uninterruptibles.sleepUninterruptibly(reconciliationProperties.getDelay())` call by configuring a very large delay value, causing the reconcile() method to hold the synchronized lock for an extended period and preventing any concurrent reconciliation run from detecting a reorganized history that was introduced during the sleep window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_738f16df-e82b-48fa-b421-3938f41d29c2?mode=deep",
+    "timestamp": "2026-04-28 22:59:24.760724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileTransfers()] Can an unprivileged external user exploit the FAIL RemediationStrategy to cause reconcile() to throw a ReconciliationException on the first detected mismatch, preventing subsequent windows from being checked, so that a reorganized history in a later window is never discovered because an earlier artificial mismatch halts processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a2e0b46-fc29-4881-bf85-115fec281204?mode=deep",
+    "timestamp": "2026-04-28 22:59:40.935321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user insert account_balance_file records with identical consensusTimestamp values, causing findNextInRange to return the same file repeatedly (if the repository does not enforce uniqueness), leading to an infinite loop in the while(current.isPresent()) loop that prevents reconciliation from ever completing and detecting a reorganized history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b70b83a2-5452-4d19-afd4-d8dbb6d5336d?mode=deep",
+    "timestamp": "2026-04-28 22:59:58.001723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNextBalanceSnapshot()] Can an unprivileged external user insert an account_balance_file with a consensusTimestamp of Long.MAX_VALUE - 1, causing `t + 1L` in the fromTimestamp calculation to overflow to Long.MIN_VALUE, so that findNextInRange(Long.MIN_VALUE, toTimestamp) returns the very first balance file and causes the reconciliation to restart from the beginning, re-processing already-audited windows with potentially reorganized data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_112e8185-bf60-4037-9f15-7ee9af3455e6?mode=deep",
+    "timestamp": "2026-04-28 23:00:14.922870",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the fact that reconciliationJob.setConsensusTimestamp() is only called when !reconciliationJob.hasErrors(), so that if a reorganized window produces an error, the timestamp is never advanced, and the next scheduled run re-processes the same window, potentially with different data if the reorganization has been partially reverted, producing inconsistent audit results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bba69b9d-13f3-4539-80f2-d1acb13d2669?mode=deep",
+    "timestamp": "2026-04-28 23:00:32.441022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileCryptoTransfers()] Can an unprivileged external user insert a crypto_transfer row with entity_id=0 and a balance that exactly compensates for a reorganized transfer, causing transfersBalance.merge(0L, balance, Math::addExact) to add a phantom account entry that makes the balance map match the current snapshot, hiding the reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b892fa69-60f0-43c9-a6fb-f44fefbbd9e5?mode=deep",
+    "timestamp": "2026-04-28 23:00:50.626778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: equals()] Can an unprivileged external user exploit the two-pass comparison in equals() (first iterating previous entries, then current entries) to construct a scenario where both maps contain the same keys but with Long value 0L vs absent key, causing the getOrDefault(..., 0L) to treat them as equal and pass reconciliation on a reorganized history where an account was zeroed out and removed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a918748-ab12-42c4-b28e-7de81f9311c2?mode=deep",
+    "timestamp": "2026-04-28 23:01:08.516953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileTransfers()] Can an unprivileged external user exploit the RESET RemediationStrategy (which is referenced in tests but not implemented in the production switch statement in reconcile()) to cause the service to fall through to the `previous = current` branch after a detected mismatch, effectively resetting the baseline to the corrupted snapshot and allowing subsequent windows to be reconciled against a reorganized history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76df4d6e-527d-4dc7-a5ab-35fff601f842?mode=deep",
+    "timestamp": "2026-04-28 23:01:28.818840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the fact that the RESET strategy is not handled in the `if (reconciliationProperties.getRemediationStrategy() == ACCUMULATE)` branch, causing it to fall through to `previous = current`, so that after a detected reorganization the baseline is silently reset to the current (potentially corrupted) snapshot and future windows are reconciled against falsified data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7159d837-c44b-4790-82d1-6f2fc6a84b8c?mode=deep",
+    "timestamp": "2026-04-28 23:01:48.454903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getAccountBalances()] Can an unprivileged external user insert an account_balance_file record that references a consensus_timestamp for which no account_balance rows exist, causing getAccountBalances() to return an empty map with total=0, which does not equal FIFTY_BILLION_HBARS, throwing a ReconciliationException(FAILURE_FIFTY_BILLION) that halts reconciliation and prevents detection of a reorganized history in subsequent windows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ad0afbd-d0da-4069-89f0-867335752c74?mode=deep",
+    "timestamp": "2026-04-28 23:02:09.128929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the cron-based scheduling (`@Scheduled(cron = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44897b0f-3757-4aea-a03d-31eba727fa67?mode=deep",
+    "timestamp": "2026-04-28 23:02:30.579935",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileTransfers()] Can an unprivileged external user exploit the Maps.difference() call to produce a MapDifference object where entriesOnlyOnLeft() and entriesOnlyOnRight() are both empty but entriesDiffering() is non-empty, and then manipulate the balance data so that the difference is exactly zero for all differing entries, causing equals() to return true on a reorganized history where transfers were swapped between accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0391f30-9b08-484b-a048-7a8efddc9ef0?mode=deep",
+    "timestamp": "2026-04-28 23:02:52.997833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileCryptoTransfers()] Can an unprivileged external user insert crypto_transfer rows with a consensus_timestamp that falls within the reconciliation window but with an entity_id that does not correspond to any account in the balance snapshot, causing transfersBalance to contain extra entries that are not in currentBalances, triggering a false FAILURE_CRYPTO_TRANSFERS that masks a real reorganization in a different account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b6d6491-c050-418b-ad0d-b03779273375?mode=deep",
+    "timestamp": "2026-04-28 23:03:14.147767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNextBalanceSnapshot()] Can an unprivileged external user insert an account_balance_file with a very large timeOffset value so that getTimestamp() returns a timestamp far in the future, causing the CRYPTO_TRANSFER_QUERY to include transfers from future windows in the current reconciliation period, reorganizing the apparent transaction history across time boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15a60e38-c242-4b93-81ed-9803126d7a14?mode=deep",
+    "timestamp": "2026-04-28 23:03:37.425818",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the fact that reconciliationJob.increment() is called unconditionally (line 120) even when errors are present, causing the count to advance past the `% 100 == 0` save threshold and trigger a premature save of a job with an incorrect consensusTimestamp, corrupting the resume point for the next run and causing it to skip a reorganized window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_716781b2-38d3-424d-bf37-e6eb7f22e7a7?mode=deep",
+    "timestamp": "2026-04-28 23:04:01.547838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcileTokenTransfers()] Can an unprivileged external user insert token_transfer rows with a token_id that does not exist in the token_balance snapshot, causing tokenBalances.merge() to add phantom token entries to the previous snapshot's map, making the reconciliation compare against a map that includes non-existent tokens and potentially masking a reorganized token transfer history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e289dac-db4d-4333-8d77-52b45153ec28?mode=deep",
+    "timestamp": "2026-04-28 23:04:25.416493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: reconcile()] Can an unprivileged external user exploit the fact that the reconciliation loop processes balance files sequentially and the `previous` variable is updated in-place, so that inserting a crafted balance file with a timestamp between two existing files causes the loop to process a reorganized window that was previously skipped, altering the audit trail for already-reconciled periods?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d290eee5-07d3-4e91-b93f-6d6be0231edd?mode=deep",
+    "timestamp": "2026-04-28 23:04:51.812768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/reconciliation/BalanceReconciliationService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestJob()] Can an unprivileged external user exploit the `reconciliationJobRepository.findLatest()` call by inserting a reconciliation_job record with a consensusTimestamp just before a known reorganized window, causing the next run to start from that point and re-process the reorganized window, potentially with different underlying data that makes the reorganization appear legitimate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15c3f1f8-ef11-43cd-9f33-9834319fa3c5?mode=deep",
+    "timestamp": "2026-04-28 23:05:17.576803",
+    "report_generated": false
+  }
+]
