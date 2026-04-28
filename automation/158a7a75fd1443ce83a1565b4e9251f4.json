@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountId()] Can an unprivileged external user flood the Rosetta API with alias-based account lookups using random non-existent hex aliases, causing repeated `selectCurrentCryptoEntityByAlias` queries against the DB and exhausting the DB connection pool, degrading service for all other users with no economic damage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94150842-2441-4af8-9067-b50c639c91a9?mode=deep",
+    "timestamp": "2026-04-28 20:20:13.597710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountId()] Can an unprivileged user craft a valid-format alias (0x-prefixed hex) that maps to a deleted account, triggering `ErrAccountNotFound` repeatedly and causing the Rosetta node to log excessive error-level entries, flooding the log system and degrading observability for operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f9270a6-5bf6-4743-958c-12f6be623ba1?mode=deep",
+    "timestamp": "2026-04-28 20:20:25.986657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user submit concurrent requests with the same alias value to `selectCryptoEntityByAlias` UNION ALL query, causing the DB to perform repeated full scans of both `entity` and `entity_history` tables simultaneously, resulting in DB CPU exhaustion and griefing legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9910a00-a788-40d9-8dc8-cf19e3648ebe?mode=deep",
+    "timestamp": "2026-04-28 20:20:38.609554",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getLatestBalanceSnapshot()] Can an unprivileged user supply an extremely large `consensusEnd` timestamp to `RetrieveBalanceAtBlock()`, causing `selectPreviousPartitionLowerBound` to scan all `mirror_node_time_partitions` rows with no matching partition, returning a zero `partitionLowerBound` and forcing `latestBalanceBeforeConsensus` to scan the entire `account_balance` table, causing a slow query that blocks DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3caa0b88-ede3-4cbf-810d-f29dc493a1d5?mode=deep",
+    "timestamp": "2026-04-28 20:20:52.026800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getLatestBalanceSnapshot()] Can an unprivileged user pass `consensusEnd = 0` to `RetrieveBalanceAtBlock()`, causing `getLatestBalanceSnapshot()` to return `ErrNodeIsStarting` (when `ab.ConsensusTimestamp == 0`) and making the Rosetta node appear to be in a starting state to all callers, effectively griefing the availability signal of the node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de9dc9d7-5205-423c-b649-e47f8427a93f?mode=deep",
+    "timestamp": "2026-04-28 20:21:06.895306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user repeatedly call `RetrieveBalanceAtBlock()` with a `consensusEnd` value of 1 (minimum), causing `balanceSnapshotEndTimestamp` to underflow to 0 when an entity is deleted at timestamp 1 (via `balanceChangeEndTimestamp - 1`), triggering `ErrNodeIsStarting` and making the node appear unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17e5c77c-c605-4d86-bf24-8790938476d9?mode=deep",
+    "timestamp": "2026-04-28 20:21:20.231346",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user send requests with an alias that matches many historical entries in `entity_history`, causing the UNION ALL in `selectCryptoEntityByAlias` to return a large result set that is fully scanned and sorted by `timestamp_range desc`, consuming excessive memory and CPU on the DB server and griefing other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5aa001ad-a2da-4014-b77d-c661fba9d979?mode=deep",
+    "timestamp": "2026-04-28 20:21:34.828458",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountAlias()] Can an unprivileged user enumerate sequential numeric account IDs via `GetAccountAlias()`, causing repeated `selectCryptoEntityWithAliasById` queries for non-existent IDs, each returning `gorm.ErrRecordNotFound` and silently returning the input `accountId`, while consuming DB query slots and degrading throughput for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71c17b33-7a39-476a-bb15-8ad7b82bc441?mode=deep",
+    "timestamp": "2026-04-28 20:21:49.174261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountAlias()] Can an unprivileged user trigger the `log.Warnf` path in `GetAccountAlias()` by registering an account with a malformed alias (one that passes DB storage but fails `NewAccountIdFromEntity()`), causing the node to emit a warning log containing `hex.EncodeToString(entity.Alias)` for every lookup, flooding the log system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f93e85b-9d27-4f38-9906-1bd9d28caf40?mode=deep",
+    "timestamp": "2026-04-28 20:22:03.975041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalanceChange()] Can an unprivileged user supply a `consensusEnd` far in the future and a `consensusStart` of 0 to `getBalanceChange()` via `RetrieveBalanceAtBlock()`, causing `balanceChangeBetween` to aggregate all `crypto_transfer` rows for a given `entity_id` across the entire table history, resulting in a full table scan that degrades DB performance for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba81ac2f-6139-4411-af41-867784b30035?mode=deep",
+    "timestamp": "2026-04-28 20:22:19.836663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user repeatedly query `RetrieveBalanceAtBlock()` for the treasury account (`treasuryEntityId`) with varying `consensusEnd` values, causing `latestBalanceBeforeConsensus` to repeatedly execute the subquery anchored on `treasury_entity_id`, creating a hot-spot on the treasury account's balance rows and degrading DB cache efficiency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39e0dcdf-0dbb-4113-9ec6-8de8f2d4924e?mode=deep",
+    "timestamp": "2026-04-28 20:22:33.443244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user send a high volume of concurrent requests using alias-based lookups, causing `db.Raw(selectCryptoEntityByAlias, args...).Scan(&entities)` to open many simultaneous DB connections via `GetDbWithContext()`, exhausting the connection pool and causing `ErrDatabaseError` for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11fcf564-3c6b-4ac3-ae8e-0a3808b7ffda?mode=deep",
+    "timestamp": "2026-04-28 20:22:48.256227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getLatestBalanceSnapshot()] Can an unprivileged user craft a `consensusEnd` timestamp that falls exactly on a partition boundary in `mirror_node_time_partitions`, causing `selectPreviousPartitionLowerBound` to return an unexpected `from_timestamp` that makes `latestBalanceBeforeConsensus` scan an extra partition, increasing query cost and griefing DB performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41ea0e64-df59-4115-a9cb-4aac5d00c1c5?mode=deep",
+    "timestamp": "2026-04-28 20:23:03.174422",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user pass a `consensusEnd` value equal to `math.MinInt64`, causing `getInclusiveInt8Range(consensusEnd, consensusEnd)` to produce an invalid range that triggers a DB error, returning `ErrDatabaseError` and causing the node to log an error with the malformed range value, polluting logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c46ecf39-cbe1-416a-8f02-47735ba078fe?mode=deep",
+    "timestamp": "2026-04-28 20:23:19.761993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user send requests with a very long alias byte sequence (maximum allowed hex string), causing `selectCryptoEntityByAlias` to perform a full index scan on the `alias` column in both `entity` and `entity_history` tables, consuming disproportionate DB I/O and griefing other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47a2fab4-be8c-452b-987a-206d307fd1d1?mode=deep",
+    "timestamp": "2026-04-28 20:23:36.561942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountId()] Can an unprivileged user send thousands of concurrent requests with different non-existent aliases, causing `db.Raw(selectCurrentCryptoEntityByAlias).First(&entity)` to return `gorm.ErrRecordNotFound` for each, and the repeated context creation/cancellation via `GetDbWithContext()` to leak goroutines or context objects, degrading node memory over time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82e89f6a-86cb-4b85-b013-a2b1630565b7?mode=deep",
+    "timestamp": "2026-04-28 20:23:52.637045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user query `RetrieveBalanceAtBlock()` for an alias-based account that has been deleted, causing the code to enter the `entity.Deleted` branch and compute `balanceSnapshotEndTimestamp = balanceChangeEndTimestamp - 1`, then trigger two separate DB queries (`getLatestBalanceSnapshot` and `getBalanceChange`) instead of one, doubling DB load per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5538b7f5-5f10-43cd-b55c-3ebc92b4c974?mode=deep",
+    "timestamp": "2026-04-28 20:24:09.039752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getLatestBalanceSnapshot()] Can an unprivileged user trigger the `ErrNodeIsStarting` error (code 110, retriable=true) by querying a valid account at a `consensusEnd` before any balance snapshot exists, causing Rosetta clients to enter infinite retry loops (since `Retriable: true`), amplifying request volume and griefing the node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_887ad6df-eeb7-4c16-be98-4acb1fa8045f?mode=deep",
+    "timestamp": "2026-04-28 20:24:24.869861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user exploit the `order by timestamp_range desc` clause in `selectCryptoEntityByAlias` by targeting an account with a very large number of historical alias reassignments in `entity_history`, causing the sort operation to consume excessive DB memory and CPU, griefing other concurrent queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca97782a-69d3-41f0-a31f-36a4dbf80e3c?mode=deep",
+    "timestamp": "2026-04-28 20:24:39.654532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user pass `consensusEnd = math.MaxInt64` to `RetrieveBalanceAtBlock()`, causing `getInclusiveInt8Range(math.MaxInt64, math.MaxInt64)` to produce an int8range that overflows or is rejected by PostgreSQL, triggering `ErrDatabaseError` and polluting error logs with a misleading database error message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da0da40a-f188-4bc2-b8eb-4651dc82a3f4?mode=deep",
+    "timestamp": "2026-04-28 20:24:54.402957",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getBalanceChange()] Can an unprivileged user cause `hbarAmount.Value += hbarValue` in `RetrieveBalanceAtBlock()` to silently overflow by querying an account with an extremely large number of micro-transfers that sum beyond `int64` range, producing a corrupted balance value returned to the caller without any error, misleading downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9c21f5f-5cc5-4975-9af9-0764d90ad45b?mode=deep",
+    "timestamp": "2026-04-28 20:25:09.240618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getCryptoEntity()] Can an unprivileged user send requests with an alias that has no matching entry in `entity` but many entries in `entity_history`, causing the UNION ALL to return only `entity_history` rows, and the `order by timestamp_range desc limit 1` to be applied across the full union result, causing unnecessary full scans of `entity_history` and griefing DB performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5c03d61-6511-4b2a-85a0-1e003eec7e23?mode=deep",
+    "timestamp": "2026-04-28 20:25:24.896843",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: GetAccountAlias()] Can an unprivileged user repeatedly call `GetAccountAlias()` for a valid account ID whose entity has a malformed alias stored in the DB (one that fails `NewPublicKeyFromAlias()`), causing the node to emit a `log.Warnf` for every single request, flooding the warning log and degrading log-based monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e92faa1-371d-432c-87d2-b1ff7031306b?mode=deep",
+    "timestamp": "2026-04-28 20:25:39.383875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged user query `RetrieveBalanceAtBlock()` for a non-existent alias-based account (where `getCryptoEntity()` returns nil), causing the function to return `types.AmountSlice{&types.HbarAmount{}}` (zero balance) without error, misleading callers into believing the account exists with zero balance rather than not existing at all?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e28b101-e052-4942-87f9-006f889b0ab0?mode=deep",
+    "timestamp": "2026-04-28 20:25:55.100445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getLatestBalanceSnapshot()] Can an unprivileged user cause `selectPreviousPartitionLowerBound` to return `partitionLowerBound = 0` by querying with a `timestamp` before any partition exists, causing `latestBalanceBeforeConsensus` to use `lower_bound = 0` and scan the entire `account_balance` table from the beginning of time, causing a full table scan that degrades DB performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_741e7a7e-fe8f-4824-8e1a-e60636464d13?mode=deep",
+    "timestamp": "2026-04-28 20:26:10.746659",
+    "report_generated": false
+  }
+]
