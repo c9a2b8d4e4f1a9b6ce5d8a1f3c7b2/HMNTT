@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: populateContractTransactions()] Can an unprivileged external user craft a transaction that results in a very large number of contract transactions being added via addContractTransaction(), causing populateContractTransactions() to build an ArrayList of all keys and set it on every ContractTransaction, resulting in O(n^2) memory allocation and potential heap exhaustion when n is large?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71601481-6517-4bd7-970a-018e294c633e?mode=deep",
+    "timestamp": "2026-04-28 22:31:01.858691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: doAddEntityId()] Can an unprivileged external user craft a transaction where doAddEntityId() is called with multiple different EntityId values, causing the shared entityTransactionBuilder to be reused across all computeIfAbsent() calls, and since the builder's entityId field is mutated in-place via .entityId(id), a race condition between two concurrent calls could cause both EntityTransaction objects to be built with the same entityId value, corrupting the entityTransactions map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_038ede48-741f-4942-80ed-f2d9c35c72a9?mode=deep",
+    "timestamp": "2026-04-28 22:31:13.911944",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: doAddEntityId()] Can an unprivileged external user craft a transaction where the entityTransactionBuilder is initialized once with a specific consensusTimestamp, payerAccountId, result, and type, and then reused for all subsequent addEntityId() calls, meaning that if the transactionType or transactionStatus changes between calls (e.g., via mutable state), all previously built EntityTransaction objects will have stale values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb154a9a-4a00-4dfe-bff2-139bbea912de?mode=deep",
+    "timestamp": "2026-04-28 22:31:26.669493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: doAddEntityId()] Can an unprivileged external user trigger concurrent calls to doAddEntityId() on the same RecordItem, causing a race condition where entityTransactionBuilder is null-checked and initialized by two threads simultaneously, resulting in two different builder instances being created and one being discarded, causing some EntityTransaction objects to be built with a different builder state than others?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b6bb92b-bc7a-40f9-8826-ae95dab0139d?mode=deep",
+    "timestamp": "2026-04-28 22:31:39.593861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: setEntityNftTransactionPredicate()] Can an unprivileged external user craft a scenario where setEntityNftTransactionPredicate() is called with a predicate that always returns true, but the payer exclusion filter `entityId -> !payerAccountId.equals(entityId)` uses the payerAccountId at the time of predicate construction, and if payerAccountId is later changed (it is final, but EntityId is mutable), the exclusion check may produce incorrect results, allowing the payer to be included in NFT entity transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af8483e1-d804-4e2b-9378-2447d217e0a4?mode=deep",
+    "timestamp": "2026-04-28 22:31:55.102312",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: setEntityNftTransactionPredicate()] Can an unprivileged external user craft a transaction where setEntityNftTransactionPredicate(null) is called, causing entityNftTransactionPredicate to be set to REJECT_ALL, silently suppressing all NFT entity transaction tracking without any error, and then a subsequent call to addNftTransactionEntityId() will silently do nothing, leading to missing NFT entity transaction records in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e467fd0-95ea-428e-8ff3-63fce8832be1?mode=deep",
+    "timestamp": "2026-04-28 22:32:09.470257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: setEntityTransactionPredicate()] Can an unprivileged external user craft a scenario where setEntityTransactionPredicate() is called with a predicate that accepts EntityId.EMPTY (the zero entity), causing doAddEntityId() to create an EntityTransaction with entityId=0, which may collide with system entities or cause foreign key violations in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_625778a1-5b6c-4a02-9243-7a97aacbe63c?mode=deep",
+    "timestamp": "2026-04-28 22:32:24.599463",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: nextHookContext()] Can an unprivileged external user craft a deeply nested parent chain (child -> parent -> grandparent) where all RecordItems have hookExecutionQueue == null, causing nextHookContext() to recursively call parent.nextHookContext() up the chain, and if the chain is sufficiently deep, causing a StackOverflowError that crashes the importer process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89e651d8-a920-44b5-965f-45d384ece948?mode=deep",
+    "timestamp": "2026-04-28 22:32:40.915833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: nextHookContext()] Can an unprivileged external user craft a transaction where hookExecutionQueue is set to an empty ArrayDeque, causing nextHookContext() to call hookExecutionQueue.poll() which returns null, and downstream hook processing code that does not null-check the return value of nextHookContext() will throw a NullPointerException, disrupting hook execution for subsequent transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06f12c7a-513f-4a06-8a98-5bc98858995f?mode=deep",
+    "timestamp": "2026-04-28 22:32:58.523859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: nextHookContext()] Can an unprivileged external user craft a CryptoTransfer transaction that populates the hookExecutionQueue with a large number of AbstractHook.Id entries, causing nextHookContext() to be called repeatedly in a loop by hook processing logic, and if the queue is never exhausted (e.g., due to a bug in the consumer), causing an infinite processing loop that starves other transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb988770-b7c4-4dbb-8cef-9a72298ec104?mode=deep",
+    "timestamp": "2026-04-28 22:33:15.919061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: getContractRelatedParent()] Can an unprivileged external user craft a transaction where hookParent is set to a RecordItem that does not actually have a contract result, causing getContractRelatedParent() to return hookParent unconditionally (line 272-274), and downstream code in SyntheticContractLogServiceImpl that assumes contractRelatedParentRecordItem has a contract result will produce incorrect log entries with empty contractId?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ce3ff9d-955c-49c3-b8de-494bf4f7b9b3?mode=deep",
+    "timestamp": "2026-04-28 22:33:34.104189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: getContractRelatedParent()] Can an unprivileged external user craft a transaction where parent is set but parent.hasContractResult() returns false (no contract call or create result), causing getContractRelatedParent() to return null, and downstream synthetic log creation to use the child's own consensusTimestamp and logIndex instead of the parent's, resulting in log index collisions between parent and child contract logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_074291ca-e4d8-4f1b-92c9-fb2f09f9990f?mode=deep",
+    "timestamp": "2026-04-28 22:33:53.589541",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseSuccess()] Can an unprivileged external user craft a child transaction record with receipt status SUCCESS but whose parent RecordItem has isSuccessful() == false, causing parseSuccess() to return false for the child (line 391-393), even though the consensus node recorded the child as successful, leading to suppression of legitimate successful child transaction data (token transfers, contract results, etc.)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddc35b99-6c89-4b02-b16f-9da45c429772?mode=deep",
+    "timestamp": "2026-04-28 22:34:13.384858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseSuccess()] Can an unprivileged external user craft a transaction record with receipt status FEE_SCHEDULE_FILE_PART_UPLOADED, causing parseSuccess() to return true (line 396), and downstream processing to treat this as a fully successful transaction, potentially persisting partial fee schedule data as if it were complete, leading to incorrect fee schedule state in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_000d6649-7ca6-4c9e-a802-30a8fbe9528d?mode=deep",
+    "timestamp": "2026-04-28 22:34:32.912641",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseSuccess()] Can an unprivileged external user craft a transaction record with receipt status SUCCESS_BUT_MISSING_EXPECTED_OPERATION, causing parseSuccess() to return true (line 398), and downstream processing to fully persist all transaction effects as successful, even though the operation was incomplete, leading to an inconsistent state where missing operations are not flagged in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fdb86e8-232c-4a94-946d-1d3c1a4eebdc?mode=deep",
+    "timestamp": "2026-04-28 22:34:54.443561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: isInvalidIdError()] Can an unprivileged external user craft a transaction with an INVALID_NODE_ACCOUNT_ID receipt status, causing isInvalidIdError() to return true, which suppresses the recoverable error log in EntityRecordItemListener (line 99-103), effectively silencing error reporting for transactions with invalid node account IDs and hiding potential data quality issues from operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f51b7902-b7e6-4a13-bfde-91192788fb5a?mode=deep",
+    "timestamp": "2026-04-28 22:35:16.425858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: isInvalidIdError()] Can an unprivileged external user craft a transaction with a receipt status not in the INVALID_* set (e.g., INVALID_SIGNATURE), causing isInvalidIdError() to return false and triggering a recoverable error log, which an attacker could use to flood error logs by submitting many transactions with non-INVALID_ID error codes, degrading log quality and masking real errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9949728f-ff4f-4099-b204-0b9a1aafbbf7?mode=deep",
+    "timestamp": "2026-04-28 22:35:38.335896",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: build()] Can an unprivileged external user craft a Transaction protobuf where the TransactionID's AccountID has all fields set to zero (default instance), causing EntityId.of(transactionBody.getTransactionID().getAccountID()) at line 308 to produce EntityId.EMPTY or a zero-value EntityId, which is then stored as payerAccountId, leading to incorrect payer attribution for all downstream entity and contract transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfb135f5-7871-4c36-b8af-3c7f627da5e7?mode=deep",
+    "timestamp": "2026-04-28 22:36:01.569700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: build()] Can an unprivileged external user craft a TransactionRecord with a consensusTimestamp that overflows DomainUtils.timestampInNanosMax() (e.g., seconds value near Long.MAX_VALUE / 1e9), causing consensusTimestamp to wrap around to a negative or very small value, leading to incorrect ordering of transactions in the database and potential primary key conflicts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6afd5c9-4ace-4cbd-b195-4d6fbab60f46?mode=deep",
+    "timestamp": "2026-04-28 22:36:26.114036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: build()] Can an unprivileged external user craft a Transaction with empty signedTransactionBytes, empty bodyBytes, and hasBody() == false, causing parseTransaction() to reach the final null check at line 430 and throw a ProtobufException with BAD_TRANSACTION_BODY_BYTES_MESSAGE, which if not properly caught by the caller, could crash the importer and halt all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dbbdcaaf-99aa-4ceb-b2f7-b8145490832e?mode=deep",
+    "timestamp": "2026-04-28 22:36:49.391879",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseTransaction()] Can an unprivileged external user craft a SignedTransaction whose bodyBytes field contains a valid protobuf message that is NOT a TransactionBody (e.g., a different message type with overlapping field numbers), causing TransactionBody.parseFrom() to succeed but produce a TransactionBody with unexpected field values, leading to incorrect transactionType detection and wrong handler dispatch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87e31603-913c-470e-b958-7321bf3f37bb?mode=deep",
+    "timestamp": "2026-04-28 22:37:14.895874",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseTransaction()] Can an unprivileged external user craft a Transaction where signedTransactionBytes contains a SignedTransaction with an extremely large bodyBytes payload (e.g., 100MB), causing TransactionBody.parseFrom() to allocate a large amount of heap memory during parsing, leading to OutOfMemoryError or GC pressure that degrades importer performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f89ba5c-6fd0-4e31-b8e1-0fceb5753e10?mode=deep",
+    "timestamp": "2026-04-28 22:37:42.157928",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: parseTransaction()] Can an unprivileged external user craft a Transaction where signedTransactionBytes is set to a deeply nested protobuf message (e.g., repeated embedded messages), causing SignedTransaction.parseFrom() to trigger recursive protobuf parsing that exhausts the call stack or causes excessive CPU usage, resulting in a denial-of-service against the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cef9063-b6ac-493b-afa7-de50302bb1da?mode=deep",
+    "timestamp": "2026-04-28 22:38:09.058234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: '] [Function: getEntityTransactions()] Can an unprivileged external user trigger a scenario where getEntityTransactions() is called externally (it is public), receiving a direct reference to the internal mutable HashMap, and then the caller modifies the map (adds/removes entries), corrupting the RecordItem's entity transaction state and causing incorrect data to be persisted by EntityRecordItemListener?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48e0b962-81f9-4f5b-915b-eef9b6c5d0c8?mode=deep",
+    "timestamp": "2026-04-28 22:38:37.485608",
+    "report_generated": false
+  }
+]
