@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() calls contractStateRepository.findStorageBatch() with a list of byte[] slot keys derived from ByteBuffer.array() — which returns the full backing array — to cause the SQL IN clause to match incorrect slot values if the ByteBuffer has a non-zero arrayOffset(), resulting in wrong Hashgraph slot values being returned and cached?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0efb9fba-6fbd-4e34-a50b-9b8ae6aec149?mode=deep",
+    "timestamp": "2026-04-28 21:11:51.722291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorage()] Can an unprivileged external user exploit the two-branch logic in findStorage() — direct DB query when batch caching is disabled vs. batch cache path — to observe different slot values for the same (contractId, key) depending on which code path is active, revealing inconsistencies between the cache and the DB that indicate tampered Hashgraph history has been ingested?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_036e47c0-6b94-45f5-9822-8097c2755854?mode=deep",
+    "timestamp": "2026-04-28 21:12:03.843278",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the contractSlotsCache (expireAfterAccess=5m, maximumSize=3000) to keep a large number of slot keys alive by periodically accessing them, preventing cache eviction and ensuring that a tampered batch query result (from a manipulated mirror node DB) remains cached and served to all users for up to 5 minutes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d6753cb-abc6-4e3b-a773-ba404c5e426d?mode=deep",
+    "timestamp": "2026-04-28 21:12:16.227274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the absence of any upper-bound check on blockTimestamp in findStorageByBlockTimestamp() to pass a timestamp that is beyond the latest ingested consensus_timestamp in the mirror node DB, causing the query to return the most recent known state as if it were the state at that future timestamp, misrepresenting unfinalized Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0641f3a0-3ea1-4c3d-b52d-25f9670eed03?mode=deep",
+    "timestamp": "2026-04-28 21:12:28.753728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractStateCache.put() in findStorageBatch() does not use putIfAbsent() — it unconditionally overwrites — to cause a race condition where a correct cached value is overwritten by a tampered DB value when two concurrent batch queries execute simultaneously, with the second query returning a manipulated Hashgraph state value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98400dfb-ea6a-48d4-bd4c-2dc4d9ab156a?mode=deep",
+    "timestamp": "2026-04-28 21:12:42.023241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorage()] Can an unprivileged external user exploit the fact that findStorage() has no mechanism to detect or reject a null contractId or a zero-value EntityId, causing contractStateRepository.findStorage() to execute a query with contract_id = 0 that may match system-level or genesis contract state records in the mirror node DB, potentially exposing tampered Hashgraph genesis state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a31d8fb-0744-4aad-a776-b43734fbd9be?mode=deep",
+    "timestamp": "2026-04-28 21:12:55.215162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the slotsPerContract cache (expireAfterAccess=5m, maximumSize=1500) by requesting 1500 unique slot keys for a single contract, filling the per-contract cache to capacity, then requesting a 1501st key to evict the oldest entry, causing the evicted slot's next read to fall back to contractStateRepository.findStorage() which may return a tampered mirror node value instead of the previously correct cached value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c00b7f11-4853-4147-b634-fd724e269cbf?mode=deep",
+    "timestamp": "2026-04-28 21:13:08.534000",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the fact that findStorageByBlockTimestamp() queries contract_state_change (not contract_state) to read a value that was written and then immediately overwritten in the same block, where the mirror node has only ingested the first write due to a Hashgraph history gap, causing the service to return an intermediate state that never represented the true final Hashgraph state at that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45ab8cff-3136-4531-9681-6ec822c11b5b?mode=deep",
+    "timestamp": "2026-04-28 21:13:22.362995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() uses Arrays.equals(slotKey, key) for matching the requested key in the batch results, while the cache key uses ByteBuffer.wrap(key) equality, creating a scenario where the same logical slot key stored differently (e.g., with different array lengths but same content) matches in one comparison but not the other, causing the wrong value to be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_216a4398-0c03-4e1f-a1c0-ae63d120cedc?mode=deep",
+    "timestamp": "2026-04-28 21:13:36.858710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorage()] Can an unprivileged external user exploit the contractStateCache (expireAfterWrite=2s) combined with the contractSlotsCache (expireAfterAccess=5m) to create a window where the contractStateCache has expired but the contractSlotsCache still holds the slot key, causing findStorageBatch() to re-query the DB and cache a tampered value that the mirror node ingested during the 2-second window between cache writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b769c28e-db05-45e1-8402-3fdcab35fa90?mode=deep",
+    "timestamp": "2026-04-28 21:13:51.813889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() does not validate that the slot values returned by contractStateRepository.findStorageBatch() correspond to the correct contractId, allowing a DB-level join confusion or ORM mapping error to return slot values from a different contract's Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5810520-1693-41b2-ba18-439bbe4ae9fd?mode=deep",
+    "timestamp": "2026-04-28 21:14:06.644179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the fact that findStorageByBlockTimestamp() does not cache its results — unlike findStorage() — to perform repeated historical queries at the same (entityId, slot, blockTimestamp) and observe different results if the mirror node DB is being updated with tampered Hashgraph history records between queries, revealing the tampering in progress?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a39afb0b-dc5f-45b5-94f7-70083371c207?mode=deep",
+    "timestamp": "2026-04-28 21:14:21.733987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that the per-contract cache in findStorageBatch() is created lazily via cacheManagerSlotsPerContract.getCache(contractId.toString()) and stored in contractSlotsCache, causing a scenario where the same contractId string maps to different CaffeineCache instances across JVM restarts or cache manager resets, leading to inconsistent slot key tracking and incorrect batch queries against tampered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17056238-c85e-4869-a638-1f66bcff4452?mode=deep",
+    "timestamp": "2026-04-28 21:14:38.078106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorage()] Can an unprivileged external user exploit the fact that findStorage() returns Optional.of(cachedValue) when cachedValue is a non-null, non-EMPTY_VALUE byte array from the cache, without verifying that the cached value still matches the current DB state, causing EVM execution to use a stale slot value that reflects a pre-tampering Hashgraph state even after the mirror node has ingested corrected records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64d08383-2fc6-4026-85a8-9d8c551d52f6?mode=deep",
+    "timestamp": "2026-04-28 21:14:54.854762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() calls contractSlotsCache.getNativeCache().asMap().keySet() to get all cached slot keys, and this set may include keys from previous requests by other users, causing the batch query to fetch and cache slot values for slots the current user never requested, potentially exposing those other users' slot access patterns and the associated Hashgraph state values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5b5d663-ffa1-407c-a560-44d726498125?mode=deep",
+    "timestamp": "2026-04-28 21:15:08.224421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the fact that findStorageByBlockTimestamp() passes the blockTimestamp directly to the SQL query without any sanitization or range validation, and if the mirror node has gaps in its consensus_timestamp records due to Hashgraph history manipulation, the query will silently skip over the gap and return the last known value before the gap, misrepresenting the state at the requested block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf8dbcfc-3efc-48fc-bc3b-2b21e8d81614?mode=deep",
+    "timestamp": "2026-04-28 21:15:22.014363",
+    "report_generated": false
+  }
+]
