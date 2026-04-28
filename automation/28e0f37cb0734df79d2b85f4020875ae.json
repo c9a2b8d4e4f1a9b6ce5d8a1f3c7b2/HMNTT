@@ -100,5 +100,107 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2083ffa0-d0a5-4ce7-b151-488999295930?mode=deep",
     "timestamp": "2026-04-28 18:12:08.229927",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInstance()] Can an unprivileged external user exploit a scenario where the Spring application context fails to call `init()` (e.g., due to a bean initialization error earlier in the context lifecycle) to leave `INSTANCE` as `null`, causing all subsequent calls to `CommonProperties.getInstance()` to throw `IllegalStateException` and crash any component (e.g., `DomainUtils.fromEvmAddress()`) that depends on it, halting transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_728e0fb5-8db1-4bf1-b629-dd00bbc0c967?mode=deep",
+    "timestamp": "2026-04-28 22:59:54.053021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user set `hiero.mirror.common.database-startup.timeout` to exactly 10 seconds (minimum via `@DurationMin(seconds=10)`) via environment variable, and then perform a network-level attack (e.g., TCP RST injection or firewall rule manipulation) to delay the database response by more than 10 seconds, causing `DatabaseWaiter` to throw `IllegalStateException` and permanently shut down the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_588ec52e-8da7-4ce2-89e6-fe5759e49f55?mode=deep",
+    "timestamp": "2026-04-28 23:00:06.029590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit the `@ConfigurationProperties` scan path `org.hiero.mirror` (in `CommonConfiguration`) to register a competing `CommonProperties`-like bean that gets picked up by `@ConfigurationPropertiesScan`, causing the `INSTANCE` to be set to a misconfigured object with wrong `realm`/`shard` values that corrupt all system entity ID resolution and halt transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4312fe7b-bbba-457f-9b0d-fe10df412bb0?mode=deep",
+    "timestamp": "2026-04-28 23:00:18.343002",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user set `hiero.mirror.common.database-startup.validation-timeout` to a value exceeding `Integer.MAX_VALUE` seconds by exploiting a unit conversion edge case in Spring's `@DurationUnit(ChronoUnit.SECONDS)` binding, causing `Math.toIntExact()` in `DatabaseWaiter` to throw `ArithmeticException` and crash the startup sequence, preventing all transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7117cc6-c981-4773-aceb-a2c7894d8b61?mode=deep",
+    "timestamp": "2026-04-28 23:00:31.067106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit a container environment where environment variables are world-readable to discover and then modify `HIERO_MIRROR_COMMON_REALM` or `HIERO_MIRROR_COMMON_SHARD` before the mirror node starts, causing `init()` to store a corrupted `CommonProperties` instance in `INSTANCE` that makes `SystemEntity.throttleDefinitionFile()` resolve to a wrong entity ID, disabling throttle enforcement and causing network instability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5331cd34-8572-4fee-81c3-124af7196278?mode=deep",
+    "timestamp": "2026-04-28 23:00:45.161529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties (inner class)] Can an unprivileged external user set `hiero.mirror.common.database-startup.interval` to a value below `@DurationMin(millis=500)` by exploiting a Spring Boot version-specific relaxed binding bug, causing `DatabaseWaiter` to retry DB connections with zero or negative sleep intervals, creating a tight loop that exhausts CPU and file descriptor resources and causes the mirror node to crash, halting all transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6be7d92-b216-43ae-b0b6-7280e9cfc922?mode=deep",
+    "timestamp": "2026-04-28 23:00:59.126337",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInstance()] Can an unprivileged external user send a high volume of concurrent API requests that all trigger `CommonProperties.getInstance()` during a rolling restart of the mirror node (when `INSTANCE` is momentarily null between context destruction and re-initialization), causing a flood of `IllegalStateException` errors that crash worker threads and prevent the node from confirming new transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b28b499-992a-4602-9376-7169464e84b7?mode=deep",
+    "timestamp": "2026-04-28 23:01:13.529825",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit the fact that `@PostConstruct init()` sets `INSTANCE` without any synchronization beyond `AtomicReference.set()` to create a visibility race where another thread reads a partially-constructed `CommonProperties` object (with default `realm=0` and `shard=0`) before the actual configured values are bound, causing `SystemEntity` to use wrong entity IDs and corrupt transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf23c7fd-83d3-4980-85af-02101ca92745?mode=deep",
+    "timestamp": "2026-04-28 23:01:28.767940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user set `hiero.mirror.common.database-startup.connect-timeout` to a value that, when converted to seconds via `String.valueOf(properties.getConnectTimeout().toSeconds())`, produces `0` (e.g., a sub-second duration that rounds down), bypassing the JDBC driver's connect timeout and causing `DatabaseWaiter` to hang indefinitely on connection attempts, blocking the mirror node startup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e41ec79f-2cde-4e99-bd43-a3bb6755d656?mode=deep",
+    "timestamp": "2026-04-28 23:01:45.020168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties.getSocketTimeout()] Can an unprivileged external user set `hiero.mirror.common.database-startup.socket-timeout` to a value that rounds to `0` seconds when converted via `String.valueOf(properties.getSocketTimeout().toSeconds())`, disabling the JDBC socket timeout and causing `DatabaseWaiter` to block indefinitely on socket reads, preventing the mirror node from ever completing startup and confirming transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f01c117-e82f-4e57-b52f-b04dbf1963fa?mode=deep",
+    "timestamp": "2026-04-28 23:02:01.886226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit a Spring Cloud Config or Kubernetes ConfigMap integration to push a configuration update that changes `hiero.mirror.common.realm` mid-operation, causing `init()` to be called again with a new value and overwriting `INSTANCE`, creating an inconsistency between the `SystemEntity` bean (which cached the old realm) and `DomainUtils.fromEvmAddress()` (which uses the new `getInstance()` realm), corrupting entity ID resolution and halting transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd11d0f6-48c4-4a92-8074-2d7b8459f1a6?mode=deep",
+    "timestamp": "2026-04-28 23:02:18.562277",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties (inner class)] Can an unprivileged external user provide a `hiero.mirror.common.database-startup.timeout` value that is a valid duration but causes `System.nanoTime() + properties.getTimeout().toNanos()` in `DatabaseWaiter` to overflow a `long`, wrapping the deadline to a past timestamp and causing the while loop to exit immediately without ever connecting to the database, resulting in `IllegalStateException` and total node shutdown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2ceaf1b-7cac-4e72-bfff-10511246d1c2?mode=deep",
+    "timestamp": "2026-04-28 23:02:36.784007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInstance()] Can an unprivileged external user exploit a deserialization or reflection-based attack vector in the Spring context to null out the `INSTANCE` `AtomicReference` after `init()` has run, causing all subsequent `getInstance()` calls to throw `IllegalStateException` and crash the mirror node, preventing all transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_54b610c8-ad5b-4992-aac4-12ba5c408a7c?mode=deep",
+    "timestamp": "2026-04-28 23:02:54.288487",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit a misconfigured Spring Boot Actuator `/env` endpoint (with write access) to override `hiero.mirror.common.shard` at runtime, causing `init()` to be re-invoked with a new shard value that corrupts the `INSTANCE` singleton, making `SystemEntity.addressBookFile101()` and `addressBookFile102()` resolve to wrong entity IDs and preventing the importer from reading address books needed for transaction routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e8263eb-17da-42c2-9ca8-9c0771d8adeb?mode=deep",
+    "timestamp": "2026-04-28 23:03:13.870858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user exploit a long-running `DatabaseWaiter.waitForDatabase()` loop (caused by a large `timeout` value) combined with a resource exhaustion attack on the database to keep the mirror node in an infinite startup loop, consuming all available threads and preventing the node from ever becoming ready to confirm transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc32c8c5-549f-4302-9104-d19002bb51cf?mode=deep",
+    "timestamp": "2026-04-28 23:03:33.543274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: DatabaseStartupProperties (inner class)] Can an unprivileged external user set `hiero.mirror.common.database-startup.connect-timeout` and `hiero.mirror.common.database-startup.socket-timeout` both to their maximum allowed values via environment variables, causing each JDBC connection attempt in `DatabaseWaiter` to take an extremely long time before failing, combined with a large `timeout`, effectively blocking the mirror node startup for an arbitrarily long period and preventing transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74f72be3-bcf3-4fe9-ba4e-aab911d8911c?mode=deep",
+    "timestamp": "2026-04-28 23:03:53.616321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: init()] Can an unprivileged external user exploit the `@Validated` annotation on `CommonProperties` to trigger a `ConstraintViolationException` during Spring context startup by providing a `null` value for `databaseStartup` (overriding the `@NotNull` default), causing the `CommonProperties` bean to fail initialization and preventing `init()` from ever running, leaving `INSTANCE` null and crashing all callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_917f1916-7eba-4138-814c-cc5c8768ef6e?mode=deep",
+    "timestamp": "2026-04-28 23:04:14.525235",
+    "report_generated": false
   }
 ]
