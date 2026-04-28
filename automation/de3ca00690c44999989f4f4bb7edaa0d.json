@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSharedListener()] Can an unprivileged external user flood the `topicMessages` ConcurrentHashMap by subscribing to a large number of distinct topic IDs, causing unbounded heap growth and degrading service for all legitimate subscribers since there is no size cap on the map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cab0530e-3be2-427d-9984-5cb799137280?mode=deep",
+    "timestamp": "2026-04-28 20:18:52.941028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user open many slow-consuming gRPC subscriptions to the same topic, exhausting the `onBackpressureBuffer(maxBufferSize, BufferOverflowStrategy.ERROR)` buffer in `SharedTopicListener.listen()`, causing ERROR signals that disrupt all other subscribers sharing the same `.share()` Flux?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee1e1b14-6236-453e-ba03-7de27f837494?mode=deep",
+    "timestamp": "2026-04-28 20:19:04.796081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: unsubscribe()] Can an unprivileged user exploit the race condition between `topicMessages.computeIfAbsent()` and `topicMessages.remove()` in `unsubscribe()` by rapidly subscribing and cancelling, causing a new subscriber's Flux to be silently removed from the map, making the topic appear unsubscribed while the Flux is still active?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9ffc851-b8c6-4f9d-b3a0-8dd3fef5c88d?mode=deep",
+    "timestamp": "2026-04-28 20:19:16.981283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user trigger the `Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(4L))` infinite retry loop by repeatedly subscribing to a topic and causing Redis errors, generating a continuous retry storm that consumes thread and connection resources and degrades service for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01f8a1e5-3595-44bf-827c-d2fee660475c?mode=deep",
+    "timestamp": "2026-04-28 20:19:29.448860",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSharedListener()] Can an unprivileged user subscribe to thousands of non-existent topic IDs, causing `computeIfAbsent()` to create a new Redis channel subscription for each via `subscribe(topic)`, exhausting Redis connection/channel resources and preventing legitimate topic subscriptions from being established?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c91c467c-831d-4736-baa0-d065e36dab6b?mode=deep",
+    "timestamp": "2026-04-28 20:19:42.617885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the `.share()` operator on the returned Flux such that when the attacker's subscription is the last one and they cancel it, `doOnCancel(() -> unsubscribe(topic))` removes the entry from `topicMessages`, forcing all future subscribers to re-establish a new Redis channel subscription and causing a brief message gap for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c53fd9d5-c403-4af1-af03-9c87976f7fa7?mode=deep",
+    "timestamp": "2026-04-28 20:19:56.262757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getTopic()] Can an unprivileged user enumerate all active topic subscriptions by iterating over valid topic IDs in the format `topic.%d` and observing which ones return live data, enabling targeted griefing by subscribing and immediately cancelling only the most-used topics to force repeated re-subscription overhead?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1e17ce9-efd9-4ef9-92ef-8cf95bca5ddc?mode=deep",
+    "timestamp": "2026-04-28 20:20:10.301570",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user deliberately consume messages very slowly on a shared `.share()` Flux, causing the `onBackpressureBuffer` in `SharedTopicListener` to fill up and emit `BufferOverflowStrategy.ERROR`, which terminates the shared Flux and disrupts all co-subscribers on that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ffcf632-26d8-4699-9684-709072001950?mode=deep",
+    "timestamp": "2026-04-28 20:20:23.111027",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RedisTopicListener()] Can an unprivileged user trigger repeated connection attempts to Redis by subscribing to topics before the Redis container is ready, causing the `Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(8))` loop to fire continuously and log-flood the system, degrading observability for operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96fdc6e0-4d1f-4904-b86e-bc57661d5562?mode=deep",
+    "timestamp": "2026-04-28 20:20:37.298643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: unsubscribe()] Can an unprivileged user cause a double-unsubscribe by having two concurrent subscribers on the same topic both cancel at the same time, triggering two concurrent calls to `topicMessages.remove(topic.getTopic())` and `log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc049339-76b3-400f-810c-d42f6e2e62aa?mode=deep",
+    "timestamp": "2026-04-28 20:20:50.650443",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSharedListener()] Can an unprivileged user exploit the fact that `computeIfAbsent` is not atomic with respect to the lifecycle of the Flux returned by `subscribe()`, by subscribing concurrently from many threads to the same topic, causing multiple `subscribe(topic)` calls and multiple Redis channel subscriptions to be created before the first one is stored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f7975bc-9de8-42ff-8428-d603d0a16c0d?mode=deep",
+    "timestamp": "2026-04-28 20:21:04.445142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user open a subscription and then hold it open indefinitely without consuming messages, causing the shared Flux's internal buffer to fill and block message delivery to all other legitimate subscribers on the same topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d46dc6e-00ea-429f-843f-0ac01a838acc?mode=deep",
+    "timestamp": "2026-04-28 20:21:19.129650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getTopic()] Can an unprivileged user craft a `TopicMessageFilter` with a very large topic ID integer value to generate a topic key like `topic.9223372036854775807`, causing the `topicMessages` map to accumulate entries for IDs that will never receive messages, wasting memory indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1b1e1f5-627d-4454-a95c-d66c66d35750?mode=deep",
+    "timestamp": "2026-04-28 20:21:34.752076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the `doOnError(t -> log.error(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e976824-2802-42b9-b0e1-8e08bf6f0224?mode=deep",
+    "timestamp": "2026-04-28 20:21:49.510664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user cause a griefing denial-of-service by subscribing to a high-traffic topic and immediately cancelling in a tight loop, repeatedly triggering `doOnCancel(() -> unsubscribe(topic))` which removes and re-adds the topic entry, causing all other subscribers to momentarily lose their shared Flux reference?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cccf3c49-c67c-4bad-9464-9a99a581ed1f?mode=deep",
+    "timestamp": "2026-04-28 20:22:03.642346",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSharedListener()] Can an unprivileged user cause the `topicMessages` ConcurrentHashMap to grow without bound by subscribing to sequentially incrementing topic IDs and never cancelling, since there is no eviction policy or maximum size enforced on the map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6332615e-f3ba-4ebd-9feb-1bde3065dcfe?mode=deep",
+    "timestamp": "2026-04-28 20:22:17.576217",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the fact that `.share()` multicasts to all current subscribers, such that if the attacker's subscription generates an error signal (e.g., by triggering a deserialization failure), the error propagates to all co-subscribers on the same topic Flux?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2beee48a-cfe1-4f98-92b8-61a93a59c8b7?mode=deep",
+    "timestamp": "2026-04-28 20:22:30.348464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: RedisTopicListener()] Can an unprivileged user trigger the `doOnSubscribe(s -> log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e9c44e1-6468-496d-b312-01f74944eeea?mode=deep",
+    "timestamp": "2026-04-28 20:22:44.637583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the `Retry.backoff(Long.MAX_VALUE, interval)` on the `subscribe()` Flux to keep a dead Redis channel subscription alive indefinitely, preventing the `topicMessages` entry from being cleaned up and blocking legitimate re-subscription to the same topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3f0d06e-088a-4bab-84ff-c75888d3a93f?mode=deep",
+    "timestamp": "2026-04-28 20:22:58.270061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: unsubscribe()] Can an unprivileged user cause a stale Flux to remain in `topicMessages` by subscribing to a topic, triggering an error that causes the Flux to enter retry backoff, and then having a second subscriber call `computeIfAbsent` which returns the stale retrying Flux instead of creating a fresh one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15228839-5117-46ba-83ca-1259cb79d4a4?mode=deep",
+    "timestamp": "2026-04-28 20:23:12.828057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSharedListener()] Can an unprivileged user cause a memory leak by subscribing to a large number of unique topic IDs, each resulting in a `Flux<TopicMessage>` stored in `topicMessages`, where each Flux holds a reference to a Redis channel subscription, exhausting JVM heap and causing GC pressure that degrades all gRPC service performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e375250e-f7da-4db1-9e10-3fb0a20c3ec2?mode=deep",
+    "timestamp": "2026-04-28 20:23:27.598071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the shared `.share()` Flux by subscribing with a very low demand (request(1)) and never requesting more, causing the upstream Redis message pipeline to stall due to backpressure, delaying message delivery to all other subscribers on the same topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca29a7c3-a6ba-4f97-bb65-efa3a3960dcd?mode=deep",
+    "timestamp": "2026-04-28 20:23:42.758548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getTopic()] Can an unprivileged user subscribe to topic ID `0` or negative-equivalent IDs to generate a channel name like `topic.0`, which may collide with internal or test channels in Redis, causing message routing confusion or unintended message delivery to legitimate subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_940dc1bc-86aa-47ee-b282-6f9881aa48a8?mode=deep",
+    "timestamp": "2026-04-28 20:23:58.192963",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user cause the `doOnSubscribe(s -> log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6ad3daa-1eba-48f2-9643-91494c1619fb?mode=deep",
+    "timestamp": "2026-04-28 20:24:12.201950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: subscribe()] Can an unprivileged user exploit the fact that `doOnCancel` and `doOnComplete` both call `unsubscribe(topic)`, by crafting a scenario where a Flux completes naturally while another cancel is in flight, causing two concurrent removals from `topicMessages` and a brief window where the topic has no active subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01350248-1b8f-424b-99d9-c4237400ab4b?mode=deep",
+    "timestamp": "2026-04-28 20:24:27.316642",
+    "report_generated": false
+  }
+]
