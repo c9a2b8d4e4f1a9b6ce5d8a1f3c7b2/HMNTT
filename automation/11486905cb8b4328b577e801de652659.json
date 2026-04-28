@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user trigger a race condition where a TOKENUNFREEZE transaction is deleted by prune() before TokenUnfreezeTransactionHandler processes it, under the precondition that the unfreeze consensusTimestamp falls exactly at the retention cutoff, causing the token_account.freeze_status to remain permanently FROZEN and the user's funds to be unspendable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cb86e79-5c1b-4852-97d6-b21edd8566bb?mode=deep",
+    "timestamp": "2026-04-28 22:49:42.304576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user craft a scenario where a TOKENFREEZE transaction is ingested and persisted but the corresponding TOKENUNFREEZE transaction is pruned via 'delete from Transaction where consensusTimestamp <= ?1' before the importer processes it, under the precondition that both transactions share a consensusTimestamp near the retention boundary, causing the mirror node to permanently reflect TokenFreezeStatusEnum.FROZEN for the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3398def8-e52f-4474-8656-beccf00759c1?mode=deep",
+    "timestamp": "2026-04-28 22:49:54.618149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the inclusive boundary condition of 'consensusTimestamp <= ?1' in prune() so that a TOKENUNFREEZE transaction whose consensusTimestamp equals the exact cutoff value is deleted, while the preceding TOKENFREEZE transaction (with a lower timestamp) was already applied to token_account, resulting in permanent freeze of the associated token balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f35f7051-ba5c-4b83-94ac-e5cf03e3cd83?mode=deep",
+    "timestamp": "2026-04-28 22:50:07.535488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user cause the importer to skip processing a TOKENUNFREEZE transaction by submitting transactions such that the unfreeze consensusTimestamp falls outside the [startInclusive, endInclusive] window used by findByConsensusTimestampBetween(), under the precondition that the freeze transaction was already processed, leading to permanent TokenFreezeStatusEnum.FROZEN state in token_account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a08fb48-b29e-436f-996c-d74437fd21ac?mode=deep",
+    "timestamp": "2026-04-28 22:50:20.855178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit the Pageable page-size limit in findByConsensusTimestampBetween() so that a TOKENUNFREEZE transaction is pushed beyond the page boundary and never retrieved in the current processing batch, while the TOKENFREEZE transaction was already applied, causing the account's freeze_status to remain FROZEN indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd68f4ca-e66d-4fdc-b48d-d2c19f6ec7b2?mode=deep",
+    "timestamp": "2026-04-28 22:50:35.691728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user flood the network with transactions in a narrow timestamp window so that findByConsensusTimestampBetween() returns a full page of non-unfreeze transactions, causing the TOKENUNFREEZE transaction to be deferred to a later page that is never fetched before prune() deletes it, permanently freezing the account's token balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2fba196-a128-4023-879f-7ce331311af7?mode=deep",
+    "timestamp": "2026-04-28 22:50:50.481954",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit a concurrent execution scenario where RetentionJob.prune() and the importer's record-file processing pipeline run simultaneously, such that prune() deletes a TOKENUNFREEZE transaction record mid-processing, causing the TokenUnfreezeTransactionHandler to never fire and leaving token_account.freeze_status permanently set to TokenFreezeStatusEnum.FROZEN?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26b142e5-a70f-47d0-b88e-f40e30022e91?mode=deep",
+    "timestamp": "2026-04-28 22:51:06.729961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user cause a permanent freeze by submitting a TOKENFREEZE transaction at timestamp T and a TOKENUNFREEZE transaction at timestamp T+1, where T+1 is within the retention window that prune() will delete on its next scheduled run, under the precondition that the importer has not yet processed the unfreeze record, resulting in the token_account remaining frozen after pruning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b19f0883-e444-4a30-8189-085b1dc40a8a?mode=deep",
+    "timestamp": "2026-04-28 22:51:24.138929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the fact that prune() deletes ALL transaction types indiscriminately (including TOKENFREEZE and TOKENUNFREEZE) to create a state where the token_account table shows FROZEN status but no transaction history exists to reconstruct the correct unfreeze state, making the freeze appear permanent and irrecoverable from the mirror node's perspective?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_619f1c63-f0f4-442d-b7e1-0fb39d8c1d23?mode=deep",
+    "timestamp": "2026-04-28 22:51:42.564611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user pass Long.MIN_VALUE as startInclusive or Long.MAX_VALUE as endInclusive to findByConsensusTimestampBetween() through a public API endpoint, causing an integer overflow or full-table scan that skips TOKENUNFREEZE transactions and leaves the account in a permanently frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fb24f08-df90-4b1a-81d1-474748854878?mode=deep",
+    "timestamp": "2026-04-28 22:52:00.980934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit a scenario where the importer restarts mid-processing after a TOKENFREEZE transaction is committed to the transaction table but before the corresponding TOKENUNFREEZE transaction is processed, and then prune() runs during the downtime deleting the unfreeze record, causing permanent TokenFreezeStatusEnum.FROZEN status in token_account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e019e6de-ef73-4cbe-8806-321bd248067f?mode=deep",
+    "timestamp": "2026-04-28 22:52:19.459475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user trigger a permanent freeze by submitting a TOKENUNFREEZE transaction with a consensusTimestamp that is numerically equal to Long.MIN_VALUE, causing the prune() query 'delete from Transaction where consensusTimestamp <= ?1' to match and delete it on the very first retention run, while the freeze status in token_account remains FROZEN?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d669abac-8755-435e-9411-795052ece4d9?mode=deep",
+    "timestamp": "2026-04-28 22:52:40.355507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit the absence of a sort-order guarantee in findByConsensusTimestampBetween() so that a TOKENFREEZE transaction is processed after a TOKENUNFREEZE transaction within the same batch, causing the final persisted freeze_status to be TokenFreezeStatusEnum.FROZEN even though the unfreeze occurred later on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d426312-1320-443a-a063-c81e9561df49?mode=deep",
+    "timestamp": "2026-04-28 22:53:00.153474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the lack of a foreign-key or referential constraint between the transaction table and token_account table so that prune() deletes the TOKENUNFREEZE transaction record without rolling back the freeze_status in token_account, leaving the account permanently frozen with no audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1b60a3b-3f2a-47a5-a9e1-328a6b176163?mode=deep",
+    "timestamp": "2026-04-28 22:53:20.953488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user cause a permanent freeze by exploiting the fact that prune() does not cascade-update token_account.freeze_status when deleting TOKENUNFREEZE transactions, under the precondition that the unfreeze transaction was deleted before being applied, so the token_account row retains TokenFreezeStatusEnum.FROZEN indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d972a682-ae47-4f12-87db-c25bfe9a4d87?mode=deep",
+    "timestamp": "2026-04-28 22:53:42.023876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit a timestamp collision (two transactions with the same consensusTimestamp) between a TOKENFREEZE and TOKENUNFREEZE transaction so that findByConsensusTimestampBetween() returns them in non-deterministic order, causing the freeze to be applied last and the account to remain permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61f39236-db82-420b-89a2-7becc1603480?mode=deep",
+    "timestamp": "2026-04-28 22:54:04.848471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the scheduled nature of RetentionJob (running every configurable frequency) to time a TOKENFREEZE submission such that the unfreeze transaction is submitted just before a prune cycle, ensuring the unfreeze record is deleted before the importer processes it, permanently freezing the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d00f0762-0b0e-4a99-9df8-ff29c85e6b62?mode=deep",
+    "timestamp": "2026-04-28 22:54:28.127886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user cause a permanent freeze by exploiting the fact that prune() returns an int count of deleted rows but does not verify whether any deleted transactions were unprocessed TOKENUNFREEZE transactions, allowing silent deletion of critical state-reversal records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a1a48c9-19bd-4801-b0f9-2e1d4066f37d?mode=deep",
+    "timestamp": "2026-04-28 22:54:53.640468",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit a gap in the [startInclusive, endInclusive] range used by findByConsensusTimestampBetween() — caused by a network partition or delayed record file delivery — so that a TOKENUNFREEZE transaction falls in the gap and is never fetched, while the TOKENFREEZE was already applied, resulting in permanent freeze of the token balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba9dd4c6-36ec-4818-b693-a61847fe1584?mode=deep",
+    "timestamp": "2026-04-28 22:55:18.577521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the @Modifying annotation on prune() — which bypasses the JPA first-level cache — to create a scenario where the in-memory entity cache still reflects a TOKENUNFREEZE state while the database row has been deleted, causing subsequent cache-based reads to incorrectly show UNFROZEN while the persistent store shows FROZEN?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f7083f6-1d2c-47e8-8f78-1accc0792146?mode=deep",
+    "timestamp": "2026-04-28 22:55:44.648572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the @Transactional boundary on prune() (inherited from RetentionRepository) to cause a partial commit where some TOKENUNFREEZE transactions are deleted but the corresponding token_account.freeze_status update is rolled back, leaving the account in a permanently frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a2fc203-40f1-46c5-9faa-6574bcdaafef?mode=deep",
+    "timestamp": "2026-04-28 22:56:10.775524",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit the fact that findByConsensusTimestampBetween() uses an inclusive range on both ends (Between in Spring Data JPA) to cause an off-by-one error where a TOKENUNFREEZE transaction at exactly endInclusive is fetched but a TOKENFREEZE at endInclusive+1 is processed in the next batch after the unfreeze, reversing the correct order and leaving the account frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bab89eb-49dc-42bd-b81f-b56ab96b5659?mode=deep",
+    "timestamp": "2026-04-28 22:56:36.226539",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit a slow importer scenario where the importer falls behind in processing record files, causing the retention job to prune TOKENUNFREEZE transactions that have been recorded in the transaction table but not yet applied to token_account, permanently freezing the account's token balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4ebf1ec-859b-4f6a-a76d-d82d68a1b0e9?mode=deep",
+    "timestamp": "2026-04-28 22:57:03.953240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user exploit the absence of a 'processed' flag on Transaction records to cause prune() to delete unprocessed TOKENUNFREEZE transactions, since the query 'delete from Transaction where consensusTimestamp <= ?1' does not distinguish between processed and unprocessed transactions, resulting in permanent freeze of the associated token account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc4df04a-76bd-471e-a5f4-572d78ccde6e?mode=deep",
+    "timestamp": "2026-04-28 22:57:33.207672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user exploit the Pageable offset parameter in findByConsensusTimestampBetween() to skip over a TOKENUNFREEZE transaction by crafting a scenario where the page offset lands exactly after the unfreeze record, causing it to be permanently missed and the account to remain frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_525dbaf0-d6be-4f79-8af2-8d53c50a4937?mode=deep",
+    "timestamp": "2026-04-28 22:58:03.410559",
+    "report_generated": false
+  }
+]
