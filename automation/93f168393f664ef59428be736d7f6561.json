@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user cause a network partition that outlasts the default `timeout` of 5 minutes by continuously dropping TCP connections to the database port, causing `DatabaseWaiter.waitForDatabase()` to exhaust the deadline and throw `IllegalStateException`, resulting in a permanent denial-of-service at application startup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7fdeadb6-6d1c-44f4-b225-c02e973fa5da?mode=deep",
+    "timestamp": "2026-04-28 23:22:07.988791",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user on the same network segment inject TCP RST packets to reset every JDBC connection attempt within the 2-second `connectTimeout` window, causing `DriverManager.getConnection()` to always throw, keeping the mirror node permanently in the startup retry loop and denying service to all downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ade1900-443a-4460-9446-12cfc15108b7?mode=deep",
+    "timestamp": "2026-04-28 23:22:20.086656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getSocketTimeout()] Can an unprivileged external user exploit the 2-second `socketTimeout` by establishing a TCP connection to the database port that accepts the handshake but never sends data, causing the JDBC driver to hang for exactly `socketTimeout` seconds per attempt, multiplying the effective retry cost and exhausting the `timeout` budget faster than the design assumes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b83638e-f2ee-4f67-af13-a00a5866afe8?mode=deep",
+    "timestamp": "2026-04-28 23:22:32.788382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user cause a partial network partition where the TCP connection is established but `Connection.isValid()` never receives a response within `validationTimeout` (2s), causing the validation to silently return false rather than throw, leading `DatabaseWaiter` to log 'not valid yet' and retry indefinitely until `timeout` expires, causing a startup DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8e0f054-2089-44bd-b3d2-2e3f87d7988a?mode=deep",
+    "timestamp": "2026-04-28 23:22:46.469532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getInterval()] Can an unprivileged external user time network partition events to coincide precisely with the 2-second `interval` sleep in `Uninterruptibles.sleepUninterruptibly(properties.getInterval())`, ensuring every retry attempt hits the partition window and the node never successfully connects within the 5-minute `timeout`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5eff51b-4bd4-4b45-af4a-f5d9e79ed010?mode=deep",
+    "timestamp": "2026-04-28 23:23:00.080905",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.isEnabled()] Can an unprivileged external user exploit the fact that `enabled=true` by default to cause a startup-time DoS: if the database is unreachable due to a network partition, the application blocks indefinitely in `waitForDatabase()` rather than starting in a degraded mode, making the entire mirror node unavailable to all users for the full `timeout` duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_395677a3-4be2-4be7-a369-cb7be90511a0?mode=deep",
+    "timestamp": "2026-04-28 23:23:14.498626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getInstance()] Can an unprivileged external user trigger a network partition during Spring context initialization such that `init()` is never called (context fails before `@PostConstruct`), leaving `INSTANCE` as null, so any subsequent call to `getInstance()` throws `IllegalStateException`, cascading failures across all components that depend on `CommonProperties.getInstance()`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e24875cf-8fa3-4302-928d-ef63f9ef3895?mode=deep",
+    "timestamp": "2026-04-28 23:23:29.632736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: init()] Can an unprivileged external user cause a network partition that triggers a Spring context refresh or restart, causing `init()` to be called again via `@PostConstruct` and overwriting the `INSTANCE` `AtomicReference` with a new `CommonProperties` object mid-flight, creating a race condition where some threads see the old instance and others see the new one, leading to inconsistent `realm`/`shard` values during partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1889d11f-35b0-46c1-8807-196823e5aba5?mode=deep",
+    "timestamp": "2026-04-28 23:23:46.335473",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user cause a network partition that lasts exactly 5 minutes (matching the default `timeout`), causing the `while (System.nanoTime() < deadline)` loop in `DatabaseWaiter` to exit with an `IllegalStateException` at the worst possible moment during a rolling deployment, preventing the new pod from ever becoming ready and causing a cascading outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_937ebf02-df86-43f6-85ff-08063ae4d286?mode=deep",
+    "timestamp": "2026-04-28 23:24:03.022643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user exploit the fact that `connectTimeout` is passed as a JDBC property string (`String.valueOf(properties.getConnectTimeout().toSeconds())`) and the minimum is only 1 second, by causing a network partition where TCP SYN packets are accepted but SYN-ACK is delayed beyond `connectTimeout`, causing every connection attempt to time out and the node to never start?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10112c48-ddbd-4a4a-8157-e6723c195aa2?mode=deep",
+    "timestamp": "2026-04-28 23:24:21.087762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getSocketTimeout()] Can an unprivileged external user perform a low-rate TCP injection attack that keeps the socket alive (preventing `socketTimeout` from triggering) but never delivers valid PostgreSQL protocol data, causing `DriverManager.getConnection()` to hang indefinitely beyond the `socketTimeout` design parameter, blocking the startup thread permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcf733ee-040a-43d6-8bb3-3c04bd27efe0?mode=deep",
+    "timestamp": "2026-04-28 23:24:39.689889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user exploit the fact that `timeout` has a minimum of only 10 seconds (`@DurationMin(seconds = 10)`) by causing repeated short network partitions that each last just over 10 seconds, causing the mirror node to fail startup repeatedly and never become available, effectively achieving persistent DoS through partition timing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3a360ae-7a47-41e5-8ffc-8530e4f8029f?mode=deep",
+    "timestamp": "2026-04-28 23:24:58.284460",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getInterval()] Can an unprivileged external user exploit the minimum `interval` of 500ms (`@DurationMin(millis = 500)`) to cause a resource exhaustion attack: if the interval is configured at its minimum and the network is partitioned, the retry loop fires at maximum rate, consuming thread resources and file descriptors from repeated `DriverManager.getConnection()` calls, degrading the JVM before the `timeout` expires?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe48bd82-4ae1-45d0-8c27-2543263798ea?mode=deep",
+    "timestamp": "2026-04-28 23:25:17.855702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user exploit the `@DurationMax(seconds = Integer.MAX_VALUE)` upper bound on `validationTimeout` by causing a network partition where `connection.isValid(Math.toIntExact(properties.getValidationTimeout().toSeconds()))` is called with a very large timeout value, causing the startup thread to block for an arbitrarily long time beyond the `timeout` deadline, violating the design parameter that startup should fail within `timeout`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31ff0250-89a7-4ad5-996b-a5c4c1b673de?mode=deep",
+    "timestamp": "2026-04-28 23:25:39.155658",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getInstance()] Can an unprivileged external user cause a network partition during the window between application startup and `@PostConstruct init()` completion, such that components calling `CommonProperties.getInstance()` during partition-induced retry logic receive an `IllegalStateException` rather than a valid instance, causing unhandled exceptions in callers like `EntityIdEvmAddressParameter.valueOfNullable()` and `EntityIdNumParameter.valueOfNullable()` that serve public API requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4a4f16c-3d33-4cfb-8527-f6b37d326523?mode=deep",
+    "timestamp": "2026-04-28 23:26:00.145835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user perform a BGP hijacking or ARP poisoning attack to redirect database traffic to a honeypot that accepts TCP connections but never completes the PostgreSQL handshake, causing every `DriverManager.getConnection()` call to hang for exactly `connectTimeout` seconds, making the total startup time equal to `timeout / connectTimeout` connection attempts, all of which fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c082cce8-62d1-4e92-8742-8548b2fc92f9?mode=deep",
+    "timestamp": "2026-04-28 23:26:21.963255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getSocketTimeout()] Can an unprivileged external user exploit a network partition that causes TCP connections to be established but then silently dropped (black-hole routing), bypassing the `connectTimeout` check but triggering `socketTimeout` on every subsequent read, causing the retry loop to consume the full `timeout` budget with each attempt taking exactly `socketTimeout` seconds, resulting in a predictable and exploitable startup delay?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b27bb9d-9a0f-473d-8360-117a8602dc76?mode=deep",
+    "timestamp": "2026-04-28 23:26:44.799654",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.isEnabled()] Can an unprivileged external user exploit the fact that `enabled` defaults to `true` and there is no circuit-breaker or backoff beyond the fixed `interval`, by causing a network partition that lasts just over `timeout`, then restoring connectivity, then partitioning again before the next startup attempt, creating a perpetual cycle where the mirror node never successfully starts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2085ca6-f7ff-436d-bb1e-7caa58e6a03f?mode=deep",
+    "timestamp": "2026-04-28 23:27:08.575740",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user cause a network partition that triggers the `IllegalStateException('Database did not become available within ' + properties.getTimeout())` thrown by `DatabaseWaiter`, which propagates up through Spring's `DataSource` bean creation, causing the entire application context to fail, and since the exception message includes the `timeout` duration value, potentially leaking configuration information to an attacker monitoring error logs or health endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6a46d06-aaba-4cff-a246-dc781025be57?mode=deep",
+    "timestamp": "2026-04-28 23:27:33.101635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user exploit the fact that `connectTimeout` is converted to seconds via `toSeconds()` (truncating sub-second precision) and the minimum is 1 second, by causing a network partition where connections are dropped after exactly 999ms, which is less than the 1-second minimum but the truncated JDBC property value of '1' still allows the driver to wait 1 full second, creating a timing discrepancy that causes the retry loop to behave outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf00eea1-5525-40eb-a69c-011da1b42161?mode=deep",
+    "timestamp": "2026-04-28 23:27:57.698859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getInterval()] Can an unprivileged external user cause a network partition that lasts exactly `interval` (2 seconds) between each retry attempt, such that the partition is always active when `DriverManager.getConnection()` is called but resolves during `Uninterruptibles.sleepUninterruptibly(properties.getInterval())`, creating a scenario where the design's retry logic never catches a healthy window and the node fails to start within `timeout`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6b48c85-986e-4568-8abd-a2928f87c946?mode=deep",
+    "timestamp": "2026-04-28 23:28:22.328057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user cause a partial network partition where the database accepts connections and responds to the initial handshake but drops `isValid()` probe packets, causing `connection.isValid(Math.toIntExact(properties.getValidationTimeout().toSeconds()))` to return `false` rather than throw an exception, so the connection is closed and retried without the exception being logged with full detail, making the partition harder to detect and diagnose?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_911787b4-aed8-433c-a054-9503b616b76d?mode=deep",
+    "timestamp": "2026-04-28 23:28:47.807901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getInstance()] Can an unprivileged external user exploit a network partition that causes the Spring application context to fail and restart, triggering `init()` to be called on a new `CommonProperties` instance, while concurrent threads still hold a reference to the old instance obtained via `getInstance()`, leading to split-brain behavior where `realm` and `shard` values differ between threads, corrupting entity ID resolution in `EntityIdNumParameter` and `EntityIdEvmAddressParameter`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67ab98b3-2af8-4c0a-8cfe-bc4211a4ba2a?mode=deep",
+    "timestamp": "2026-04-28 23:29:14.102465",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user cause a network partition that expires the `timeout` deadline during a Kubernetes liveness probe check, causing the pod to be killed and restarted, which then faces the same partition, creating an infinite restart loop (CrashLoopBackOff) that permanently denies service to all users of the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b8b5c49-8456-418b-8ee4-9cd6eb6a9c63?mode=deep",
+    "timestamp": "2026-04-28 23:29:41.821708",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user exploit the fact that `connectTimeout` is passed as a plain string JDBC property without validation of the driver's actual support for this property, by causing a network partition where the driver ignores the `connectTimeout` property (driver-specific behavior), causing `DriverManager.getConnection()` to block indefinitely beyond the design parameter, hanging the startup thread permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb3c1cfc-08b8-46f9-9e95-896a21cb7ba0?mode=deep",
+    "timestamp": "2026-04-28 23:30:09.181646",
+    "report_generated": false
+  }
+]
