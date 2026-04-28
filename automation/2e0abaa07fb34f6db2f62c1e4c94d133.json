@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user cause a denial of service by sending a high volume of concurrent requests to the token allowances endpoint, since `getAccountTokenAllowances()` has no rate limiting, request coalescing, or query result caching at the service layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1ec64e3-a47d-4562-b09f-290505e37fe8?mode=deep",
+    "timestamp": "2026-04-28 20:39:42.211713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the absence of a query timeout in `getAccountTokenAllowances()` to hold a database connection open indefinitely by triggering a slow query (e.g., via a large `union all` with maximum limit), exhausting the connection pool and causing denial of service for other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f83db132-4b4a-49b7-86ce-0961880fbc5a?mode=deep",
+    "timestamp": "2026-04-28 20:39:54.245917",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getSubQuery()] Can an unprivileged external user bypass the static `amountCondition` (`amount > 0`) by injecting SQL into `filter.operator` that appends an `OR` clause (e.g., `= $3 OR 1=1 --`), causing the WHERE clause to evaluate to true for all rows regardless of amount, exposing revoked or zero-amount allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d962cf46-4aae-480b-8199-8ab98e0f8a67?mode=deep",
+    "timestamp": "2026-04-28 20:40:06.755321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getSubQuery()] Can an unprivileged external user exploit the `amountCondition` being a static string (`amount > 0`) that is always prepended to conditions, such that if `accountIdCondition` is manipulated to be empty or always-true, the `amount > 0` check alone is insufficient to prevent cross-account data leakage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecef1071-0ddc-4c8b-a1a9-7ae0724d6828?mode=deep",
+    "timestamp": "2026-04-28 20:40:19.613519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user inject SQL via the `order` parameter that flows into `OrderSpec.from(column, order)` and then `OrderSpec.toString()` which produces `${this.column} ${this.order}` without escaping, such that a value like `asc, (SELECT pg_sleep(5))--` causes a time-based blind SQL injection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_713f6554-600c-4578-ac2f-22716df81f80?mode=deep",
+    "timestamp": "2026-04-28 20:40:34.172256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the `OrderSpec.from(column, order)` call where `column` is taken from `TokenAllowanceService.orderByColumns` (hardcoded as `spender` and `token_id`) but `order` comes from user input, and if `order` is not validated to be strictly `asc` or `desc` at the service layer, inject arbitrary SQL into the ORDER BY clause?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a927e08c-2748-4141-aec8-75c14ff34906?mode=deep",
+    "timestamp": "2026-04-28 20:40:47.963064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user cause the `getOrderByQuery(...TokenAllowanceService.orderByColumns.map((column) => OrderSpec.from(column, order)))` call to produce a malformed ORDER BY clause by passing an `order` value containing a newline or null byte, potentially causing log injection or query parser confusion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bf8002b-5e3f-40b8-b53a-d3ed639c5188?mode=deep",
+    "timestamp": "2026-04-28 20:41:02.107169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getSubQuery()] Can an unprivileged external user cause a SQL injection by supplying a `filter.key` that maps to `undefined` in `TokenAllowanceService.columns`, resulting in the condition `undefined${operator}$N` being appended to the WHERE clause, which PostgreSQL may interpret in an unexpected way or throw an error that leaks query structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90fd54a7-e305-4de9-9709-3a348fbe9d22?mode=deep",
+    "timestamp": "2026-04-28 20:41:15.753934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getSubQuery()] Can an unprivileged external user exploit the `TokenAllowanceService.columns` map having only two entries (`SPENDER_ID` and `TOKEN_ID`) to cause a runtime error if a filter with an unmapped key is passed, since `column` would be `undefined` and `${column}${filter.operator}$${params.length}` would produce `undefined=...$N` in the SQL string?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_010ec054-8db8-4735-bc43-c499bd9b5ceb?mode=deep",
+    "timestamp": "2026-04-28 20:41:29.307854",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getSubQuery()] Can an unprivileged external user exploit the mutable `params` array being passed by reference to multiple `getSubQuery()` calls in `getQuery()`, such that each call appends to the same array and the `$${params.length}` index calculation in one subquery is affected by parameters pushed in a previous subquery, causing parameter misalignment and wrong data being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_202d817d-9c55-4a6e-9a26-737f9fb6cad2?mode=deep",
+    "timestamp": "2026-04-28 20:41:43.056771",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user cause a parameter index off-by-one error by crafting a request that generates exactly the boundary number of filter conditions across `lower`, `inner`, and `upper`, causing `$${params.length}` references in later subqueries to point to wrong parameter values (e.g., `ownerAccountId` instead of a filter value)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_548dcc5f-d8dc-4be6-bd14-fd7c7f78ae83?mode=deep",
+    "timestamp": "2026-04-28 20:41:56.063026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the fact that `params` starts as `[ownerAccountId, limit]` and is then mutated by each `getSubQuery()` call, such that if `lower`, `inner`, and `upper` all contain the same filter key, the same value is pushed multiple times and the `$N` references in each subquery point to different positions in the params array, returning inconsistent results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed4177c1-6af0-427a-977b-4dffcb9c3437?mode=deep",
+    "timestamp": "2026-04-28 20:42:09.233963",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the `union all` construction to cause the database to perform significantly more work than a single query by crafting a request that maximizes the number of subqueries (3) each with maximum `limit`, effectively multiplying the database load by 3x and causing a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3ea4ad7-19e4-4cd8-9b4a-1764657dd453?mode=deep",
+    "timestamp": "2026-04-28 20:42:22.160093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the `union all` query structure where each subquery has its own `order by` and `limit` clause, and the outer query also has `order by` and `limit`, to cause the database to sort and limit results multiple times, leading to excessive CPU usage and a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdf0c5a7-66f8-454b-a5de-66c9755837db?mode=deep",
+    "timestamp": "2026-04-28 20:42:35.471922",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user cause the `union all` query to return duplicate rows by crafting overlapping `lower`, `inner`, and `upper` filter ranges, since `union all` does not deduplicate results, leading to incorrect pagination or inflated response data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b849d172-9a65-465b-a530-52b8b91e2cc5?mode=deep",
+    "timestamp": "2026-04-28 20:42:49.403367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user read token allowances for any account by supplying an arbitrary account ID in the URL path parameter (which becomes `ownerAccountId`), since the service only enforces `owner = $1` without verifying that the requesting user is the owner of that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfb8e7ab-d1c5-44da-9401-3cff2b980ab4?mode=deep",
+    "timestamp": "2026-04-28 20:43:03.139153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user enumerate all accounts that have token allowances by iterating over account IDs in the path parameter, since `getAccountTokenAllowances()` returns results for any valid `ownerAccountId` without authentication or authorization checks at the service layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2bb8258-6d67-4a1e-9bef-c58c6665cf37?mode=deep",
+    "timestamp": "2026-04-28 20:43:17.733234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the `ownerAccountId` being placed at `params[0]` to cause a type confusion issue if `ownerAccountId` is a string instead of a BigInt/number, causing PostgreSQL to perform an implicit type cast that could bypass index usage and cause a full table scan, leading to denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67190ee6-7063-468c-ba20-d7e69339c9b3?mode=deep",
+    "timestamp": "2026-04-28 20:43:31.652454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user cause a denial of service by supplying the maximum allowed `limit` value, since `getLimitQuery(2)` places `limit` at `$2` and it is reused across all subqueries in the `union all` construction, causing each subquery to fetch up to `maxLimit` rows independently before the outer limit is applied?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_afe79da2-d8ce-4a01-b155-0982f92cfa60?mode=deep",
+    "timestamp": "2026-04-28 20:43:45.286960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getQuery()] Can an unprivileged external user exploit the `getLimitQuery(2)` hardcoding position 2 for the limit parameter to cause a parameter mismatch if the `params` array is ever initialized with a different number of pre-populated values, causing the wrong value to be used as the limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1a32dc0-0d70-4346-8319-09d0b3c8fe56?mode=deep",
+    "timestamp": "2026-04-28 20:44:00.154267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user receive the `payer_account_id` column (exposed as `payerAccountId` after camelCase conversion) from the `select *` query, which may reveal internal account relationships not intended for public API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0b469d3-7911-4b3b-897b-fae4a168bffe?mode=deep",
+    "timestamp": "2026-04-28 20:44:14.949379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user receive the `timestamp_range` column (exposed as `timestampRange` after camelCase conversion) from the `select *` query, which may reveal internal temporal metadata about when allowances were granted or modified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91bb9a28-f3c0-45cb-b55e-e884bd7a9cb4?mode=deep",
+    "timestamp": "2026-04-28 20:44:29.700911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user receive the `amount_granted` column (exposed as `amountGranted` after camelCase conversion) from the `select *` query, which may reveal the original granted amount even after partial spending, leaking financial information beyond what the API is intended to expose?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a116f99b-4156-4872-981f-1770e77d0183?mode=deep",
+    "timestamp": "2026-04-28 20:44:43.216893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the `Object.assign(this, mapKeys(tokenAllowance, (v, k) => camelCase(k)))` in the `TokenAllowance` constructor to overwrite class methods or properties if a database column name camelCases to a method name like `toString` or `valueOf`, causing unexpected serialization behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d9f9f6a-44a7-412e-a85e-615ff225d6c2?mode=deep",
+    "timestamp": "2026-04-28 20:44:56.484049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: '] [Function: getAccountTokenAllowances()] Can an unprivileged external user trigger a database error by crafting a request that produces malformed SQL (e.g., via undefined column from `TokenAllowanceService.columns` lookup), and then receive a detailed error message from `super.getRows()` that discloses the internal SQL query structure, table names, or column names?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e20a2ff-7df0-45b9-9a16-1de8f52240d4?mode=deep",
+    "timestamp": "2026-04-28 20:45:09.934991",
+    "report_generated": false
+  }
+]
