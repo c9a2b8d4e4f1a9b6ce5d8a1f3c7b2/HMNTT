@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit a request with multiple `scheduled` values (e.g., `?scheduled=true&scheduled=false`) so that `COLLAPSABLE_PARAMS` collapse logic silently discards all but the last value, causing the downstream SQL query to filter on `scheduled=false` instead of `scheduled=true`, thereby hiding a scheduled freeze transaction from the response and making funds appear permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4bb1d3e6-dbfd-4812-b003-fa93a1f30f10?mode=deep",
+    "timestamp": "2026-04-28 20:26:54.041164",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user craft a request with `?scheduled=false&scheduled=true` (reversed order) so that `valueArray.slice(valueArray.length - 1)` retains `true`, causing the transaction lookup to return a scheduled freeze transaction that the user intended to exclude, leading to incorrect freeze-state reporting that permanently locks perceived access to funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2238ea61-38da-4155-8f5c-bd12003ef8c0?mode=deep",
+    "timestamp": "2026-04-28 20:27:06.019386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit multiple `nonce` values (e.g., `?nonce=0&nonce=1`) so that `COLLAPSABLE_PARAMS` collapse retains only `nonce=1`, causing the transaction lookup to resolve to a different transaction than intended, where the resolved transaction carries a freeze operation that permanently locks the queried account's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb1b6493-f986-4fd9-9509-e551e7bda0ae?mode=deep",
+    "timestamp": "2026-04-28 20:27:18.428730",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user append a crafted `nonce` value at the end of a multi-value nonce query (e.g., `?nonce=<legitimate>&nonce=<attacker_chosen>`) so that `valueArray.slice(valueArray.length - 1)` always picks the attacker-chosen nonce, redirecting the transaction lookup to a freeze transaction and causing the client to believe the account is frozen when it is not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_098bd312-9705-4b13-8daa-0a6d76299e53?mode=deep",
+    "timestamp": "2026-04-28 20:27:31.802503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request to a known API route with `balance=true&balance=false` so that `COLLAPSABLE_PARAMS` collapse produces `balance=false` in the normalized URL, causing the response to omit balance data and making a frozen account's zero balance indistinguishable from a non-frozen account, thereby permanently obscuring the freeze state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65a52198-49a3-4256-aaa9-34784ffe7da2?mode=deep",
+    "timestamp": "2026-04-28 20:27:44.458054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send `?balance=false&balance=true` so that collapse retains `balance=true`, but then poison the response cache with this normalized key, causing subsequent legitimate requests that omit `balance` (which defaults to `true`) to receive a cached response that was generated under a different query context, masking a freeze status change?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fdb30dc-e121-4e22-98a4-a5d206a95d25?mode=deep",
+    "timestamp": "2026-04-28 20:27:57.835864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fact that `normalizeRequestQueryParams` injects the OpenAPI default value for `balance` (`true`) when the parameter is absent, causing a request that intentionally omits `balance` to be normalized identically to `balance=true`, and if the cache stores this normalized key, a subsequent request with `balance=false` that collapses to `balance=false` would miss the cache and expose different data, creating an inconsistency that hides a freeze event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_debcb840-b3b7-497a-a55e-f38dba343457?mode=deep",
+    "timestamp": "2026-04-28 20:28:10.366547",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user craft a timestamp query with reversed operator order (e.g., `?timestamp=1234567899.999999001&timestamp=lt:1234567899.999999000`) so that, since `TIMESTAMP` is in `NON_SORTED_PARAMS` and is not collapsed, the SQL query returns a 404 instead of the freeze transaction that would be returned with the correct order (`?timestamp=lt:1234567899.999999000&timestamp=1234567899.999999001`), permanently hiding the freeze event from the user?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4443c2c6-6169-45aa-b83d-fb7c5c5fca86?mode=deep",
+    "timestamp": "2026-04-28 20:28:23.671676",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user craft a `block.number` query with reversed values (e.g., `?block.number=10&block.number=11` vs `?block.number=11&block.number=10`) so that, since `BLOCK_NUMBER` is in `NON_SORTED_PARAMS` and not sorted, the SQL query returns different result sets, causing a freeze transaction to appear or disappear depending on parameter order, and an attacker can reliably trigger the order that hides the freeze?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df78e663-69c8-4a18-9984-88e0aaabac32?mode=deep",
+    "timestamp": "2026-04-28 20:28:37.145477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request with an `openApiRoute` that does not exist in `openApiMap` (e.g., a slightly malformed path), causing `isEmpty(openApiParameters)` to be true and falling back to `querystring.stringify(query)` without any default injection or normalization, so that a freeze-related query bypasses all normalization logic and reaches the backend with raw, potentially inconsistent parameters that cause incorrect freeze-state evaluation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de9a405a-de1e-411a-aeec-377dc34119c5?mode=deep",
+    "timestamp": "2026-04-28 20:28:50.361158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fallback path (`isEmpty(openApiParameters)`) by sending a request to an undocumented or unknown route, causing `querystring.stringify(query)` to serialize the raw query object (which may contain array values differently than the main normalization path), producing a cache key that collides with a legitimate freeze-status query and returning stale frozen-state data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97348b11-af3a-42e6-b408-3f9282c7d426?mode=deep",
+    "timestamp": "2026-04-28 20:29:03.406524",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit multiple `block.hash` values (e.g., `?block.hash=<hash1>&block.hash=<hash2>`) so that `COLLAPSABLE_PARAMS` collapse retains only the last hash, causing the transaction lookup to resolve to a block that does not contain the unfreeze transaction, making the account appear permanently frozen when the unfreeze was confirmed in the discarded block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fdddc13-f0d5-436e-a365-dc6390a95506?mode=deep",
+    "timestamp": "2026-04-28 20:29:16.716387",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user craft a request with `?block.hash=<unfreeze_block_hash>&block.hash=<freeze_block_hash>` so that collapse retains the freeze block hash, causing the API to return the freeze transaction context instead of the unfreeze context, making the account appear frozen to any client relying on this response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_506b5351-7ff8-49c9-8455-6c1d7e13f89e?mode=deep",
+    "timestamp": "2026-04-28 20:29:30.406949",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the `appendToQuery()` string concatenation (which uses raw `name + '=' + normalizedValue` without URL encoding) by injecting a value containing `&` or `=` characters in a collapsable param, causing the normalized query string to be malformed and interpreted differently by the downstream SQL layer, resulting in a freeze-related filter being silently dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03870dd2-109b-4a5a-ab4e-abb35bd7709c?mode=deep",
+    "timestamp": "2026-04-28 20:29:44.927326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit a `scheduled` param value containing `&nonce=0` (e.g., `?scheduled=true%26nonce%3D0`) so that after `valueArray.join('&' + name + '=')` the resulting string injects an extra `nonce=0` segment into the normalized query, causing the downstream handler to apply an unintended nonce filter that excludes the freeze transaction from results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f97712c-a74a-4fe5-98fa-57bacde81f99?mode=deep",
+    "timestamp": "2026-04-28 20:29:59.583458",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request where the `query` object contains a key that matches a `COLLAPSABLE_PARAMS` name but with a value that is a non-array (single string), bypassing the `Array.isArray(value)` check and going directly to `normalizedValue = value`, so that the collapse logic is never applied and the raw unvalidated value is used in the normalized query, potentially injecting unexpected filter semantics that hide a freeze state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9afd8641-fea8-427b-95f2-3f6c84abecfc?mode=deep",
+    "timestamp": "2026-04-28 20:30:13.281875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user exploit JavaScript's default lexicographic `valueArray.sort()` on non-`NON_SORTED_PARAMS` query parameters (e.g., `account.id` values like `['10', '9', '2']`) so that the sort produces `['10', '2', '9']` instead of numeric order, causing the SQL query to use an incorrect range filter that excludes the frozen account from results, making the freeze invisible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bec837ff-6f38-4134-b537-76e57104aac6?mode=deep",
+    "timestamp": "2026-04-28 20:30:26.970308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request where `query[name]` is `undefined` for a `COLLAPSABLE_PARAMS` key that has no OpenAPI default, causing `normalizedValue` to remain `''` and `isEmpty('')` to be true, so the parameter is silently omitted from the normalized query, and a downstream handler that requires this parameter to identify a freeze transaction returns an empty or incorrect result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd4f2494-7b88-48f4-a3eb-79496c2da6bb?mode=deep",
+    "timestamp": "2026-04-28 20:30:39.503781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fact that `isEmpty(normalizedValue)` uses lodash's `isEmpty`, which returns `true` for the number `0` and boolean `false`, so that if a `defaultValue` from the OpenAPI spec is the string `'false'` or `'0'` and is not properly stringified, it gets dropped from the normalized query, causing a freeze-related default filter to be silently omitted and returning unfiltered data that includes frozen accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a839f00-59b3-4123-9a8a-557ed5543d64?mode=deep",
+    "timestamp": "2026-04-28 20:30:52.894549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request to `/api/v1/accounts` without a `balance` parameter, causing `normalizeRequestQueryParams` to inject `balance=true` as the default, and then poison the response cache with this normalized URL, so that a subsequent request with `balance=false` (which collapses to `balance=false` and has a different normalized key) bypasses the cache and hits the database with a different query, creating a race condition where freeze status is inconsistently reported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da49519e-6459-45cc-a036-0906f102579c?mode=deep",
+    "timestamp": "2026-04-28 20:31:06.481253",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit an empty array for a `COLLAPSABLE_PARAMS` key (e.g., `?scheduled=`) so that `isEmpty(valueArray)` returns `true` and `getNormalizedArrayValue` returns `undefined`, causing the parameter to be omitted from the normalized query, and the downstream handler applies no `scheduled` filter, returning both scheduled and non-scheduled transactions including freeze transactions that should have been excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae8efc31-da3b-4cfc-ab4e-c8f52dadd2ff?mode=deep",
+    "timestamp": "2026-04-28 20:31:20.044919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user craft a request where the `openApiRoute` parameter passed to `normalizeRequestQueryParams` is a template path (e.g., `/api/v1/transactions/{transactionIdOrHash}`) while the actual `path` is a concrete path, causing `openApiMap.get(openApiRoute)` to return the correct parameter list but the normalized URL to use the concrete path, creating a mismatch between the cache key and the actual resource, so that a freeze transaction lookup is served a cached response from a different transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15d0b6d0-8df7-4e60-ae9f-85a718666606?mode=deep",
+    "timestamp": "2026-04-28 20:31:32.734689",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit a large number of repeated `timestamp` values in a specific order so that, since `TIMESTAMP` is in `NON_SORTED_PARAMS` and not collapsed, the SQL query receives all timestamp values in attacker-controlled order, and the attacker can craft an order that causes the SQL query to return a 404 for a valid unfreeze transaction, making the account appear permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4f0a385-87ba-4059-a8ac-5bfacd860faa?mode=deep",
+    "timestamp": "2026-04-28 20:31:45.573267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fact that `normalizeRequestQueryParams` iterates over `openApiParameters` in OpenAPI spec order (not request order), so that when building the normalized query string, parameters are always emitted in spec-defined order regardless of the user's input order, and for `NON_SORTED_PARAMS` like `timestamp` and `block.number` whose SQL semantics depend on order, the spec order may differ from the user's intended order, causing a freeze transaction to be missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29fcf01b-65c9-4ed1-9df3-e03f955d1c16?mode=deep",
+    "timestamp": "2026-04-28 20:31:58.972527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit `?nonce=1&nonce=0` to a transaction lookup endpoint so that `COLLAPSABLE_PARAMS` collapse retains `nonce=0`, and since nonce=0 is the default for non-inner transactions, the query returns the parent transaction (which may be a freeze) instead of the child transaction (which may be an unfreeze), causing the client to incorrectly conclude the account is frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_629c64d7-e318-4c08-8feb-c0767f2ec1f8?mode=deep",
+    "timestamp": "2026-04-28 20:32:11.571665",
+    "report_generated": false
+  }
+]
