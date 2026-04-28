@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user supply a crafted `cfg.network` value of `'other'` combined with a `cfg.mirrorRest` URL pointing to an attacker-controlled HTTP server, causing `buildNetworkFromMirrorNodes()` to fetch a poisoned node map and redirect all pinger traffic to attacker-chosen gRPC endpoints, resulting in the pinger being silently disconnected from the real network without any error surfaced to operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad6cae6c-17e2-4548-9904-20304b6923bd?mode=deep",
+    "timestamp": "2026-04-28 23:17:32.207985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response with zero usable `service_endpoints` entries, causing `buildNetworkFromMirrorNodes()` to return `fmt.Errorf('no usable service_endpoints found')`, which propagates to `newClient()` returning an error and the pinger process exiting via `log.Fatalf`, resulting in a complete denial-of-service of the pinger's health-monitoring function?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_864d0b9f-6adb-4bb7-853c-9dde2bd9f867?mode=deep",
+    "timestamp": "2026-04-28 23:17:44.076697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a JSON payload with all `node_account_id` fields set to empty strings, causing every node to be skipped by the `if n.NodeAccountID == ''` guard in `fetchMirrorNodeNetwork()`, resulting in an empty network map and a fatal startup error that permanently disables the pinger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecd1c56d-0dc4-45e3-b8eb-1279908b8fd3?mode=deep",
+    "timestamp": "2026-04-28 23:17:56.460010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response with all `service_endpoints` having `port == 0`, causing every endpoint to be skipped by the `if host == '' || ep.Port == 0` guard in `fetchMirrorNodeNetwork()`, resulting in an empty network map and a fatal startup crash of the pinger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62b840f6-24b4-41c1-9cae-5eeac526d917?mode=deep",
+    "timestamp": "2026-04-28 23:18:09.697537",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response with all `service_endpoints` having both `domain_name` and `ip_address_v4` as empty strings, causing every endpoint to be skipped by the host-emptiness check in `fetchMirrorNodeNetwork()`, resulting in an empty network map and a fatal startup crash of the pinger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6da790c-127d-439c-840a-f0feb02fed2d?mode=deep",
+    "timestamp": "2026-04-28 23:18:23.063552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a deliberately malformed JSON body (e.g., truncated or syntactically invalid), causing `json.NewDecoder(resp.Body).Decode(&payload)` to return an error in `fetchMirrorNodeNetwork()`, which propagates through `buildNetworkFromMirrorNodes()` to `newClient()` and causes the pinger to crash on startup via `log.Fatalf`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9a84b81-523d-4c17-956d-69fd35bbe2fa?mode=deep",
+    "timestamp": "2026-04-28 23:18:37.034480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return an HTTP 500 status code on every request, causing `fetchMirrorNodeNetwork()` to set `retry=true` and `buildNetworkFromMirrorNodes()` to exhaust all `cfg.mirrorNodeClientMaxRetries` attempts with exponential backoff, blocking the pinger startup for an extended period and causing liveness probe failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31727392-a7dc-4179-b71c-5e96a1e95786?mode=deep",
+    "timestamp": "2026-04-28 23:18:51.695914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return HTTP 429 (Too Many Requests) on every attempt, causing `fetchMirrorNodeNetwork()` to set `retry=true` and `buildNetworkFromMirrorNodes()` to spin through all retries with exponential backoff delays, blocking the pinger from initializing and causing Kubernetes liveness/readiness probes to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f8f526d-7ebe-45e2-b84c-9d4384c67508?mode=deep",
+    "timestamp": "2026-04-28 23:19:07.860093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint hold the HTTP connection open for the full `cfg.mirrorNodeClientTimeout` duration on every attempt, causing `buildNetworkFromMirrorNodes()` to block for `attempts * mirrorNodeClientTimeout` total time before failing, effectively preventing the pinger from ever starting and causing the `/tmp/ready` file to never be written?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_245a1ca2-05e1-40c3-9cbb-8e07aa78fb09?mode=deep",
+    "timestamp": "2026-04-28 23:19:24.572768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a JSON response with an extremely large number of node entries (e.g., millions), causing `fetchMirrorNodeNetwork()` to allocate a massive `network` map and exhaust the pinger process's memory, resulting in an OOM kill and denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba2e7824-9e70-41e6-ad96-80d2fc8a0e64?mode=deep",
+    "timestamp": "2026-04-28 23:19:41.523524",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a JSON response with a single node entry containing thousands of `service_endpoints`, causing `fetchMirrorNodeNetwork()` to insert thousands of entries into the `network` map and pass an oversized map to `hiero.ClientForNetwork(netmap)`, potentially causing SDK-level resource exhaustion or degraded performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0deacc45-2745-441c-ad22-f3389d052680?mode=deep",
+    "timestamp": "2026-04-28 23:19:59.466523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a `node_account_id` value that is syntactically valid but semantically incorrect (e.g., `'0.0.99999999'`), causing `hiero.AccountIDFromString()` to succeed but `hiero.ClientForNetwork(netmap)` to build a client pointing to non-existent nodes, causing all subsequent `submitWithRetry()` calls to fail silently and the pinger to log continuous errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a95e2c24-2c06-4164-9599-3bd2d649213e?mode=deep",
+    "timestamp": "2026-04-28 23:20:18.396206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return `service_endpoints` with `domain_name` values containing special characters (e.g., newlines, null bytes, or shell metacharacters), causing `net.JoinHostPort(host, port)` in `fetchMirrorNodeNetwork()` to produce a malformed address string that is silently accepted into the network map but causes all SDK connection attempts to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e01f71f-a862-4c87-a40a-a527d775d4a6?mode=deep",
+    "timestamp": "2026-04-28 23:20:36.737412",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return `service_endpoints` with `ip_address_v4` values that are actually IPv6 addresses or hostnames, causing `net.JoinHostPort()` in `fetchMirrorNodeNetwork()` to produce incorrectly formatted addresses (missing brackets for IPv6), resulting in SDK connection failures and continuous pinger errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d30a375-3f94-4fad-b6a6-86560ad1c124?mode=deep",
+    "timestamp": "2026-04-28 23:20:55.997500",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return `service_endpoints` with `domain_name` values pointing to internal network addresses (e.g., `169.254.169.254`, `10.0.0.1`, `localhost`), causing the pinger's SDK client to make gRPC connections to internal infrastructure, constituting a server-side request forgery (SSRF) griefing vector that disrupts internal services?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a11d5130-e9f7-4a43-9774-b97d596b66d5?mode=deep",
+    "timestamp": "2026-04-28 23:21:16.716034",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return `service_endpoints` with `domain_name` values pointing to `169.254.169.254` (AWS metadata endpoint) or equivalent cloud metadata services, causing the pinger's SDK client to make repeated gRPC connection attempts to the metadata service, generating noise in cloud audit logs and potentially triggering rate-limiting on the metadata endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_817bcec2-d7cd-4a02-b2d9-0374817cc789?mode=deep",
+    "timestamp": "2026-04-28 23:21:37.927127",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response body of unbounded size (e.g., gigabytes of JSON), causing `json.NewDecoder(resp.Body).Decode(&payload)` in `fetchMirrorNodeNetwork()` to read the entire body into memory, exhausting the pinger process's heap and causing an OOM crash, since there is no `http.MaxBytesReader` applied to `resp.Body`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6953f460-8fde-4074-8e18-cba1d386c91a?mode=deep",
+    "timestamp": "2026-04-28 23:21:59.922509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a valid JSON response but with a `links.next` field set, and since `fetchMirrorNodeNetwork()` does not follow pagination, cause the pinger to build a network map from only the first page of nodes, potentially omitting all reachable nodes and causing the pinger to connect to a degraded or non-functional subset of the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_062ca030-50ed-4c44-b09e-6e404adfbfa1?mode=deep",
+    "timestamp": "2026-04-28 23:22:22.481040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return HTTP redirects (301/302) pointing to internal services, and since `http.Client` follows redirects by default, cause `fetchMirrorNodeNetwork()` to make requests to unintended internal endpoints, constituting an SSRF griefing attack that could disrupt internal services or generate unexpected traffic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42fac012-c0af-464f-b269-4d86caca5df2?mode=deep",
+    "timestamp": "2026-04-28 23:22:45.281712",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response with `Content-Type: application/json` but a body that is valid JSON yet contains deeply nested structures, causing `json.NewDecoder().Decode()` in `fetchMirrorNodeNetwork()` to consume excessive CPU during parsing, resulting in a CPU exhaustion denial-of-service of the pinger process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4862e87-8de5-4bce-8568-9eb0e4db99a6?mode=deep",
+    "timestamp": "2026-04-28 23:23:08.720101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return `service_endpoints` with `port` values outside the valid TCP port range (e.g., 65536 or negative), causing `net.JoinHostPort(host, fmt.Sprintf('%d', ep.Port))` in `fetchMirrorNodeNetwork()` to produce an address with an invalid port that is silently inserted into the network map, causing all SDK connection attempts to fail with confusing errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_faed4ee5-63d9-4deb-a065-724302d8401a?mode=deep",
+    "timestamp": "2026-04-28 23:23:32.559126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return duplicate `node_account_id` entries with different `service_endpoints`, causing `fetchMirrorNodeNetwork()` to silently overwrite earlier entries in the `network` map with later ones, resulting in a non-deterministic and potentially degraded network topology being passed to `hiero.ClientForNetwork(netmap)`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be9d3dcd-aaa8-4d2d-b55b-52a0f34e4a9e?mode=deep",
+    "timestamp": "2026-04-28 23:23:56.423994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response that causes `hiero.AccountIDFromString(n.NodeAccountID)` to panic (e.g., via a specially crafted string that triggers a bug in the SDK parser), causing the pinger process to crash and resulting in a denial-of-service of the health-monitoring function?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be11d59e-be2b-41d1-928d-5115ec57ee17?mode=deep",
+    "timestamp": "2026-04-28 23:24:21.462550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response where `service_endpoints` entries have `domain_name` values with leading/trailing whitespace that survives `strings.TrimSpace()` but causes DNS resolution failures, resulting in a network map that appears populated but causes all SDK connections to fail silently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ccb76e75-a0c6-44f1-a2b7-e900ba11c505?mode=deep",
+    "timestamp": "2026-04-28 23:24:46.660737",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/sdk_client.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: newClient()] Can an unprivileged external user who controls the mirror REST endpoint return a response with `service_endpoints` containing `domain_name` values that are valid hostnames but resolve to `0.0.0.0` or `127.0.0.1`, causing the pinger's SDK client to attempt gRPC connections to loopback or null addresses, resulting in connection failures and continuous error logging that floods the pinger's log output?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dda8cf23-96c3-41f3-b7ca-2114e8adb351?mode=deep",
+    "timestamp": "2026-04-28 23:25:12.136728",
+    "report_generated": false
+  }
+]
