@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractResultsByTimestamps()] Can an unprivileged external user supply a crafted `involvedContractIds` array containing SQL-injectable values (e.g., `['1 OR 1=1']`) that bypass the `CONTRACT_ID in (...)` filter via direct `.join(',')` interpolation at line 279, causing the mirror node to return contract results belonging to unrelated contracts and exposing incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac0e3233-ab43-4e95-a0b4-92ecd430cee5?mode=deep",
+    "timestamp": "2026-04-28 20:55:45.351171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractLogsByTimestamps()] Can an unprivileged external user supply a crafted `involvedContractIds` array with SQL-injectable content that is directly interpolated via `.join(',')` at line 406, causing the `contract_log` query to return logs from contracts the user should not see, resulting in incorrect records exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2deeefb7-61bb-4c14-b2be-768215c1824b?mode=deep",
+    "timestamp": "2026-04-28 20:55:57.118624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user supply a crafted `involvedContractIds` array with SQL-injectable content that is directly interpolated via `.join(',')` at line 427, bypassing the `CONTRACT_ID in (...)` filter and causing the mirror node to return state changes for arbitrary contracts, leading to incorrect records being exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55d9ad3b-96c9-4829-ac9e-f5726afa6034?mode=deep",
+    "timestamp": "2026-04-28 20:56:09.211160",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user trigger the `contractId`-present branch at line 429-433 by providing a valid `contractId` alongside a crafted `involvedContractIds` list, causing the `migration is false` guard to be bypassed for non-primary contracts, resulting in migration-era state changes being incorrectly included in exported records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57bd1cfe-cc0d-443c-b7e6-2f5da70e12d4?mode=deep",
+    "timestamp": "2026-04-28 20:56:21.292833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user omit `contractId` (null path, line 434-437) while supplying an empty `involvedContractIds` array, causing `contractIdsQuery` to resolve to the literal SQL `true` at line 426, which removes the contract ID filter entirely and returns all state changes across all contracts, leading to massive incorrect record exposure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73f8eedc-3dd3-4384-af97-46ce9ad3fea8?mode=deep",
+    "timestamp": "2026-04-28 20:56:33.681370",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: contractStateTimestampQuery] Can an unprivileged external user exploit the `DISTINCT ON (slot)` ordering in `contractStateTimestampQuery` (lines 113-122) by providing a timestamp that falls between two writes to the same slot, causing the query to return a stale `value_read` instead of the correct `value_written`, resulting in incorrect contract state records exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0175d2a2-e617-48ff-84e1-5157bf2eb6c2?mode=deep",
+    "timestamp": "2026-04-28 20:56:46.269474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user pass `timestamp=true` to trigger the `contractStateTimestampQuery` branch (line 256-263) with a timestamp value that precedes all writes, causing `coalesce(VALUE_WRITTEN, VALUE_READ)` to return `VALUE_READ` for every slot, producing a state snapshot that never reflects any actual written state and exporting incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90375a63-48dd-463a-849b-ddede7cda145?mode=deep",
+    "timestamp": "2026-04-28 20:56:59.384153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user pass `timestamp=false` (default path, line 254) to query `contractStateQuery` which reads from the live `contract_state` table, while a concurrent `timestamp=true` query reads from `contract_state_change`, causing two simultaneous API calls to return divergent state for the same contract at the same logical time, resulting in inconsistent records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84b8540d-c94d-4111-b544-8b0cfcc07c53?mode=deep",
+    "timestamp": "2026-04-28 20:57:11.900885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: contractResultsWithEvmAddressQuery / contractResultsFields] Can an unprivileged external user observe that the `function_result` field is conditionally suppressed to an empty string when `sender_id` is NOT null (lines 50-52), and craft a transaction where `sender_id` is set, causing the mirror node to export an empty `function_result` for a valid Ethereum-originated call, resulting in missing function result data in exported records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0620597e-24b0-47ca-b9d8-fcbe8f33fc39?mode=deep",
+    "timestamp": "2026-04-28 20:57:25.313121",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: contractResultsWithEvmAddressQuery / contractResultsFields] Can an unprivileged external user identify that `function_result` is only returned when `sender_id IS NULL` (line 50-52), meaning EVM transactions (which have a sender_id) always export an empty `function_result`, and exploit this to make mirror node consumers believe a contract call returned no data, causing incorrect record interpretation for Ethereum-compatible contract calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd11c4b0-e4d0-4eec-891f-38acabd0c041?mode=deep",
+    "timestamp": "2026-04-28 20:57:38.689065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractTransactionDetailsByHash()] Can an unprivileged external user submit a hash value that matches multiple entries in `contract_transaction_hash` with different `transaction_result` values, causing `ethereumTransactionsByHashQuery` (lines 208-212) to return only the SUCCESS-ordered top result via `limit 1`, silently hiding failed transaction records from mirror node exports and causing missing records for failed transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff037604-2a55-40c9-88b1-212d61330ade?mode=deep",
+    "timestamp": "2026-04-28 20:57:51.148274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: ethereumTransactionsByHashQuery] Can an unprivileged external user exploit the `ORDER BY (transaction_result = successTransactionResult) DESC` ordering (line 210) combined with `LIMIT 1` to ensure that when a hash collision exists between a failed and a successful transaction, the failed transaction record is permanently suppressed from mirror node exports, causing missing records for failed Ethereum transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7edbe73b-0a0a-4f76-be01-0d68ca7d35dd?mode=deep",
+    "timestamp": "2026-04-28 20:58:04.000339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user supply an EVM address that resolves to a deleted contract (where `DELETED = true`) and observe that `contractIdByEvmAddressQuery` (lines 146-151) filters out deleted contracts with `DELETED <> true`, causing the mirror node to return a `NotFoundError` instead of the correct (deleted) contract record, resulting in missing records for deleted contracts in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63d2f247-8263-4ab3-85f2-d21e5acc417c?mode=deep",
+    "timestamp": "2026-04-28 20:58:18.032316",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user exploit the non-unique `evm_address` index (noted at line 460) by observing that when two contracts share the same EVM address, the service throws a generic `Error` (line 462) rather than returning either record, causing both contract records to be permanently missing from mirror node exports for that EVM address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_366166ad-b25e-4ba5-9578-989aaa7b1e9b?mode=deep",
+    "timestamp": "2026-04-28 20:58:31.364763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: computeContractIdFromString()] Can an unprivileged external user supply a `contractIdValue` string that triggers the `create2_evm_address` path (line 471) with a hex-encoded address that matches a non-CONTRACT entity type, causing `contractIdByEvmAddressQuery`'s `TYPE = 'CONTRACT'` filter (line 150) to exclude the entity and throw `NotFoundError`, resulting in missing records for non-CONTRACT entities that have matching EVM addresses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15e30501-c257-434a-8973-41a1c3de348c?mode=deep",
+    "timestamp": "2026-04-28 20:58:44.339627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractLogs()] Can an unprivileged external user trigger a scenario where `RecordFileService.getRecordFileBlockDetailsFromTimestampArray(timestamps)` (line 390) returns an incomplete map (missing some timestamps), causing `recordFileMap.get(cr.consensus_timestamp)` at line 392 to return `undefined`, resulting in `ContractLog` objects with `blockHash=undefined` and `blockNumber=null` being exported as incorrect records to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96ff7980-094a-494f-ac09-d64403702d57?mode=deep",
+    "timestamp": "2026-04-28 20:58:57.999012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractLogs()] Can an unprivileged external user exploit the timestamp deduplication logic at lines 385-389 (which only deduplicates consecutive duplicates) by crafting a query that returns non-consecutive duplicate timestamps, causing the `timestamps` array passed to `RecordFileService` to contain duplicates, potentially causing incorrect block metadata to be associated with contract log records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fc4fa2c-453a-448e-9c61-a0b7bf5c2179?mode=deep",
+    "timestamp": "2026-04-28 20:59:10.417214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractLogsQuery()] Can an unprivileged external user supply pagination parameters that produce all three of `lower`, `inner`, and `upper` filter sets as non-empty, causing the UNION query path (lines 363-365) to apply `orderClauseNoAlias` (without table alias) after the union, and if the alias-free column names are ambiguous, cause incorrect ordering of exported log records leading to wrong record sequencing in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d53c6657-6d1d-4ecf-82a2-99896491ba66?mode=deep",
+    "timestamp": "2026-04-28 20:59:23.678353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractLogsQuery()] Can an unprivileged external user supply a `limit` value that is pushed to `params` at line 324 before subquery construction, and then the same `params` array is mutated by `buildSelectQuery` calls at line 338-349 for each subquery, causing the limit parameter position (`params.length`) to be incorrect for subsequent subqueries, resulting in wrong limits applied and incorrect numbers of log records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9fc12e8-d030-4d1c-bc45-3f4db7d9d9b6?mode=deep",
+    "timestamp": "2026-04-28 20:59:37.320601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractActions()] Can an unprivileged external user supply a filter with `key === 'index'` (line 493) and an operator that is not sanitized (e.g., `>=` vs `=`), causing the `whereClause` string concatenation at line 495 to include an unsanitized operator, potentially altering which contract action records are returned and causing incorrect records to be exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a22dcbb6-5af6-4580-ad8f-62196009d14b?mode=deep",
+    "timestamp": "2026-04-28 20:59:50.573197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractActions()] Can an unprivileged external user pass multiple filters with `key === 'index'` to `getContractActions()` (lines 491-498), causing multiple `AND index <op> $N` clauses to be appended, and if conflicting operators are used (e.g., `index > 5` AND `index < 3`), cause zero records to be returned where records should exist, resulting in missing contract action records in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_315fc953-588f-4251-a29c-98d40fbaf951?mode=deep",
+    "timestamp": "2026-04-28 21:00:03.929955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user trigger a scenario where `payers` and `timestamps` arrays have mismatched lengths (violating the documented contract at line 515), causing the `ANY($1)` and `ANY($2)` array conditions (lines 196-197) to return a cross-product of matching rows rather than paired matches, resulting in incorrect Ethereum transaction records being associated with wrong payers in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e97d3ce-c323-4468-bb08-8e03fae5b2e8?mode=deep",
+    "timestamp": "2026-04-28 21:00:17.119140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user observe that `transactionMap` uses `consensus_timestamp` as the key (line 543), and if two transactions share the same `consensus_timestamp` but different `payer_account_id` values, the second row overwrites the first in the map, causing one Ethereum transaction record to be silently dropped from mirror node exports (missing record)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57e2ea3d-dd7f-48f5-8767-bd236f66fdcc?mode=deep",
+    "timestamp": "2026-04-28 21:00:30.459873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user supply a `timestamps` array with a very large number of entries, causing the `minTimestamp`/`maxTimestamp` range (lines 525-534) to span a wide time window, and the `ANY($1)` payer filter to match many unrelated transactions within that range, causing incorrect Ethereum transaction records from other payers to be included in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45a24415-332b-4182-ab1f-a23674788ff2?mode=deep",
+    "timestamp": "2026-04-28 21:00:44.024216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getContractResultsByIdAndFiltersQuery()] Can an unprivileged external user supply an empty `whereConditions` array (line 220), causing the WHERE clause to be omitted entirely, and combined with a large `limit`, retrieve contract results across all contracts rather than a specific one, resulting in incorrect (cross-contract) records being exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f35cbf0d-227b-4b08-bd35-dc198a855ae4?mode=deep",
+    "timestamp": "2026-04-28 21:00:57.455521",
+    "report_generated": false
+  }
+]
