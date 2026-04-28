@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onNext()] Can an unprivileged external user send a TopicMessage where sequenceNumber is Long.MAX_VALUE, causing the expected = topicMessage.sequenceNumber + 1 calculation to overflow to Long.MIN_VALUE, and subsequent sequence validation to always warn, masking all future out-of-order message delivery that reorganizes transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3dedebc3-b0fa-467d-a309-4750d1f284a9?mode=deep",
+    "timestamp": "2026-04-28 19:55:01.171692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the setEndTime(properties.getEndTime()) call where endTime = startTime.plus(duration), by manipulating startTime to a value such that endTime falls in the past, causing the query to return zero messages and the monitor to report an empty transaction history for a period that actually had activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9eb99f1a-2425-4003-9c21-8ac2fd4d45ec?mode=deep",
+    "timestamp": "2026-04-28 19:55:13.191181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: subscribe()] Can an unprivileged external user exploit the subscriptions.flatMap(this::clientSubscribe) call to trigger multiple concurrent clientSubscribe() invocations that each update the shared last AtomicReference, creating a race condition where the winning write determines the startTime for all subsequent resubscriptions, effectively allowing the attacker to choose which historical anchor is used?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36d099ff-797e-4c01-9742-3e78ea05734c?mode=deep",
+    "timestamp": "2026-04-28 19:55:25.535829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user deliver a sequence of messages where each consensusTimestamp is identical, causing getLast().map(t -> t.consensusTimestamp.plusNanos(1)) to always compute the same startTime on retry, creating an infinite loop that replays the same historical window and never advances the transaction history cursor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63ce4874-88d9-4849-ae05-39bd95dd2277?mode=deep",
+    "timestamp": "2026-04-28 19:55:38.057649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the doOnError() handler that logs subscription errors to suppress retry-triggering errors by crafting exceptions that are caught and swallowed before reaching the retryWhen() operator, causing the subscription to silently terminate and leave the monitor with a frozen, incomplete transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f709837-db02-4c7a-9c6d-7dbb7d021706?mode=deep",
+    "timestamp": "2026-04-28 19:55:51.795728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the for loop over properties.getSubscribers() to create subscriber instances with IDs 1..N that all share the same GrpcSubscriberProperties object, so that a mutation of properties.setTopicId() in one subscriber's context affects all others, causing them to reorganize their history around a different topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bea5053-78ab-4c7b-b427-a1a4ce6df853?mode=deep",
+    "timestamp": "2026-04-28 19:56:04.574283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the TopicId.fromString(properties.getTopicId()) call with a crafted topic ID string (e.g., containing shard/realm overrides) to redirect the subscription to a different topic's history, causing the monitor to validate a reorganized transaction sequence from an attacker-controlled topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0bbb3a3-09c3-44c4-9246-d9ac66513f15?mode=deep",
+    "timestamp": "2026-04-28 19:56:16.848862",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onNext()] Can an unprivileged external user exploit the absence of a monotonicity check on consensusTimestamp in onNext() to deliver messages with non-monotonically-increasing timestamps, causing last to hold a message with an earlier timestamp than previously seen, and the next subscription's startTime to go backward, replaying historical transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65e0e119-4840-46f8-85dc-1c5a955eeb70?mode=deep",
+    "timestamp": "2026-04-28 19:56:29.856645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: shouldRetry()] Can an unprivileged external user exploit the fact that getStatusCode() returns Status.Code.UNKNOWN for any non-StatusRuntimeException, meaning all non-gRPC exceptions bypass the INVALID_ARGUMENT filter and trigger infinite retries, allowing the attacker to use crafted non-gRPC errors to force repeated resubscription from a manipulated history anchor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d7e0058-9c68-4226-97a6-1a9c39cb601b?mode=deep",
+    "timestamp": "2026-04-28 19:56:42.839346",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the limit calculation limit - counter.get() by sending a burst of messages that rapidly increments counter to equal limit, causing setLimit(0) to be passed to the query and the subscriber to receive an unbounded stream that ignores historical ordering constraints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91c8a0ea-2211-4c42-bc76-50b858f4b8d0?mode=deep",
+    "timestamp": "2026-04-28 19:56:55.996929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the Retry.backoff() filter(this::shouldRetry) to ensure that only specific error types trigger retries, then craft a sequence of errors that alternately trigger and suppress retries to control the exact timing of resubscription and thus the startTime computed from last, reorganizing the history window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b5a2015-d915-48ad-9d50-405e959a19e5?mode=deep",
+    "timestamp": "2026-04-28 19:57:08.437447",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the subscribeProperties.isEnabled() && properties.isEnabled() check by manipulating the enabled flag through a configuration injection, causing certain subscriptions to be skipped and their historical coverage gaps to go unmonitored, effectively hiding transaction history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecb96152-9151-4821-bbe7-dcd63d07eb39?mode=deep",
+    "timestamp": "2026-04-28 19:57:21.930076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the orElseGet(properties::getStartTime) fallback in getLast() to force a subscription reset by clearing the last reference, then having properties.getStartTime() return a manipulated historical timestamp that causes the monitor to replay old transactions as if they were new?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_722eafe2-672e-46ef-900b-635bb99d1277?mode=deep",
+    "timestamp": "2026-04-28 19:57:34.869104",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onNext()] Can an unprivileged external user deliver a TopicMessage with a null consensusTimestamp so that getLast().map(t -> t.consensusTimestamp.plusNanos(1)) throws a NullPointerException, triggering a retry that resets the subscription to properties.getStartTime() and replays historical transactions from the beginning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_003ab000-088b-4fdd-ad9c-148fd0646354?mode=deep",
+    "timestamp": "2026-04-28 19:57:48.901893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the doOnSubscribe() log statement that logs subscriberProperties to leak configuration details (topicId, startTime, retry settings) that enable the attacker to craft precisely timed attacks to reorganize the transaction history window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9cbe180-e17e-4443-93a3-6e4c34d953e5?mode=deep",
+    "timestamp": "2026-04-28 19:58:01.543309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the setStartTime() and setEndTime() calls in getTopicMessageQuery() by manipulating the duration property so that the query window covers only a subset of the actual transaction history, causing the monitor to present a truncated and reorganized view of transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e09a13c-1183-4d09-81b0-2875eb7a210b?mode=deep",
+    "timestamp": "2026-04-28 19:58:13.840787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: subscribe()] Can an unprivileged external user exploit the cached Flux<GrpcSubscription> to prevent subscription list refresh after a topicId change, causing the monitor to continue subscribing to the old topic's history even after the topic has been reorganized, presenting stale transaction history as current?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_613e4430-5e27-4d8f-b9cb-ea6ec2f2437b?mode=deep",
+    "timestamp": "2026-04-28 19:58:27.346692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onNext()] Can an unprivileged external user exploit the ConcurrentHashMultiset errors collection by flooding it with crafted error entries that consume memory and cause the monitor to drop legitimate error records, masking sequence number anomalies that indicate transaction history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee78c0bd-ef20-4f88-a467-646871b67741?mode=deep",
+    "timestamp": "2026-04-28 19:58:40.331826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the TopicMessageQuery.setLimit() call with a crafted limit value of Long.MAX_VALUE - counter.get() that overflows when counter is near Long.MAX_VALUE, causing the query to use a negative limit and receive messages in an undefined order that reorganizes transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85c3bdb3-dbbc-4184-a633-a64349fb1302?mode=deep",
+    "timestamp": "2026-04-28 19:58:54.018302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the retry.getMaxAttempts() value of Long.MAX_VALUE to sustain an indefinite retry storm that keeps the subscription in a perpetual reconnect loop, preventing the monitor from ever establishing a stable view of transaction history and allowing concurrent manipulation of the history anchor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1172d08f-099c-4db6-b5d8-b4925030cc33?mode=deep",
+    "timestamp": "2026-04-28 19:59:06.417116",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the properties.setTopicId(topicId) mutation in createSubscriptions() to permanently alter the topicId stored in the shared GrpcSubscriberProperties object, causing all subsequent subscription instances created from the same properties to subscribe to the attacker-chosen topic and its reorganized history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_946884aa-e2b8-4400-af11-1e4f3ebaaa4c?mode=deep",
+    "timestamp": "2026-04-28 19:59:19.846624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the absence of a lower-bound check on startTime in getTopicMessageQuery() to set startTime to Instant.EPOCH, causing the subscriber to request the entire topic history from the beginning and present it as the current transaction sequence, effectively reorganizing the observable history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87e5555f-ab7b-49e5-9f77-b7431ea20345?mode=deep",
+    "timestamp": "2026-04-28 19:59:33.178149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onNext()] Can an unprivileged external user exploit the super.onNext(topicResponse) call that unconditionally updates last.set(response) without validating the message's authenticity or ordering, allowing injection of a forged TopicMessage that sets a manipulated history anchor for all future subscription windows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19f89e7b-2c87-468e-aa29-bd256b362fcf?mode=deep",
+    "timestamp": "2026-04-28 19:59:47.295148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: shouldRetry()] Can an unprivileged external user exploit the binary shouldRetry() logic that only excludes INVALID_ARGUMENT to ensure that DEADLINE_EXCEEDED, RESOURCE_EXHAUSTED, and INTERNAL errors all trigger retries, using these error codes to force resubscription at attacker-controlled times when the history anchor has been manipulated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aca94add-d4d7-4802-9bf7-3107e6a8d5ce?mode=deep",
+    "timestamp": "2026-04-28 20:00:01.410794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTopicMessageQuery()] Can an unprivileged external user exploit the consensusTimestamp.plusNanos(1) computation to create a startTime that is exactly 1 nanosecond after a target transaction's timestamp, causing that specific transaction to be excluded from all future subscription windows and effectively removing it from the observable history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bce2fc9-7bfb-4bbe-b35c-6d4ee52f9fc0?mode=deep",
+    "timestamp": "2026-04-28 20:00:14.617743",
+    "report_generated": false
+  }
+]
