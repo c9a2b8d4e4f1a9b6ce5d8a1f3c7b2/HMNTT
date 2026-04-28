@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries requesting the obtainer: Accountable field, which can resolve to any Accountable entity, causing the mirror node to perform additional DB lookups for each request and contributing to resource exhaustion that prevents gossiped transactions from being stored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_435991fc-a063-4391-ba46-7d45de139011?mode=deep",
+    "timestamp": "2026-04-28 23:42:51.665092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the fact that entityService.getByIdAndType() calls entityRepository.findById() and then filters by type in memory (not in the DB query), causing the mirror node to fetch full entity records from the DB even for non-ACCOUNT entities, wasting DB bandwidth and preventing the gossip ingestion pipeline from getting timely DB access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cd022a3-d15d-4190-b660-3f5491f92ea2?mode=deep",
+    "timestamp": "2026-04-28 23:43:03.790161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with entityId.num values that correspond to non-existent entities, causing entityRepository.findById() to perform a full index scan for each missing entity, accumulating DB load across thousands of concurrent requests and preventing the mirror node from processing gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10b3cc67-479c-46db-9b93-3c67ef2dcebe?mode=deep",
+    "timestamp": "2026-04-28 23:43:16.068260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the GraphQL introspection endpoint (if enabled) to enumerate all available fields on the Account type, then craft maximally complex queries that request every field including recursive ones, achieving near-maximum query complexity (200) per request and saturating the mirror node's processing capacity for gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93c699b2-4934-4a31-acd8-a2df109cd9c3?mode=deep",
+    "timestamp": "2026-04-28 23:43:28.868620",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with an alias field containing only the character '2' repeated to the maximum allowed length, which is valid Base32 per the @Pattern(regexp: '^[A-Z2-7]+$') directive, causing decodeBase32() to produce a large byte array that triggers a slow DB query via findByAlias(), contributing to resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7290ea3f-8390-4aaa-a310-a58ff0ae8a10?mode=deep",
+    "timestamp": "2026-04-28 23:43:43.064038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the fact that the @Pattern directive validation failure returns null (RETURN_NULL strategy) rather than an error, sending an evmAddress that fails the regex but is silently nullified, then providing a valid alias in the same request so validateOneOf() passes, effectively bypassing the evmAddress format check and probing the alias lookup path with attacker-controlled data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5c47933-0466-4635-a620-a2b244a36d28?mode=deep",
+    "timestamp": "2026-04-28 23:43:56.930358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with the evmAddress '0x' followed by 40 zeros, which passes the @Pattern regex, and causes getByEvmAddressAndType() to call ByteBuffer.wrap() on a 20-byte zero array, then check buffer.getInt() == 0 and buffer.getLong() == 0, and finally call findById(0L), potentially returning a system-level entity whose transactions should not be publicly accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86e89617-3a15-4072-8b67-886e1167f39d?mode=deep",
+    "timestamp": "2026-04-28 23:44:11.691408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the CustomExceptionResolver which exposes the raw exception message (including the nonNull count from validateOneOf()) in the GraphQL error response, using this information to enumerate which combinations of AccountInput fields are accepted, enabling targeted probing of the account lookup paths to identify accounts involved in specific gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1c3e872-863a-4f20-bc90-a12ab1e189f9?mode=deep",
+    "timestamp": "2026-04-28 23:44:26.884152",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with an alias that is a valid Base32 string but decodes to a byte sequence that matches the alias of a deleted account (where findByAlias() filters 'deleted is not true'), causing the query to return empty and the attacker to infer that the account was deleted, leaking information about the lifecycle of accounts involved in gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1f8b69e-b659-4e3d-9925-f04020fbfc49?mode=deep",
+    "timestamp": "2026-04-28 23:44:42.783765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with evmAddress values that pass the @Pattern regex but contain uppercase hex characters (e.g., '0xABCDEF...'), causing decodeEvmAddress() to call Strings.CS.removeStart() and Hex.decodeHex() on mixed-case input, and if Hex.decodeHex() is case-sensitive, potentially throwing a DecoderException that exposes the raw evmAddress in the error message via CustomExceptionResolver?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90ffbdab-4571-4068-a475-44cbbb37178f?mode=deep",
+    "timestamp": "2026-04-28 23:44:59.674322",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the fact that the GraphQL parser limit is maxCharacters(10000) by sending queries that are exactly 9999 characters long with unique whitespace padding, bypassing the CachedPreparsedDocumentProvider cache (since each query string is unique) and forcing repeated parsing, consuming CPU and preventing the mirror node from processing gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a6daf81-f0b4-4245-9a08-c9bda8d97b6f?mode=deep",
+    "timestamp": "2026-04-28 23:45:17.139296",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with entityId values where shard and realm are non-zero, causing toEntityId() to produce an EntityId with a non-standard shard/realm combination that may not exist in the database, resulting in repeated DB misses that accumulate latency and prevent the mirror node from processing gossiped transactions in real time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2e13353-d108-4124-9000-c2abba6a36cd?mode=deep",
+    "timestamp": "2026-04-28 23:45:33.750519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the pendingReward(unit: HbarUnit) field on the Account type by requesting it with all seven HbarUnit values as aliases in a single query, causing convertCurrency() to be called seven times per account per request, multiplying CPU usage and contributing to resource exhaustion that prevents gossiped transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bae8a43-8304-4e05-a7ab-31a8b71d22a1?mode=deep",
+    "timestamp": "2026-04-28 23:45:52.400043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries that request the timestamp: TimestampRange field, which includes from and to Timestamp scalars, causing the GraphQlTimestamp scalar to serialize Instant objects for every response, and by flooding with requests, exhaust the serialization thread pool and prevent the mirror node from processing gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31d1c95e-2916-4efc-9d6c-8aa14648b289?mode=deep",
+    "timestamp": "2026-04-28 23:46:11.048267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the fact that account() returns Optional<Account> and the GraphQL framework must unwrap the Optional for every response, sending thousands of concurrent requests that each trigger Optional.map(accountMapper::map) and the MapStruct mapping logic, consuming CPU and preventing the mirror node from allocating resources for gossiped transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4ae73c2-8e55-4bd2-9d8f-d219cb0bf11e?mode=deep",
+    "timestamp": "2026-04-28 23:46:31.176172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with an alias field containing the maximum 10000 characters of valid Base32 characters, causing decodeBase32() to allocate a large byte array (approximately 6250 bytes) per request, and by sending thousands of concurrent requests, exhaust JVM heap memory and trigger OutOfMemoryError that crashes the mirror node and prevents gossiped transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ced1e16-dded-49c0-80ad-b5ecab13078f?mode=deep",
+    "timestamp": "2026-04-28 23:46:50.529115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the GraphQL variables mechanism to send the same query string (hitting the CachedPreparsedDocumentProvider cache) but with different variable values for the AccountInput, bypassing the cache's protective effect and causing unique DB queries for each variable combination, exhausting DB connections and preventing gossiped transaction storage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bebbef4f-741f-445c-8330-e6bd436d8f20?mode=deep",
+    "timestamp": "2026-04-28 23:47:12.052935",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries requesting the autoRenewAccount field which itself has an autoRenewAccount field, and by requesting both the outer and inner autoRenewAccount's balance with all seven HbarUnit aliases, achieve a query complexity near 200 while also triggering multiple DB lookups, maximally stressing the mirror node and preventing gossiped transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1ccce6f-44d5-46c6-ab7c-83eab3267000?mode=deep",
+    "timestamp": "2026-04-28 23:47:34.082027",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the fact that entityService.getByAliasAndType() calls decodeBase32(alias) before the DB query, and a malformed Base32 string that passes the @Pattern regex but fails Base32 decoding causes an ArrayIndexOutOfBoundsException or similar unchecked exception not caught by CustomExceptionResolver, resulting in a 500 error that degrades mirror node availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_713487cc-6403-428f-9887-9c2962dc565f?mode=deep",
+    "timestamp": "2026-04-28 23:47:56.607678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with an evmAddress that is exactly '0x' followed by 40 'f' characters (0xffffffffffffffffffffffffffffffffffffffff), causing getByEvmAddressAndType() to call ByteBuffer.getInt() which returns -1 (not 0), falling through to findByEvmAddress() with a 20-byte all-0xFF array, potentially matching an unintended entity in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62c14be7-9c47-461e-901b-a7dfc075f65e?mode=deep",
+    "timestamp": "2026-04-28 23:48:19.273878",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user exploit the LoggingFilter's getMessage() method which logs request.getRemoteAddr() without sanitization, sending requests with spoofed X-Forwarded-For headers that inject newlines into log entries, causing log injection that corrupts the mirror node's audit trail for gossiped transaction processing errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a9bba74-8c5b-4bcf-b5f8-75add6c42c5c?mode=deep",
+    "timestamp": "2026-04-28 23:48:42.259092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/controller/AccountController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: account()] Can an unprivileged external user send account() queries with entityId.num=0, entityId.realm=0, entityId.shard=0, causing toEntityId() to produce EntityId(0,0,0) and entityRepository.findById(0L) to be called, potentially returning a treasury or system account whose balance and transaction history should not be publicly enumerable, enabling correlation with gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec79fddd-7820-4f26-9c4c-97a0d288cad2?mode=deep",
+    "timestamp": "2026-04-28 23:49:05.180898",
+    "report_generated": false
+  }
+]
