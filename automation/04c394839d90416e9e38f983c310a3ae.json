@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactions()] Can an unprivileged external user supply `order=asc` combined with crafted `timestamp=gt:X` and `timestamp=lt:Y` filters to `GET /api/v1/transactions` to force the mirror node to return a reordered window of transaction history that omits boundary transactions, causing downstream consumers to reconstruct an incorrect chronological ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_614c83e8-4f8a-4d99-a65e-01c43b94c6cb?mode=deep",
+    "timestamp": "2026-04-28 23:14:13.383602",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doGetTransactions()] Can an unprivileged external user exploit the `nextTimestamp` pagination cursor returned by `doGetTransactions()` by replaying it with a flipped `order` parameter, causing the pagination chain to traverse history in reverse and present a reorganized sequence of transactions to any client following the `links.next` chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ade453e0-006e-45d9-9f3c-1c7e0ea5c623?mode=deep",
+    "timestamp": "2026-04-28 23:14:25.241871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: cacheKeyGenerator()] Can an unprivileged external user craft a URL whose MD5 hash (computed over `req.originalUrl`) collides with the cache key of a legitimate transaction-list response, causing `responseCacheCheckHandler` to serve a different account's transaction history in place of the victim's, effectively reorganizing what history is visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9c511ba-afe1-4f85-b212-605fc414c4a3?mode=deep",
+    "timestamp": "2026-04-28 23:14:37.694114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a request with a forged `if-none-match` ETag header matching a cached response's ETag to force a 304 Not Modified reply, suppressing a freshly updated transaction ordering and making clients believe the old (stale) ordering is still current?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3aad234b-6877-464a-ae98-0b93c439e2b5?mode=deep",
+    "timestamp": "2026-04-28 23:14:50.459527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user race two concurrent requests for the same cache key — one with `order=asc` and one with `order=desc` — so that the slower response overwrites the cache with the reversed ordering, causing all subsequent cache-hit clients to receive a reorganized transaction list?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8d934a7-c661-4f01-a3e3-5584da8f27cb?mode=deep",
+    "timestamp": "2026-04-28 23:15:05.325245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: requestQueryParser()] Can an unprivileged external user submit query parameters with mixed-case keys (e.g., `Timestamp=gt:X&TIMESTAMP=lt:Y`) that are lowercased and merged by `requestQueryParser()`, producing a combined timestamp range that differs from what either individual parameter would produce, thereby shifting which transactions appear in the history window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94b5d2d2-d8e9-4239-ad40-c57f24e92bb7?mode=deep",
+    "timestamp": "2026-04-28 23:15:19.170695",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user supply multiple conflicting `type` (CREDIT_TYPE) values — one `credit` and one `debit` — to `extractSqlFromTransactionsRequest()`, which returns `null` and causes `getTransactionTimestamps()` to return an empty row set, effectively erasing the visible transaction history for that query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f302510-aabc-4d24-b765-e6d09ec01ad7?mode=deep",
+    "timestamp": "2026-04-28 23:15:33.700988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user exploit the `full outer join` between `crypto_transfer`, `token_transfer`, and `transaction` tables in `getTransactionTimestampsQuery()` by supplying an `account.id` filter that matches only token transfers, causing the `coalesce` ordering to produce a different consensus_timestamp sequence than the canonical transaction table order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8091ce4c-1cef-4ac3-94a5-0c35e12dcc9f?mode=deep",
+    "timestamp": "2026-04-28 23:15:48.422668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user look up a transaction by hash and trigger the inner-transaction expansion path (`innerTransactions.length > 0`) in `getTransactionsByIdOrHash()`, causing inner transaction rows to be appended after outer rows without re-sorting by `consensus_timestamp`, presenting a non-chronological transaction sequence to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9dfcc72c-b65a-4a72-a35e-41ff4b58b853?mode=deep",
+    "timestamp": "2026-04-28 23:16:03.777187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: mayMissLongTermScheduledTransaction()] Can an unprivileged external user omit the `scheduled` query parameter when querying a known `SCHEDULECREATE` transaction ID, triggering `mayMissLongTermScheduledTransaction()` to expand the upper consensus timestamp bound by `maxScheduledTransactionConsensusTimestampRangeNs`, pulling in additional transactions outside the normal window and altering the apparent transaction sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5eec0b48-954a-4f07-90b5-883fe2937db8?mode=deep",
+    "timestamp": "2026-04-28 23:16:20.303297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction hash that resolves to multiple `payer_account_id`/`consensus_timestamp` pairs in `getTransactionHash()`, causing `getTransactionsByTransactionIdsSql()` to build a wide timestamp window (`minTimestamp` to `maxTimestamp`) that inadvertently includes unrelated transactions in the response, reorganizing what history is attributed to that hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e89116df-4543-4f3f-91fa-5b3a6d8e5ca2?mode=deep",
+    "timestamp": "2026-04-28 23:16:36.922046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: bindTimestampRange()] Can an unprivileged external user omit all timestamp filters so that `bindTimestampRange()` defaults the range to `[firstTransactionTimestamp, nowInNs()]`, and then by repeatedly querying with `order=asc` vs `order=desc` cause the `maxTransactionsTimestampRangeNs` window to be sliced from opposite ends, producing two different partial views of history that together omit a middle segment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a469d59-37d3-4f85-b456-2cefe4b38d7c?mode=deep",
+    "timestamp": "2026-04-28 23:16:54.815426",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactions()] Can an unprivileged external user supply `transactiontype=SCHEDULECREATE` combined with `result=success` to filter out all non-schedule transactions, then use the returned `links.next` pagination cursor to walk forward through history, presenting a reorganized view that hides all non-schedule activity from any consumer following the cursor chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9eebe19c-bcdf-4563-bfeb-7f389aaf9b53?mode=deep",
+    "timestamp": "2026-04-28 23:17:12.972017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doGetTransactions()] Can an unprivileged external user set `limit=1` and repeatedly follow `links.next` cursors from `doGetTransactions()`, where each page's `consensus_timestamp` is used as the next `timestamp=lt:X` bound, to reconstruct a transaction history that skips transactions sharing the same consensus timestamp as the page boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_357cc378-4da5-4bcf-8390-49a4a75d34f3?mode=deep",
+    "timestamp": "2026-04-28 23:17:31.555811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user submit a transaction hash in base64url encoding (44 chars) vs hex encoding (96 chars) for the same underlying hash, causing `extractSqlFromTransactionsByIdOrHashRequest()` to take different code paths and potentially return different sets of matching transactions, creating an inconsistent history view depending on encoding used?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a354b07-67c9-43cb-9085-1d7b3d6b0807?mode=deep",
+    "timestamp": "2026-04-28 23:17:50.834392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user query a `SCHEDULECREATE` transaction that was recently executed (within `maxScheduledTransactionConsensusTimestampRangeNs`) to trigger the `SHORTER_CACHE_CONTROL_HEADER` (`max-age=5`) path in `getTransactionsByIdOrHashCacheControlHeader()`, causing CDN/proxy caches to serve a 5-second-stale transaction list that omits the scheduled execution transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c519dfd6-b0bc-437b-9ee9-7ad2400ad149?mode=deep",
+    "timestamp": "2026-04-28 23:18:10.671847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: transactionByPayerExcludeSyntheticCondition] Can an unprivileged external user query `GET /api/v1/transactions?account.id=X` for an account that is only a recipient (not payer) of synthetic transactions, causing `transactionByPayerExcludeSyntheticCondition` to exclude those synthetic transactions from the payer-based sub-query while the `entity_transaction` union still includes them, producing a duplicated or reordered result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ba61678-2f30-4ec5-8145-ccea755dedad?mode=deep",
+    "timestamp": "2026-04-28 23:18:31.405876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter that matches only the `entity_transaction` table (NFT-related) and not `crypto_transfer` or `token_transfer`, causing the `nftTransfersUnion` sub-query to dominate the result ordering and present NFT-related transactions in a sequence that differs from the canonical `consensus_timestamp` order in the main transaction table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb1878de-195e-49cf-afb9-e69f0f03cca3?mode=deep",
+    "timestamp": "2026-04-28 23:18:53.392877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user submit duplicate `timestamp` parameters in a specific order (e.g., `timestamp=lt:Y&timestamp=gt:X`) that `normalizeRequestQueryParams()` preserves as-is (since `TIMESTAMP` is in `NON_SORTED_PARAMS`), while a different order (`timestamp=gt:X&timestamp=lt:Y`) produces a different cache key, causing cache misses that serve different transaction windows for semantically identical queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cafe3d9-e041-4a6a-a867-51a3d57701da?mode=deep",
+    "timestamp": "2026-04-28 23:19:14.694170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNormalizedArrayValue()] Can an unprivileged external user submit multiple `scheduled` parameters (e.g., `scheduled=true&scheduled=false`) to exploit the `COLLAPSABLE_PARAMS` behavior in `getNormalizedArrayValue()`, which keeps only the last value, causing the cache key to be computed on `scheduled=false` while the actual query used `scheduled=true`, serving a cached scheduled-transaction history for a non-scheduled query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28f69395-0110-49b7-89c3-17fd9c88cd74?mode=deep",
+    "timestamp": "2026-04-28 23:19:37.708581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactions()] Can an unprivileged external user supply `result=fail` to `GET /api/v1/transactions` to filter out all successful transactions, then use the returned pagination cursor to navigate history, presenting a reorganized view that hides all successful transactions and makes the ledger appear to consist only of failed operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e38aad0b-34b8-4a38-9eed-6604ec462adb?mode=deep",
+    "timestamp": "2026-04-28 23:20:00.967932",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: createStakingRewardTransferList()] Can an unprivileged external user query a timestamp range containing many transactions with staking reward account 800 transfers, causing `getStakingRewardTimestamps()` to generate a large IN-clause query that returns staking reward transfers associated with different consensus timestamps than the outer transaction rows, misattributing staking rewards to wrong transactions in the formatted history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44f73357-4466-4b35-99cb-e1c02e21cea6?mode=deep",
+    "timestamp": "2026-04-28 23:20:23.668940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: formatTransactionRows()] Can an unprivileged external user trigger a response where `stakingRewardMap.get(row.consensus_timestamp)` returns an empty array `[]` for a transaction that actually has staking rewards (due to a missed timestamp in `getStakingRewardTimestamps()`), causing the formatted transaction history to omit staking reward transfers and present an incomplete transfer record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f790d0f-c8a3-405e-8338-c3324c6d398c?mode=deep",
+    "timestamp": "2026-04-28 23:20:47.229039",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a HEAD request to a cached transaction-list endpoint, causing `responseCacheCheckHandler()` to call `negotiate()` and set `Vary: accept-encoding` without returning a body, then follow up with a GET request that hits the same cache entry but with a different `Accept-Encoding`, receiving a response whose `Content-Length` mismatches the actual body, corrupting the client's view of the transaction list?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfcbe195-4306-4a04-a69a-431d5232e041?mode=deep",
+    "timestamp": "2026-04-28 23:21:11.367995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/server.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction ID with `nonce=0` to specifically target the non-synthetic (user-submitted) transaction, while omitting `nonce` in a second query returns both the user transaction and its synthetic children appended in `rows.push(...innerTransactionRows)`, creating two different history views for the same transaction ID?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7e57489-c591-4836-81f4-4c17bee84d18?mode=deep",
+    "timestamp": "2026-04-28 23:21:35.981905",
+    "report_generated": false
+  }
+]
