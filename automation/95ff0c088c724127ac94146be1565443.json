@@ -1,0 +1,86 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that the Pageable sort is constructed from the user-supplied order parameter (asc/desc) and the hardcoded HOOK_ID field, and if Spring Data's sort property is not validated against an allowlist, inject a sort expression like 'adminKey' to cause the database to sort by adminKey bytes, leaking relative ordering of adminKey values that aids in brute-forcing the key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b77aa83e-e4c7-4b15-b22f-0d8b4b3b51f2?mode=deep",
+    "timestamp": "2026-04-28 22:46:16.361851",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that HookRepository extends PagingAndSortingRepository<Hook, Id> and call findAll() without ownerId scoping (if the parent interface method is accessible via Spring Data REST auto-exposure), retrieving all Hook records in the database and exposing adminKey and contractId for every registered ACCOUNT_ALLOWANCE_HOOK?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f51c92b5-7e9f-484a-ba83-627503f3a4ea?mode=deep",
+    "timestamp": "2026-04-28 22:46:28.707617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that the lowerBound and upperBound passed to findByOwnerIdAndHookIdBetween() are computed using Math.max() and Math.min() over user-supplied NumberRangeParameter values, and by supplying conflicting gt/gte/lt/lte operators for the same hookId value, cause an arithmetic edge case where lowerBound equals upperBound and the query returns exactly one hook, enabling precise single-hook enumeration without triggering rate limits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74e39acb-2d72-40b0-808a-8ec442280603?mode=deep",
+    "timestamp": "2026-04-28 22:46:41.413149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdIn() accepts a Collection<Long> hookIds parameter and the HookServiceImpl filters idsInRange using Java stream operations rather than database-level filtering, and by supplying hookIds that are outside the lowerBound/upperBound range, observe the filtering behavior to infer the existence of hooks at specific IDs without directly retrieving them, enabling targeted enumeration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e89b50d0-7052-49ab-9bb1-ed313a7b4be2?mode=deep",
+    "timestamp": "2026-04-28 22:46:54.578815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdBetween() returns the full Hook entity including createdTimestamp, and by correlating createdTimestamp values with known transaction timestamps, identify the specific CryptoCreate or ContractCreate transaction that registered the hook, then analyze that transaction's HookCreationDetails to extract the original adminKey and use it to modify the hook's contractId?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b6e2c27-d81c-4e42-ba68-cd8fd5924546?mode=deep",
+    "timestamp": "2026-04-28 22:47:08.798738",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that the Hook entity's contractId field (an EntityId) is returned in the REST response, and by calling findByOwnerIdAndHookIdIn() for multiple accounts, build a mapping of which contractId implements ACCOUNT_ALLOWANCE_HOOK for which accounts, then call the hook contract's EVM functions directly to manipulate the hook's internal state before a transfer transaction fires the hook, causing the hook to approve malicious allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed85b276-809f-473e-a224-6ab4666b846d?mode=deep",
+    "timestamp": "2026-04-28 22:47:23.458255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdBetween() uses a BETWEEN clause that is inclusive on both ends, and by supplying lowerBound=N and upperBound=N (same value), retrieve exactly the hook with hookId=N for the target ownerId, enabling O(1) hook existence checks that allow the attacker to silently enumerate all hookIds for a victim account without triggering anomaly detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9afa85d5-3c59-43a9-abbc-60e4e0d01798?mode=deep",
+    "timestamp": "2026-04-28 22:47:38.826865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that the ownerId path variable is parsed by EntityIdParameter.valueOf() which supports numeric, EVM address, and alias formats, and by supplying an EVM address that maps to a different shard/realm/num combination than expected, cause findByOwnerIdAndHookIdIn() to query hooks for an unintended account in a different shard, exposing cross-shard hook data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb7ae92c-d736-4846-8b6d-47785f34e57c?mode=deep",
+    "timestamp": "2026-04-28 22:47:56.071525",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdBetween() is called when hookIds is empty (no hook.id filter), and by omitting the hook.id parameter entirely, trigger a full range scan (lowerBound=0, upperBound=MAX_VALUE) that returns all hooks for the target ownerId, including hooks with extensionPoint=ACCOUNT_ALLOWANCE_HOOK, revealing the complete allowance hook configuration that can be exploited to drain the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44e33a47-1a76-403b-ad64-70df6fa6ed42?mode=deep",
+    "timestamp": "2026-04-28 22:48:14.091083",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that the Hook entity returned by findByOwnerIdAndHookIdIn() includes the type field (HookType.EVM), and by identifying accounts with EVM hooks, target those accounts with crafted EVM transactions that interact with the hook contract's storage slots to manipulate the hook's execution logic and cause it to approve unauthorized fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fe6395c-3f57-4b47-82f6-be97198968df?mode=deep",
+    "timestamp": "2026-04-28 22:48:32.770520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdBetween() does not enforce any rate limiting at the repository level, and by sending thousands of requests with different ownerId values, enumerate which accounts have ACCOUNT_ALLOWANCE_HOOK hooks registered, building a target list of high-value accounts whose allowance hooks can be exploited for fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_889ff652-75d4-47b4-8f13-72ad09592a8c?mode=deep",
+    "timestamp": "2026-04-28 22:48:51.811044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that the Hook entity's adminKey is a @ToString.Exclude field but is still serialized in the REST response (since @ToString.Exclude only affects toString()), and by calling findByOwnerIdAndHookIdIn() for a victim account, obtain the raw adminKey bytes that authorize hook management transactions, enabling the attacker to delete or modify the victim's ACCOUNT_ALLOWANCE_HOOK?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8c174ef-0a5c-41ec-ad6d-55937a1a5e36?mode=deep",
+    "timestamp": "2026-04-28 22:49:12.156601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdBetween()] Can an unprivileged external user exploit the fact that findByOwnerIdAndHookIdBetween() returns the timestampRange (a Range<Long>) for each hook, and by observing the upper bound of the timestampRange (which is set when a hook is updated or deleted), infer the exact consensus timestamp of the last hook modification, correlate it with network transaction records to identify the modifying transaction, and extract updated adminKey material?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4728c55b-51af-4014-88c7-2d1241f2eb42?mode=deep",
+    "timestamp": "2026-04-28 22:49:33.061129",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/HookRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByOwnerIdAndHookIdIn()] Can an unprivileged external user exploit the fact that HookRepository.findByOwnerIdAndHookIdIn() is a derived query method and Spring Data JPA generates the SQL at startup, meaning there is no runtime validation that the ownerId parameter matches the authenticated caller, allowing any user to query hooks for any ownerId and retrieve adminKey data that enables hook manipulation leading to fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d52dfa4a-be28-425c-87e0-0814a7e4c1ea?mode=deep",
+    "timestamp": "2026-04-28 22:49:53.966625",
+    "report_generated": false
+  }
+]
