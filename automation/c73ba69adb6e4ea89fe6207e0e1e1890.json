@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a crafted Base32 alias that decodes to the same byte sequence as a deleted entity's alias, exploiting the 'deleted is not true' NULL-permissive predicate to surface a deleted entity's transaction history as if it were active, causing observers to see a reorganized view of which account owns a given alias history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5cfae4d6-71f1-46da-abbe-2bcbb9e3c1bb?mode=deep",
+    "timestamp": "2026-04-28 23:34:38.511269",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user query an EVM address whose corresponding entity has deleted=NULL (never explicitly set), exploiting 'deleted is not true' which returns NULL rows as active, causing the entity's full transaction history to appear under an address that should be considered inactive, reorganizing visible history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26653249-7c03-42b0-94ef-bef1c441c79a?mode=deep",
+    "timestamp": "2026-04-28 23:34:50.756372",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the difference between 'deleted is not true' (used in graphql EntityRepository) and 'deleted <> true' (used in importer EntityRepository) to retrieve an entity with deleted=NULL via the GraphQL alias lookup that the importer would treat as deleted, causing inconsistent transaction history visibility across services?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6bacc89-6458-4f52-b20d-040b1edf811f?mode=deep",
+    "timestamp": "2026-04-28 23:35:03.348663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the same 'deleted is not true' vs 'deleted <> true' semantic divergence for EVM address lookups, causing the GraphQL endpoint to present transaction history for an entity that the canonical importer considers deleted, effectively reorganizing which history is visible at a given EVM address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e5d0f8e-394e-4edf-8973-c9bd4b552cb6?mode=deep",
+    "timestamp": "2026-04-28 23:35:16.915210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById() via CrudRepository] Can an unprivileged external user call getByIdAndType() which uses the inherited CrudRepository.findById() with no 'deleted' filter, allowing retrieval of a deleted entity's full record and transaction history by numeric ID, while findByAlias and findByEvmAddress would correctly hide it, causing inconsistent history visibility depending on lookup method?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84cf35f1-3201-430d-84e1-94eb3a19ae80?mode=deep",
+    "timestamp": "2026-04-28 23:35:30.623016",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user craft a long-zero EVM address (bytes 0-3 = 0x00000000, bytes 4-11 = 0x0000000000000000, bytes 12-19 = target entity numeric ID) to trigger the findById() fallback path in EntityServiceImpl.getByEvmAddressAndType(), bypassing the evm_address column filter and retrieving a deleted entity's transaction history that findByEvmAddress() would have hidden?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb790f83-b3a7-45eb-bba1-febc333c7ddc?mode=deep",
+    "timestamp": "2026-04-28 23:35:45.290334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a Base32 alias that decodes to an all-zero byte array or empty byte array, causing the native query 'select * from entity where alias = ?1 and deleted is not true' to match an entity with a zero-byte alias field, potentially surfacing an unintended entity's transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9da932a5-dd17-4c42-bc6f-235d69f9e265?mode=deep",
+    "timestamp": "2026-04-28 23:36:00.155903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a hex-encoded EVM address that decodes to fewer than 20 bytes due to leading-zero stripping in the hex decoder, causing the native query to match an entity with a shorter evm_address byte sequence, returning a different entity's transaction history than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b67e1cb2-ada9-4647-b04c-a6969ccddec9?mode=deep",
+    "timestamp": "2026-04-28 23:36:16.013664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the absence of a LIMIT clause in 'select * from entity where alias = ?1 and deleted is not true' to trigger a scenario where multiple entities share the same alias bytes (e.g., after a re-key event), causing the ORM to return an unpredictable entity and thus an unpredictable transaction history to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f410066f-1495-41b4-b032-d7f21a36112b?mode=deep",
+    "timestamp": "2026-04-28 23:36:32.647473",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the absence of a LIMIT clause in 'select * from entity where evm_address = ?1 and deleted is not true' when multiple entities share the same evm_address bytes, causing the ORM to return an arbitrary entity and reorganize which transaction history is visible at that EVM address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74109257-4378-4ead-8ecc-390edf928bfe?mode=deep",
+    "timestamp": "2026-04-28 23:36:49.896374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a maximally long Base32 alias string that decodes to a large byte array, causing the native query to perform a full table scan on the entity table with no index on alias for large byte values, enabling a DoS that prevents legitimate transaction history queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c44e09f-3010-41ef-a66e-932fe71cad9d?mode=deep",
+    "timestamp": "2026-04-28 23:37:07.953273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit thousands of concurrent GraphQL queries with distinct EVM addresses, each triggering a full table scan via 'select * from entity where evm_address = ?1', exhausting database connection pool resources and causing legitimate transaction history queries to time out or return stale cached results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b7ff0b3-d9c1-4c61-9dfe-b89ac6efb5ff?mode=deep",
+    "timestamp": "2026-04-28 23:37:27.280159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user craft a Base32 alias that, after decoding, produces a byte sequence matching the evm_address of a different entity (not the alias column), and if the database has a cross-column index or the query planner uses an unexpected path, cause the wrong entity's transaction history to be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6006173-77bc-4833-b7e8-d74d70dcfe5a?mode=deep",
+    "timestamp": "2026-04-28 23:37:47.010741",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the fact that decodeBase32() in GraphQlUtils uses Apache Commons Codec Base32 with lenient padding, submitting an alias without trailing '=' padding characters that decodes to the same bytes as a padded alias, to resolve a different entity's transaction history than the strict alias owner expects?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5e356ad-baee-43d3-b7b1-9e97231c60b7?mode=deep",
+    "timestamp": "2026-04-28 23:38:06.874187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit an EVM address with mixed-case hex characters (e.g., 'aAbBcC...') that, after case-insensitive hex decoding in decodeEvmAddress(), resolves to the same bytes as a different entity's canonical lowercase EVM address, causing that entity's transaction history to be returned under a non-canonical address representation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18fa11a5-8f1a-43a8-ba38-88c6304f8537?mode=deep",
+    "timestamp": "2026-04-28 23:38:27.683774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit an EVM address with the '0x' prefix in uppercase ('0X') or with extra whitespace, and if decodeEvmAddress() only strips lowercase '0x' via Strings.CS.removeStart(), cause a DecoderException that leaks internal path information through the error message, aiding history reorganization reconnaissance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82485844-e069-47ba-a421-c84b74b8cc67?mode=deep",
+    "timestamp": "2026-04-28 23:38:48.505192",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a Base32 alias that decodes to a byte array of length 0 (empty string input), causing the native query to execute 'select * from entity where alias = '' and deleted is not true', potentially matching entities with an empty alias field and exposing their transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a44065f0-cf57-4ad2-9326-130bb9eec63a?mode=deep",
+    "timestamp": "2026-04-28 23:39:09.081454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a 20-byte EVM address where bytes 0-3 are 0x00000000 and bytes 4-11 are 0x0000000000000000 but bytes 12-19 encode a valid entity ID that has no evm_address set in the database, causing getByEvmAddressAndType() to return that entity via findById() even though it was never associated with any EVM address, reorganizing its transaction history under a fabricated EVM address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6737f9bb-3467-46e6-81da-aad67c8df141?mode=deep",
+    "timestamp": "2026-04-28 23:39:30.647529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user craft a long-zero EVM address encoding a deleted entity's numeric ID, exploiting the fact that the findById() fallback in getByEvmAddressAndType() has no 'deleted' filter, to retrieve and display a deleted entity's transaction history under a synthetic EVM address that was never legitimately associated with it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a14bcde-56c7-4561-8bee-cf1edce86604?mode=deep",
+    "timestamp": "2026-04-28 23:39:53.589190",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the type filter being applied in Java (not SQL) in getByAliasAndType() — where findByAlias() returns the entity and then .filter(e -> e.getType() == type) is applied — to enumerate entity types by observing whether a given alias returns a result or empty, leaking metadata about transaction history ownership?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4975688-6718-46a2-9656-1ad6f35d2b87?mode=deep",
+    "timestamp": "2026-04-28 23:40:16.622438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the type filter being applied post-query in getByEvmAddressAndType() to perform a timing side-channel attack — where a matched-but-wrong-type entity causes a slightly different response time than a no-match — to enumerate which EVM addresses correspond to CONTRACT vs ACCOUNT entities and map transaction history ownership?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8720862-412f-4b0f-bb66-811bf4c8b453?mode=deep",
+    "timestamp": "2026-04-28 23:40:40.220264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a Base32 alias that decodes to the same bytes as another entity's evm_address (not alias), and if the database has a composite index or the query optimizer performs a cross-column scan, cause the wrong entity's transaction history to be returned, reorganizing history attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2aae48c0-ecf8-4072-a8d2-482a30c0b407?mode=deep",
+    "timestamp": "2026-04-28 23:41:05.815302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the native query returning 'select *' (all columns) including sensitive fields like key material, memo, and balance, to extract full entity state alongside transaction history, enabling a more complete picture for history reorganization attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_519e6e2a-7b12-406f-b4a5-ad1c25e95ca6?mode=deep",
+    "timestamp": "2026-04-28 23:41:32.583050",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the native query returning 'select *' (all columns) to retrieve the full entity record including internal fields not exposed in the GraphQL schema, and use those fields (e.g., internal timestamps, shard/realm/num) to correlate and reorganize transaction history across multiple entities?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e034100-5670-4e05-bf67-a96ae9404416?mode=deep",
+    "timestamp": "2026-04-28 23:41:59.158283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: graphql/src/main/java/org/hiero/mirror/graphql/repository/EntityRepository.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a sequence of alias lookups for the same alias at high frequency, exploiting the absence of rate limiting on the GraphQL endpoint, to cause repeated database reads that interfere with write operations and cause a stale or inconsistent entity state to be returned, reorganizing the visible transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fba5fbde-6525-408f-8d8a-5852ea03eb13?mode=deep",
+    "timestamp": "2026-04-28 23:42:25.068929",
+    "report_generated": false
+  }
+]
