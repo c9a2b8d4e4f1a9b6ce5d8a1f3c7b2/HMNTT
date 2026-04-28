@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifyHashChain()] Can an unprivileged external user supply a stream file whose `previousHash` matches an empty/null SHA-384 sentinel value so that `SHA_384.isHashEmpty(expectedPreviousHash)` returns true, causing `verifyHashChain()` to unconditionally return true and bypass the entire running-hash chain integrity check, allowing injection of a forged stream file into the mirror node's state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2cd674e-7a87-425e-9332-dd7f339bc155?mode=deep",
+    "timestamp": "2026-04-28 19:49:16.549460",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifyHashChain()] Can an unprivileged external user exploit the early-return path `if (SHA_384.isHashEmpty(expectedPreviousHash)) { return true; }` on first startup (when `lastStreamFile` is empty) to inject an arbitrary stream file with any `previousHash` value, permanently anchoring a malicious hash as the chain root and corrupting all subsequent chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bc58ff4-e7cc-4245-a260-6bb3b564d32d?mode=deep",
+    "timestamp": "2026-04-28 19:49:28.733148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifyHash()] Can an unprivileged external user craft a stream file where `streamFile.getFileHash()` returns null and `signature.getFileHashAsHex()` also returns null, causing `Objects.equals(actual, expected)` to return true for two null values, effectively bypassing the file hash integrity check in `verifyHash()` and allowing acceptance of a tampered data file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6dcfdcd-9ba6-481b-83b7-237ebe379876?mode=deep",
+    "timestamp": "2026-04-28 19:49:41.512679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifyHash()] Can an unprivileged external user craft a stream file where both `streamFile.getMetadataHash()` and `signature.getMetadataHashAsHex()` are null, causing `verifyHash()` called with `HASH_TYPE_METADATA` to pass via `Objects.equals(null, null)`, bypassing metadata integrity verification and allowing tampered metadata to be accepted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70f00763-577d-480b-be8c-4a96d4d4106b?mode=deep",
+    "timestamp": "2026-04-28 19:49:54.383597",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: partialCollection()] Can an unprivileged external user, by observing that `nodes.getFirst().getTotalStake()` is used as `totalStake` for all nodes, exploit a scenario where the first shuffled node has a disproportionately low stake value, causing `neededStake` to be computed incorrectly and allowing consensus to be reached with fewer nodes than the `downloadRatio` requires, weakening the trust model?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_193dc40e-adbd-4fd4-9ec3-dcad823ce37c?mode=deep",
+    "timestamp": "2026-04-28 19:50:09.019266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: partialCollection()] Can an unprivileged external user trigger an `IndexOutOfBoundsException` or infinite loop in `partialCollection()` when `allNodes` contains nodes with zero stake, causing `aggregateStake` to never reach `neededStake` and the `while (aggregateStake < neededStake)` loop to exhaust all nodes and throw an exception, resulting in a denial-of-service for the downloader?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c72ab907-c2db-4681-9751-2f31159e00ad?mode=deep",
+    "timestamp": "2026-04-28 19:50:22.434695",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadAndParseSigFiles()] Can an unprivileged external user cause unbounded memory consumption by injecting an extremely large number of signature files into the cloud storage bucket, since `listLimit` is set to `Long.MAX_VALUE` when the downloader is enabled, causing the `Flux.collect()` into `getStreamFileSignatureMultiMap()` to accumulate unlimited entries in memory until OOM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3dc70fa0-b4eb-4dda-a947-e6749f9e5fbe?mode=deep",
+    "timestamp": "2026-04-28 19:50:36.201387",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadAndParseSigFiles()] Can an unprivileged external user exploit the `.onErrorContinue((e, s) -> log.error(...))` error handler in the reactive pipeline to silently suppress all signature download errors for a given node, effectively making that node appear as `NOT_FOUND` in `statusMap()` rather than triggering a hard failure, allowing an attacker to selectively block node signatures without alerting operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_688b344f-50b5-4837-bebd-936e0839cbb3?mode=deep",
+    "timestamp": "2026-04-28 19:50:49.258716",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadAndParseSigFiles()] Can an unprivileged external user cause a `NullPointerException` crash by making `Flux.collect().block()` return null (e.g., via a reactive pipeline cancellation), since the result is wrapped in `Objects.requireNonNull()` which throws NPE, causing the entire `downloadNextBatch()` to fail and halting stream ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_873f8e7d-d804-4482-8e8a-535ef6714b03?mode=deep",
+    "timestamp": "2026-04-28 19:51:03.956763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySigsAndDownloadDataFiles()] Can an unprivileged external user exploit the `continue` statement in the `SignatureVerificationException` catch block to skip all but the last signature group, by injecting many invalid signature files that all fail verification, causing the last group to throw a `SignatureVerificationException` that propagates up and halts all processing, effectively blocking legitimate stream file ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d05d782-aab6-4200-8149-156a4bf75e9f?mode=deep",
+    "timestamp": "2026-04-28 19:51:17.137110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user cause `streamFileProvider.get(dataFilename).block()` to block indefinitely by making the cloud provider hang on a specific file request, since there is no per-file timeout on the `get()` call (only a global `timeout` on the listing phase), resulting in a thread being permanently blocked and degrading the downloader's throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36c231d6-485c-48b3-8168-6e7f2918bfd5?mode=deep",
+    "timestamp": "2026-04-28 19:51:31.318498",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user trigger `Objects.requireNonNull(streamFileProvider.get(dataFilename).block())` to throw a `NullPointerException` by making the provider return an empty `Mono` (completing without a value), causing the entire `verifySignatures()` loop to abort and log an error, preventing any data file from being processed in that batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1a3ce07-e1ef-4210-9a52-b1c75cf0dfa5?mode=deep",
+    "timestamp": "2026-04-28 19:51:44.697432",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user exploit the fact that `verifySignatures()` only iterates signatures with `SignatureStatus.CONSENSUS_REACHED` and returns `true` on the first successful verification, to inject a malicious data file at a node that happens to be tried first, if the hash verification in `verify()` can be bypassed via null hash values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3384605-fee7-44d6-9856-f791b837d03a?mode=deep",
+    "timestamp": "2026-04-28 19:51:57.585600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: onVerified()] Can an unprivileged external user craft a stream file with a `consensusStart` value of `Long.MIN_VALUE` or `0`, causing `streamFile.getConsensusStart() - last.getConsensusStart()` to produce a negative or overflowing `latency` value recorded into `streamCloseMetric`, corrupting monitoring metrics and potentially causing metric-based alerting to malfunction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95ea8c2e-0e6f-464c-9e7d-14979fb83b8a?mode=deep",
+    "timestamp": "2026-04-28 19:52:10.798500",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: onVerified()] Can an unprivileged external user craft a stream file with a `consensusEnd` value of `Long.MAX_VALUE`, causing `Instant.ofEpochSecond(0, streamFile.getConsensusEnd())` to overflow or throw an `ArithmeticException`, crashing `onVerified()` and preventing the stream file from being committed to `lastStreamFile`, effectively halting all future downloads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a95e40c-500c-4b8a-b2b5-5a2f4622acf3?mode=deep",
+    "timestamp": "2026-04-28 19:52:24.585401",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: onVerified()] Can an unprivileged external user exploit the `lastStreamFile.set(Optional.of(copy))` call in `onVerified()` to race with `getStartAfterFilename()`'s `lastStreamFile.compareAndSet(Optional.empty(), streamFile)`, causing a TOCTOU condition where a stale `lastStreamFile` value is used to compute `startAfterFilename`, resulting in re-downloading already-processed files or skipping files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9f73c15-99df-4500-ae59-3c39963cd7a5?mode=deep",
+    "timestamp": "2026-04-28 19:52:37.467207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: setStreamFileIndex()] Can an unprivileged external user cause a `Long` overflow in `setStreamFileIndex()` by processing a stream file when `lastStreamFile.get().map(StreamFile::getIndex)` returns `Long.MAX_VALUE`, causing `v + 1` to overflow to `Long.MIN_VALUE` and setting a negative index on the stream file, corrupting the block index sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce0353e5-36eb-40b2-ad62-83cf398ef39b?mode=deep",
+    "timestamp": "2026-04-28 19:52:52.077043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: statusMap()] Can an unprivileged external user cause unbounded metric cardinality growth by injecting signature files from a large number of fabricated node IDs, causing `nodeSignatureStatusMetricMap.computeIfAbsent(nodeId, n -> newStatusMetric(...))` to create unlimited `Counter` instances in the `MeterRegistry`, exhausting heap memory and crashing the importer process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_930a7ee4-bbd1-484b-b480-cde2ce683fc2?mode=deep",
+    "timestamp": "2026-04-28 19:53:04.967942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: statusMap()] Can an unprivileged external user inject signature files with attacker-controlled `streamType` tag values (via `StreamFileSignature::getStreamType`), causing `newStatusMetric()` to register Micrometer counters with arbitrary tag values, leading to metric label injection that corrupts monitoring dashboards or causes metric backend resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4b4319a-dc40-4a65-915c-3d6d52caa35e?mode=deep",
+    "timestamp": "2026-04-28 19:53:18.244053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadNextBatch()] Can an unprivileged external user exploit the broad `catch (Exception e)` block in `downloadNextBatch()` to silently suppress any exception thrown during `verifySigsAndDownloadDataFiles()`, causing the downloader to continue polling without processing any files and without raising an alert, resulting in silent data loss or indefinite stalling of stream ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae002297-c146-4d10-a8e8-0e585ef51bdc?mode=deep",
+    "timestamp": "2026-04-28 19:53:31.058073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadNextBatch()] Can an unprivileged external user trigger the `downloaderProperties.setEnabled(false)` path in `downloadNextBatch()` by making `sigFilesMap.isEmpty()` return true on a DEMO network, permanently disabling the downloader for the lifetime of the process without any recovery mechanism, causing a denial-of-service for stream ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c465ef0-c246-48aa-88c0-52931b1a4bc3?mode=deep",
+    "timestamp": "2026-04-28 19:53:44.681921",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user trigger `downloaderProperties.setEnabled(false)` by crafting a stream file whose `dataFilename.getInstant()` is after `importerProperties.getEndDate()`, permanently disabling the downloader and causing a denial-of-service, given that `endDate` defaults to a far-future value that an attacker could match by controlling the filename timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f18fd585-b4e9-434b-b65c-e1c9201ef827?mode=deep",
+    "timestamp": "2026-04-28 19:53:57.906236",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user cause `Utility.archiveFile(streamFileData.getFilePath(), streamFile.getBytes(), archiveDestinationFolder)` to write files to arbitrary filesystem paths by injecting a `streamFileData.getFilePath()` value containing path traversal sequences (e.g., `../../etc/cron.d/malicious`), since `destinationRoot.resolve(filename)` in `Utility.archiveFile()` does not sanitize the filename against path traversal?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d80c9e66-4d4a-4378-9271-58feb7cf0e2a?mode=deep",
+    "timestamp": "2026-04-28 19:54:10.374050",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: verifySignatures()] Can an unprivileged external user cause `signatures.forEach(s -> Utility.archiveFile(s.getFilename().getBucketFilePath(), s.getBytes(), archiveDestinationFolder))` to write signature bytes to arbitrary paths by injecting a `bucketFilePath` containing `../` sequences, since `Utility.archiveFile()` calls `destinationRoot.resolve(filename)` without validating that the resolved path stays within `destinationRoot`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d2f7745-683d-4e5d-8253-e9cc78de9cda?mode=deep",
+    "timestamp": "2026-04-28 19:54:23.431479",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: '] [Function: downloadAndParseSigFiles()] Can an unprivileged external user cause a reactive pipeline timeout DoS by making all node signature listing operations hang just under the `downloaderProperties.getCommon().getTimeout()` threshold, causing the `.timeout()` operator to fire and cancel the entire batch, resulting in zero signatures being processed and the downloader stalling indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e3b8dcd-01bc-4108-8edc-e83d20a2f3a0?mode=deep",
+    "timestamp": "2026-04-28 19:54:37.068956",
+    "report_generated": false
+  }
+]
