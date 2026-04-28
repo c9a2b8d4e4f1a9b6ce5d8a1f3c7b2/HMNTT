@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a crafted consensusEnd timestamp to RetrieveBalanceAtBlock() that falls exactly between a fee transfer and the next balance snapshot, causing the balanceChangeBetween query to include that fee transfer in the sum while the snapshot already reflects it, resulting in double-counting of fees in the reported balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_462f50dc-1493-422b-bb3c-954a438d992f?mode=deep",
+    "timestamp": "2026-04-28 22:30:27.203296",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a consensusEnd value of 0 to RetrieveBalanceAtBlock(), causing balanceChangeBetween to execute with @start=0 and @end=0, which returns a sum of all crypto_transfer rows with consensus_timestamp in (0,0] (empty set), effectively zeroing out all fee contributions to the balance and misrepresenting the account's fee-adjusted balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_424a8baa-b916-452a-9ec0-bd8d389ce4b5?mode=deep",
+    "timestamp": "2026-04-28 22:30:39.111218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user trigger a silent int64 overflow at line 211 (hbarAmount.Value += hbarValue) by querying an account whose snapshot balance (ab.Balance) is near math.MaxInt64 and whose fee transfers between snapshot and consensusEnd sum to a positive value, causing the reported balance to wrap to a negative number and misrepresent the fee-adjusted balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b068ae95-d30b-4b3d-9b64-6d2fe47766d0?mode=deep",
+    "timestamp": "2026-04-28 22:30:51.883822",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user trigger a condition where the selectPreviousPartitionLowerBound query silently fails (error logged but not returned at lines 276-285), leaving partitionLowerBound=0, causing latestBalanceBeforeConsensus to scan all account_balance rows from timestamp 0, potentially selecting a stale snapshot that excludes recent fee transfers and misrepresents the fee-adjusted balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9eebd3c-d92c-4770-b6e5-fd51624a5b51?mode=deep",
+    "timestamp": "2026-04-28 22:31:04.842079",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query a deleted account with a consensusEnd value equal to entity.GetModifiedTimestamp(), causing balanceSnapshotEndTimestamp = balanceChangeEndTimestamp - 1 (line 184), and if GetModifiedTimestamp() returns 0 (unset), balanceSnapshotEndTimestamp underflows to -1, causing the latestBalanceBeforeConsensus query to find no snapshot and returning an incorrect fee-adjusted balance of 0?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69dbb97a-5d58-46d8-a8b9-1e17b8e50b56?mode=deep",
+    "timestamp": "2026-04-28 22:31:18.372806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit the errata filter in balanceChangeBetween (errata is null or errata <> 'DELETE') to have errata='INSERT' fee transfers counted in the balance change sum, since INSERT errata rows represent historically missing fee transactions that were retroactively added, potentially inflating the fee component of the reported balance beyond design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11283891-87d0-4dc9-8bd1-451fd9f5863c?mode=deep",
+    "timestamp": "2026-04-28 22:31:32.626393",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a consensusEnd timestamp that is exactly equal to the consensus_timestamp of a known fee transfer (errata='INSERT'), causing that fee transfer to be included in the balanceChangeBetween sum (consensus_timestamp <= @end), while a non-errata query path would exclude it, resulting in a fee amount outside design parameters being reflected in the balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77adac74-50b1-4344-b466-3d7d092c4c14?mode=deep",
+    "timestamp": "2026-04-28 22:31:47.190655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias that resolves to a different entity at a given consensusEnd via selectCryptoEntityByAlias (UNION ALL of entity and entity_history ordered by timestamp_range desc), causing the balance query to use the wrong entity's ID and aggregate fee transfers belonging to a different account, misrepresenting the fee-adjusted balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3153d845-2db4-45dd-8098-d078ab1c93ac?mode=deep",
+    "timestamp": "2026-04-28 22:32:03.218357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user craft a consensusEnd value that falls within the timestamp_range of a historical entity record (entity_history) rather than the current entity record, causing getCryptoEntity() to return the historical entity's ID, and subsequently causing getBalanceChange() to sum fee transfers for the historical entity ID rather than the current one, producing a fee balance outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b38952c1-79cc-45b4-aa42-296ab8e13119?mode=deep",
+    "timestamp": "2026-04-28 22:32:19.663051",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query an account by alias where selectCurrentCryptoEntityByAlias (used in GetAccountId()) returns a different entity ID than selectCryptoEntityByAlias (used in getCryptoEntity()), because the former has no timestamp filter while the latter does, causing fee transfers to be summed for one entity while the balance snapshot is retrieved for another?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f78d371-08e5-4d14-a064-a2b8d0ad5639?mode=deep",
+    "timestamp": "2026-04-28 22:32:37.042198",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a consensusEnd value of math.MaxInt64 to RetrieveBalanceAtBlock(), causing getInclusiveInt8Range(consensusEnd, consensusEnd) to create a pgtype.Int8range with both bounds at MaxInt64, and the balanceChangeBetween query to sum ALL fee transfers ever recorded for the account (consensus_timestamp <= MaxInt64), producing a fee-inflated balance far outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b99a2767-a5e8-44a5-9d4d-f42efd583995?mode=deep",
+    "timestamp": "2026-04-28 22:32:54.384255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a consensusEnd value that causes selectPreviousPartitionLowerBound to return the lower bound of the oldest partition (not the second-to-last as intended), causing latestBalanceBeforeConsensus to use an overly restrictive lower_bound that excludes the most recent balance snapshot, forcing the balance calculation to use a stale snapshot and include more fee transfers in the change window than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62736694-0613-4611-8a11-c9198629648f?mode=deep",
+    "timestamp": "2026-04-28 22:33:12.911160",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit the strict greater-than boundary in balanceChangeBetween (consensus_timestamp > @start) by supplying a consensusEnd equal to the exact snapshot timestamp, causing fee transfers at the snapshot timestamp to be excluded from the change sum while also not being reflected in the snapshot (if the snapshot was taken before those fees were processed), resulting in a fee amount being silently dropped from the balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a3daff2-b9e8-4dce-85d7-d1a9865dd57c?mode=deep",
+    "timestamp": "2026-04-28 22:33:31.234212",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query an account that has entity.Deleted=nil (not explicitly set), causing the deleted-account branch at line 178 to be skipped, and if the account was effectively removed from the network without the deleted flag being set, fee transfers after the effective deletion are still included in the balance change sum, producing a fee balance outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61df279f-e7ed-4d0b-8f3b-c56878404fa3?mode=deep",
+    "timestamp": "2026-04-28 22:33:50.153141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user trigger a PostgreSQL bigint overflow in the sum(amount) expression within balanceChangeBetween by querying an account that has accumulated a large number of fee transfers whose sum exceeds int64 range, causing the database to return an error or wrapped value that is then stored in accountBalanceChange.Value and used unchecked in hbarAmount.Value += hbarValue?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c0b2cf8-3cf8-43e6-82fd-de80045946a2?mode=deep",
+    "timestamp": "2026-04-28 22:34:10.255839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user supply a consensusEnd value of 1 (minimum positive timestamp) to getCryptoEntity(), causing getInclusiveInt8Range(1,1) to create a range [1,1], which matches no entity or entity_history records (since all real entities have timestamp_range starting after genesis), returning nil entity, and then causing RetrieveBalanceAtBlock() to proceed with id=accountId.GetId() and query fee transfers from timestamp 0 to 1, misrepresenting the fee balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59534020-f762-4dd7-9fa3-d50c2df375cb?mode=deep",
+    "timestamp": "2026-04-28 22:34:31.138699",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a consensusEnd timestamp that falls in a partition gap (between two partitions in mirror_node_time_partitions), causing selectPreviousPartitionLowerBound to return a lower_bound that is too far in the past, expanding the window in latestBalanceBeforeConsensus to include balance snapshots from a prior partition that predate significant fee schedule changes, producing a fee-adjusted balance that does not reflect current fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca65142b-7244-4e6a-ade9-aa5f5ecb73d3?mode=deep",
+    "timestamp": "2026-04-28 22:34:52.413333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query an account by alias where the alias was previously owned by a different account (reassigned), causing selectCryptoEntityByAlias to return the current owner's entity at the given consensusEnd, but the fee transfers in crypto_transfer are stored under the old owner's entity_id, resulting in the fee change sum being computed for the wrong entity and misrepresenting the fee-adjusted balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81cdac30-0086-4551-bf30-e7f217d97130?mode=deep",
+    "timestamp": "2026-04-28 22:35:13.607140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a consensusEnd value that is less than the snapshotTimestamp returned by getLatestBalanceSnapshot(), causing getBalanceChange() to be called with consensusStart > consensusEnd, making the balanceChangeBetween query return 0 (no transfers in the inverted range), and silently dropping all fee transfers that occurred between the snapshot and the intended query time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a32c478a-0960-4ce2-b8fc-1a5127da227c?mode=deep",
+    "timestamp": "2026-04-28 22:35:35.819014",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a consensusEnd timestamp for which no treasury account balance exists in the account_balance table (e.g., a future timestamp), causing the inner subquery of latestBalanceBeforeConsensus (which anchors on treasury_entity_id) to return no rows, making the outer query return no rows, triggering ErrNodeIsStarting at line 305, and preventing any fee-adjusted balance from being computed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_245bb8e2-ac29-4446-a110-b2cc4d41b68b?mode=deep",
+    "timestamp": "2026-04-28 22:35:59.250199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user supply a very large alias byte sequence to getCryptoEntity() via selectCryptoEntityByAlias, causing the UNION ALL query to perform a full table scan on both entity and entity_history tables with no index hit, leading to resource exhaustion that degrades the fee balance query service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a521250-2e17-4b51-b6d0-ecc5fb0cd76c?mode=deep",
+    "timestamp": "2026-04-28 22:36:22.899823",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit the fact that balanceChangeBetween does not filter by errata='INSERT' to have retroactively inserted fee transactions (errata='INSERT', representing historically missing fee records) counted in the balance change, inflating the fee component of the balance beyond what was originally charged to the account at that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e81a770-4fc5-474e-be98-885d59d486a2?mode=deep",
+    "timestamp": "2026-04-28 22:36:47.655777",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query a deleted account with consensusEnd set to exactly entity.GetModifiedTimestamp() (the deletion timestamp), causing balanceChangeEndTimestamp = GetModifiedTimestamp() and balanceSnapshotEndTimestamp = GetModifiedTimestamp() - 1, and if the deletion fee transfer has consensus_timestamp = GetModifiedTimestamp(), it is included in the change sum (consensus_timestamp <= @end), potentially double-counting the deletion fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49bbc181-f15c-4215-a6ed-7882208fea8c?mode=deep",
+    "timestamp": "2026-04-28 22:37:12.255202",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user supply a negative consensusEnd value (if the API does not validate it) to RetrieveBalanceAtBlock(), causing balanceChangeBetween to execute with @end < 0, which matches no crypto_transfer rows (all real timestamps are positive), returning 0 as the fee change, and producing a balance that reflects only the snapshot value without any fee adjustments?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e06124c-6c2f-4584-894f-1e18747b13e6?mode=deep",
+    "timestamp": "2026-04-28 22:37:37.118528",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user supply an account ID whose numeric value matches a system account (e.g., treasury, fee collector) to getCryptoEntity() via selectCryptoEntityById, causing the balance query to sum fee transfers for that system account and expose the fee collection balance, which is outside the design parameters for user-facing balance queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df8fdee2-0b77-483a-9631-4d0acf99fd3c?mode=deep",
+    "timestamp": "2026-04-28 22:38:03.110190",
+    "report_generated": false
+  }
+]
