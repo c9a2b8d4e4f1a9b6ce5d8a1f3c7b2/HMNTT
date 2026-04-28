@@ -1,0 +1,122 @@
+[
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit a timestamp filter with a very large nanosecond value (e.g., ?timestamp=gte:9999999999.999999999), causing parseTimestampParam() to produce a 19-digit nanosecond string that overflows a PostgreSQL bigint when used in the CONSENSUS_END comparison — resulting in a DB error or silent truncation that causes smart contract clients to receive incorrect block ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa6ba35a-e381-4e90-86fa-4b98bc7d8b86?mode=deep",
+    "timestamp": "2026-04-28 21:56:49.413424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user submit a request where filters is null (not an empty array), causing the check 'filters && filters.length === 0' to short-circuit on 'filters &&' and return filterQuery with an empty whereQuery — but then the subsequent filters.filter() call on null throws a TypeError, causing an unhandled exception that crashes the handler and makes the /blocks endpoint unavailable to smart contract clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36dc9cfa-716a-42c7-9768-68a64e19ea08?mode=deep",
+    "timestamp": "2026-04-28 21:57:01.419141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit duplicate block.number filters with conflicting operators (e.g., ?block.number=gte:100&block.number=lte:50), causing extractSqlFromBlockFilters() to generate a WHERE clause with both conditions — resulting in an empty result set with no error, causing smart contract clients to silently receive zero blocks for a range they expect to be non-empty?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3d74cf6-61a4-4d39-b832-a5a7954a94aa?mode=deep",
+    "timestamp": "2026-04-28 21:57:14.052840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: generateNextLink()] Can an unprivileged external user craft a request with order=desc and a block.number filter, causing generateNextLink() to always use filterKeys.BLOCK_NUMBER with the last block's index as the cursor — but in DESC order, the next page cursor should use 'lt:' not 'gt:', and if getPaginationLink() uses the wrong direction operator, smart contract clients following the next link will re-fetch the same page in an infinite loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84a8cedb-82a9-4bf6-a101-cb679b96ba7d?mode=deep",
+    "timestamp": "2026-04-28 21:57:26.950725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit a request with a timestamp filter using the 'eq' operator (e.g., ?timestamp=eq:1234567890), causing extractSqlFromBlockFilters() to generate 'CONSENSUS_END = $1' — but since consensus_end is a nanosecond timestamp and the user provides a seconds-only value, the query returns no results, causing smart contract clients to incorrectly conclude that no block exists at that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd7170de-9cc0-49e5-9c14-92ee0d2ff305?mode=deep",
+    "timestamp": "2026-04-28 21:57:39.958374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractOrderByFromFilters()] Can an unprivileged external user submit only a LIMIT or ORDER filter (no BLOCK_NUMBER or TIMESTAMP), causing extractOrderByFromFilters() to produce an empty array from the filter() call, making [0] return undefined — and isEmpty(undefined) returns true in lodash, so it defaults to RecordFile.CONSENSUS_END — but this means the ORDER BY column is always CONSENSUS_END regardless of user intent, causing smart contract block queries to always sort by time even when block number ordering is expected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c934c635-ec8e-4f4c-9400-7ed740d83554?mode=deep",
+    "timestamp": "2026-04-28 21:57:53.107196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a Hedera hash (96 hex chars) to getByHashOrNumber(), which passes it to RecordFileService.getByHashOrNumber() as a hash — where the service does 'HASH like $1' with hash+'%' — but since the hash is already 96 chars (full length), the LIKE query with '%' appended still matches exactly one record, making this functionally equivalent to an exact match; however, if the DB stores hashes with trailing metadata, the LIKE could match unintended rows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fc8d054-3c0c-4786-a414-c6b0ed9b7b33?mode=deep",
+    "timestamp": "2026-04-28 21:58:07.447087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user flood the /blocks endpoint with high-frequency requests using no filters (full table scan with default limit), causing RecordFileService.getBlocks() to execute repeated expensive queries — degrading mirror node DB performance and causing smart contract clients that depend on block data to experience sustained timeouts and operate on stale block state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e47fa41f-eac3-40b3-9df4-4e4db86879ab?mode=deep",
+    "timestamp": "2026-04-28 21:58:22.447092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: BlockViewModel constructor] Can an unprivileged external user query a block where the 'hash' field in the database is null or empty, causing addHexPrefix(recordFile.hash) to produce '0x' or '0xnull' — which EVM clients interpret as an invalid block hash, causing smart contract tooling to reject the block as malformed and skip it during chain traversal?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ac5c1c1-e2f8-489d-bd0c-b634f1910828?mode=deep",
+    "timestamp": "2026-04-28 21:58:37.503169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: BlockViewModel constructor] Can an unprivileged external user query a block where 'prevHash' is null, causing addHexPrefix(recordFile.prevHash) to produce '0xnull' or throw — which EVM clients use to verify chain continuity, and an incorrect previous_hash value causes smart contract clients to incorrectly detect a chain fork or discontinuity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec29b3a2-8caa-4966-ada8-3a2f139418af?mode=deep",
+    "timestamp": "2026-04-28 21:58:54.675881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit ?block.number=eq:100&block.number=eq:200, causing extractSqlFromBlockFilters() to generate two separate WHERE conditions 'INDEX = $1 AND INDEX = $2' — which is logically impossible and returns zero results, but no error is thrown, causing smart contract clients to silently receive an empty block list for what should be a valid multi-block query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db0a195f-98f1-43ba-bce2-b79294fc114f?mode=deep",
+    "timestamp": "2026-04-28 21:59:11.803532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractLimitFromFilters()] Can an unprivileged external user submit ?limit=1&limit=2&limit=3 (multiple limit params), causing findLast() to pick the last value (3) — but if the user intended the first value (1), the extra results returned cause smart contract pagination logic to process more blocks than expected per page, potentially causing double-processing of blocks at page boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c54d44e7-00e9-4fc1-88df-e4550b260f8b?mode=deep",
+    "timestamp": "2026-04-28 21:59:27.855854",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a block number as a string with leading zeros (e.g., '007'), which passes isPositiveLong() since positiveLongRegex matches /^\\d{1,19}$/ — and the string '007' is passed directly to RecordFileService.getByHashOrNumber() as the number parameter, where it is used in 'INDEX = $1'; if PostgreSQL coerces '007' to 7, this works correctly, but if not, it returns no result, causing smart contract clients to receive a false 404 for block 7?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_988e6f7a-e753-4a28-b4e6-d50043751b51?mode=deep",
+    "timestamp": "2026-04-28 21:59:44.063499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit a timestamp filter with nanosecond precision (e.g., ?timestamp=gte:1234567890.123456789) alongside a block.number filter, causing extractSqlFromBlockFilters() to generate a WHERE clause mixing INDEX and CONSENSUS_END conditions — where the timestamp is converted to nanoseconds but the block number is used as-is, producing a cross-domain filter that returns blocks satisfying both conditions simultaneously, which may not correspond to the expected EVM block range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_580ccf77-d6d3-4cb3-8021-3ae616494ac6?mode=deep",
+    "timestamp": "2026-04-28 22:00:01.124289",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: validateHashOrNumber()] Can an unprivileged external user submit a hash string with uppercase hex characters and '0x' prefix (e.g., '0xABCDEF...'), causing validateHashOrNumber() to strip '0x' and return the mixed-case hash — which is then passed to RecordFileService.getByHashOrNumber() where hash.toLowerCase() is applied — but if the DB stores hashes in mixed case, the lowercased LIKE query may fail to match, returning a false 404 for a valid block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8858a41d-3ee8-41f1-a316-08d37ddc0efd?mode=deep",
+    "timestamp": "2026-04-28 22:00:18.511387",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit a request with ?order=ASC (uppercase), causing extractOrderFromFilters() to call order.value.toUpperCase() and look up orderFilterValues['ASC'] — if orderFilterValues only has lowercase keys ('asc', 'desc'), this returns undefined, which is interpolated into the SQL ORDER BY clause as 'undefined', causing a DB syntax error or indeterminate block ordering for smart contract clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13f8ec85-f08b-4b67-91a6-f9669d9d3a41?mode=deep",
+    "timestamp": "2026-04-28 22:00:37.607959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user submit a request where the switch statement in extractSqlFromBlockFilters() encounters a filter key that is in blockWhereFilters but not handled by any case (e.g., if blockWhereFilters is extended but the switch is not updated) — causing the map() to produce undefined entries in whereQuery, which buildWhereSqlStatement() then processes as 'undefined.query' and throws a TypeError, crashing the block query for smart contract clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3da6030d-aaf2-42e8-abd9-2144ad2a3189?mode=deep",
+    "timestamp": "2026-04-28 22:00:54.691479",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getBlocks()] Can an unprivileged external user submit a very large block.number value (e.g., ?block.number=gte:9223372036854775807) that is valid per isPositiveLong() — causing RecordFileService.getBlocks() to execute a query with a WHERE INDEX >= 9223372036854775807 condition that returns zero results — and generateNextLink() to still generate a next link (since blocks.length=0 means the blocks.length check returns null), causing smart contract clients to receive an empty but non-terminal response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aab20a8a-2585-46ce-9636-24acd0fce27c?mode=deep",
+    "timestamp": "2026-04-28 22:01:12.680618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a path parameter that is exactly 64 hex characters (valid ETH hash without 0x), causing validateHashOrNumber() to treat it as a hash and pass it to RecordFileService.getByHashOrNumber() — but the service's LIKE query 'HASH like $1' with hash+'%' could match a 96-char Hedera hash that starts with those 64 chars, returning a different block than the one the user intended, causing smart contract clients to operate on wrong block data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a06ff080-2d57-4df2-a005-ab0a140d5bec?mode=deep",
+    "timestamp": "2026-04-28 22:01:33.748266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: BlockViewModel constructor] Can an unprivileged external user query a block where 'count' is null or zero, causing BlockViewModel to set this.count = null/0 — which EVM clients use to determine the number of transactions in a block, and an incorrect count causes smart contract transaction indexers to skip fetching transactions for that block, leading to incomplete transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c60fe6b-368a-4fb2-baa5-83ca9466abc9?mode=deep",
+    "timestamp": "2026-04-28 22:01:54.502980",
+    "report_generated": false
+  }
+]
