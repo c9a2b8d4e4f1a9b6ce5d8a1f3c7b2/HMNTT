@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user repeatedly connect and disconnect from a fee-schedule topic subscription, causing the PollingContext to be created and destroyed at high frequency, generating excessive log entries via doOnSubscribe() that fill disk space and mask legitimate fee-update processing errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1e7019d-0aa1-4bc6-9a67-e4a89fff1196?mode=deep",
+    "timestamp": "2026-04-28 23:40:22.838051",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user craft a TopicMessageFilter with endTime set to a value just after a fee-update message's consensus timestamp, causing newFilter built via filter.toBuilder() to have a narrow time window that only captures that specific fee-update, and by subscribing repeatedly cause that fee modification to be processed multiple times by downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7013098d-1845-41fb-a01b-deccd4d43048?mode=deep",
+    "timestamp": "2026-04-28 23:40:35.192024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the fact that listenerProperties.getInterval() is a shared configuration value read by all PollingTopicListener instances, and by triggering a configuration reload (if supported) during active fee-update polling, cause the interval to change mid-stream and disrupt the timing guarantees of fee-update message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_038b97f5-d1aa-49e5-8e17-5da497d9d792?mode=deep",
+    "timestamp": "2026-04-28 23:40:47.809068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user set filter.limit to 1 and startTime to the consensus timestamp of a fee-update message minus 1, causing poll() to fetch exactly that fee-update message, then immediately re-subscribe with the same filter to fetch it again, effectively replaying the fee modification an arbitrary number of times to downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_327356ac-56dc-4d08-9c01-5e95d61100ed?mode=deep",
+    "timestamp": "2026-04-28 23:41:00.962741",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the METRIC and METRIC_TAG constants used in .name(METRIC).tag(METRIC_TAG, 'poll') to inject crafted metric labels via a malicious TopicMessageFilter, causing metric cardinality explosion in the ObservationRegistry that degrades monitoring of fee-update processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e54befe-2257-438b-9ff4-d1e6871281a0?mode=deep",
+    "timestamp": "2026-04-28 23:41:14.714203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user craft a TopicMessageFilter where topicId is set to a fee-schedule topic and limit is set such that the remaining limit calculation (filter.getLimit() - context.getCount().get()) produces Integer.MIN_VALUE after the (int) cast, causing Math.min() to return Integer.MIN_VALUE and topicMessageRepository.findByFilter() to receive a negative limit, potentially returning all records and exposing all fee-update history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2cf12750-90d2-4b81-81bf-0651a3a69671?mode=deep",
+    "timestamp": "2026-04-28 23:41:29.107581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: onNext()] Can an unprivileged user cause a fee-update TopicMessage with a manipulated consensusTimestamp (e.g., set to Long.MAX_VALUE) to be processed by onNext(), causing last.set() to store this extreme timestamp, and then poll() to compute last.getConsensusTimestamp() + 1 = Long.MIN_VALUE as the next startTime, wrapping around and re-polling all historical fee messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_852e7dc5-839d-4be1-9e84-628cbe34f30c?mode=deep",
+    "timestamp": "2026-04-28 23:41:43.921472",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user subscribe to a fee-schedule topic with a filter that has no endTime, causing the Flux to run indefinitely with RepeatSpec.times(Long.MAX_VALUE), and by opening many such subscriptions exhaust file descriptors or network connections, preventing legitimate fee-update consumers from connecting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca870a5b-4c9a-4607-8548-4ac47e387ca6?mode=deep",
+    "timestamp": "2026-04-28 23:42:00.208235",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user exploit the filter.toBuilder().limit(pageSize).startTime(startTime).build() pattern to observe that the newFilter discards the original filter's endTime, causing poll() to query beyond the intended time window and retrieve fee-update messages that should not yet be visible to the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7ea1b0a-bff3-48fd-9943-816b0c94d9c8?mode=deep",
+    "timestamp": "2026-04-28 23:42:16.895060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the boundedElastic() scheduler's thread-bounding behavior by opening exactly as many subscriptions as the scheduler's thread limit, causing all subsequent legitimate fee-update polling tasks to queue indefinitely and never execute, effectively halting fee-update propagation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ab06ea-0112-4bab-8360-f9d3299cddfe?mode=deep",
+    "timestamp": "2026-04-28 23:42:35.175317",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user craft a TopicMessageFilter with startTime set to a value that causes topicMessageRepository.findByFilter() to perform a full table scan of the topic_message table, and by doing so at scale cause database CPU exhaustion that delays fee-update message writes and reads, effectively modifying when fee changes take effect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6d3354c-9d33-45ce-8682-556a1128d31c?mode=deep",
+    "timestamp": "2026-04-28 23:42:53.941390",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the fact that PollingContext is created per-subscription (not shared) to open many subscriptions with identical filters targeting a fee-schedule topic, causing topicMessageRepository.findByFilter() to be called N times per interval (once per subscription), multiplying database load and degrading fee-update delivery performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43643efa-2810-4af1-924b-eccbc15e05e0?mode=deep",
+    "timestamp": "2026-04-28 23:43:12.541255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user set filter.limit to a value that causes the remaining limit to be exactly listenerProperties.getMaxPageSize(), and then on the next poll cycle the remaining limit drops to zero, causing poll() to return an empty Flux and silently stop delivering fee-update messages even though more exist in the repository?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ad78edf-57a2-4335-9c4f-bbe09a6f8394?mode=deep",
+    "timestamp": "2026-04-28 23:43:32.528257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the doOnSubscribe() logging in listen() to infer internal system state (such as the polling interval and filter parameters) from log output, and use this information to time attacks that target fee-update message windows precisely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80d64f4e-683e-4dd1-9198-cfc7721dbfa2?mode=deep",
+    "timestamp": "2026-04-28 23:43:52.859823",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user craft a filter with startTime set to a value just before a batch of fee-update messages and limit set to exactly the number of non-fee messages before the fee-update, causing poll() to exhaust the limit on non-fee messages and never reach the fee-update message, effectively hiding the fee modification from the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8151bc59-7f4c-497e-9f5f-2cec94bcd100?mode=deep",
+    "timestamp": "2026-04-28 23:44:14.030427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the Micrometer.observation(observationRegistry) tap in listen() to cause observation context propagation to carry malicious metadata that interferes with fee-update message tracing, causing fee modifications to be attributed to wrong transactions in monitoring systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_163c7e02-6ee5-4b70-a76d-a8690ec23e42?mode=deep",
+    "timestamp": "2026-04-28 23:44:36.236254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user exploit the fact that newFilter is built with filter.toBuilder() which copies all original filter fields, and that the original filter's subscriberId is preserved in newFilter, to cause topicMessageRepository.findByFilter() to use the subscriberId in a way that leaks or cross-contaminates fee-update message results between subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2fded89-6a4b-46dc-988d-8474bc1cd58e?mode=deep",
+    "timestamp": "2026-04-28 23:44:58.299061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user open a subscription to a fee-schedule topic and then send a very large number of gRPC messages to trigger backpressure, causing the Flux pipeline to buffer fee-update messages in memory until OOM occurs, crashing the mirror node and preventing fee updates from being propagated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1321b77e-2aae-4428-9256-613ef578bdf7?mode=deep",
+    "timestamp": "2026-04-28 23:45:20.505757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user exploit the AtomicLong count in PollingContext by causing count to reach Long.MAX_VALUE through a very long-running subscription, causing count.incrementAndGet() to overflow to Long.MIN_VALUE, and then (filter.getLimit() - context.getCount().get()) to produce an unexpectedly large positive value, causing poll() to fetch far more fee-update messages than the limit allows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a543004-2ed4-427c-b7a7-eae03f9a90a4?mode=deep",
+    "timestamp": "2026-04-28 23:45:44.331344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the RepeatSpec.withFixedDelay(interval) combined with jitter(0.1) to cause polling to occur at slightly different times across many subscriptions, creating a thundering herd effect where all subscriptions poll simultaneously at peak jitter, overwhelming topicMessageRepository and delaying fee-update message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ecd37ae-8af8-4b0c-b8bd-f437d28ab1d6?mode=deep",
+    "timestamp": "2026-04-28 23:46:08.810877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user craft a TopicMessageFilter with a topicId that does not correspond to any existing topic, causing topicMessageRepository.findByFilter() to return an empty stream on every poll cycle, and by doing so at scale generate excessive empty-result database queries that degrade performance for legitimate fee-update pollers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9868b993-adf7-4e4a-a7a3-7e81cdec2ab6?mode=deep",
+    "timestamp": "2026-04-28 23:46:33.818417",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the fact that listen() does not validate whether the topicId in the filter corresponds to a fee-schedule topic, allowing them to subscribe to any topic and use the polling mechanism to enumerate all topic messages including sensitive fee-related governance messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9d968b3-97f8-4de4-9ab1-57a1fe4accc5?mode=deep",
+    "timestamp": "2026-04-28 23:46:59.770287",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user set filter.startTime to a value that is exactly equal to a fee-update message's consensusTimestamp, and since poll() uses last.getConsensusTimestamp() + 1 only after the first message is received, cause the first poll to include the fee-update message and subsequent polls to also include it if onNext() fails, leading to repeated fee modification delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1abaeabf-dfbc-408c-a02f-cbb8b4ea188b?mode=deep",
+    "timestamp": "2026-04-28 23:47:26.138092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: listen()] Can an unprivileged user exploit the shared Scheduler (Schedulers.boundedElastic()) instance in PollingTopicListener to cause scheduler starvation by opening many subscriptions, each holding a scheduler thread in the delaySubscription(interval, scheduler) call, preventing other fee-update polling tasks from being scheduled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbc29776-a76e-4e76-9e55-dd6e6028a909?mode=deep",
+    "timestamp": "2026-04-28 23:47:53.235783",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: poll()] Can an unprivileged user exploit the filter.toBuilder().limit(pageSize).startTime(startTime).build() construction to observe that if pageSize equals maxPageSize and there are exactly maxPageSize fee-update messages, poll() will return all of them but the next poll will start at the correct timestamp, while if there are maxPageSize+1 messages, the last one is silently skipped until the next poll cycle, creating a fee-update delivery gap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fed021a5-34d0-42cc-ab30-d91556dea101?mode=deep",
+    "timestamp": "2026-04-28 23:48:21.346281",
+    "report_generated": false
+  }
+]
