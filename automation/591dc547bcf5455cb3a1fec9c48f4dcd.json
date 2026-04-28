@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user manipulate the `hiero.mirror.common.shard` or `hiero.mirror.common.realm` configuration properties (e.g., via environment variable injection or externalized config) to cause `SystemEntity.stakingRewardAccount()` to resolve to a wrong entity ID, so that `EntityStakeCalculatorImpl` anchors all pending reward calculations to an attacker-controlled account instead of 0.0.800, causing legitimate staking rewards to be miscalculated and effectively stolen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f595a95b-c2d4-4845-8da5-abec34e5e654?mode=deep",
+    "timestamp": "2026-04-28 21:11:50.284930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user submit crafted configuration input that sets `realm` or `shard` to a non-zero value before `@PostConstruct` runs on `CommonProperties`, causing `toEntityId(800L)` to produce an `EntityId` whose `getId()` matches an attacker-owned account, so that `EntityStakeCalculatorImpl.calculate()` calls `entityStakeRepository.updated(attackerAccountId)` and `getEndStakePeriod(attackerAccountId)`, redirecting the entire pending reward update cycle away from the real staking reward account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0e41f1f-4fef-4f75-9f69-c2236be0253e?mode=deep",
+    "timestamp": "2026-04-28 21:12:02.503250",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user exploit the mutable `@Data`-generated setters on `CommonProperties` (e.g., `setShard()`, `setRealm()`) via an exposed Spring actuator endpoint or configuration refresh mechanism to change the singleton `INSTANCE` values at runtime, causing `SystemEntity.stakingRewardAccount()` to return a different `EntityId` mid-calculation and corrupting the `pending_reward` values stored in `entity_stake` for all staking accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_156fa875-e55f-4904-96bf-703f5f3e8fd9?mode=deep",
+    "timestamp": "2026-04-28 21:12:14.940731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hibernatePropertiesCustomizer()] Can an unprivileged external user bypass the `hibernate.criteria.literal_handling_mode = BIND` setting by crafting a request that reaches a Criteria API query path where user-controlled data is embedded as a literal rather than a bind parameter, allowing SQL injection into the `entity_stake` table to inflate their own `pending_reward` value and steal rewards from the staking reward account 0.0.800?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52cf3450-deea-4a21-a9fb-15f559bb3421?mode=deep",
+    "timestamp": "2026-04-28 21:12:28.218268",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hibernatePropertiesCustomizer()] Can an unprivileged external user trigger a scenario where the `HibernatePropertiesCustomizer` bean is not applied (e.g., by registering a competing `HibernatePropertiesCustomizer` bean that overrides `literal_handling_mode`), removing the BIND protection and enabling SQL injection through Criteria API queries that read or write `pending_reward` in `entity_stake`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_283bba5f-6255-45b4-b5f4-450e912a1002?mode=deep",
+    "timestamp": "2026-04-28 21:12:40.424976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hibernatePropertiesCustomizer()] Can an unprivileged external user exploit the `CustomJsonFormatMapper` registered via `AvailableSettings.JSON_FORMAT_MAPPER` to perform a deserialization attack on JSON-typed Hibernate columns, injecting malicious payloads that alter `pendingReward` or `stakeTotalStart` fields in `AbstractEntityStake` during a read-modify-write cycle?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_540aaa24-8e1a-4c0e-a779-d6abf9aaacb4?mode=deep",
+    "timestamp": "2026-04-28 21:12:53.496008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user inject a crafted `JdbcConnectionDetails` bean (via a classpath-level override or Spring Boot auto-configuration ordering exploit) to redirect the `dataSource()` to an attacker-controlled database, causing the mirror node to read fraudulent `node_stake` reward rates and write inflated `pending_reward` values back to the legitimate database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1934201-8836-4352-a1dc-429630cb4288?mode=deep",
+    "timestamp": "2026-04-28 21:13:06.382805",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user exploit the `ObjectProvider<JdbcConnectionDetails> detailsProvider` resolution to supply a malicious `JdbcConnectionDetails` implementation that returns a JDBC URL pointing to a rogue database, so that `databaseWaiter.waitForDatabase()` succeeds against the rogue DB and the `HikariDataSource` is configured to connect there, allowing the attacker to serve fake `entity_stake` and `node_stake` data that inflates their `pending_reward`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51ec997f-5422-4f4c-aa8b-0844a9ad24c7?mode=deep",
+    "timestamp": "2026-04-28 21:13:19.415622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user exploit the `@Lazy` annotation on `dataSource()` to create a race condition window between application startup and first datasource use, injecting a competing `DataSource` bean that satisfies `@ConditionalOnMissingBean(DataSource.class)` before the legitimate one is created, causing all staking reward DB writes to go to an attacker-controlled store?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65fa729f-708c-4941-ada9-827d3c6ebdc8?mode=deep",
+    "timestamp": "2026-04-28 21:13:32.602529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user manipulate the `spring.datasource.hikari` configuration properties (scanned via `@ConfigurationProperties`) to set a malicious `connectionInitSql` or `connectionTestQuery` that executes arbitrary SQL on every new connection, modifying `pending_reward` values in `entity_stake` to redirect staking rewards to an attacker-controlled account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c62609e-bb1f-4c33-871e-ca4607e6ef6b?mode=deep",
+    "timestamp": "2026-04-28 21:13:44.985909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hikariConfig()] Can an unprivileged external user inject properties under `spring.datasource.hikari` (e.g., via environment variables or a mounted config file) to set `maximumPoolSize` to 0 or `connectionTimeout` to 0, causing the `HikariDataSource` to fail all connections and preventing the `EntityStakeCalculatorImpl` from persisting `pending_reward` updates, effectively freezing reward accrual and enabling a denial-of-reward attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bbd7a62-3205-47f1-9164-834a7e9f4797?mode=deep",
+    "timestamp": "2026-04-28 21:13:57.323635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hikariConfig()] Can an unprivileged external user exploit the `hikariConfig.copyStateTo(config)` call in `dataSource()` to smuggle a malicious `HikariConfig` state (e.g., a custom `DataSourceClassName` pointing to a JNDI-injectable class) that causes the resulting `HikariDataSource` to connect to an attacker-controlled endpoint, intercepting all `entity_stake` pending reward reads and writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf4adfa6-b175-4197-b5f2-a408c9186e8f?mode=deep",
+    "timestamp": "2026-04-28 21:14:09.921171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dbWaiter()] Can an unprivileged external user manipulate the `hiero.mirror.common.databaseStartup` configuration properties to set an extremely long `timeout` or `interval`, causing `DatabaseWaiter.waitForDatabase()` to block indefinitely and preventing the `DataSource` from being initialized, resulting in a denial-of-service that stops all staking reward calculations from being persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ee0c2ca-e3b4-4e27-b891-be90c7af3b92?mode=deep",
+    "timestamp": "2026-04-28 21:14:22.400288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dbWaiter()] Can an unprivileged external user exploit the `connectTimeout` or `socketTimeout` properties in `DatabaseStartupProperties` (both validated with `@DurationMin(seconds = 1)`) to set values just above the minimum, causing the `DatabaseWaiter` to repeatedly retry against a slow or unresponsive database, creating a window where stale `pending_reward` data is served to the REST API without reflecting the latest staking period calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4858209b-ecd7-431a-af72-46b831d5e6d4?mode=deep",
+    "timestamp": "2026-04-28 21:14:35.568065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: spelHelper()] Can an unprivileged external user inject a SpEL expression through a user-controlled input field that reaches `SpelHelper` evaluation, executing arbitrary code that modifies the `pending_reward` field in `entity_stake` for their account, effectively stealing unpaid staking rewards from the 0.0.800 account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5bc792d-2c2d-4054-8c55-33ce691f3cf0?mode=deep",
+    "timestamp": "2026-04-28 21:14:48.624743",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: spelHelper()] Can an unprivileged external user craft a malicious SpEL expression (e.g., `#{T(org.hiero.mirror.common.CommonProperties).getInstance().setShard(1)}`) that, when evaluated by `SpelHelper`, mutates the `CommonProperties` singleton to change the `shard` value, causing `SystemEntity.stakingRewardAccount()` to resolve to a different entity ID and corrupting all subsequent pending reward calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1670b292-d592-437e-a1a0-6db4c7bf9349?mode=deep",
+    "timestamp": "2026-04-28 21:15:01.444666",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: spelHelper()] Can an unprivileged external user exploit the `@Bean(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c28ab6c4-17d4-4fdf-90ee-4d67c0e6b576?mode=deep",
+    "timestamp": "2026-04-28 21:15:13.955952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user exploit the lazy initialization of `EntityId` fields in `SystemEntity` (using Lombok `@Getter(lazy = true)`) to trigger a race condition where `stakingRewardAccount()` is first called with a manipulated `CommonProperties` state, caching an incorrect `EntityId` for the staking reward account and permanently corrupting all pending reward calculations for the lifetime of the application?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1220c3fe-bc4b-4f32-aae3-92060aef5ad3?mode=deep",
+    "timestamp": "2026-04-28 21:15:26.992670",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user exploit the fact that `SystemEntity` is a Spring singleton bean constructed from `CommonProperties` to cause the `entityTransactionExclusionDefault` set (which includes `stakingRewardAccount()`) to exclude the wrong account from entity transaction tracking, causing staking reward transfers from 0.0.800 to be incorrectly included or excluded in transaction records and enabling reward double-counting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5defcdb3-e64a-4022-b0d5-ac16a79164fe?mode=deep",
+    "timestamp": "2026-04-28 21:15:40.162356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hibernatePropertiesCustomizer()] Can an unprivileged external user exploit the `AvailableSettings.HBM2DDL_AUTO = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dca6b475-ad51-416d-ab56-9c502e2b6404?mode=deep",
+    "timestamp": "2026-04-28 21:15:53.079405",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: hibernatePropertiesCustomizer()] Can an unprivileged external user exploit the `AvailableSettings.GENERATE_STATISTICS = true` setting to extract Hibernate query statistics (e.g., via an exposed JMX endpoint or actuator) that reveal the exact SQL patterns used to calculate `pending_reward`, enabling the attacker to craft targeted SQL injection payloads against the staking reward calculation queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af73acbe-cf1d-46f5-8ec3-fb33d4072955?mode=deep",
+    "timestamp": "2026-04-28 21:16:06.032494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user exploit the `dataSourceProperties.determineUrl()`, `determineUsername()`, and `determinePassword()` calls to inject JDBC URL parameters (e.g., `?socketFactory=...` or `?sslfactory=...`) that redirect the database connection through an attacker-controlled proxy, enabling man-in-the-middle interception and modification of `pending_reward` values in transit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d312fc2-01c6-4921-961b-c76ede4dd075?mode=deep",
+    "timestamp": "2026-04-28 21:16:18.578889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: dataSource()] Can an unprivileged external user exploit the fact that `connectionDetails.getPassword()` is used without sanitization in `dataSource()` to inject a crafted password string containing JDBC URL parameters that alter the connection behavior, enabling the attacker to connect to a secondary database that serves falsified `node_stake` reward rates used in `pending_reward` calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa99cfcc-5e1d-4ff8-9734-c071d18b6642?mode=deep",
+    "timestamp": "2026-04-28 21:16:32.540110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user exploit the `@ConfigurationPropertiesScan(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5d4a08d-c482-4f5a-b78a-665877e4b2e3?mode=deep",
+    "timestamp": "2026-04-28 21:16:46.657980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonConfiguration.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: systemEntity()] Can an unprivileged external user exploit the `@EnableConfigurationProperties(CommonProperties.class)` registration to supply a crafted `application.properties` or `application.yml` file (e.g., via a mounted Kubernetes ConfigMap) that sets `hiero.mirror.common.shard` and `hiero.mirror.common.realm` to values that make `toEntityId(800L)` produce an ID matching an attacker-owned account, redirecting all staking reward calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd637173-4888-40e0-b245-e78a07494547?mode=deep",
+    "timestamp": "2026-04-28 21:17:00.726589",
+    "report_generated": false
+  }
+]
