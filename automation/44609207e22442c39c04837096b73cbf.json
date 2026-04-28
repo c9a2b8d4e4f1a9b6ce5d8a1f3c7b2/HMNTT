@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: processTransactionResponse()] Can an unprivileged external user set both `request.isSendRecord()` and `request.isReceipt()` to interact with the if-else chain in `processTransactionResponse()` such that the `sendRecord` branch always executes and pays 1 HBAR per call, draining the operator account and preventing any freeze-reversal transaction from being funded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5e83005-ff39-4914-b9e4-1f2e4782d212?mode=deep",
+    "timestamp": "2026-04-28 23:42:18.759847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the `clients.elementAt(clientIndex)` call in `publish()` where `clientIndex` is derived from `secureRandom.nextInt(publishProperties.getClients())`, and if `publishProperties.getClients()` is 1, always select the same client, causing a single-point-of-failure where a freeze transaction submitted through that client is never confirmed if the client's connection drops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12bc5aa3-a754-4d5b-b07a-6034cb7476f4?mode=deep",
+    "timestamp": "2026-04-28 23:42:30.909382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toClient()] Can an unprivileged external user cause `AccountId.fromString(monitorProperties.getOperator().getAccountId())` in `toClient()` to parse an account ID with a mismatched shard/realm, resulting in the operator signing freeze transactions on behalf of a wrong account, making those freezes unrecoverable by the legitimate operator?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6971e86-9392-47bb-8d4a-d9b5bceb352a?mode=deep",
+    "timestamp": "2026-04-28 23:42:43.477314",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user flood `publish()` with high-volume requests that each trigger `processTransactionResponse()` with `sendRecord=true`, exhausting the operator's HBAR balance through repeated 1-HBAR `TransactionRecordQuery` payments, so that the operator can no longer pay fees to unfreeze any frozen accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a979df3-2283-4335-9be6-67fa2e8dd828?mode=deep",
+    "timestamp": "2026-04-28 23:42:56.968254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTransactionResponse()] Can an unprivileged external user exploit the `request.setNode(node)` mutation in `getTransactionResponse()` on a shared `PublishRequest` object across concurrent reactive streams, causing a freeze transaction to be associated with the wrong node in the response, preventing correct receipt verification and leaving the freeze undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aeb3a7a3-1076-4749-818e-874f57de33d3?mode=deep",
+    "timestamp": "2026-04-28 23:43:11.100749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: close()] Can an unprivileged external user trigger `close()` during a batch of freeze-reversal transactions, causing `clients.subscribe(client -> client.close())` to close all clients mid-flight, so that the reversal transactions are submitted but their receipts are never retrieved, leaving the freeze permanently active?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abc7c524-7859-4cf3-ab36-fc4b2414ccbb?mode=deep",
+    "timestamp": "2026-04-28 23:43:25.186625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user craft a `PublishRequest` with a `scenario` whose `onNext()` callback throws an unchecked exception, causing the `doOnNext(scenario::onNext)` in `publish()` to propagate an error that cancels the reactive pipeline after a freeze transaction is submitted but before its receipt is confirmed, leaving the freeze permanent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_adac008e-1335-4f7a-be83-c82b3a23794f?mode=deep",
+    "timestamp": "2026-04-28 23:43:40.010881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toClient()] Can an unprivileged external user cause the `nodeAddressBook` built in `toClient()` to contain a node address with an incorrect `certHash`, causing TLS verification to fail for all transactions routed through that client, so that freeze-reversal transactions are silently rejected and the freeze persists permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49ecbb8e-bf01-4bea-90f3-ffdb833eb73a?mode=deep",
+    "timestamp": "2026-04-28 23:43:55.706845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: execute(Client, Transaction)] Can an unprivileged external user exploit the `@SneakyThrows` annotation on `toClient()` (which suppresses checked exceptions) so that a client initialization failure is silently swallowed, producing a broken `Client` object that submits freeze transactions without proper signing, causing those transactions to be accepted with wrong keys and funds to be permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82b2e837-cc59-4530-91c5-e7a8bc72fa73?mode=deep",
+    "timestamp": "2026-04-28 23:44:12.141827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the reactive backpressure in `clients.elementAt(clientIndex).flatMap(...)` in `publish()` to cause a freeze transaction to be submitted multiple times to the network (due to retry or re-subscription), resulting in duplicate freeze operations that compound the fund-locking impact?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42da56ec-7806-4cb2-a707-b1bea8163deb?mode=deep",
+    "timestamp": "2026-04-28 23:44:30.073895",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getClients()] Can an unprivileged external user exploit the `Flux.defer(this::getClients).cache()` pattern so that a one-time network misconfiguration at startup permanently poisons the cached client pool, causing every freeze transaction submitted thereafter to go to wrong nodes and every freeze-reversal to fail, making all freezes permanent for the lifetime of the process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a26516b9-ad64-4b60-aa6e-0c3248200c5c?mode=deep",
+    "timestamp": "2026-04-28 23:44:48.581354",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: processTransactionResponse()] Can an unprivileged external user cause `new TransactionRecordQuery().setQueryPayment(Hbar.from(1, HbarUnit.HBAR))` in `processTransactionResponse()` to be executed against a node that returns a stale or incorrect record, causing the monitor to believe a freeze transaction failed when it actually succeeded, leaving the freeze active and unmonitored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c659e30-5f57-4845-b25d-33ab9d52c01b?mode=deep",
+    "timestamp": "2026-04-28 23:45:07.166073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user set `publishProperties.isEnabled()` to `false` at runtime (if configuration is externally mutable), causing `publish()` to return `Mono.empty()` and silently skip all freeze-reversal transactions, leaving any active freeze permanent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa559283-6e9c-4dbe-bcf7-db4c15ccdb9c?mode=deep",
+    "timestamp": "2026-04-28 23:45:26.843319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toClient()] Can an unprivileged external user cause `client.setNetwork(network)` in `toClient()` to overwrite the address-book-derived network with a map containing attacker-controlled endpoints, so that all fund-transfer and freeze-reversal transactions are routed to attacker nodes that drop them, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c474bd00-ac79-483c-915f-db61878971cb?mode=deep",
+    "timestamp": "2026-04-28 23:45:47.137469",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the fact that `publish()` does not validate the `Transaction<?>` type inside `PublishRequest`, allowing a freeze transaction to be submitted without any pre-flight check, and because `onErrorMap` wraps all non-`PublishException` errors, the freeze succeeds silently with no operator alert?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57d38081-b8dc-461a-8e50-5cc2b94e6397?mode=deep",
+    "timestamp": "2026-04-28 23:46:08.831811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTransactionResponse()] Can an unprivileged external user exploit the absence of transaction ID validation in `getTransactionResponse()` to submit a freeze transaction with a replayed or forged transaction ID, causing the network to process it as a new freeze while the monitor treats it as a duplicate and skips receipt verification, leaving the freeze undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70db7b9f-aec1-41da-aefa-791266d0f3a4?mode=deep",
+    "timestamp": "2026-04-28 23:46:30.139257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: execute(Client, Query)] Can an unprivileged external user cause `execute(client, new TransactionReceiptQuery().setTransactionId(...))` in `processTransactionResponse()` to query the wrong transaction ID (due to a race condition in `transactionResponse.transactionId` access), returning a receipt for a different transaction and causing the monitor to incorrectly mark a freeze as resolved when it is still active?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1358f427-97e1-4fa9-9d93-252e5fc60536?mode=deep",
+    "timestamp": "2026-04-28 23:46:52.088735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the `doOnNext(response -> { if (log.isTraceEnabled() || properties.isLogResponse()) log.info(...) })` logging in `publish()` to trigger excessive logging that causes I/O saturation, delaying receipt processing for freeze transactions and causing them to time out, leaving the freeze unconfirmed and permanent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95e05d57-868f-460e-8efb-49608d21f94d?mode=deep",
+    "timestamp": "2026-04-28 23:47:14.371355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toClient()] Can an unprivileged external user cause `nodes.stream().collect(Collectors.toMap(NodeProperties::getEndpoint, p -> AccountId.fromString(p.getAccountId()), (a, b) -> a))` in `toClient()` to produce a network map where a legitimate node's account ID is replaced by an attacker's account ID (via endpoint collision), routing freeze transactions to the wrong account and making them unrecoverable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c218a68-2e5e-436d-9ef6-dd10661f12e6?mode=deep",
+    "timestamp": "2026-04-28 23:47:36.185340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the reactive chain in `publish()` where `flatMap(client -> getTransactionResponse(...).flatMap(r -> processTransactionResponse(...)))` does not have explicit error boundaries between the two flatMap stages, so that an error in `processTransactionResponse()` after a freeze is submitted causes the freeze to remain active while the error is silently wrapped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d00bc5c-581f-4fe3-adfb-77ba4978a4ac?mode=deep",
+    "timestamp": "2026-04-28 23:48:00.647939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getClients()] Can an unprivileged external user cause `Flux.range(0, publishProperties.getClients()).flatMap(i -> Mono.defer(() -> Mono.just(toClient(nodes))))` in `getClients()` to create multiple clients all sharing the same stale node list, so that when nodes rotate, all cached clients continue routing freeze transactions to defunct nodes and funds remain permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ca0e8da-f0ef-46f3-b6f1-b8a9e13967c4?mode=deep",
+    "timestamp": "2026-04-28 23:48:25.690086",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: processTransactionResponse()] Can an unprivileged external user exploit the fixed `Hbar.from(1, HbarUnit.HBAR)` payment in `TransactionRecordQuery` to cause the operator to overpay for record queries on a network where the actual cost is lower, and by flooding with `sendRecord=true` requests, drain the operator's balance below the threshold needed to pay unfreeze transaction fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bc69afc-49a2-457b-89ac-e8faca838102?mode=deep",
+    "timestamp": "2026-04-28 23:48:49.991329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the absence of transaction type whitelisting in `publish()` to submit a `TokenFreezeTransaction` through the monitor's operator account, which has broad signing authority, causing the freeze to be accepted by the network and permanently locking token funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efb8b2ed-d54f-43e1-8b60-341ef67fe903?mode=deep",
+    "timestamp": "2026-04-28 23:49:16.492345",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: execute(Client, Transaction)] Can an unprivileged external user cause `Mono.fromCallable(() -> executable.execute(client))` in the synchronous `execute()` branch to block the calling thread indefinitely (if the network is unresponsive), causing thread pool exhaustion that prevents any freeze-reversal transactions from being submitted, making existing freezes permanent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08180896-a05b-46d9-8fde-93a93fc5c690?mode=deep",
+    "timestamp": "2026-04-28 23:49:42.626081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/publish/TransactionPublisher.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: publish()] Can an unprivileged external user exploit the `scenario::onNext` callback in `publish()` to inject a side effect that modifies shared state (e.g., the scenario's error counter), causing the monitor to suppress alerts for subsequent freeze transactions and allowing multiple freezes to accumulate undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92e0d70d-f24f-4d06-87c1-b9894b7e630b?mode=deep",
+    "timestamp": "2026-04-28 23:50:09.513667",
+    "report_generated": false
+  }
+]
