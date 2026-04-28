@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a single-character hash prefix (e.g., '0') to the LIKE $1 pattern (`${hash}%`) so that multiple record file rows match, causing getSingleRow() to return null instead of the correct block, resulting in missing block data exposed to all API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17ab9b4d-64cb-4772-89f4-ab89101129f3?mode=deep",
+    "timestamp": "2026-04-28 21:15:46.845057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a hash value of a single hex character so that `hash + '%'` matches dozens of record file rows, triggering the getSingleRow() null-on-multiple-rows path and causing the block endpoint to return 404 for a legitimately existing block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41045ec8-e2c4-4015-8740-926b6c8fa191?mode=deep",
+    "timestamp": "2026-04-28 21:15:58.887817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user craft a request where filters.orderBy is not sanitized before being interpolated directly into `order by ${filters.orderBy} ${filters.order}`, injecting arbitrary SQL that reorders or filters out records, causing incorrect block records to be returned to all consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08725df6-4634-49ed-b05c-38d0190834b2?mode=deep",
+    "timestamp": "2026-04-28 21:16:11.271104",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user inject a SQL fragment into filters.order (e.g., 'asc; DROP TABLE record_file--') via the direct string interpolation `${filters.order}` in the ORDER BY clause, causing permanent loss of record file data from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7e13e64-0e89-40b8-8acc-e44270a01012?mode=deep",
+    "timestamp": "2026-04-28 21:16:24.078200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user set filters.limit to an arbitrarily large integer via direct interpolation `limit ${filters.limit}`, causing the database to return an unbounded result set that exhausts memory and causes the REST service to crash, making all block records unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_563d8807-887d-4b4b-8a1a-3400e3a865ed?mode=deep",
+    "timestamp": "2026-04-28 21:16:37.950078",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user inject a subquery into filters.orderBy (e.g., `(SELECT pg_sleep(30))`) via the unparameterized `order by ${filters.orderBy}` interpolation, causing time-based denial of service that makes block records temporarily unavailable to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93562c61-4abb-4af5-ae5d-c5b3f833b23a?mode=deep",
+    "timestamp": "2026-04-28 21:16:51.283435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTimestampArrayContext()] Can an unprivileged external user supply an unsorted timestamps array (e.g., [T3, T1, T2]) where the first element is greater than the last, causing getTimestampArrayContext() to incorrectly classify the order as DESC, leading the inner loop in getRecordFileBlockDetailsFromTimestampArray() to skip valid records and return an incomplete map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3747c0c6-2b75-42ea-8a2b-c86bafb6bab4?mode=deep",
+    "timestamp": "2026-04-28 21:17:04.520473",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array with duplicate values, causing the inner loop to map the same timestamp to a record file multiple times or skip records, resulting in incorrect or missing entries in the returned recordFileMap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a10627b7-6433-4c0b-bf8c-685e1698ce75?mode=deep",
+    "timestamp": "2026-04-28 21:17:17.568827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a timestamps array where all values are identical (e.g., [T, T, T]), causing getTimestampArrayContext() to return order ASC with minTimestamp == maxTimestamp, and the query `CONSENSUS_END >= $2 and CONSENSUS_END <= $3` to collapse to a single-nanosecond window, causing all but one record file to be excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83804d59-261d-4403-aa48-74152c0decfc?mode=deep",
+    "timestamp": "2026-04-28 21:17:31.245535",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a very large timestamps array (e.g., 100,000 elements) passed as `$1::bigint[]` to the unnest() subquery, causing the database to perform a full table scan for each element and exhausting connection pool resources, making record file lookups unavailable for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0c6a292-581c-4d31-8320-ac388af3ad79?mode=deep",
+    "timestamp": "2026-04-28 21:17:45.021463",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a timestamps array where maxTimestamp is near BigInt MAX_VALUE so that `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` overflows or wraps, causing the upper bound $3 to become negative or zero and excluding all valid record files from the query result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53eb11d8-2274-4195-83ee-550479136906?mode=deep",
+    "timestamp": "2026-04-28 21:17:59.432701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a timestamp value of 0 or a negative number to getRecordFileBlockDetailsFromTimestamp(), causing the query `CONSENSUS_END >= $1` to match the very first record file in the table regardless of the intended transaction, returning an incorrect block association?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4e4587f-aeb2-48b9-b6f6-4c6f31710441?mode=deep",
+    "timestamp": "2026-04-28 21:18:12.874341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a timestamp of MAX_LONG (2^63-1) to getRecordFileBlockDetailsFromTimestamp(), causing the query to find no matching record file and return null, making the transaction appear to have no associated block on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3ce9dda-378f-4a05-a8d1-fecfd9afaf4f?mode=deep",
+    "timestamp": "2026-04-28 21:18:26.341174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a negative index value to getRecordFileBlockDetailsFromIndex(), causing the query `INDEX = $1` to never match (since block indices are non-negative), always returning null and making the block appear missing even if it exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96ececd3-f385-4401-bad7-7f74d1332d29?mode=deep",
+    "timestamp": "2026-04-28 21:18:40.410457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a floating-point index (e.g., 1.5) to getRecordFileBlockDetailsFromIndex(), causing type coercion issues in the parameterized query that either throws an error or returns null, making a valid block appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_018324b7-24e7-4feb-b0a4-5c29a6ecf0eb?mode=deep",
+    "timestamp": "2026-04-28 21:18:53.368271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply an empty string hash to getRecordFileBlockDetailsFromHash(), causing the LIKE pattern to become '%' which matches every row in the record_file table, and getSingleRow() to return null due to multiple matches, making all block-by-hash lookups return missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45996bf3-b870-412a-8cd8-f54091d41fac?mode=deep",
+    "timestamp": "2026-04-28 21:19:06.904826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a hash containing SQL LIKE wildcard characters (e.g., '%' or '_') to getRecordFileBlockDetailsFromHash(), causing the LIKE pattern to match unintended record file rows and return incorrect block data or null due to multiple matches?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40f4684a-c9c5-46ff-96ae-2472e8858853?mode=deep",
+    "timestamp": "2026-04-28 21:19:20.886613",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash string containing '%' wildcards to getByHashOrNumber(), bypassing the `hash.toLowerCase()` normalization (which does not escape LIKE metacharacters), causing the LIKE pattern to match multiple rows and getSingleRow() to return null, making a valid block appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49c39e3b-9f1c-4225-ac1a-9c5b0f6a9dce?mode=deep",
+    "timestamp": "2026-04-28 21:19:33.941634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash of exactly the right prefix length to match two different block hashes in the record_file table, causing getSingleRow() to return null instead of the correct block, resulting in incorrect missing-block responses for that hash prefix?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b5cf4fc-3478-4be7-98a4-2fcc17130cae?mode=deep",
+    "timestamp": "2026-04-28 21:19:47.393699",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: buildWhereSqlStatement()] Can an unprivileged external user craft a whereQuery array with a very large number of filter conditions, causing the positional parameter loop (`$${i}`) to generate an excessively long SQL WHERE clause that exceeds PostgreSQL's query size limits, causing the getBlocks() query to fail and return no records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9934c722-a8a5-47f8-b71b-97babc8b812e?mode=deep",
+    "timestamp": "2026-04-28 21:20:00.628616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: buildWhereSqlStatement()] Can an unprivileged external user supply a whereQuery entry where the `.query` property contains a SQL fragment with unbalanced quotes or injected operators, bypassing the positional parameter binding and causing incorrect WHERE clause logic that filters out valid record files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9de96d5-6570-4b47-b842-e3a26f2734d0?mode=deep",
+    "timestamp": "2026-04-28 21:20:14.125068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user set filters.order to 'DESC NULLS LAST; SELECT 1--' via the unparameterized `${filters.order}` interpolation, injecting a second SQL statement that causes the query to return incorrect or no block records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_880d6bab-9514-451b-b74e-4b74e5d7f10c?mode=deep",
+    "timestamp": "2026-04-28 21:20:27.569962",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBlocks()] Can an unprivileged external user set filters.orderBy to a non-existent column name via the unparameterized `${filters.orderBy}` interpolation, causing a PostgreSQL error that results in no block records being returned and a 500 error exposed to the user?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82ea5959-a485-4f1c-8c46-86847414c790?mode=deep",
+    "timestamp": "2026-04-28 21:20:41.315639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a single-element timestamps array where the sole timestamp falls between two record files' consensus windows, causing the inner loop condition `consensusStart <= timestamp && consensusEnd >= timestamp` to never be true, resulting in an empty recordFileMap and missing block association?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3395e7e2-a2bc-4847-bc53-6ca2f6b1b351?mode=deep",
+    "timestamp": "2026-04-28 21:20:55.544646",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTimestampArrayContext()] Can an unprivileged external user supply a two-element timestamps array [T, T] (both equal) where first == last, causing getTimestampArrayContext() to return order ASC with minTimestamp == maxTimestamp == T, and the query to use a zero-width time window that may exclude the correct record file if the interval check is strict?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_575a01f3-a572-407d-8a27-3934774e3969?mode=deep",
+    "timestamp": "2026-04-28 21:21:10.657967",
+    "report_generated": false
+  }
+]
