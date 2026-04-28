@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user submit a transaction with a 20-byte EVM address that is a valid long-zero address (first 12 bytes zero, last 8 bytes encoding a Hedera entity ID), causing `findByEvmAddressAndDeletedIsFalse` to match on the `evm_address` column and cache the result, while `CommonEntityAccessor.get(Address, timestamp)` would route the same address through `getEntityByMirrorAddressAndTimestamp` (ID-based path), creating a cache inconsistency that misdirects subsequent transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a779b8b2-e24e-4f4d-9e7d-5b83b057fcda?mode=deep",
+    "timestamp": "2026-04-28 23:47:23.437768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByIdAndTimestamp(long id, long blockTimestamp)] Can an unprivileged external user submit a historical transaction simulation where the entity exists in both `entity` and `entity_history` tables with the same `id` and overlapping `timestamp_range`, causing the UNION ALL to return two rows, and the `order by timestamp_range desc limit 1` to non-deterministically select either row, leading to inconsistent transaction execution results across repeated calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9919b507-a4aa-4a47-8776-f21b7be0ef43?mode=deep",
+    "timestamp": "2026-04-28 23:47:35.360675",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressOrAliasAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user exploit the `deleted is not true` predicate (which treats NULL as not-deleted) in the native query of `findByEvmAddressOrAliasAndDeletedIsFalse` to retrieve entities where `deleted IS NULL`, and then submit a transaction targeting such an entity, bypassing the intended deletion check and interacting with a logically-deleted entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c43dc3ca-5076-4c69-b62b-4195b8612099?mode=deep",
+    "timestamp": "2026-04-28 23:47:47.920511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByEvmAddressAndTimestamp(byte[] evmAddress, long blockTimestamp)] Can an unprivileged external user exploit the `deleted is not true` check only on the `entity` table branch (not on `entity_history` branch) in `findActiveByEvmAddressAndTimestamp`, by supplying a `blockTimestamp` that causes the `entity` branch to return no rows (entity is deleted) but the `entity_history` branch to return a deleted historical record (since `deleted is not true` is absent from the history branch), making a transaction interact with a deleted entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e272b2f2-a234-448b-b2d0-b9e77dc54ad7?mode=deep",
+    "timestamp": "2026-04-28 23:48:00.833442",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByIdAndTimestamp(long id, long blockTimestamp)] Can an unprivileged external user exploit the `deleted is not true` check on the `entity_history` branch of `findActiveByIdAndTimestamp` being present, but the `entity` branch also having `deleted is not true`, to craft a scenario where an entity was deleted and re-created with the same ID, causing the UNION to return the re-created entity's current state instead of the historical deleted state at the requested `blockTimestamp`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3721296-5741-4729-afc5-b5758e92bb81?mode=deep",
+    "timestamp": "2026-04-28 23:48:14.214917",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findMaxId()] Can an unprivileged external user repeatedly call `eth_estimateGas` for contract creation to force repeated `findMaxId()` database queries (since the result is only cached per `ContractCallContext` scope, not globally), causing a database resource exhaustion that degrades transaction processing for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d93776f0-0572-446e-b60b-5d6269be3f6e?mode=deep",
+    "timestamp": "2026-04-28 23:48:28.257592",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByIdAndDeletedIsFalse(Long entityId)] Can an unprivileged external user submit a transaction with `entityId = 999` (just below the system-account threshold of 1000) while `isBalanceCallSafe()` is false, causing the entity to be cached in `CACHE_MANAGER_SYSTEM_ACCOUNT`, and then exploit the system-account cache's potentially longer TTL to serve stale data for entity 999 after it has been updated, causing transactions to execute against outdated entity state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_565a11e1-7c93-47e1-be4e-28d1d7159e5a?mode=deep",
+    "timestamp": "2026-04-28 23:48:42.665812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user submit a transaction with a crafted EVM address that produces a `spelHelper.hashCode` collision with a system contract address (e.g., `0x167`), causing the `CACHE_NAME_EVM_ADDRESS` cache to serve the attacker's entity data when the system contract address is looked up, redirecting transaction calls intended for the system contract to the attacker's entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b1d4a82-c269-42b0-bf56-ba7f16aacaea?mode=deep",
+    "timestamp": "2026-04-28 23:48:58.190126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByEvmAddressOrAliasAndTimestamp(byte[] alias, long blockTimestamp)] Can an unprivileged external user supply a `blockTimestamp` that is exactly 1 nanosecond before the `created_timestamp` of a contract, causing the CTE `created_timestamp <= ?2` to exclude the contract, returning an empty Optional, and making a historical transaction simulation incorrectly report that the contract did not exist at that block, enabling false proof-of-non-existence attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6984d42a-8d27-4436-b09a-5e72485a022a?mode=deep",
+    "timestamp": "2026-04-28 23:49:14.644191",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressOrAliasAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user submit a transaction where the `alias` byte array is exactly 20 bytes but encodes a long-zero Hedera address, causing `findByEvmAddressOrAliasAndDeletedIsFalse` to match on `evm_address` for one entity and `alias` for another entity simultaneously, and the query to return the wrong entity due to undefined row ordering in the absence of an ORDER BY clause?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73d97a8b-1489-4932-9baa-a7c93027cfca?mode=deep",
+    "timestamp": "2026-04-28 23:49:31.392993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByIdAndTimestamp(long id, long blockTimestamp)] Can an unprivileged external user submit a historical `eth_call` with `id = 0` (EntityId.EMPTY) to `findActiveByIdAndTimestamp`, causing the query to scan all entities with `id = 0` across both `entity` and `entity_history` tables, potentially returning an unexpected entity or causing a full table scan that degrades transaction processing performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7b655c2-e740-433d-900b-0251f199ad46?mode=deep",
+    "timestamp": "2026-04-28 23:49:47.240468",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByIdAndDeletedIsFalse(Long entityId)] Can an unprivileged external user exploit the `unless = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88a91b80-34b1-4197-8bda-b5eb8149c49a?mode=deep",
+    "timestamp": "2026-04-28 23:50:03.198035",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByEvmAddressAndTimestamp(byte[] evmAddress, long blockTimestamp)] Can an unprivileged external user submit a 0-byte or oversized EVM address byte array to `findActiveByEvmAddressAndTimestamp`, causing the native SQL query `evm_address = ?1` to perform a type-mismatch comparison that either throws an exception (causing transaction failure) or matches no rows (causing the transaction to treat a valid contract as non-existent)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5573d048-a7f7-42aa-8edf-ac1ea9a6bcf3?mode=deep",
+    "timestamp": "2026-04-28 23:50:20.781990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressOrAliasAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user exploit the fact that `findByEvmAddressOrAliasAndDeletedIsFalse` uses a native query with `select *` (returning all columns) while the cache key is only `@spelHelper.hashCode(#alias)`, to poison the cache with a partial/corrupted entity object by triggering a hash collision, causing subsequent transactions to deserialize incorrect entity fields (wrong type, wrong balance, wrong key)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e702162f-f1ce-45f2-b354-d5c6ae13a932?mode=deep",
+    "timestamp": "2026-04-28 23:50:38.547888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByEvmAddressOrAliasAndTimestamp(byte[] alias, long blockTimestamp)] Can an unprivileged external user craft a scenario where the same byte array matches both `evm_address` and `alias` columns of the same entity in the CTE, causing the CTE to return duplicate rows, and the subsequent UNION to produce unexpected results when `order by timestamp_range desc limit 1` is applied, leading to non-deterministic entity state resolution for a submitted transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_205b0943-9fca-420e-9ff8-ef17cf875482?mode=deep",
+    "timestamp": "2026-04-28 23:50:58.151013",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByIdAndDeletedIsFalse(Long entityId)] Can an unprivileged external user submit a transaction that triggers `findByIdAndDeletedIsFalse` for a system account (id < 1000) in a non-balance-call context, populating `CACHE_MANAGER_SYSTEM_ACCOUNT`, and then immediately submit a balance-call transaction for the same account, which bypasses the system-account cache (due to `isBalanceCallSafe()=true`), reads a different (potentially updated) entity state from the database, and causes the two concurrent transactions to operate on inconsistent entity states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ba67478-a575-4d4f-bc51-78fbcf23e9a7?mode=deep",
+    "timestamp": "2026-04-28 23:51:16.820694",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findActiveByIdAndTimestamp(long id, long blockTimestamp)] Can an unprivileged external user submit a historical transaction with a `blockTimestamp` equal to `Long.MAX_VALUE`, causing the `lower(timestamp_range) <= ?2` predicate to match all records in both `entity` and `entity_history`, and the UNION ALL to return multiple rows for the same entity ID, with the `order by timestamp_range desc limit 1` selecting the current state instead of the historical state, breaking historical transaction isolation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_559d9db1-c01d-4630-9c72-17088a07c343?mode=deep",
+    "timestamp": "2026-04-28 23:51:37.481149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/repository/EntityRepository.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: findByEvmAddressAndDeletedIsFalse(byte[] alias)] Can an unprivileged external user submit a transaction with an EVM address that matches a deleted entity (where `deleted = true`), observe that `findByEvmAddressAndDeletedIsFalse` returns empty (not cached due to `unless = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1dff16f6-8633-46e4-938d-809a7e88d2f5?mode=deep",
+    "timestamp": "2026-04-28 23:51:58.529023",
+    "report_generated": false
+  }
+]
