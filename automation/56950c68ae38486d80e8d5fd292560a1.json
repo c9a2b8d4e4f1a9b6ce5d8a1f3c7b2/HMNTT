@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user submit a contract transaction with a crafted consensusTimestamp value that, when the retention job fires prune(), causes the ContractResult record for a fund-holding contract call to be deleted before the funds are recoverable, permanently freezing the amount stored in the ContractResult.amount field?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89b85a17-56e8-44de-b687-1c3b2a64e7e8?mode=deep",
+    "timestamp": "2026-04-28 20:19:56.856100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user trigger a scenario where prune() deletes ContractResult rows with consensusTimestamp <= threshold, removing the only on-chain evidence of a failed contract create that held an initialBalance (amount field), making fund recovery impossible because the mirror node no longer has the record to reconstruct the refund path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_746663ae-21ce-458c-8fed-844e427603e9?mode=deep",
+    "timestamp": "2026-04-28 20:20:08.915567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can a user without privileges craft an Ethereum transaction that causes a ContractResult with a non-zero amount to be persisted with a consensusTimestamp that falls within the next prune() window, so that the deletion of that record via 'delete from ContractResult where consensusTimestamp <= ?1' removes the fund-transfer record before any downstream reconciliation can occur?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81165240-b9a7-467d-8c65-a3ee32c2dba6?mode=deep",
+    "timestamp": "2026-04-28 20:20:21.820193",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Given that prune() uses a '<=' comparison on consensusTimestamp and ContractResult.isNew() always returns true (forcing insert-only semantics), can an attacker submit duplicate transactions that produce two ContractResult rows at the same consensusTimestamp, causing one to be silently dropped and the associated amount to be unaccounted for, leading to permanent fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c800b146-a038-4d2d-b207-c409e593ace1?mode=deep",
+    "timestamp": "2026-04-28 20:20:34.972736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the fact that prune() is annotated @Transactional (via RetentionRepository) but ContractResult.isNew() always returns true to create a race condition where a new ContractResult carrying a large amount is inserted mid-prune transaction, causing the amount to be associated with a contract that has already been pruned, permanently freezing those funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_309b9ee5-7c95-4cc9-b313-17e6e54590b2?mode=deep",
+    "timestamp": "2026-04-28 20:20:50.667986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can a user without permissions submit a failed contract creation (resulting in a ContractResult with failedInitcode set and contractId=0) such that prune() later deletes this record, destroying the only reference to the failed initcode and the associated amount, making it impossible to prove the funds were spent and preventing any refund claim?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0edde81b-37a1-4f98-939a-918242847810?mode=deep",
+    "timestamp": "2026-04-28 20:21:03.896886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user cause a ContractResult with a non-null amount and a transactionResult indicating failure to be pruned before the REST API can serve it, so that a client relying on the mirror node to detect failed fund transfers never learns the transfer failed, leaving the funds in an indeterminate state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9d9db5b-e3ef-4c27-8877-1fd21ae08deb?mode=deep",
+    "timestamp": "2026-04-28 20:21:17.178691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract call with a very low gasLimit that causes the transaction to fail with an out-of-gas error, producing a ContractResult with errorMessage='Out of gas' and a non-zero amount, and then rely on prune() to delete this record before any refund mechanism queries it, permanently freezing the amount?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d66c811e-b976-4fd0-8db8-24b62622b216?mode=deep",
+    "timestamp": "2026-04-28 20:21:29.995700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Given that the @Query annotation in prune() uses JPQL 'delete from ContractResult where consensusTimestamp <= ?1' without any guard on the amount field, can an unprivileged user ensure that ContractResult records with non-zero amounts are deleted by the retention job, causing permanent loss of fund-transfer audit trails needed for dispute resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da9cbe7b-22bd-4aea-9a0f-e43a731eb7e1?mode=deep",
+    "timestamp": "2026-04-28 20:21:43.112185",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the absence of any amount != 0 guard in the prune() JPQL query to cause the deletion of ContractResult records that represent the only proof of HBAR transfers into a contract, making those funds permanently unrecoverable because no other table retains the amount field after pruning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de3b6efd-d5cf-4c2a-838d-b0b1a4ed0134?mode=deep",
+    "timestamp": "2026-04-28 20:21:56.181163",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can a user without privileges trigger a scenario where prune() deletes a ContractResult whose transactionHash is the only lookup key for a fund-holding Ethereum transaction, so that after deletion the transaction cannot be found via /api/v1/contracts/results/{hash}, permanently hiding the fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_310b65be-776b-4060-adea-2c48eb403bfe?mode=deep",
+    "timestamp": "2026-04-28 20:22:10.806625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user craft a contract call where the senderId differs from payerAccountId, causing the ContractResult to be stored with a senderId that points to a different account, and then after prune() removes the record, the funds associated with the original payerAccountId become unattributable and permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c67edb87-d9ce-4d88-959e-8c5712065b39?mode=deep",
+    "timestamp": "2026-04-28 20:22:23.797987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract transaction that produces a ContractResult with createdContractIds containing a contract initialized with balance=0 by processCreatedContractEntity(), and then after prune() deletes the ContractResult, the created contract's zero-balance initialization record is the only evidence of its creation, causing any funds sent to it to be permanently frozen with no recovery path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac172c0a-d3bb-4581-bbdb-1fe471414e9e?mode=deep",
+    "timestamp": "2026-04-28 20:22:36.619906",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the fact that prune() deletes ContractResult rows atomically per block but does not cascade-delete related ContractLog or ContractStateChange records, creating an inconsistent state where logs reference a pruned ContractResult, causing fund-recovery logic that joins these tables to fail and permanently freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_928960d7-c8a8-496c-bc55-ee4a22050e07?mode=deep",
+    "timestamp": "2026-04-28 20:22:50.090762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a failed Ethereum transaction that causes addDefaultEthereumTransactionContractResult() to persist a ContractResult with contractId=0 and a non-zero amount, and then prune() deletes this record, making the failed fund transfer permanently invisible to any downstream fund-recovery process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41df219f-90df-470b-9451-c5a5b8d7aacc?mode=deep",
+    "timestamp": "2026-04-28 20:23:03.355753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user cause a ContractResult with gasConsumed miscalculated by calculateGasConsumed() (due to crafted all-zero functionParameters inflating the zero-byte count) to be stored, causing the mirror node to report incorrect gas consumption, which downstream EVM simulators use to estimate gas for fund-transfer calls, leading those calls to run out of gas and freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc960337-1cc2-4399-b6bd-8e013d0f28c5?mode=deep",
+    "timestamp": "2026-04-28 20:23:16.662682",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract call with functionParameters consisting entirely of zero bytes to manipulate the calculateGasConsumed() formula (TX_DATA_ZERO_COST * zeros + ISTANBUL_TX_DATA_NON_ZERO_COST * nonZeros), causing gasConsumed to be stored as artificially low in ContractResult, which after prune() removes the record, leaves no correctable audit trail and causes future gas estimates to under-provision, freezing funds in out-of-gas failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab053792-f704-4ed1-bff9-2104b12a9bdd?mode=deep",
+    "timestamp": "2026-04-28 20:23:30.739996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the fact that ContractResult.isNew() always returns true to force Hibernate to always INSERT rather than UPDATE, causing a primary key collision on consensusTimestamp if two transactions share the same nanosecond timestamp, resulting in one ContractResult (and its associated amount) being silently dropped and those funds permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f23f078a-0c97-4846-b354-a7572a640044?mode=deep",
+    "timestamp": "2026-04-28 20:23:43.941107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract transaction that causes processContractResult() to set contractId to EntityId.EMPTY.getId() (0), storing a ContractResult with contractId=0, and then after prune() deletes it, the funds associated with that call have no valid contract reference and are permanently frozen with no recovery path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed6cec0d-75e2-49dc-b048-1f3327c72be5?mode=deep",
+    "timestamp": "2026-04-28 20:23:56.991194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user craft a contract call where the ContractFunctionResult.bloom equals the 256-byte EMPTY_BLOOM, causing setBloom() to store an empty byte array instead, and then after prune() removes the ContractResult, the bloom filter that would have been used to detect fund-transfer events is gone, making those events permanently undetectable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a86242a2-7670-4219-aedb-d73072bf847f?mode=deep",
+    "timestamp": "2026-04-28 20:24:11.025916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract transaction that causes processContractResult() to store a ContractResult with a null transactionHash (when recordItem.getTransactionHash() returns null), and then after prune() deletes the record, the fund transfer cannot be looked up by hash, permanently hiding the funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc33bad1-9b81-49aa-ae1b-42c21ac20d3b?mode=deep",
+    "timestamp": "2026-04-28 20:24:24.874956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the absence of a NOT NULL constraint on the amount field in ContractResult to submit a contract call where amount is null, causing fund-accounting logic that sums amounts to skip this record, and after prune() removes it, the transferred funds are permanently unaccounted for?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d5012b6-ee6f-429a-b972-f07b1d01e7a1?mode=deep",
+    "timestamp": "2026-04-28 20:24:38.778720",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract call that causes processContractResult() to store a ContractResult with transactionResult indicating success but callResult being empty, and then after prune() removes the record, any fund-recovery logic that checks callResult to confirm the transfer completed finds no evidence, permanently freezing the funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6bc08c3-48b6-4bc7-bad1-ed563ed3ece6?mode=deep",
+    "timestamp": "2026-04-28 20:24:52.863382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user cause a ContractResult with a non-zero amount and errorMessage set to an empty string (rather than null) to be stored, causing REST API consumers that check isEmpty(errorMessage) to treat it as success when it was actually a failure, and after prune() removes the record, the incorrect success status permanently hides the frozen funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3579e3da-ddc0-4881-8771-9b5e8441e735?mode=deep",
+    "timestamp": "2026-04-28 20:25:06.582225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/ContractResultRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user submit a contract transaction that causes processContractResult() to store a ContractResult with gasUsed greater than gasLimit (due to a crafted ContractFunctionResult), and then after prune() removes the record, the impossible gas values that would have flagged the transaction as anomalous are gone, permanently hiding evidence of a fund-freezing exploit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ebc2c8a2-6319-4a9e-a471-7e2a13e8d8cb?mode=deep",
+    "timestamp": "2026-04-28 20:25:21.043528",
+    "report_generated": false
+  }
+]
