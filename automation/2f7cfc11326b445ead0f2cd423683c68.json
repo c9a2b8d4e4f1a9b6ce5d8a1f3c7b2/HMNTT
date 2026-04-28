@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply a crafted `filters.orderBy` value containing SQL keywords (e.g., `'1; DROP TABLE record_file--'`) that is interpolated directly into the query string at line 156 (`order by ${filters.orderBy} ${filters.order}`), bypassing parameterization and achieving SQL injection, causing unauthorized data exfiltration or database corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f0aaf48-800b-4d04-9bda-2a1479497a0c?mode=deep",
+    "timestamp": "2026-04-28 21:00:49.243237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user inject arbitrary SQL through `filters.order` (interpolated directly at line 156 as `order by ${filters.orderBy} ${filters.order}`) by supplying a value like `ASC; SELECT pg_sleep(30)--`, causing blind SQL injection or denial of service via query stalling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd069cd6-de7b-41c9-9930-cc69eaaff6ac?mode=deep",
+    "timestamp": "2026-04-28 21:01:01.395426",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user inject arbitrary SQL through `filters.limit` (interpolated directly at line 157 as `limit ${filters.limit}`) by supplying a non-numeric string like `1 UNION SELECT hash,null,null FROM record_file--`, bypassing the LIMIT clause and achieving UNION-based SQL injection to read arbitrary table data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a258ea6-6d32-4e51-961f-9298f5d549a5?mode=deep",
+    "timestamp": "2026-04-28 21:01:14.071268",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: buildWhereSqlStatement()] Can an unprivileged external user cause SQL injection by controlling the `whereQuery[i-1].query` property (interpolated directly at line 12 as `${whereQuery[i - 1].query} $${i}`), since only the `.param` value is parameterized while the `.query` string is concatenated raw into the SQL statement, allowing injection of arbitrary SQL clauses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1c79b70-c344-4908-a160-31259d625297?mode=deep",
+    "timestamp": "2026-04-28 21:01:26.656919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply an empty or zero `filters.limit` value that, when interpolated at line 157 as `limit ${filters.limit}`, produces `limit 0` or `limit NaN`, causing the query to return no rows or throw a database error, resulting in denial of service or incorrect API responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2511569-2c00-485d-91cb-058c589cc0e2?mode=deep",
+    "timestamp": "2026-04-28 21:01:40.271436",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply an arbitrarily large `timestamps` array (e.g., millions of elements) that is passed as `$1::bigint[]` at line 101, causing the database to perform an `unnest` over a massive array and a correlated subquery per element, resulting in sustained CPU/memory exhaustion and denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24db813d-664b-4f04-88ea-377b9a5dba00?mode=deep",
+    "timestamp": "2026-04-28 21:01:53.541635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array containing non-BigInt or non-numeric values that fail the `$1::bigint[]` cast at line 101, causing an unhandled database cast exception that propagates to the API caller and leaks internal query structure or stack traces?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4f3d167-faee-4bf1-a173-fda2af9193e1?mode=deep",
+    "timestamp": "2026-04-28 21:02:07.351992",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array where `maxTimestamp` is `BigInt(Number.MAX_SAFE_INTEGER)` or near `2^63-1`, causing `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` at line 101 to overflow a PostgreSQL `bigint` parameter, resulting in a database error or incorrect range boundary that skips valid record files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6841f000-43d7-4e95-aa7b-581d81035378?mode=deep",
+    "timestamp": "2026-04-28 21:02:20.772013",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array that is not actually sorted (e.g., `[5, 3, 7, 1]`), causing `getTimestampArrayContext()` to derive an incorrect `order` and `minTimestamp`/`maxTimestamp` from only the first and last elements, leading to incorrect record file mapping where timestamps are silently associated with wrong blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d277b22d-1406-4397-9539-87bd7c015d13?mode=deep",
+    "timestamp": "2026-04-28 21:02:35.166241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getTimestampArrayContext()] Can an unprivileged external user supply a single-element `timestamps` array where `first === last`, causing `getTimestampArrayContext()` to always return `order: ASC` regardless of context, and then the loop at lines 109-119 to incorrectly map or skip the single timestamp against record files due to the boundary comparison logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a157104-44d4-4934-b9e1-ea46fcf8ff9e?mode=deep",
+    "timestamp": "2026-04-28 21:02:47.675577",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply an extremely long `hash` string (e.g., 1MB) that is appended with `%` at line 144 (`\\`${hash}%\\``) and passed to a `LIKE` query, causing the database to perform an expensive pattern match scan across the `record_file` table, resulting in denial of service through query resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e77bef04-d59d-4c3c-96ff-e3427252df89?mode=deep",
+    "timestamp": "2026-04-28 21:03:01.334165",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a `hash` value containing SQL LIKE wildcard characters (e.g., `%`, `_`) that, while parameterized, cause the LIKE pattern at line 61 (`where hash like $1`) to match unintended rows, leaking record file data that should only be accessible via exact hash lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69378dab-256c-44fa-a4ae-0384b411f8f4?mode=deep",
+    "timestamp": "2026-04-28 21:03:14.972048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user supply a `hash` prefix (e.g., a single character `a`) that matches thousands of records via the LIKE pattern at line 169 (`${RecordFile.HASH} like $1` with `hash + '%'`), and since `getSingleRow` in BaseService returns `null` when `rows.length > 1`, silently suppress valid results, causing the API to return 404 for blocks that exist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be84a8ec-2e36-4c51-a48e-3895c86e84fa?mode=deep",
+    "timestamp": "2026-04-28 21:03:29.504224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user supply a `hash` value of empty string `''`, causing `hash.toLowerCase()` at line 168 to produce `''`, and the LIKE pattern to become `%`, matching every row in `record_file`, and since `getSingleRow` returns null for multiple rows, causing a silent data suppression that makes all blocks appear not found?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_267bf0d3-e588-41ce-97e5-f272e20b1230?mode=deep",
+    "timestamp": "2026-04-28 21:03:44.060872",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user supply a `number` value of `null`, `undefined`, or a non-integer string that is passed directly as `$1` at line 173 (`params.push(number)`), causing a PostgreSQL type mismatch error that leaks internal query structure or causes an unhandled exception?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec5c8de0-0f05-401c-b6e7-2322446c9a5b?mode=deep",
+    "timestamp": "2026-04-28 21:03:58.303837",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a negative `index` value or a floating-point number (e.g., `1.5`) that is passed directly to the parameterized query at line 132, causing a PostgreSQL type error or returning unexpected results due to implicit type coercion in the `INDEX = $1` comparison?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91a93509-6744-415f-a053-31089d8668bf?mode=deep",
+    "timestamp": "2026-04-28 21:04:11.790752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a `timestamp` value of `0`, negative, or an extremely large number that is passed directly to the query at line 79, causing the `CONSENSUS_END >= $1` condition to match all rows or no rows, leaking the existence of record files or causing incorrect block resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ee27afe-904f-432b-abc2-ebdb8a7f60fc?mode=deep",
+    "timestamp": "2026-04-28 21:04:27.351096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: pool()] Can an unprivileged external user trigger a runtime `ReferenceError: primaryPool is not defined` at line 204 by invoking any method that calls `this.pool()` (e.g., `getBlocks()`, `getByHashOrNumber()`), since `primaryPool` is referenced but never imported or declared in the file, causing a service crash and denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a040732-4b71-40c8-add5-b4e7b7c73e61?mode=deep",
+    "timestamp": "2026-04-28 21:04:42.549430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply a `filters.whereQuery` array with a very large number of entries, causing `buildWhereSqlStatement()` to generate an extremely long SQL WHERE clause that exceeds PostgreSQL's query size limits or causes excessive parse time, resulting in denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e80ca84f-a231-49dc-b2ca-55d0633d14ab?mode=deep",
+    "timestamp": "2026-04-28 21:04:56.502904",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply `filters.orderBy` as a subquery string (e.g., `(SELECT pg_sleep(10))`), which is interpolated directly at line 156 without sanitization, causing a time-based blind SQL injection that allows the attacker to infer database contents through response timing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65b6d7bc-ede2-474f-9136-7cbf2a58277f?mode=deep",
+    "timestamp": "2026-04-28 21:05:10.582985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply `filters.limit` as a very large integer (e.g., `2147483647`) that is interpolated directly at line 157, causing the database to attempt to return billions of rows, exhausting memory and causing denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6683eca1-3805-45db-a555-939797b5c8cf?mode=deep",
+    "timestamp": "2026-04-28 21:05:24.412565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user supply `filters.limit` as a negative number (e.g., `-1`) that is interpolated directly at line 157 as `limit -1`, causing a PostgreSQL syntax error that propagates as an unhandled exception, leaking internal query details?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d24ccfda-51de-44ba-ada4-a659fee61dce?mode=deep",
+    "timestamp": "2026-04-28 21:05:38.784262",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: buildWhereSqlStatement()] Can an unprivileged external user cause a parameter index mismatch by supplying a `whereQuery` array where `.query` already contains `$1` or `$2` placeholders, causing the auto-generated `$${i}` at line 12 to bind the wrong parameter values, leading to incorrect query results or data leakage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31f3660a-7d2f-4859-bd67-fbcd3e65914b?mode=deep",
+    "timestamp": "2026-04-28 21:05:52.075771",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array with duplicate values, causing the `unnest($1::bigint[]) group by consensus_end` subquery at lines 41-42 to collapse duplicates and return fewer record files than expected, leading to incorrect block mapping for transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a1a08fa-10c2-43f3-b5dd-87ae2ba447d4?mode=deep",
+    "timestamp": "2026-04-28 21:06:06.420849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: '] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array with values that span a range larger than `config.query.maxRecordFileCloseIntervalNs`, causing the `$3` upper bound at line 101 to exclude valid record files, silently dropping timestamp-to-block mappings and returning an incomplete result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e4dbd19-14b7-428c-bbe0-1502c1d9f6bc?mode=deep",
+    "timestamp": "2026-04-28 21:06:20.647541",
+    "report_generated": false
+  }
+]
