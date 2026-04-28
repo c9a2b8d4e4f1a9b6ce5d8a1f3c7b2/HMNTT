@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca6b6dd1-ddd9-4a9d-a982-208c9362909d?mode=deep",
     "timestamp": "2026-04-28 14:07:14.009842",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user submit a request with only an ORDER filter (no block.number or timestamp), causing extractSqlFromBlockFilters() to return an empty whereQuery but a non-default order, and then exploit the fact that the resulting query scans the entire record_file table ordered by consensus_end, consuming significant DB resources when issued at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba86ed92-70da-4628-9e02-0f9d9d912a36?mode=deep",
+    "timestamp": "2026-04-28 21:21:07.311275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit concurrent requests with timestamp=gte:X filters where X is the current chain tip timestamp, causing RecordFileService.getBlocks() to repeatedly query for blocks that don't yet exist, and by doing so at high frequency, create a thundering herd against the DB that starves the importer's write path and causes the mirror node to fall behind the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c00afc4-943e-4d27-bb96-2d1bf09bfb2b?mode=deep",
+    "timestamp": "2026-04-28 21:21:19.733209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: validateHashOrNumber()] Can an unprivileged external user submit a hash with the 0x prefix (e.g., 0x + 64 hex chars) that after replace('0x', '') produces a valid hash, but the same hash without 0x prefix is treated as a number by isPositiveLong() if it consists entirely of digits, causing validateHashOrNumber() to route the same logical identifier through different code paths and return different results, creating an inconsistency in block lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c0d9ca5c-b71c-4ab4-aff4-62b552f75248?mode=deep",
+    "timestamp": "2026-04-28 21:21:34.141164",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user exploit the fact that getBlocks() calls RecordFileService.getBlocks() which uses primaryPool, and by flooding the endpoint, cause all connections in primaryPool to be held by read queries, preventing the importer from acquiring a write connection and thus halting the ingestion of new blocks from the network, causing the mirror node to serve an increasingly stale chain view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40061b5c-62c2-415d-b0eb-0578bee02bf5?mode=deep",
+    "timestamp": "2026-04-28 21:21:47.147777",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractOrderByFromFilters()] Can an unprivileged external user submit a request with only a timestamp filter, causing extractOrderByFromFilters() to return RecordFile.CONSENSUS_END as the ORDER BY column, while simultaneously submitting a request with only a block.number filter that returns RecordFile.INDEX, and by comparing the two responses, detect inconsistencies in block ordering that reveal a partition or reindexing event in the mirror node's database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad0472ee-25e6-49bb-b2dd-955542f8f9df?mode=deep",
+    "timestamp": "2026-04-28 21:22:00.372276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a block number that is a valid positive long but exceeds the current chain height, causing RecordFileService.getByHashOrNumber() to perform an index scan that finds no row, and by issuing thousands of such requests, cause DB index scan overhead that degrades performance and partitions the service from timely block ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df71cfd2-34cb-459b-a3c4-3045ff3f302f?mode=deep",
+    "timestamp": "2026-04-28 21:22:13.820430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a request with block.number=gte:0 and limit at defaultLimit, then use the next link from generateNextLink() to paginate through the entire chain, and by doing so with many concurrent clients, cause a sustained read load that exhausts DB connections and prevents the importer from writing new blocks, effectively partitioning the mirror node from the live network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_970fdffe-e176-485c-864d-05b74ff91161?mode=deep",
+    "timestamp": "2026-04-28 21:22:28.369267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractLimitFromFilters()] Can an unprivileged external user submit limit=NaN or limit=Infinity as a query parameter, and if buildAndValidateFilters() does not reject these values, cause extractLimitFromFilters() to pass a non-numeric limit to the SQL query, causing a DB error that crashes the connection and partitions the REST layer from the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_851f1799-a6c6-4aa8-805a-f837bf0a8ba4?mode=deep",
+    "timestamp": "2026-04-28 21:22:42.535451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: generateNextLink()] Can an unprivileged external user observe that generateNextLink() returns null when blocks.length is 0, and exploit this to determine the exact chain tip block number by binary searching with block.number=gte:X filters, then use this information to time requests that arrive exactly when a new block is being written, causing a race condition where the next link points to a partially-written block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4fde568c-a562-44c6-8191-632b6e2d55a2?mode=deep",
+    "timestamp": "2026-04-28 21:22:55.373068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a timestamp filter with a nanosecond-precision value that falls in the gap between two consecutive record files (i.e., after one file's consensus_end and before the next file's consensus_start), causing the query to return zero blocks, and by doing this repeatedly, cause clients to believe the chain has gaps that don't actually exist, simulating a network partition in the observable block sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_396740bb-2417-40af-9d1b-e9d3b4c9fcec?mode=deep",
+    "timestamp": "2026-04-28 21:23:09.028924",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a hash that is a valid prefix of multiple blocks stored in the DB (e.g., all blocks whose hash starts with '00'), causing RecordFileService.getByHashOrNumber() to return the first matching block via getSingleRow(), and by doing this at scale with different prefixes, map out the hash distribution of all blocks in the chain, enabling targeted attacks on specific blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6c879df-dd6b-4404-8b87-493b4ec653d3?mode=deep",
+    "timestamp": "2026-04-28 21:23:23.303237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user exploit the fact that extractSqlFromBlockFilters() does not deduplicate multiple block.number filters (e.g., block.number=gte:0&block.number=gte:100&block.number=gte:200), causing the whereQuery to contain multiple redundant conditions that force the DB query planner to use a suboptimal plan, resulting in a full table scan that exhausts DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d7f883c-0caf-43a7-923b-fd0e6ee7c005?mode=deep",
+    "timestamp": "2026-04-28 21:23:38.256180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractOrderFromFilters()] Can an unprivileged external user submit a request with order=ASC (uppercase) and observe that extractOrderFromFilters() calls order.value.toUpperCase() before looking up in orderFilterValues, and then submit order=asc (lowercase) and verify the same result, confirming that case normalization is consistent, but then submit order=Asc%00 (with null byte) to test if the null byte causes unexpected behavior in the order lookup that could corrupt the SQL query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22d7a2f0-3c2d-4803-bc9b-863b2b4cee28?mode=deep",
+    "timestamp": "2026-04-28 21:23:52.801255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a block.number=eq:X filter where X is the index of the genesis block (0), causing RecordFileService.getBlocks() to return the genesis block, and then compare the prev_hash field (which should be all zeros) with what is returned, and if the mirror node has been partitioned from the network and re-indexed, detect the inconsistency through a mismatch in the genesis block's prev_hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d31f6e3-9af6-4ac1-8ac0-d2ea50fa262c?mode=deep",
+    "timestamp": "2026-04-28 21:24:07.480355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a block number as a string with leading zeros (e.g., '007') and observe whether isPositiveLong() accepts or rejects it, and if accepted, whether the DB query treats it as the same block as '7', creating an inconsistency in block lookup that could be exploited to cause divergent client state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef0adccd-2c8f-4fe1-988f-4cbab18cbfc6?mode=deep",
+    "timestamp": "2026-04-28 21:24:20.908816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a request with both block.number and timestamp filters that are logically contradictory (e.g., block.number=eq:100 and timestamp=lte:0), causing RecordFileService.getBlocks() to return an empty result set, and by doing this at scale, cause the DB to repeatedly execute queries that scan indexes unnecessarily, degrading performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d94f9c3-4386-47c7-aedd-3b7bc2e8f44d?mode=deep",
+    "timestamp": "2026-04-28 21:24:34.845703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: generateNextLink()] Can an unprivileged external user exploit the fact that generateNextLink() uses blocks.length !== filters.limit as the isEnd condition, and by submitting a limit that exactly matches the number of blocks returned (e.g., limit=5 when exactly 5 blocks exist), cause generateNextLink() to generate a next link even though there are no more blocks, causing the client to make an additional request that returns an empty result, wasting resources and potentially causing client-side infinite loops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ff2c6f2-bd4a-491f-8451-5182344d2622?mode=deep",
+    "timestamp": "2026-04-28 21:24:48.528025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a timestamp=gte:X filter where X is a future timestamp (far in the future), causing RecordFileService.getBlocks() to return an empty result set, and by doing this repeatedly, cause the DB to perform repeated index scans on consensus_end that find no matching rows, wasting DB resources and contributing to connection pool exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6a32ea9-8511-448d-8461-18c79d742b5a?mode=deep",
+    "timestamp": "2026-04-28 21:25:01.544565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user submit a request where filters is null or undefined (if buildAndValidateFilters() returns null in an edge case), causing extractSqlFromBlockFilters() to fail at the filters.length === 0 check with a TypeError, crashing the request handler and potentially causing an unhandled promise rejection that destabilizes the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29de609b-6801-4eb8-9d8b-fe7040a2139c?mode=deep",
+    "timestamp": "2026-04-28 21:25:14.928601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a hash string of exactly 96 hex characters (valid Hedera hash) that after lowercasing in RecordFileService.getByHashOrNumber() is appended with '%' for the LIKE query, and by submitting many such requests with different hash prefixes, cause the DB to perform many LIKE scans on the hash column, exhausting DB I/O and partitioning the service from the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_261ce4ba-2806-4b7c-ab49-ae35878a1b1e?mode=deep",
+    "timestamp": "2026-04-28 21:25:29.244043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user exploit the fact that the blocks query in RecordFileService includes coalesce(size, length(bytes)) as size, and by requesting blocks that have large bytes fields, cause the DB to compute length() on large binary data for every row in the result set, significantly increasing query execution time and contributing to DB resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65f5570e-9f0b-491d-bfab-31015da9ee5e?mode=deep",
+    "timestamp": "2026-04-28 21:25:44.209068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractLimitFromFilters()] Can an unprivileged external user submit limit=1 and observe the response, then submit limit=maxLimit and observe the response, and by comparing the two, determine the exact value of maxLimit and getEffectiveMaxLimit(), enabling them to craft requests that are just below the limit threshold and maximize the data returned per request for a DoS attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4ecf817-5f67-4f70-8008-b8ecdb78754c?mode=deep",
+    "timestamp": "2026-04-28 21:25:59.429326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a request with no filters and observe that the default order is DESC (from extractOrderFromFilters()), causing the query to return the most recent blocks first, and then exploit this to monitor the chain tip in real time by polling with no filters, and by doing so at high frequency with many clients, cause a sustained read load that partitions the mirror node from the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4da20582-9bd5-4286-a93a-704b8e0982ea?mode=deep",
+    "timestamp": "2026-04-28 21:26:14.423642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a block number of 0 (genesis block) and observe the response, then submit a hash that is the genesis block's hash, and compare the two responses to detect any inconsistency in the genesis block's data that would indicate the mirror node has been re-indexed or partitioned from the network at some point in its history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61ca4beb-47d6-4891-af3b-6defa696daf5?mode=deep",
+    "timestamp": "2026-04-28 21:26:30.124463",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBlocks()] Can an unprivileged external user submit a block.number=gte:X filter where X is a very large number close to the maximum int8 value (9223372036854775807), causing RecordFileService.getBlocks() to perform an index scan that finds no rows, and by issuing many such requests, cause repeated unnecessary index scans that degrade DB performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb5f289d-1959-42f5-9976-f698b22a6363?mode=deep",
+    "timestamp": "2026-04-28 21:26:47.476633",
+    "report_generated": false
   }
 ]
