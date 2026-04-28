@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user inject a malicious JDBC URL (e.g., via environment variable injection or misconfigured external config) into the jdbcUrl parameter of waitForDatabase() so that DriverManager.getConnection(jdbcUrl, jdbcProperties) connects to an attacker-controlled database, causing all submitted transaction records to be written to a rogue endpoint instead of the legitimate mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_529f868b-4dfe-4a32-86ee-67de99cfc6d0?mode=deep",
+    "timestamp": "2026-04-28 19:41:59.585360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the absence of JDBC URL validation in waitForDatabase() to supply a URL with embedded JDBC parameters (e.g., ?autoReconnect=true&allowMultiQueries=true) that alter the behavior of the underlying database connection used to store submitted transactions, enabling batch SQL injection or multi-statement execution against transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca60d7c1-286f-4ddf-8090-48d06c0ed8c0?mode=deep",
+    "timestamp": "2026-04-28 19:42:11.511161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user craft a jdbcUrl containing a SSRF payload (e.g., jdbc:postgresql://internal-db-host:5432/mirror_node) to redirect the DriverManager.getConnection() call to an internal database replica or shadow database, causing submitted transactions to be validated against a tampered or stale dataset?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_422041a9-a5c1-48e4-86b4-ae3cd185e846?mode=deep",
+    "timestamp": "2026-04-28 19:42:24.400380",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user trigger a denial-of-service against transaction ingestion by causing the waitForDatabase() retry loop (while (System.nanoTime() < deadline)) to spin indefinitely against an unresponsive or attacker-controlled host, blocking the DataSource bean initialization and preventing any submitted transactions from being persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b85d104c-5013-4e12-9220-54b2e3fbd186?mode=deep",
+    "timestamp": "2026-04-28 19:42:36.602997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the Uninterruptibles.sleepUninterruptibly(properties.getInterval()) call inside the retry loop to hold application startup threads in a blocked state for up to the full timeout duration (default 5 minutes), creating a window during which submitted transactions are not processed or are dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4ee4f41-58fe-41e9-bd3f-544d65743c47?mode=deep",
+    "timestamp": "2026-04-28 19:42:50.067059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that password is added to jdbcProperties only when password != null (not when it is empty string) to cause waitForDatabase() to attempt a passwordless connection to the database, and if the database accepts it, allow the attacker to later connect with the same empty-password credential and tamper with stored transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad7bd04e-7556-4066-ae7a-96995366ff8f?mode=deep",
+    "timestamp": "2026-04-28 19:43:02.957999",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the asymmetric null-check logic (StringUtils.hasText(username) for user vs. password != null for password) in waitForDatabase() to cause a connection attempt with a blank username but a valid password, potentially matching a database account with a blank username that has write access to transaction tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ca20f8d-f4c0-47db-850d-9784743550de?mode=deep",
+    "timestamp": "2026-04-28 19:43:15.583065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the Math.toIntExact(properties.getValidationTimeout().toSeconds()) call to trigger an ArithmeticException overflow if a very large validationTimeout is configured, causing connection.isValid() to never be called and the application to fall back to an unvalidated database connection that may be pointing to a tampered database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c17c002-adbe-43d4-b280-37759c1395a2?mode=deep",
+    "timestamp": "2026-04-28 19:43:28.869219",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the exception message logging (log.info(..., e.getMessage())) inside the catch block of waitForDatabase() to extract sensitive JDBC connection details (host, port, database name, credentials) from application logs, which could then be used to directly connect to the transaction database and tamper with submitted transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73f3a449-a11f-404a-b474-ea82607e723d?mode=deep",
+    "timestamp": "2026-04-28 19:43:41.352859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the IllegalStateException thrown at the end of waitForDatabase() (which chains lastException) to cause the application to expose database connection error details (including host, credentials, or SQL state) in error responses or logs, enabling the attacker to identify and target the transaction storage backend?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b7e7892-91bd-4cb4-aa7f-47088299aa05?mode=deep",
+    "timestamp": "2026-04-28 19:43:54.376459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user inject JDBC URL parameters such as ssl=false or sslmode=disable into the jdbcUrl passed to DriverManager.getConnection() to downgrade the database connection from TLS to plaintext, enabling a man-in-the-middle attacker to intercept and tamper with submitted transaction data in transit between the mirror node and the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05d57205-d460-4f36-9683-fca22a8fbfd5?mode=deep",
+    "timestamp": "2026-04-28 19:44:06.779359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the lack of JDBC URL allowlist validation in waitForDatabase() to supply a URL pointing to a PostgreSQL-compatible proxy (e.g., PgBouncer misconfiguration or a rogue proxy) that intercepts and modifies transaction INSERT/UPDATE statements before forwarding them to the real database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4f4f293-f4e2-4fa3-9973-66701c12a3dd?mode=deep",
+    "timestamp": "2026-04-28 19:44:19.844976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that waitForDatabase() uses DriverManager.getConnection() (which loads JDBC drivers from the classpath) to trigger loading of a malicious JDBC driver registered via java.sql.DriverManager.registerDriver(), redirecting the database connection used for transaction storage to an attacker-controlled endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd8792ad-7dc8-4ee6-bee0-7ba25106d8ad?mode=deep",
+    "timestamp": "2026-04-28 19:44:32.444651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the retry loop in waitForDatabase() combined with a slow-responding database to cause repeated connection attempts that exhaust the database's connection pool, preventing legitimate transaction writes from obtaining connections and causing submitted transactions to be lost or delayed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8845d6f0-477c-4f06-990b-c24fbefcdb1f?mode=deep",
+    "timestamp": "2026-04-28 19:44:45.429687",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the connectTimeout property (set via jdbcProperties.setProperty('connectTimeout', ...)) being passed as a string without validation to inject additional JDBC URL parameters by embedding special characters, altering the effective connection behavior and potentially bypassing transaction integrity checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44aaad95-540c-4170-a078-1cc31c3adf43?mode=deep",
+    "timestamp": "2026-04-28 19:44:57.716955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the socketTimeout property set in jdbcProperties to cause the database connection to time out mid-transaction during the validation phase, leaving the DataSource in an inconsistent state where partially written transaction records are committed to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1417c081-12ce-4569-9c6b-827227910759?mode=deep",
+    "timestamp": "2026-04-28 19:45:10.320246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that waitForDatabase() does not verify the identity (e.g., TLS certificate) of the database server it connects to via DriverManager.getConnection(jdbcUrl, jdbcProperties), allowing a DNS spoofing or ARP poisoning attack to redirect the connection to a rogue database that returns tampered transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a637e16d-63d5-40b6-b189-20e7451ff72f?mode=deep",
+    "timestamp": "2026-04-28 19:45:22.887239",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the properties.isEnabled() check in waitForDatabase() — where returning false skips all database validation — to cause the application to proceed with an unvalidated or attacker-substituted DataSource, resulting in submitted transactions being written to a tampered database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44485c32-799d-4070-81ea-ed1700cd88d6?mode=deep",
+    "timestamp": "2026-04-28 19:45:35.278439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the System.nanoTime() + properties.getTimeout().toNanos() deadline calculation in waitForDatabase() to cause a long-type overflow if getTimeout() returns a very large Duration, resulting in an immediate deadline expiry and an IllegalStateException that prevents the application from connecting to the database and processing submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c666247-c627-44ad-aa79-a83130a2ea79?mode=deep",
+    "timestamp": "2026-04-28 19:45:47.790166",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that the jdbcUrl parameter in waitForDatabase() is passed directly to DriverManager.getConnection() without sanitization to inject JDBC URL options like ?currentSchema=attacker_schema, causing transaction data to be written to an attacker-controlled schema instead of the legitimate mirror_node schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_938132bb-745b-41d6-9213-675c1e70d29a?mode=deep",
+    "timestamp": "2026-04-28 19:46:00.581752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the absence of connection encryption enforcement in waitForDatabase() to perform a protocol downgrade attack on the JDBC connection, enabling interception and modification of transaction data written to the database during the startup validation phase?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c234844-fb14-47f3-b149-ead1f2b16f81?mode=deep",
+    "timestamp": "2026-04-28 19:46:14.103164",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that waitForDatabase() opens a raw JDBC connection via DriverManager.getConnection() that is separate from the HikariCP connection pool, and if the JDBC URL points to a different host than the pool, cause a split-brain scenario where startup validation succeeds against a legitimate DB but actual transaction writes go to a tampered DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0dbdec6-b3f8-427e-9485-bf66d4ee317b?mode=deep",
+    "timestamp": "2026-04-28 19:46:27.027084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the connection.isValid(Math.toIntExact(properties.getValidationTimeout().toSeconds())) call to cause a false-positive validation result by connecting to a database that responds to isValid() but is actually a rogue server, causing the application to trust the connection and route submitted transaction writes to the attacker's database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a75fa66e-7db8-4b94-86fc-c51feedb60c2?mode=deep",
+    "timestamp": "2026-04-28 19:46:40.564172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the fact that the lastException variable in waitForDatabase() accumulates exception details across all retry attempts and is then embedded in the thrown IllegalStateException, causing sensitive database error messages (including SQL state codes, host names, or partial credentials) to be exposed in application error output that could aid in targeting the transaction database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ee72259-be56-4998-861e-28e0e5be6d11?mode=deep",
+    "timestamp": "2026-04-28 19:46:53.728259",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DatabaseWaiter.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: waitForDatabase()] Can an unprivileged external user exploit the retry loop in waitForDatabase() to perform a timing oracle attack — by measuring how long the application takes to start up based on retry intervals — to infer whether the database is reachable and deduce network topology information useful for targeting the transaction storage backend?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12a5ecf9-f12d-42bc-a41e-4e865818cbf6?mode=deep",
+    "timestamp": "2026-04-28 19:47:07.563803",
+    "report_generated": false
+  }
+]
