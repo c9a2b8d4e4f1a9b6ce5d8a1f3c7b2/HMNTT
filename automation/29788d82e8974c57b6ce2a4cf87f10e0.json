@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBalanceChange()] Can an unprivileged external user trigger an incorrect balance record exported to the mirror node by submitting a crypto transfer with errata='INSERT' that is double-counted because the balanceChangeBetween query only excludes errata='DELETE' but includes errata='INSERT', causing the reported balance to be inflated relative to the true on-chain state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c038f0b-8b94-4544-9a14-08e898753130?mode=deep",
+    "timestamp": "2026-04-28 22:40:22.564711",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBalanceChange()] Can an unprivileged external user cause a missing balance change record by crafting a transfer at exactly consensusStart (the snapshot timestamp), since the balanceChangeBetween query uses `consensus_timestamp > @start` (exclusive), meaning a transfer at the snapshot boundary is silently excluded from the exported balance delta?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecc7a781-828f-43cc-bb29-7567c499ebd2?mode=deep",
+    "timestamp": "2026-04-28 22:40:34.990908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect balance record to be exported by querying RetrieveBalanceAtBlock() at a consensusEnd timestamp that is exactly equal to a deleted account's GetModifiedTimestamp(), triggering the off-by-one adjustment (balanceSnapshotEndTimestamp = balanceChangeEndTimestamp - 1) and causing the snapshot lookup to miss the deletion-time balance snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec122d37-e8bf-4cbd-b002-480f30eeda66?mode=deep",
+    "timestamp": "2026-04-28 22:40:47.598936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect hbar balance to be exported by querying a deleted account at a consensusEnd timestamp after deletion, where the crypto delete transfer (which moves remaining hbar to another account) is included in balanceChangeEndTimestamp but the snapshot lookup is shifted to balanceChangeEndTimestamp-1, potentially double-counting or missing the final transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62300df1-aa12-414e-9edc-ea81d70e69f6?mode=deep",
+    "timestamp": "2026-04-28 22:41:01.142131",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCryptoEntity()] Can an unprivileged external user cause an incorrect entity record to be exported by supplying an alias that matches both a deleted and a live account in the entity_history UNION ALL, where the ORDER BY timestamp_range DESC returns the deleted historical record first instead of the current live entity, leading to a wrong account being reported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b7e9077-950f-44a9-9542-e665a7f94b46?mode=deep",
+    "timestamp": "2026-04-28 22:41:16.785486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCryptoEntity()] Can an unprivileged external user cause a missing entity record in the exported data by querying getCryptoEntity() with a consensusEnd timestamp that falls in a gap between entity and entity_history timestamp_range values, causing both UNION ALL branches to return zero rows and the function to return nil without error, silently omitting the account from the exported output?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26c22a65-cb30-4a9b-b04a-24010c6b6b59?mode=deep",
+    "timestamp": "2026-04-28 22:41:31.452710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause an incorrect balance snapshot to be exported by querying at a timestamp where the selectPreviousPartitionLowerBound returns a partitionLowerBound of 0 (no matching partition), causing the latestBalanceBeforeConsensus query to scan all historical account_balance rows and potentially return a stale snapshot from a much earlier partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af0ee025-e211-4acb-9987-2c0bd0a89e59?mode=deep",
+    "timestamp": "2026-04-28 22:41:47.220279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause a missing balance record to be exported by querying at a timestamp that falls in the first partition (before any second-to-last partition exists), causing selectPreviousPartitionLowerBound to return 0 and the latestBalanceBeforeConsensus query to use lower_bound=0, which may include or exclude snapshots incorrectly relative to the true partition boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3910fb7e-648c-4b62-ab4c-db2a83e5d6f8?mode=deep",
+    "timestamp": "2026-04-28 22:42:04.027117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause an incorrect balance to be exported when the treasury entity has no account_balance row at or before the queried timestamp, causing the inner subquery in latestBalanceBeforeConsensus to return no rows, making the outer query return a zero ConsensusTimestamp, which then triggers ErrNodeIsStarting and suppresses the real balance record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0db9cba-2576-4f97-a908-1543619f54a8?mode=deep",
+    "timestamp": "2026-04-28 22:42:21.249254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect zero-balance record to be exported for an alias-based account that does not exist in the entity table, because the nil entity check at line 172 returns an empty HbarAmount{} without consulting crypto_transfer records, potentially masking real transfers that occurred before the account was formally registered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25c5f4a5-c8d0-441e-914a-153e613a74cb?mode=deep",
+    "timestamp": "2026-04-28 22:42:38.949071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: GetAccountId()] Can an unprivileged external user cause a missing account record to be exported by querying GetAccountId() with an alias that belongs to a soft-deleted account (deleted=true), since selectCurrentCryptoEntityByAlias filters out deleted accounts, returning ErrAccountNotFound and causing the caller to omit the account's historical records from the export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79495529-ebd5-4eed-9cde-228fe33f6622?mode=deep",
+    "timestamp": "2026-04-28 22:42:56.770658",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: GetAccountAlias()] Can an unprivileged external user cause an incorrect alias record to be exported when GetAccountAlias() encounters an entity with an alias that fails NewAccountIdFromEntity() parsing (e.g., account5Alias with 48 random bytes), silently falling back to the numeric accountId instead of reporting the alias, causing the exported record to use the wrong identifier?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c89a2220-71e1-4dda-80b6-a0b186070dec?mode=deep",
+    "timestamp": "2026-04-28 22:43:14.646273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: GetAccountAlias()] Can an unprivileged external user cause a missing alias record to be exported when GetAccountAlias() is called for an account with a zero-length alias (len(entity.Alias) == 0), causing the function to return the numeric accountId without any alias, even if the account was originally created with an alias that was later cleared in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_104f6ec2-3dab-4f68-b4fb-163acc659f1d?mode=deep",
+    "timestamp": "2026-04-28 22:43:34.852793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCryptoEntity()] Can an unprivileged external user cause an incorrect entity record to be exported by providing an alias that matches multiple historical entries with overlapping timestamp_range values, where the ORDER BY timestamp_range DESC picks the wrong (older) entity due to range comparison semantics in PostgreSQL, exporting stale key or deleted status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baf82c58-0895-4727-88e6-e10de12d4162?mode=deep",
+    "timestamp": "2026-04-28 22:43:52.877618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect public key to be exported by querying RetrieveBalanceAtBlock() at a consensusEnd timestamp that falls within the first entity history record's timestamp_range, causing getCryptoEntity() to return the historical entity with publicKeyBytes1 instead of the current entity with publicKeyBytes2?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61d89f30-821c-4af6-883c-b07a60fd4570?mode=deep",
+    "timestamp": "2026-04-28 22:44:13.632519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBalanceChange()] Can an unprivileged external user cause an incorrect balance change record to be exported by ensuring that a crypto transfer with errata='DELETE' is present in the crypto_transfer table for their account, since the balanceChangeBetween query excludes it from the sum, causing the exported balance delta to differ from what was actually recorded on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8feea7e6-4a3c-440c-81e9-de964398b5c4?mode=deep",
+    "timestamp": "2026-04-28 22:44:34.394352",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause a missing balance snapshot record to be exported when the account has no entry in account_balance for the queried timestamp range, causing the coalesce(..., 0) in latestBalanceBeforeConsensus to return balance=0 with a valid ConsensusTimestamp, exporting a zero balance that does not reflect the true account state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73b1896a-5090-4424-bf9c-7aed1a431e89?mode=deep",
+    "timestamp": "2026-04-28 22:44:56.465031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect balance record to be exported by querying at a consensusEnd timestamp between two balance snapshots where the account's balance row is absent from the second snapshot due to deduplication, causing getLatestBalanceSnapshot() to fall back to the first snapshot and then getBalanceChange() to sum all transfers since the first snapshot, potentially including transfers that were already captured in the second snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22b4d093-54d8-4f40-9d6b-47ad67f0091b?mode=deep",
+    "timestamp": "2026-04-28 22:45:18.271652",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCryptoEntity()] Can an unprivileged external user cause an incorrect entity type to be exported by querying getCryptoEntity() with a numeric account ID that belongs to a CONTRACT entity, since selectCryptoEntityById includes both 'ACCOUNT' and 'CONTRACT' types, causing a contract's balance and key to be exported as if it were an account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d5d0015-0d37-435c-89a2-24fc4d6e0c13?mode=deep",
+    "timestamp": "2026-04-28 22:45:41.925059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectCryptoEntityByAlias] Can an unprivileged external user cause an incorrect entity record to be exported by registering an alias that was previously held by a deleted account (accountNum2 pattern), where the UNION ALL of entity and entity_history returns the deleted account's row first due to a later timestamp_range, causing the exported record to reflect the deleted account's key instead of the current account's key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_492bdfa8-1941-4dde-9eb7-ff45dc5735ac?mode=deep",
+    "timestamp": "2026-04-28 22:46:05.263885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect entityIdString to be exported by querying an account whose entity.Id.String() returns a non-standard shard/realm format (e.g., shard=1023, realm=2), causing downstream consumers of the exported record to fail to match the account to its canonical identifier?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd13e663-321c-4e6f-b841-fda95ebb53e9?mode=deep",
+    "timestamp": "2026-04-28 22:46:29.627080",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause a missing balance record to be exported when selectPreviousPartitionLowerBound returns a partitionLowerBound that is greater than the queried timestamp, causing the latestBalanceBeforeConsensus query's lower_bound constraint to exclude all valid account_balance rows and return a zero ConsensusTimestamp, triggering ErrNodeIsStarting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ae6cb55-5c72-4037-be4d-abba0c3cde23?mode=deep",
+    "timestamp": "2026-04-28 22:46:55.738944",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getBalanceChange()] Can an unprivileged external user cause an incorrect balance change to be exported by submitting multiple crypto transfers at the same consensus_timestamp as the snapshot, since the balanceChangeBetween query uses `consensus_timestamp > @start` (exclusive lower bound), meaning transfers at exactly the snapshot timestamp are excluded even if they represent real balance changes after the snapshot was taken?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_697ccea9-bcbd-4f3d-b8c2-0318f53ee2ea?mode=deep",
+    "timestamp": "2026-04-28 22:47:22.322157",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause an incorrect balance record to be exported for a deleted account by querying at a consensusEnd timestamp that is exactly one nanosecond before the deletion timestamp, causing the deletion branch (entity.GetModifiedTimestamp() <= consensusEnd) to not trigger, and the balance to be computed using the full consensusEnd range which may include post-deletion transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f171185d-55ac-41a1-8e51-4b244f3489f8?mode=deep",
+    "timestamp": "2026-04-28 22:47:49.130094",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCryptoEntity()] Can an unprivileged external user cause a missing record to be exported by querying getCryptoEntity() with a consensusEnd timestamp that is exactly at the boundary of a timestamp_range (the range uses @> operator for containment), where an off-by-one in getInclusiveInt8Range() causes the entity to not be found even though it existed at that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5406fe2-0475-4bdf-ba99-e396a589af4c?mode=deep",
+    "timestamp": "2026-04-28 22:48:17.366718",
+    "report_generated": false
+  }
+]
