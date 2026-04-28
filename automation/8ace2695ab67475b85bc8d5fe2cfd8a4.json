@@ -1,0 +1,122 @@
+[
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: formatBalancesResult()] Can an unprivileged external user trigger a scenario where formatBalancesResult() receives a result with rows where consensus_timestamp is a string (due to DB type coercion under partition-induced fallback), causing the reduce comparator (result > current) to perform string comparison instead of numeric comparison, returning a wrong maxTimestamp and incorrect ret.timestamp in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be1697a3-dcaa-44ad-ad27-c3b43214080b?mode=deep",
+    "timestamp": "2026-04-28 20:44:31.013884",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request without any filters, causing getBalances() to execute the entity table CTE query (with entity_balance as ...) against a partitioned read replica, where the entity table returns stale balance_timestamp values, causing the response to reflect balances from before the partition without any staleness warning, misleading clients about current network state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e90041c-9414-43b5-9ac9-00344f46393d?mode=deep",
+    "timestamp": "2026-04-28 20:44:43.009153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalancesQuery()] Can an unprivileged external user send a timestamp filter that causes getBalancesQuery() to build a WHERE clause joining tsQueryResult.query, accountQuery, accountIdsQuery, and balanceQuery with AND, and under a network partition where accountIdsQuery is null (getAccountIdsByPublicKey returned null), the filter() removes it, potentially broadening the query to return more accounts than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_408c1db5-2536-48cd-a1ca-4ed6cfe131b0?mode=deep",
+    "timestamp": "2026-04-28 20:44:55.292030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send concurrent requests that each trigger the 3-query sequential flow in getBalances(), so that under a network partition the connection pool (finite size) is saturated by in-flight queries waiting for the partitioned DB, causing new requests to receive connection pool timeout errors that expose pool configuration details in the DbError message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68580e73-0fa1-425d-b5e5-eede0f8fc138?mode=deep",
+    "timestamp": "2026-04-28 20:45:07.796092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user send timestamp=gte:T1&timestamp=gte:T2 with two gte operators, causing getOptimizedTimestampRange() to call bigIntMax(lowerBound, value) twice, setting lowerBound to the larger value, and if T2 is in the far future (beyond nowInNs), effectiveUpperBound = nowInNs < lowerBound, causing lowerBound > upperBound check to fail and return {}, silently returning empty results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63e054e2-e984-4e50-87e5-3c9eae9bd0f8?mode=deep",
+    "timestamp": "2026-04-28 20:45:21.515111",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountBalanceTimestampRange()] Can an unprivileged external user exploit the fact that getAccountBalanceTimestampRange() uses EntityId.systemEntity.treasuryAccount as the anchor account, so that during a network partition where only the treasury account's partition shard is unavailable, all timestamp-filtered balance queries return {} and silently serve empty results, even though balance data for other accounts is available?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a870546-8784-496b-9c0b-b07e20d4a448?mode=deep",
+    "timestamp": "2026-04-28 20:45:35.214678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request that causes pool.queryQuietly() at line 153 to throw DbError after getTsQuery() and getAccountIdsByPublicKey() have already succeeded, so that the response has res.locals[constants.responseDataLabel] set to the empty default (from line 102) rather than an error, and the error middleware may or may not override this, depending on middleware ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2cbf819-f22c-48fc-beb3-e0585ee46000?mode=deep",
+    "timestamp": "2026-04-28 20:45:48.072169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenBalanceSubQuery()] Can an unprivileged external user send a timestamp filter that causes getTokenBalanceSubQuery() to embed the consensusTsQuery string directly into the SQL subquery via string interpolation (not parameterized), and under a network partition where tsQueryResult.query contains unexpected characters due to a corrupted DB response, this could alter the subquery structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aecd5fcd-8ced-481e-b264-be6b055c985a?mode=deep",
+    "timestamp": "2026-04-28 20:46:01.502043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request with account.balance=gte:0 causing parseBalanceQueryParam() to produce a balanceQuery, and in the no-timestamp branch, the whereClause is constructed as 'where <conditions>' with balanceQuery included, but under a network partition where the entity table's balance column has stale values, the filter returns accounts that no longer meet the balance threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab3a1fdd-b216-4173-bd27-b3a5c2aea518?mode=deep",
+    "timestamp": "2026-04-28 20:46:15.414706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user send timestamp=lt:T where T is exactly 1 nanosecond (BigInt value 1n), causing ltValue = value - 1n = 0n, setting upperBound = 0n, and then lowerBound (computed from nowInNs) > upperBound = 0n, causing getOptimizedTimestampRange() to return {}, which propagates as a silent empty response, masking whether this is a partition or a valid boundary condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e2dd7db-f3bf-471d-afc7-960d119e5731?mode=deep",
+    "timestamp": "2026-04-28 20:46:28.400121",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request that causes getBalances() to call utils.mergeParams(tsParams, accountParams, balanceParams, params) where tsParams has been mutated by getBalancesQuery() (reassigned at line 132), and under a network partition where getBalancesQuery() returns unexpected tsParams length, the merged sqlParams array has wrong positional alignment with the pgSqlQuery placeholders?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcecbf96-b25a-447d-b641-4129b457d966?mode=deep",
+    "timestamp": "2026-04-28 20:46:44.669180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountIdsByPublicKey()] Can an unprivileged external user send a valid public key that matches many accounts in the entity table, causing getAccountIdsByPublicKey() to return a large 'ab.account_id in (id1, id2, ..., idN)' string with N up to the limit value, and under a network partition where the entity table returns a partial result set, the IN clause silently filters to only the accounts visible before the partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6557e214-3121-49be-81d4-c21bd05952ce?mode=deep",
+    "timestamp": "2026-04-28 20:46:57.492235",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request with only an account.publickey filter and no timestamp, causing getBalances() to take the else branch and include pubKeyQuery directly in the WHERE clause of the entity_balance CTE query, and under a network partition where the entity table's public_key index is on a different shard, the query performs a full table scan that times out and throws DbError?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc69ed09-9ea2-4c07-87a4-b526085527e1?mode=deep",
+    "timestamp": "2026-04-28 20:47:11.172800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: formatBalancesResult()] Can an unprivileged external user trigger a scenario where formatBalancesResult() calls EntityId.parse(row.account_id).toString() on each row, and under a network partition where the DB returns account_id values with unexpected encoding (e.g., null or out-of-range), EntityId.parse() throws an exception that is not caught within formatBalancesResult(), causing an unhandled error after the DB query has already succeeded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b32ed8be-3b3d-45cd-b52c-6c50628cd3d6?mode=deep",
+    "timestamp": "2026-04-28 20:47:24.279628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request that causes the entity table CTE query (no-timestamp branch) to be executed against a DB where the entity table is temporarily unavailable due to a network partition, causing pool.queryQuietly() to throw DbError, and since this is the only DB call in this branch, the error propagates directly to the error handler, potentially exposing the full SQL query in the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a12653d-01ae-432a-b637-fb08b480c8ed?mode=deep",
+    "timestamp": "2026-04-28 20:47:37.854233",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getOptimizedTimestampRange()] Can an unprivileged external user send timestamp=lte:T1&timestamp=lte:T2 with two lte operators, causing getOptimizedTimestampRange() to call bigIntMin(upperBound, value) twice, and if both T1 and T2 are in the past, the effectiveUpperBound = bigIntMin(upperBound, nowInNs) = upperBound, causing optimalLowerBound to be computed from a past date, potentially scanning a partition that was dropped during a maintenance window triggered by a network partition event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d522660-d40f-4312-b09c-bcd7171de522?mode=deep",
+    "timestamp": "2026-04-28 20:47:51.252224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request with a timestamp filter that causes getBalances() to call getTsQuery() which internally calls getAccountBalanceTimestampRange() → pool.queryQuietly(), and if the DB connection is dropped mid-query (network partition), the pool.queryQuietly() catch block calls client.query('rollback') on an already-disconnected client, causing a secondary error that masks the original partition error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_820059ec-99fb-43eb-ad65-1a1d4254a9ef?mode=deep",
+    "timestamp": "2026-04-28 20:48:05.404266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountBalanceTimestampRange()] Can an unprivileged external user send timestamp=gte:T1&timestamp=lte:T2 where the range spans exactly two months, causing getAccountBalanceTimestampRange() to query account_balance with lowerBound at the start of the previous month, and under a network partition where one monthly partition is unavailable, the query returns a snapshot from the available partition that may not be the most recent, causing stale balance data to be served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74fbcb40-6def-4ca1-8367-ad21a5a31b7a?mode=deep",
+    "timestamp": "2026-04-28 20:48:18.863390",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalances()] Can an unprivileged external user send a request that causes getBalances() to execute the account_balance query (timestamp branch) against a DB that is in the process of partition failover, where the primary has failed and the replica is being promoted, causing pool.queryQuietly() to succeed on the first attempt (primary) but return stale data from before the failover?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d7b702e-488f-445d-b93e-964f776d5aed?mode=deep",
+    "timestamp": "2026-04-28 20:48:31.988094",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/balances.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenBalanceSubQuery()] Can an unprivileged external user send a timestamp filter that causes getTokenBalanceSubQuery() to build a correlated subquery against token_balance with 'limit tokenBalanceLimit.multipleAccounts', and under a network partition where the token_balance table is on a lagging replica, the subquery returns token balances from a different point in time than the outer account_balance query, causing temporal inconsistency in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f88d8e41-1e8c-4e96-b649-83a167aa5406?mode=deep",
+    "timestamp": "2026-04-28 20:48:46.312484",
+    "report_generated": false
+  }
+]
