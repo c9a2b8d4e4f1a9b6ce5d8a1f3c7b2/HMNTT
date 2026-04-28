@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user trigger a stale-cache read of a contract storage slot by issuing a `findStorage()` call within the 2-second `contractState` expireAfterWrite window after a legitimate on-chain state update, causing the EVM simulation to use an outdated slot value (e.g., an old token balance or allowance), leading to incorrect fund-transfer decisions in a simulated contract call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d177073-da0b-40f0-90de-005cfd92d399?mode=deep",
+    "timestamp": "2026-04-28 21:50:48.503663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user exploit the reference-equality sentinel check `cachedValue != EMPTY_VALUE` (line 65) — where a zero-length byte array stored by a prior batch miss is compared by reference rather than value — to cause `findStorage()` to skip the live DB lookup and return `Optional.empty()` for a slot that now holds a non-zero balance, causing a contract simulation to treat a funded slot as empty and miscalculate transferable funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd7d159c-5966-43f6-91e7-4a8d716c0a89?mode=deep",
+    "timestamp": "2026-04-28 21:51:00.512085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user, by repeatedly querying many distinct slot keys for the same contract, flood the `contractSlotsCache` (max 1500 entries per `slotsPerContract`) and evict the legitimate slot key for a balance-holding storage slot, so that the next `findStorageBatch()` call sets `isKeyEvictedFromCache = true` and falls back to `contractStateRepository.findStorage()` — bypassing the batch cache entirely — and if the DB is momentarily inconsistent, returns a wrong value leading to direct loss of funds in a dependent simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d6c7625-26f7-43b3-b244-cc55defc8bcb?mode=deep",
+    "timestamp": "2026-04-28 21:51:12.854176",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the unsynchronized concurrent access to `contractSlotsCache.getNativeCache().asMap().keySet()` (line 91) in `findStorageBatch()` — where two threads simultaneously call `putIfAbsent` and then iterate the key set — causing a race condition where one thread's batch query includes a key that was just evicted by the other thread, resulting in `Optional.empty()` being returned for a slot that holds a non-zero balance, causing a fund-loss miscalculation in a contract simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed3d285a-c644-4a46-b0e1-312183086adb?mode=deep",
+    "timestamp": "2026-04-28 21:51:25.695223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause `findStorageBatch()` to return `Optional.empty()` for a valid, funded slot by crafting a request where the slot key is present in `cachedSlotKeys` (so `isKeyEvictedFromCache = false`) but the `contractStateRepository.findStorageBatch()` query returns no row for that key (e.g., due to a DB read anomaly or the slot not yet being committed), causing `cachedValue` to remain `null` and `Optional.ofNullable(null)` to be returned — making the EVM treat a funded slot as zero and enabling a double-spend simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b645ea6-a9f3-4769-a2b7-1fa770071c9d?mode=deep",
+    "timestamp": "2026-04-28 21:51:38.741876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the `ByteBuffer.wrap(key)` call (line 88) — which shares the backing array with the caller-supplied `key` byte array — so that if the caller mutates the `key` array after calling `findStorage()` but before `findStorageBatch()` completes, the `wrappedKey` used for cache lookup and equality checks reflects the mutated value, causing the wrong slot value to be returned and leading to a fund-loss miscalculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c704546-61f8-4304-9380-8af40a04e4c8?mode=deep",
+    "timestamp": "2026-04-28 21:51:52.510298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause cross-contract slot value contamination by exploiting the fact that `contractSlotsCache.get(contractId, ...)` (line 86-87) uses `contractId.toString()` as the cache name — if two different `EntityId` objects produce the same `toString()` representation (e.g., due to shard/realm/num encoding collisions), causing one contract's slot values to be served for another contract's storage reads, leading to incorrect balance reads and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f49de62e-e05a-433a-a15b-d79364968be2?mode=deep",
+    "timestamp": "2026-04-28 21:52:05.738125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user poison the `contractStateCache` by triggering a `findStorageBatch()` that writes a stale or zero slot value via `contractStateCache.put(generateCacheKey(contractId, slotKey), slotValue)` (line 109), which then persists for up to 2 seconds (`expireAfterWrite=2s`), causing subsequent `findStorage()` calls to return the poisoned value for a balance-critical slot and enabling a fund-loss exploit in a dependent contract simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdbfefe8-d530-46f6-be9e-8c2a087772f4?mode=deep",
+    "timestamp": "2026-04-28 21:52:18.620655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user supply a crafted `blockTimestamp` value to `findStorageByBlockTimestamp()` that is slightly less than the actual timestamp of a balance-increasing transaction, causing the query `consensus_timestamp <= ?3` to return the pre-deposit slot value, making the EVM simulation believe a contract holds less funds than it actually does and enabling a fund-loss exploit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fef1a47-d07d-4085-ae5d-761fc65851bf?mode=deep",
+    "timestamp": "2026-04-28 21:52:32.426356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user supply a `blockTimestamp` of `Long.MAX_VALUE` to `findStorageByBlockTimestamp()`, causing the query to return the most recent slot value regardless of block context, bypassing historical state isolation and potentially leaking future state into a simulation that should be bounded to an earlier block, leading to incorrect fund calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05b2c7e6-9813-4114-915c-324597e3531a?mode=deep",
+    "timestamp": "2026-04-28 21:52:47.170033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user supply a negative `blockTimestamp` to `findStorageByBlockTimestamp()`, causing the SQL `consensus_timestamp <= ?3` clause to match no rows (since all timestamps are positive), returning `Optional.empty()` for a slot that holds a non-zero balance, causing the EVM to treat the slot as zero and enabling a fund-loss miscalculation in a historical simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c865a22-d360-4cc8-ba0f-7fa4f5d3516f?mode=deep",
+    "timestamp": "2026-04-28 21:53:03.358936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that `contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE)` (line 90) registers the slot key with `EMPTY_VALUE` before the batch DB query runs, so that if the batch query returns no result for that key (slot not yet in DB), the key remains mapped to `EMPTY_VALUE` in the per-contract cache — and on the next call, `findStorage()` checks `contractStateCache` (not the per-contract cache), finds nothing, calls `findStorageBatch()` again, and the key is now present so `isKeyEvictedFromCache = false`, causing `Optional.empty()` to be returned indefinitely for a slot that was later written to the DB, leading to a permanent stale-zero read?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9b608b7-fcbe-4046-9256-0a4652af45a7?mode=deep",
+    "timestamp": "2026-04-28 21:53:17.013689",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause a denial-of-correct-state by querying a slot key for a contract that has no storage entries, causing `contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE)` to register the key, `findStorageBatch()` to return an empty list, `isKeyEvictedFromCache = false`, and `Optional.empty()` to be returned — and since the key is now cached, subsequent calls after the contract is funded will still return `Optional.empty()` until the `slotsPerContract` cache expires (up to 5 minutes), causing a 5-minute window where a funded slot appears empty to EVM simulations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca8eb1c2-d5e5-497d-afaf-ad8a511bf694?mode=deep",
+    "timestamp": "2026-04-28 21:53:30.538438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: generateCacheKey()] Can an unprivileged external user craft two different `(contractId, slotKey)` pairs that produce the same `SimpleKey` (line 126) — exploiting `SimpleKey`'s array-based equality which uses `Arrays.equals` on the params array — causing a cache key collision where one contract's slot value is returned for a different contract's slot lookup, leading to incorrect balance reads and direct loss of funds in a simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c9b8776-ec76-4f60-95ae-d8e567079f55?mode=deep",
+    "timestamp": "2026-04-28 21:53:45.169030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the `((ByteBuffer) slot).array()` call (line 97) — which returns the full backing array of the `ByteBuffer`, potentially including bytes outside the buffer's current position/limit — to cause the batch query `findStorageBatch(contractId.getId(), cachedSlots)` to use a padded or oversized byte array as a slot key, resulting in a DB miss for a slot that actually exists, returning `Optional.empty()` for a funded slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c64f56b7-325b-475d-af00-42214a744fda?mode=deep",
+    "timestamp": "2026-04-28 21:53:59.635437",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user trigger a time-of-check/time-of-use (TOCTOU) race in `findStorageBatch()` where: (1) thread A reads `cachedSlotKeys` snapshot at line 91, (2) thread B evicts the target key from `contractSlotsCache`, (3) thread A's loop sets `isKeyEvictedFromCache = false` because it saw the key in the snapshot, (4) the batch query returns no result for the evicted key, and (5) `Optional.empty()` is returned for a funded slot — causing a fund-loss miscalculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52dc8c77-9427-4867-8eb2-7d139405a8de?mode=deep",
+    "timestamp": "2026-04-28 21:54:13.639906",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user exploit the 2-second `contractState` cache TTL (`expireAfterWrite=2s`) by timing a `findStorage()` call to land exactly at cache expiry — causing a cache miss that triggers `findStorageBatch()`, which reads a snapshot of `cachedSlotKeys` that includes stale keys from the previous cache generation, issuing a batch query that returns stale values, and then writing those stale values back into `contractStateCache` for another 2 seconds, creating a rolling stale-data window that affects fund-critical slot reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b5c0bd5-50fc-4835-9bbb-8b4ff2e855f8?mode=deep",
+    "timestamp": "2026-04-28 21:54:29.399207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause `findStorageBatch()` to issue an unbounded SQL `IN` clause by first registering thousands of slot keys in `contractSlotsCache` (up to `maximumSize=3000`), then triggering a batch query with all 3000 keys, causing a DB performance degradation that delays the response and creates a window where concurrent legitimate queries receive stale cached values for balance-critical slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3697fa7-b09d-464a-9558-3e1a8b2e582c?mode=deep",
+    "timestamp": "2026-04-28 21:54:44.753149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that `contractStateCache.put()` (line 109) unconditionally overwrites any existing cached value for a slot — including a freshly-written correct value from a concurrent thread — by racing two `findStorageBatch()` calls where one thread writes the correct value and the other writes a stale value from an older batch query, causing the stale value to persist in cache for up to 2 seconds and affecting fund-critical simulations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60a25dbe-ba55-4ee3-999f-017a2ba7565b?mode=deep",
+    "timestamp": "2026-04-28 21:54:59.765262",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user exploit the fact that `findStorage()` has no input validation on the `key` byte array — accepting null, zero-length, or oversized keys — causing `ByteBuffer.wrap(key)` to throw a `NullPointerException` or produce a zero-capacity buffer, which when used as a cache key in `contractSlotsCache.putIfAbsent()` registers a degenerate entry that pollutes the per-contract slot cache and causes subsequent legitimate slot lookups to include the degenerate key in batch queries, returning wrong results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c58c8ea3-afbf-4951-937f-6690fab93f1b?mode=deep",
+    "timestamp": "2026-04-28 21:55:14.052536",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the shared `contractSlotsCache` (a single `Cache` instance for all contracts) by registering slot keys for a high-volume contract to evict slot keys for a low-volume contract (due to `maximumSize=3000` across all contracts), causing the low-volume contract's slot keys to be evicted, triggering the `isKeyEvictedFromCache = true` fallback path, and if the fallback `findStorage()` DB call returns a stale or wrong value, leading to fund-loss in a simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddfe9793-df58-4b84-b0ac-af99450c822e?mode=deep",
+    "timestamp": "2026-04-28 21:55:29.604178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user supply a `slotKeyByteArray` of incorrect length (e.g., 20 bytes instead of 32) to `findStorageByBlockTimestamp()`, causing the SQL `slot = ?2` comparison to never match (due to byte-array length mismatch in the DB), returning `Optional.empty()` for a slot that holds a non-zero balance, causing the EVM to treat the slot as zero and enabling a fund-loss miscalculation in a historical block simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40725459-17bf-454c-b3a3-497057a18965?mode=deep",
+    "timestamp": "2026-04-28 21:55:44.016812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause a cache namespace collision by querying a contract whose `EntityId.toString()` representation matches the `CACHE_NAME` constant (`\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eae37cd3-551c-4a28-b58c-4053cb6fbce1?mode=deep",
+    "timestamp": "2026-04-28 21:55:59.249512",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the `isKeyEvictedFromCache` flag logic (lines 94-101) — where the flag is only set to `false` if `wrappedKey.equals(slot)` matches during iteration — to cause a false-eviction detection when the `ByteBuffer` position/limit state of a cached key differs from the newly wrapped key (even if the underlying bytes are identical), causing the fallback `contractStateRepository.findStorage()` to be called unnecessarily and potentially returning a different (stale) value than the batch path would have?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c60f2e58-3f47-4567-8a0a-2219295c2915?mode=deep",
+    "timestamp": "2026-04-28 21:56:13.627316",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Critical: Direct loss of funds'] [Function: findStorage()] Can an unprivileged external user exploit the two-layer cache architecture — where `contractStateCache` (2s TTL) and `contractSlotsCache` (5m TTL) have different expiry times — to create a state where `contractStateCache` has expired (returning a cache miss) but `contractSlotsCache` still holds the old slot key set, causing `findStorageBatch()` to issue a batch query with stale slot keys and write stale values back into `contractStateCache`, creating a persistent stale-data cycle for balance-critical slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c489597f-adfe-4e40-94d4-c6327bc39830?mode=deep",
+    "timestamp": "2026-04-28 21:56:28.427605",
+    "report_generated": false
+  }
+]
