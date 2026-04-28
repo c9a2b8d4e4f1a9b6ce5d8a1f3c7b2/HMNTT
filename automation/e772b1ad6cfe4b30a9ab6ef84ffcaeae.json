@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user supply a crafted `consensus_timestamp <=` filter value (e.g., timestamp=1) via the public `/contracts/:id/state?timestamp=1` endpoint, causing `contractStateTimestampQuery` to return all storage slots frozen at their oldest historical values, making every balance/allowance slot appear permanently locked at a stale state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_419d7a0b-a1ac-4b3c-bee1-d8ef02c4a923?mode=deep",
+    "timestamp": "2026-04-28 23:24:15.001798",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user trigger the `timestamp=true` branch by passing any truthy timestamp query parameter, switching the query from `contractStateQuery` (live `contract_state` table) to `contractStateTimestampQuery` (historical `contract_state_change` table), causing the API to return stale slot values that do not reflect the current on-chain state and making funds appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_823ad135-0e9a-4e3d-b155-db94f3cb98cc?mode=deep",
+    "timestamp": "2026-04-28 23:24:26.962769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user exploit the `contractStateTimestampQuery`'s `DISTINCT ON (slot)` clause by supplying a `consensus_timestamp <=` condition that predates any write to a balance-controlling slot, causing `coalesce(VALUE_WRITTEN, VALUE_READ)` to return `VALUE_READ` (a read-only observation) as the slot's effective value, making the contract's balance slot appear frozen at a value that was never actually written?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4686d727-f333-457f-9639-643ff72b150f?mode=deep",
+    "timestamp": "2026-04-28 23:24:39.318507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user pass a `consensus_timestamp <=` filter equal to the contract's creation timestamp, causing `contractStateTimestampQuery` to return zero rows for all balance-controlling slots (since no state changes exist at that exact moment), making the contract appear to have no storage state and all funds appear inaccessible to any downstream consumer relying on this API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1221dcfc-3ffd-4ed8-9fbb-e492988558e7?mode=deep",
+    "timestamp": "2026-04-28 23:24:52.627744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user exploit the fact that `contractStateTimestampQuery` uses `coalesce(VALUE_WRITTEN, VALUE_READ)` — where a read-only state change entry (VALUE_WRITTEN=null) causes the coalesce to return VALUE_READ — to make a slot appear to hold a value it no longer holds, causing downstream smart contract integrations that query this API to make incorrect fund-release decisions based on a frozen stale balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60a87281-3573-499f-b3d0-3772de35ea77?mode=deep",
+    "timestamp": "2026-04-28 23:25:06.601688",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user supply a `slot =` filter combined with a historical `timestamp` filter such that `DISTINCT ON (slot)` in `contractStateTimestampQuery` returns the value from a read-only state change (VALUE_WRITTEN=null, VALUE_READ=old_balance) rather than the most recent write, causing the slot to appear frozen at an old balance value and blocking fund withdrawals that depend on this state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40bb013d-4dc5-47e1-b713-f0a12bd5b656?mode=deep",
+    "timestamp": "2026-04-28 23:25:20.622643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user exploit the ordering mismatch in `contractStateTimestampQuery` — which orders by `SLOT ASC, CONSENSUS_TIMESTAMP DESC` — by supplying a `slot >=` range filter that causes `DISTINCT ON (slot)` to select the wrong row per slot (the oldest rather than newest within the filtered range), returning stale balance values and making funds appear permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c68e019d-62bb-4108-b7d3-f7169db62c71?mode=deep",
+    "timestamp": "2026-04-28 23:25:34.622691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user supply a `limit=1` parameter combined with a `slot` pagination cursor pointing to a balance-controlling slot, causing `getContractStateByIdAndFilters()` to return only that one slot with a stale value from `contractStateTimestampQuery`, while downstream consumers interpret the truncated response as the complete contract state and treat all other slots as zero/frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70f0c529-da18-4e4e-8a24-435996c16a50?mode=deep",
+    "timestamp": "2026-04-28 23:25:49.645257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user exploit the fact that `buildWhereSqlStatement(whereConditions)` in `getContractStateByIdAndFilters()` uses `whereConditions` passed from the controller without re-validating operator values, allowing a crafted `operator` string in a slot filter to inject SQL that alters the WHERE clause and causes the query to return wrong slot values, making balances appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00084547-912c-4639-9479-6c9f3d44239b?mode=deep",
+    "timestamp": "2026-04-28 23:26:05.308282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user supply a `consensus_timestamp` filter with operator `=` (which the controller converts to `<=` per `extractContractStateByIdQuery`) pointing to a timestamp just before a large fund transfer was written, causing `contractStateTimestampQuery` to return the pre-transfer balance for all slots and making the post-transfer funds appear permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13cf0dd3-b953-449a-b01c-4f180286026c?mode=deep",
+    "timestamp": "2026-04-28 23:26:22.050279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the direct SQL interpolation of `involvedContractIds.join(',')` at line 427 — where `involvedContractIds` is an array of numeric IDs joined without parameterization — to inject SQL into the `CONTRACT_ID in (...)` clause, causing the query to return wrong or empty state changes and making fund-related state changes appear absent, effectively freezing the visible state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0438c8f2-3ffc-47ef-8182-93bf3da3e880?mode=deep",
+    "timestamp": "2026-04-28 23:26:38.828307",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the `involvedContractIds.join(',')` interpolation in `getContractStateChangesByTimestamps()` to inject a SQL fragment like `0) OR (1=1 --` into the `CONTRACT_ID in (...)` clause, causing the WHERE condition to be bypassed and returning state changes for all contracts, or alternatively injecting `0) AND (1=0 --` to return zero rows, making all fund-related state changes appear frozen/absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35a8f8fc-c945-47e9-a505-a880a855d0a8?mode=deep",
+    "timestamp": "2026-04-28 23:26:56.680251",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTimestamps()] Can an unprivileged external user exploit the direct SQL interpolation of `involvedContractIds.join(',')` at line 279 — `${ContractResult.CONTRACT_ID} in (${involvedContractIds.join(',')})` — to inject SQL that filters out the target contract's results, causing `getContractResultsByTimestamps()` to return zero contract results for a legitimate transaction and making the transaction appear as if it never executed, permanently freezing the associated funds in the caller's view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_350c9eab-4de2-4ff4-b90a-b92acbab488f?mode=deep",
+    "timestamp": "2026-04-28 23:27:14.591188",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogsByTimestamps()] Can an unprivileged external user exploit the direct SQL interpolation of `involvedContractIds.join(',')` at line 406 — `${ContractLog.CONTRACT_ID} in (${involvedContractIds.join(',')})` — to inject SQL that suppresses all log entries for a contract, causing downstream consumers to see no Transfer/Approval events and incorrectly conclude that no fund movements occurred, leading to a frozen-funds perception?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_346c8245-74c8-4009-a41f-ed17a4792f1d?mode=deep",
+    "timestamp": "2026-04-28 23:27:33.311386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the asymmetric `migration is false` filtering logic — where when `contractId` is provided, migration records ARE included for that contract (line 432), but when `contractId` is null, migration records are excluded for all (line 436) — to cause inconsistent state change views between two API calls for the same contract, making the contract's balance appear different depending on how it is queried and creating a frozen-funds discrepancy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f491d574-d054-454e-940d-bfb128f70cd7?mode=deep",
+    "timestamp": "2026-04-28 23:27:52.344952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the condition `(${ContractStateChange.CONTRACT_ID} = $N or (${contractIdsQuery} and migration is false))` at line 432 — where `contractIdsQuery` is `true` (JavaScript boolean) when `involvedContractIds` is empty — causing the SQL to evaluate `(contract_id = $N or (true and migration is false))`, which includes ALL non-migration state changes regardless of contract ID, returning state changes for unrelated contracts and corrupting the fund-state view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46c8d341-938e-4400-890e-0e6e7ebb3a6a?mode=deep",
+    "timestamp": "2026-04-28 23:28:13.243980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user trigger the `rows.length > 1` error path in `getContractIdByEvmAddress()` at line 461 — which throws a generic `Error` (not `NotFoundError`) — by exploiting the fact that `evm_address` is not a unique index (as noted in the comment at line 460), causing any API call that resolves a contract by EVM address to permanently fail with a 500 error, effectively freezing all fund operations routed through that contract address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_079a5600-e0a9-4961-80da-918dbf3fdd79?mode=deep",
+    "timestamp": "2026-04-28 23:28:34.476605",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user exploit the `contractIdByEvmAddressQuery` filter `${Entity.DELETED} <> true` (line 149) — which passes rows where `deleted IS NULL` — to cause a contract with `deleted=NULL` to be returned alongside a legitimate contract with the same EVM address, triggering the `rows.length > 1` error and permanently blocking all EVM-address-based contract resolution for that address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39ff0330-5483-42b8-8645-f7419541b428?mode=deep",
+    "timestamp": "2026-04-28 23:28:54.955649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user craft a `create2_evm_address` value that, when passed to `Buffer.from(create2EvmAddress, 'hex')` at line 455, produces a buffer matching multiple entity rows (due to the non-unique `evm_address` index), causing `getContractIdByEvmAddress()` to throw `Error('More than one contract...')` and permanently blocking all downstream fund operations that depend on EVM address resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_595ee63b-5524-438c-b302-b31c1f4f261c?mode=deep",
+    "timestamp": "2026-04-28 23:29:16.230318",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: computeContractIdFromString()] Can an unprivileged external user supply a `contractIdValue` that causes `EntityId.computeContractIdPartsFromContractIdValue()` to return an object with a `create2_evm_address` property inherited from the prototype (prototype pollution), causing `contractIdParts.hasOwnProperty('create2_evm_address')` at line 471 to return `false` even when the address is present, bypassing EVM address resolution and routing the request to a wrong contract ID, causing fund operations to target the wrong contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f58bf3b-0866-44f9-ab7b-e194a5be2b5c?mode=deep",
+    "timestamp": "2026-04-28 23:29:39.082590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: computeContractIdFromString()] Can an unprivileged external user supply a `contractIdValue` that is a valid EVM address format but resolves via `getContractIdByEvmAddress()` to a deleted contract (where `deleted=NULL` passes the `<> true` check), causing fund operations to be routed to a deleted/inactive contract and permanently freezing the associated funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19777064-a218-467c-90ae-67660c8bb711?mode=deep",
+    "timestamp": "2026-04-28 23:30:02.157982",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractTransactionDetailsByHash()] Can an unprivileged external user exploit the `ethereumTransactionsByHashQuery` ordering — `ORDER BY (TRANSACTION_RESULT = successTransactionResult) DESC, CONSENSUS_TIMESTAMP DESC LIMIT 1` at lines 210-212 — by submitting a failed transaction with the same hash as a successful one but a later timestamp, causing the query to return the failed transaction (since both have equal priority on the first sort key but the failed one has a higher timestamp), making the successful fund transfer appear to have failed and freezing the funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84626ea5-8c83-41d6-b1d4-531109b60a8b?mode=deep",
+    "timestamp": "2026-04-28 23:30:24.851007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractTransactionDetailsByHash()] Can an unprivileged external user submit multiple failed Ethereum transactions with the same hash as a legitimate successful fund transfer, exploiting the `LIMIT 1` in `ethereumTransactionsByHashQuery` to ensure the failed transaction is returned when it has a later `CONSENSUS_TIMESTAMP`, causing the fund transfer to appear permanently failed and the funds to appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0dab79ff-0d85-4982-bfc6-faf6ae7fe98f?mode=deep",
+    "timestamp": "2026-04-28 23:30:48.804936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractActions()] Can an unprivileged external user exploit the direct string interpolation of `filter.operator` at line 495 — `whereClause += \\`\\\\nand ${ContractAction.INDEX}${filter.operator}$${params.length}\\`` — where `filter.operator` is not validated against a whitelist, to inject SQL operators or fragments that alter the WHERE clause, causing `getContractActions()` to return wrong or empty action sets and making fund-related contract actions appear absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eedb5689-05a1-466e-95ce-3f16998a28ad?mode=deep",
+    "timestamp": "2026-04-28 23:31:12.824049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractActions()] Can an unprivileged external user supply a crafted `index` filter with a malicious `operator` value (e.g., `= 0 OR 1=1 --`) that, when interpolated into `whereClause` at line 495, bypasses the `CONSENSUS_TIMESTAMP = $1 AND PAYER_ACCOUNT_ID = $2` constraints in `contractActionsByConsensusTimestampQuery`, returning actions from other transactions and corrupting the fund-flow audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb0b2a86-d6b6-4792-923b-a18c1af5b73a?mode=deep",
+    "timestamp": "2026-04-28 23:31:38.617091",
+    "report_generated": false
+  }
+]
