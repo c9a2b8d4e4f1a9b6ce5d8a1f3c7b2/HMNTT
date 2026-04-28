@@ -1,0 +1,116 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the two-level cache architecture (contractSlotsCache -> contractStateCache) by poisoning contractStateCache with a crafted value for the pending-reward slot key via a concurrent batch load, where the attacker's batch includes the victim's slot key alongside many attacker-controlled slots, and the DB returns the attacker's desired value for the reward slot due to a SQL injection or parameter binding issue in findStorageBatch()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb0d9127-539a-4cd8-aac8-0c5d5457d2ac?mode=deep",
+    "timestamp": "2026-04-28 20:46:23.947412",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageByBlockTimestamp(EntityId, long)] Can an unprivileged external user pass a blockTimestamp that corresponds to a block where the staking reward contract's pending_reward slot was written with a value that has since been decremented (reward paid out), causing findStorageByBlockTimestamp() to return the higher historical value, and a contract that uses this value to authorize a withdrawal to grant the attacker more funds than currently owed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6d0739b-f44f-4a87-a4ff-8c11fad304f3?mode=deep",
+    "timestamp": "2026-04-28 20:46:35.828246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that the contractStateCache uses CACHE_MANAGER_CONTRACT_STATE which is a separate CacheManager from CACHE_MANAGER_CONTRACT_SLOTS, and if the contractStateCache has a longer TTL than contractSlotsCache, a reward slot value cached before a payout will continue to be served from contractStateCache even after the slot key is evicted from contractSlotsCache, causing the reward to appear uncollected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d95409f7-1c99-441d-a6c5-1750ca088c23?mode=deep",
+    "timestamp": "2026-04-28 20:46:48.272707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the ArrayList construction (new ArrayList<>(cachedSlotKeys.size())) in findStorageBatch() where cachedSlotKeys is a live concurrent map view, causing the ArrayList to be sized incorrectly if keys are added/removed concurrently, potentially resulting in an ArrayIndexOutOfBoundsException that is caught upstream and causes the EVM to return a default zero value for the pending-reward slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ad5992b-7315-475b-bec2-bc2e95dfb6da?mode=deep",
+    "timestamp": "2026-04-28 20:47:01.025826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user craft an EntityId (contractId) that resolves to the staking reward account (0.0.800) or the entity_stake table's contract address, causing findStorage() to read storage slots from the reward account's contract state rather than the intended staking contract, potentially exposing or manipulating the pending_reward value stored there?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7891c87-f7ae-4424-963f-7f653c2e052d?mode=deep",
+    "timestamp": "2026-04-28 20:47:14.877820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageByBlockTimestamp(EntityId, long)] Can an unprivileged external user exploit the ORDER BY consensus_timestamp DESC LIMIT 1 in findStorageByBlockTimestamp()'s SQL query by targeting a block timestamp where multiple contract_state_change rows exist for the same slot (e.g., two updates in the same block), causing the query to return the wrong row's coalesce(value_written, value_read) value for the pending-reward slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce666aad-bf21-4996-98d6-6e57f957c5d6?mode=deep",
+    "timestamp": "2026-04-28 20:47:27.437153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the fact that findStorageBatch() calls contractStateRepository.findStorageBatch() with a List<byte[]> of ALL currently cached slot keys for the contract, meaning that if the attacker has previously queried many slots, the batch query grows large and may time out or be truncated, causing the pending-reward slot to not be included in the results and returning null (Optional.empty()) for the reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7c479c1-de37-43d9-a5e8-9d78b9d563c4?mode=deep",
+    "timestamp": "2026-04-28 20:47:40.644087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that when cacheProperties.isEnableBatchContractSlotCaching() is false, findStorage() calls contractStateRepository.findStorage() which is annotated @Cacheable(cacheManager = CACHE_MANAGER_CONTRACT_STATE), and if the Spring cache key for this method (contractId, key) collides with a key from the batch cache path, a stale pre-payout reward value may be served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45059a18-0128-4c47-a8b3-0d2050f40354?mode=deep",
+    "timestamp": "2026-04-28 20:47:53.298432",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the isKeyEvictedFromCache logic: since isKeyEvictedFromCache starts as true and is only set to false if wrappedKey.equals(slot) matches in the live key set iteration, a concurrent eviction between putIfAbsent and the iteration loop causes the fallback to contractStateRepository.findStorage() which may return a @Cacheable-cached stale reward value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f46d7c3-3308-4bd6-b11e-c72bd89a1a89?mode=deep",
+    "timestamp": "2026-04-28 20:48:06.591313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that contractStateCache.put() in findStorageBatch() uses the result of contractStateRepository.findStorageBatch(), which queries contract_state (not contract_state_change), meaning it always returns the current (latest) value and never the historical value, so a historical eth_call that should use findStorageByBlockTimestamp() but accidentally hits the batch cache path returns the current reward value instead of the historical one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c274465-12b2-4b2c-a74e-e59a1bb6597e?mode=deep",
+    "timestamp": "2026-04-28 20:48:19.729348",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageByBlockTimestamp(EntityId, long)] Can an unprivileged external user pass a blockTimestamp equal to the exact consensus_timestamp of a staking reward payout transaction, causing the query (consensus_timestamp <= blockTimestamp) to include the payout row, but since the payout writes the reward to zero, the attacker reads zero and then uses a separate non-historical call to read the current (non-zero) reward, creating an inconsistency that a contract could exploit to double-count rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e2d6ef8-ffec-4cae-b4eb-534968dd018f?mode=deep",
+    "timestamp": "2026-04-28 20:48:32.620702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the fact that contractSlotsCache is a CaffeineCache obtained via cacheManagerContractSlots.getCache(CACHE_NAME), which is shared across all contracts, so that evicting entries for one contract's slots (by flooding with many keys) also affects the slot tracking for the staking reward contract, causing its pending-reward slot to be re-fetched from DB at a moment when the reward value is in an intermediate state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef27fef4-b0d9-4f66-a539-6969fef494b9?mode=deep",
+    "timestamp": "2026-04-28 20:48:46.211538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that the contractStateCache check (line 63-67) returns Optional.of(cachedValue) without verifying that cachedValue is a valid 32-byte slot value, so if a previous batch load stored a truncated or malformed byte[] for the pending-reward slot (e.g., due to a DB encoding issue), the cached malformed value is returned indefinitely, causing the EVM to misinterpret the reward amount?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfa0c61e-ce44-418e-a18d-9322159a2db0?mode=deep",
+    "timestamp": "2026-04-28 20:48:59.429286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageByBlockTimestamp(EntityId, long)] Can an unprivileged external user exploit the fact that findStorageByBlockTimestamp() is NOT cached (unlike findStorage()), so repeated historical calls for the same (contractId, slot, blockTimestamp) always hit the DB, and by timing these calls to coincide with a DB transaction that is updating the pending-reward slot, the attacker can observe a partially-committed reward value that is higher than the final committed value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb6879af-0327-469c-8cc1-8dc7e69bbef5?mode=deep",
+    "timestamp": "2026-04-28 20:49:14.301529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the fact that the per-contract cache (cacheManagerSlotsPerContract.getCache(contractId.toString())) uses contractId.toString() as the cache name, and if two different EntityId objects with the same numeric ID but different shard/realm produce the same toString() output, they share the same per-contract slot cache, causing cross-contamination of slot values between different contract instances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f92a503c-2680-40ed-98cc-5b3ba63b3c06?mode=deep",
+    "timestamp": "2026-04-28 20:49:28.521290",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that the contractSlotsCache.get(contractId, () -> cacheManagerSlotsPerContract.getCache(contractId.toString())) call in findStorageBatch() is not synchronized, so two concurrent threads for the same contractId may each create a new per-contract cache instance, resulting in two separate caches for the same contract where one has the pending-reward slot and the other does not, causing inconsistent reward reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43d902f7-bd9a-48f9-8ede-b0acdfa365b6?mode=deep",
+    "timestamp": "2026-04-28 20:49:42.968575",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageBatch(EntityId, byte[])] Can an unprivileged external user exploit the fact that contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE) uses EMPTY_VALUE as a placeholder, and if the DB query in findStorageBatch() returns no row for the pending-reward slot (e.g., slot not yet initialized), the EMPTY_VALUE placeholder remains in contractSlotsCache but nothing is written to contractStateCache, causing subsequent findStorage() calls to fall through to findStorageBatch() again and again, creating a repeated-query amplification attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f4e82bb-8bd0-4265-9191-fd7bb42c3e2c?mode=deep",
+    "timestamp": "2026-04-28 20:49:56.541923",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorageByBlockTimestamp(EntityId, long)] Can an unprivileged external user exploit the fact that findStorageByBlockTimestamp() passes slotKeyByteArray after trimLeadingZeros() in ContractStorageReadableKVState but the raw keyBytes in the non-historical path, meaning the same logical slot key is stored in contract_state_change under the trimmed representation but queried with the full 32-byte key, causing the historical query to return empty and the EVM to treat the pending-reward slot as zero for historical blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1679756-803e-41fb-a89d-98b600c4d6df?mode=deep",
+    "timestamp": "2026-04-28 20:50:10.482452",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: findStorage(EntityId, byte[])] Can an unprivileged external user exploit the fact that the @Cacheable annotation on contractStateRepository.findStorage() uses the default Spring cache key (contractId, key), while the manual cache key in findStorageBatch() uses SimpleKey(contractId, slotKey), and if these two key generation strategies produce different keys for the same (contractId, slot) pair, the same slot value may be cached twice under different keys, causing one path to serve a stale pre-payout value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ffaeacc4-dadf-4d78-a08a-a100ec3b6606?mode=deep",
+    "timestamp": "2026-04-28 20:50:25.266328",
+    "report_generated": false
+  }
+]
