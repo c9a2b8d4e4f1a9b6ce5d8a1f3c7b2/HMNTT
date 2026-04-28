@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import shutil
 import time
 import uuid
@@ -258,7 +259,7 @@ def generate_file_path():
         raise FileNotFoundError(f"No question files found in {question_directory}")
 
     # Get the first file
-    source_file = question_files[0]
+    source_file = random.choice(question_files)
     file_name = source_file.name
 
     # Define destination path in pending directory
