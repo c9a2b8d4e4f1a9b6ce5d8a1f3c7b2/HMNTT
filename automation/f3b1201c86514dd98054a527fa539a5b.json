@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the integer overflow in `(int) (filter.getLimit() - context.getCount().get())` by subscribing with a crafted large `limit` value such that the cast to `int` produces a negative `pageSize`, causing `findByFilter()` to return zero or unexpected messages and silently skip portions of Hashgraph history, allowing history gaps to go undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68ddf464-dbc1-4034-b47b-be466b8b4072?mode=deep",
+    "timestamp": "2026-04-28 21:42:32.741910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user trigger a `consensusTimestamp` overflow by observing that `startTime = last.getConsensusTimestamp() + 1` is computed without overflow protection, such that if a message with `consensusTimestamp = Long.MAX_VALUE` is present in the database, the next poll starts at `Long.MIN_VALUE`, causing the listener to replay the entire Hashgraph message history from the beginning and deliver tampered historical messages as if they were new?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fe8831f-10bd-4d9c-9f85-3469dc2dbca6?mode=deep",
+    "timestamp": "2026-04-28 21:42:44.579557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of `runningHash` chain verification in `poll()` — which calls `topicMessageRepository.findByFilter(newFilter)` and emits results directly via `Flux.fromStream()` without validating that each message's `runningHash` is consistent with the previous — to receive and trust messages whose `runningHash` has been silently tampered with in the mirror database, causing clients to accept a falsified Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6518c55e-b748-4775-81f6-c1f4295a376f?mode=deep",
+    "timestamp": "2026-04-28 21:42:56.882959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of `sequenceNumber` monotonicity validation between successive `poll()` invocations — since `PollingContext` only tracks `last` and `count` but never checks that `topicMessage.getSequenceNumber()` is exactly `previousSequenceNumber + 1` — to receive messages with duplicate or out-of-order `sequenceNumber` values that represent a manipulated Hashgraph message ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5019638-7bde-444e-abf9-448df4295e3b?mode=deep",
+    "timestamp": "2026-04-28 21:43:09.567799",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user exploit the `RepeatSpec.times(Long.MAX_VALUE)` infinite polling loop in `listen()` to hold open a subscription indefinitely, and by doing so observe every message inserted into the `topic_message` table including any retroactively inserted tampered messages that appear at timestamps already past the current cursor, since `startTime` advances only by `last.getConsensusTimestamp() + 1` and never re-validates previously seen ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90f8de64-fd60-4b38-a68c-78dd7520fd4e?mode=deep",
+    "timestamp": "2026-04-28 21:43:22.888512",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the fact that `poll()` rebuilds the filter via `filter.toBuilder().limit(pageSize).startTime(startTime).build()` without re-validating `endTime > startTime` after cursor advancement, such that when `startTime` advances past the original `endTime`, the JPA criteria query in `TopicMessageRepositoryCustomImpl.findByFilter()` returns an empty result set silently rather than an error, causing the subscriber to miss messages at the boundary and receive an incomplete Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_123f775b-7cfe-4dcf-bf1e-3efc1e72ec33?mode=deep",
+    "timestamp": "2026-04-28 21:43:35.614232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: onNext()] Can an unprivileged external user exploit a race condition between `last.set(topicMessage)` and `count.incrementAndGet()` in `PollingContext.onNext()` — since these two atomic operations are not performed atomically together — such that a concurrent poll reads a stale `last` with an already-incremented `count`, causing the `startTime` cursor to be set incorrectly and messages to be skipped or duplicated in the delivered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfa733fa-7615-42ab-9dd7-b51950ee3a61?mode=deep",
+    "timestamp": "2026-04-28 21:43:49.239227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of gap detection between `last.getConsensusTimestamp()` and the `consensusTimestamp` of the first message returned by the next `poll()` call, such that if messages are deleted from the `topic_message` table between polls, the listener silently skips those sequence numbers and delivers a history with gaps, making Hashgraph history appear complete when it has been tampered with?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1bc99b5-62fc-4619-9be5-56c7ce4cd4f0?mode=deep",
+    "timestamp": "2026-04-28 21:44:01.986269",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user exploit the `delaySubscription(interval, scheduler)` initial delay in `listen()` to create a timing window during which messages inserted into the database before the first `poll()` executes are fetched using `filter.getStartTime()` as the cursor, and if the database has been seeded with tampered messages at timestamps just after `filter.getStartTime()`, those tampered messages are delivered as the first batch of Hashgraph history without any integrity check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa9c96b4-beac-43fc-b687-7499cf510b03?mode=deep",
+    "timestamp": "2026-04-28 21:44:15.069294",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the `Math.min(limit, listenerProperties.getMaxPageSize())` page size calculation in `poll()` where `limit` is computed as `Integer.MAX_VALUE` when no limit is set, causing `pageSize = maxPageSize = 5000`, and by subscribing to a topic with a very large number of tampered messages, force the listener to emit all tampered messages across many poll cycles without any integrity verification, effectively certifying a falsified Hashgraph history to the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_120f5e2e-7774-4f2b-b820-986693dc9856?mode=deep",
+    "timestamp": "2026-04-28 21:44:28.096242",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the fact that `Flux.fromStream(topicMessageRepository.findByFilter(newFilter))` in `poll()` emits `TopicMessage` objects whose `runningHashVersion` field is accepted as-is from the database without validation against the expected version (the `ConsensusController` defaults to version 3), such that a tampered message with a downgraded `runningHashVersion` is delivered to the client, causing the client to use a weaker hash algorithm to verify Hashgraph integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d18ea7ca-08e9-4133-8c16-a59cec248ec3?mode=deep",
+    "timestamp": "2026-04-28 21:44:41.283101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of `topicId` consistency validation in `poll()` — the rebuilt filter uses `filter.toBuilder()` which preserves the original `topicId`, but the `TopicMessage` objects returned by `findByFilter()` are never checked to confirm their `topicId` matches the filter — such that a database-level manipulation inserting messages with a different `topicId` at the queried timestamp range causes cross-topic message contamination in the delivered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea73abcb-9443-4e24-a5a2-7fbdc122b131?mode=deep",
+    "timestamp": "2026-04-28 21:44:53.658832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user exploit the `jitter(0.1)` on the polling interval in `listen()` to create unpredictable timing windows between polls, and by timing a database write of a tampered message to fall within a jitter-extended gap, ensure the tampered message is picked up in the next poll cycle and delivered as legitimate Hashgraph history before any out-of-band integrity check can detect it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0298e60-7100-4f9e-9de6-f3865ee63c3a?mode=deep",
+    "timestamp": "2026-04-28 21:45:06.287240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the `(int) (filter.getLimit() - context.getCount().get())` cast in `poll()` where both operands are `long` but the result is cast to `int`, such that when `filter.getLimit()` is set to `Long.MAX_VALUE / 2` and `count` is near that value, the subtraction result exceeds `Integer.MAX_VALUE`, wrapping to a negative int, causing `Math.min(negative, maxPageSize)` to return a negative value that is passed as `limit` to `findByFilter()`, which then calls `typedQuery.setMaxResults(negative)` and throws an exception that terminates the stream, silently truncating Hashgraph history delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c57906ae-6fd8-4070-848c-bc382a75a4e1?mode=deep",
+    "timestamp": "2026-04-28 21:45:19.100761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the fact that `poll()` uses `last.getConsensusTimestamp() + 1` as the new `startTime` without checking whether the returned messages from the previous poll were contiguous in `sequenceNumber`, such that if the database is missing sequence numbers 5-10 (deleted or never written due to tampering), the listener advances past them silently and the subscriber receives a Hashgraph history with a gap that is never flagged?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02476eb0-0131-4d45-bcfd-a1709b234897?mode=deep",
+    "timestamp": "2026-04-28 21:45:31.898571",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user open thousands of concurrent `listen()` subscriptions to exhaust the `Schedulers.boundedElastic()` thread pool, causing legitimate subscribers' `poll()` calls to be delayed or starved, creating timing windows during which tampered messages inserted into the database are the only messages available when the delayed poll finally executes, causing those tampered messages to be delivered as the authoritative Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4fc278c0-6ae0-405e-943d-f8d2613ca796?mode=deep",
+    "timestamp": "2026-04-28 21:45:44.416080",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of `message` content integrity verification in `poll()` — `TopicMessage.getMessage()` is returned as raw bytes from the database without any hash verification against the `runningHash` — such that a tampered message payload is delivered to the subscriber who has no way to detect the tampering through the gRPC stream alone, effectively allowing silent manipulation of Hashgraph message content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_687329f2-bd8b-4ddb-a0c1-f8c8c948b956?mode=deep",
+    "timestamp": "2026-04-28 21:45:57.569901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the fact that `filter.toBuilder().limit(pageSize).startTime(startTime).build()` in `poll()` creates a new `TopicMessageFilter` that bypasses the `@AssertTrue isValidStartTime()` constraint (which checks `startTime <= DomainUtils.now()`) because the `toBuilder()` path does not re-trigger Bean Validation, allowing the cursor to advance to a future `startTime` that would be rejected if submitted directly, causing the listener to poll for messages that do not yet exist and miss messages inserted at the boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_837a7421-473b-4a22-b7ca-900237422f35?mode=deep",
+    "timestamp": "2026-04-28 21:46:10.585284",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: PollingContext.onNext()] Can an unprivileged external user exploit the fact that `PollingContext.onNext()` unconditionally calls `last.set(topicMessage)` without verifying that the new `topicMessage.getConsensusTimestamp()` is strictly greater than the previous `last.getConsensusTimestamp()`, such that if the database returns messages out of timestamp order (due to a tampered insert), the cursor `last` is set to an earlier timestamp, causing subsequent polls to re-fetch and re-deliver already-seen messages, creating a history replay that obscures the tampered insertion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3fdc10f-cf7c-4c58-ae97-2a788e3fafe9?mode=deep",
+    "timestamp": "2026-04-28 21:46:24.731775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the `Flux.fromStream()` wrapping of `topicMessageRepository.findByFilter()` in `poll()`, where the underlying JPA stream is consumed lazily, such that if the database state changes between the time the stream is opened and the time elements are consumed (e.g., a tampered message is inserted mid-stream), the subscriber receives a mix of original and tampered messages within a single poll cycle, making the tampering harder to detect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_246cdd53-20ba-4a7a-b18b-2d74af1eb551?mode=deep",
+    "timestamp": "2026-04-28 21:46:39.243238",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user exploit the `doOnSubscribe` log statement `log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31e05eb1-3070-4ba8-b92a-dc52393984b2?mode=deep",
+    "timestamp": "2026-04-28 21:46:53.412668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the absence of `initialTransactionId` validation in `poll()` — `TopicMessage.getInitialTransactionId()` is returned as raw bytes without verifying it corresponds to a real transaction in the `transaction` table — such that a tampered message with a fabricated `initialTransactionId` is delivered to the subscriber, causing the subscriber to believe a non-existent transaction initiated a chunked message sequence, falsifying Hashgraph provenance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d92cf580-9547-4545-9c86-69f08ecf1ab1?mode=deep",
+    "timestamp": "2026-04-28 21:47:07.244796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the `filter.hasLimit()` check in `poll()` — which returns `true` only when `limit > 0` — by setting `limit = 0` to trigger the `Integer.MAX_VALUE` branch, causing `pageSize = Math.min(Integer.MAX_VALUE, maxPageSize) = maxPageSize`, and then relying on the infinite `RepeatSpec.times(Long.MAX_VALUE)` loop to continuously poll and deliver all tampered messages inserted into the database without any count-based termination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_811b40d9-06ce-4e38-8682-7f7b01f1572f?mode=deep",
+    "timestamp": "2026-04-28 21:47:19.960764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: poll()] Can an unprivileged external user exploit the fact that `poll()` does not verify that the `sequenceNumber` of the first message in a new poll batch is exactly `last.getSequenceNumber() + 1`, such that if a tampered message with a sequence number that skips ahead is inserted into the database, the listener delivers it without detecting the gap, causing the subscriber to receive a Hashgraph history with a missing sequence number that is never flagged as an integrity violation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e16bffd-66eb-40f2-a1db-dafb07582ebb?mode=deep",
+    "timestamp": "2026-04-28 21:47:32.679557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: listen()] Can an unprivileged external user exploit the `Micrometer.observation(observationRegistry)` tap in `listen()` to infer message delivery rates and timing through observable metrics, and use that side-channel information to determine when a tampered message was successfully delivered to a subscriber, confirming the success of a Hashgraph history manipulation attack without direct access to the subscriber's stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_add388a1-e945-44b4-a9d0-84b2c3fe8432?mode=deep",
+    "timestamp": "2026-04-28 21:47:45.708192",
+    "report_generated": false
+  }
+]
