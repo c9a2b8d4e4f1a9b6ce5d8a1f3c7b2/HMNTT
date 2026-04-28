@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the TokenCreateTransactionHandler's logic where auto-associated accounts get freezeStatus set to UNFROZEN (if freeze key exists) or NOT_APPLICABLE (if no freeze key), and then submit a TOKENFREEZE transaction in the same record file, causing mergeTokenAccount() to merge FROZEN into the auto-association row with the auto-association's createdTimestamp, making the account appear to have been frozen since creation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff8fdce9-2462-4f39-b2e7-ebd9b19c4d28?mode=deep",
+    "timestamp": "2026-04-28 20:00:59.477214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that TokenFreezeTransactionHandler.doUpdateTransaction() calls recordItem.addEntityId(tokenId) but not addEntityId for the account, causing the entity transaction tracking to be incomplete, and if the importer uses entity transaction completeness to determine whether to reprocess events during recovery, the TOKENUNFREEZE event may be skipped during replay, permanently freezing the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_742cae75-4e3f-44df-8005-e87068169709?mode=deep",
+    "timestamp": "2026-04-28 20:01:11.560357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's Flyway migration V1.43.2 which inserts token_account rows with freeze_status derived from the token's freeze_key presence (0 if null, 2 if present), causing accounts that were frozen before the migration to have their freeze_status reset to UNFROZEN (2), while accounts that were unfrozen but whose token has a freeze key get freeze_status=UNFROZEN, creating a window where a subsequent TOKENFREEZE transaction processed by the importer sets FROZEN permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61bde6d2-2664-47c3-9bcb-75f4acbe5f75?mode=deep",
+    "timestamp": "2026-04-28 20:01:24.133995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the mergeTokenAccountBalance() method in SqlEntityListener, which only updates balance and balanceTimestamp without touching freezeStatus, to submit a token transfer that triggers a balance-only merge, and then observe that a concurrent TOKENFREEZE event's FROZEN status is lost because the balance merge overwrites the in-memory TokenAccount object before the freeze update is flushed to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d842efec-9f12-45d0-9331-0574d07f6419?mode=deep",
+    "timestamp": "2026-04-28 20:01:37.711211",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the importer's ImporterApplication uses @SpringBootApplication which auto-configures Spring Data JPA, and if the JPA entity cache returns a stale TokenAccount with FROZEN status after a TOKENUNFREEZE event has been written to the database but not yet evicted from the cache, causing downstream REST API queries to return FROZEN status and block legitimate transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90801ca0-12cc-4c0a-89b1-790f28f9eaee?mode=deep",
+    "timestamp": "2026-04-28 20:01:51.024185",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the TokenAccountRepository.findById() query which uses 'coalesce(ta.freeze_status, t.freeze_status) as freeze_status', such that if the importer writes a token_account row with freeze_status=null (as done by TokenAccountBalanceMigration and FixAirdropTokenAssociationMigration), and the token table has freeze_status=FROZEN (ordinal 1) due to freezeDefault=true, the account appears permanently frozen to all API consumers even though the account was explicitly unfrozen on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_314055e4-ca89-4558-954a-0eddd29451e3?mode=deep",
+    "timestamp": "2026-04-28 20:02:04.405457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's record file processing by submitting a TOKENFREEZE transaction in record file N and a TOKENUNFREEZE transaction in record file N+1, and then causing the importer to crash between processing file N and N+1 (e.g., via OOM from a large transaction payload), so that on restart the importer re-processes file N (freeze) but skips file N+1 (unfreeze) due to the lastFileInstant check in DateRangeCalculator, permanently freezing the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67e89281-80e3-4af4-ae57-d98f913c76e8?mode=deep",
+    "timestamp": "2026-04-28 20:02:17.505091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the importer's @SpringBootApplication scans and registers all TransactionHandler beans, and if a custom or misconfigured TransactionHandler for TOKENFREEZE is registered with higher priority than TokenFreezeTransactionHandler, it could process freeze events without the isSuccessful() guard, causing failed TOKENFREEZE transactions to still set FROZEN status in the database, permanently freezing accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_905e8e67-6a5e-4cc2-8222-6b26687c67f2?mode=deep",
+    "timestamp": "2026-04-28 20:02:30.872071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TokenFreezeStatusEnum ordinal values (NOT_APPLICABLE=0, FROZEN=1, UNFROZEN=2) where the Flyway migration V1.94.0 uses integer comparisons, and by submitting a transaction that causes the importer to write freeze_status=0 (NOT_APPLICABLE) to a token_account that previously had UNFROZEN, causing the coalesce(ta.freeze_status, t.freeze_status) to return the token-level FROZEN status, permanently blocking transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d87785f0-4d15-44cc-8de9-ad1952235d65?mode=deep",
+    "timestamp": "2026-04-28 20:02:44.685134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TOKENFREEZE transaction where TokenFreezeTransactionHandler.doUpdateTransaction() sets tokenAccount.setTimestampLower(recordItem.getConsensusTimestamp()) but does not set timestampUpper, causing the token_account row to have an open-ended timestamp range with FROZEN status, and if a subsequent TOKENUNFREEZE event fails to close this range due to a merge conflict, the FROZEN status persists indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98f020a4-d124-4b74-b1e8-d307e09943bb?mode=deep",
+    "timestamp": "2026-04-28 20:02:57.973333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's Spring Boot auto-configuration of the Flyway migration runner, which runs migrations at startup before the importer begins processing record files, such that a migration (e.g., TokenAccountBalanceMigration) sets freeze_status=null for all token_account rows, and then the importer processes only TOKENFREEZE transactions from the current record file without the historical TOKENUNFREEZE transactions, permanently freezing accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52f1bf6d-73ad-45ad-9a35-586a2681ab72?mode=deep",
+    "timestamp": "2026-04-28 20:03:12.340506",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the importer's SqlEntityListener.mergeTokenAccount() has a special case for duplicate token account associations ('Skipping duplicate token account association') that returns the previous (potentially FROZEN) token account, causing a legitimate re-association event that should reset the freeze status to be silently discarded, permanently freezing the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6f65449-6ee2-489a-9757-a93772c5fb65?mode=deep",
+    "timestamp": "2026-04-28 20:03:26.533022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of automatic token associations in insertAutomaticTokenAssociations(), which creates TokenAccount objects with no freezeStatus set, and then submit a TOKENFREEZE transaction in the same consensus round, causing the mergeTokenAccount() to merge FROZEN into the auto-association row, making the account appear frozen from the moment of automatic association?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc3ce8f2-15d9-453b-845c-e5e09172aad8?mode=deep",
+    "timestamp": "2026-04-28 20:03:42.310979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's ImporterProperties.importHistoricalAccountInfo flag (default true), which triggers historical account info migration on mainnet, to cause the importer to import historical account data that includes stale FROZEN status for accounts that were subsequently unfrozen, permanently blocking transfers if the importer does not process the historical TOKENUNFREEZE transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bc1a7dc-112b-4bab-b040-af29ccccc93d?mode=deep",
+    "timestamp": "2026-04-28 20:03:57.819376",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TOKENFREEZE transaction where the TokenFreezeTransactionHandler does not validate that the token actually has a freeze key before setting FROZEN status, causing the importer to record FROZEN for a token with NOT_APPLICABLE freeze status, creating a permanent discrepancy between the on-chain state and the mirror node database that blocks legitimate transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e745f6f9-d646-4e26-8205-fcc88f63cc2c?mode=deep",
+    "timestamp": "2026-04-28 20:04:12.583024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's batch processing where multiple record files are processed in sequence, and by submitting a TOKENFREEZE transaction in file N and a TOKENUNFREEZE transaction in file N+1, observe that if the importer's batch size (CommonDownloaderProperties.batchSize=25) causes file N+1 to be deferred to the next batch cycle, and the importer is shut down between cycles, the account remains permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdebb4f1-709b-4150-867e-5534af9f6d60?mode=deep",
+    "timestamp": "2026-04-28 20:04:26.473384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TokenFreezeStatusEnum.FROZEN ordinal value (1) in the database, where if a migration or direct database write sets freeze_status=1 for a token_account row, and the importer's upsert coalesce logic ('coalesce({0}, e_{0})') preserves this value when processing a partial update with null freezeStatus, causing the FROZEN status to persist indefinitely across all subsequent token account updates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ef3072a-d74d-483f-bfc7-3a07635b274c?mode=deep",
+    "timestamp": "2026-04-28 20:04:40.455154",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TOKENFREEZE transaction where TokenFreezeTransactionHandler.doUpdateTransaction() does not check whether the account is already FROZEN before writing FROZEN status, causing redundant freeze events to reset the timestampLower of the token_account row, potentially overwriting a more recent TOKENUNFREEZE event's timestamp and making the account appear frozen at a later time than the actual unfreeze?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd1290fa-4bb0-475a-82d4-653b5c92ce99?mode=deep",
+    "timestamp": "2026-04-28 20:04:53.480371",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's Spring Boot auto-configuration of the Redis cache (RedisConfiguration), where the TokenAccountRepository.findById() result is cached with CACHE_NAME_TOKEN_ACCOUNT, and a TOKENFREEZE event updates the database but the cache is not invalidated, causing the cached FROZEN status to persist beyond the actual unfreeze event and permanently blocking transfers for the cache TTL duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ecd7acc-6557-46d2-aabe-56d0cb1c3df4?mode=deep",
+    "timestamp": "2026-04-28 20:05:06.515063",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TOKENFREEZE transaction where the TokenFreezeTransactionHandler processes a TOKENFREEZE for an account that has never been associated with the token, causing the importer to create a new token_account row with associated=true and freeze_status=FROZEN, which then prevents the account from ever associating with the token through normal means?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_912f48c7-a07a-418c-a7bb-51dc3cd112d8?mode=deep",
+    "timestamp": "2026-04-28 20:05:20.200424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/ImporterApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the importer's handling of the TOKENFREEZE transaction where the TokenFreezeTransactionHandler.doUpdateTransaction() does not set the balance or balanceTimestamp fields on the new TokenAccount object, causing the mergeTokenAccount() to use the balance from the previous snapshot, and if the previous snapshot had a non-zero balance with FROZEN status, the account appears to have funds that are permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff5ae3c5-8c88-4d25-83d4-a385ac996e44?mode=deep",
+    "timestamp": "2026-04-28 20:05:33.939878",
+    "report_generated": false
+  }
+]
