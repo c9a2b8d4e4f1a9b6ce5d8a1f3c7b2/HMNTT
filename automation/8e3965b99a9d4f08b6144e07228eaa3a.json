@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a transactionId whose getValidStartNs() returns a string that, when passed to BigInt(), causes an integer overflow or wraps the maxConsensusTimestamp computation, resulting in a WHERE clause range that spans the entire transaction table and leaks arbitrary transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfd0c52b-2d51-4b28-aae6-161562404b49?mode=deep",
+    "timestamp": "2026-04-28 20:35:47.345956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user craft a transactionId with validStartSeconds at the maximum 19-digit boundary (regex allows \\d{1,19}) so that BigInt(transactionId.getValidStartNs()) + maxTransactionConsensusTimestampRangeNs overflows JavaScript BigInt representation, causing the upper timestamp bound ($3) to wrap to a negative or zero value and bypass the consensus_timestamp range filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88c8f6b0-ce15-49e2-ad43-7513d995b3c1?mode=deep",
+    "timestamp": "2026-04-28 20:35:59.276078",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user pass nonce=undefined (the default) to trigger the SQL subquery coalesce($4, 0) to resolve to 0, causing the query to match transactions with nonce=0 that belong to other payers, leaking their transaction metadata (consensus_timestamp, scheduled, type, payer_account_id)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_133b537e-e83e-4aa6-8d94-93af06a4d5e2?mode=deep",
+    "timestamp": "2026-04-28 20:36:11.606224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a negative nonce value (e.g., nonce=-1) that passes upstream validation and is bound to $4, causing coalesce($4, 0) to evaluate to -1 and match no transactions or match unintended nonce values, producing incorrect transaction resolution for callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c74915b2-437d-4c52-b2b6-45e5b5158404?mode=deep",
+    "timestamp": "2026-04-28 20:36:24.108701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a floating-point nonce (e.g., nonce=1.5) that is coerced to an integer by the database driver, causing coalesce($4, 0) to match a nonce value the attacker did not intend, leading to incorrect transaction lookup and potential data confusion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6dc33c1-d7a8-417e-bfd9-ee71138a64ec?mode=deep",
+    "timestamp": "2026-04-28 20:36:36.518127",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply an extremely large nonce value (e.g., 2^53-1) that exceeds the database integer column range for the nonce field, causing a database error that leaks internal query structure or stack traces?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4fc2832-cbbf-43db-a1ff-2b7bd33e9909?mode=deep",
+    "timestamp": "2026-04-28 20:36:49.070048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user craft a transactionId where validStartNanos is exactly 999999999 (the 9-digit maximum allowed by the regex \\d{1,9}), causing getValidStartNs() to produce a valid nanosecond timestamp, and then supply validStartNanos=1000000000 (10 digits) to test whether the regex boundary is enforced or bypassed by the caller before reaching this function?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6e44410-6bf9-45c9-b446-7d8d7794e7ab?mode=deep",
+    "timestamp": "2026-04-28 20:37:01.646977",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply validStartNanos=0 so that getValidStartNs() pads it to '000000000', making the valid_start_ns equal to validStartSeconds * 1e9, and then enumerate all transactions for a known payer by iterating seconds values, effectively performing a full transaction history scan for any account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f79c942-e473-4127-b0bd-75d603c9a48a?mode=deep",
+    "timestamp": "2026-04-28 20:37:15.939171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a payer_account_id (shard.realm.num) that encodes to a valid but unintended entity ID via getEncodedId(), causing the WHERE clause payer_account_id = $1 to match transactions belonging to a different account than intended, leaking that account's transaction metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f27e3fab-cf15-4b00-9575-7ef1923e81d3?mode=deep",
+    "timestamp": "2026-04-28 20:37:29.063517",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user exploit the ORDER BY (result = successTransactionResult) DESC, consensus_timestamp DESC ordering to always retrieve the most recent successful transaction for any payer, effectively using this endpoint as an oracle to determine whether a specific payer's transaction succeeded without being authorized to view that information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e74e5130-de38-4c7c-9981-d678d2a95261?mode=deep",
+    "timestamp": "2026-04-28 20:37:42.202960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user enumerate transaction metadata (consensus_timestamp, nonce, scheduled, type, payer_account_id) for any arbitrary payer account by iterating over valid transactionId strings in the format shard.realm.num-ssssssssss-nnnnnnnnn, since the query applies no authorization check on the payer_account_id parameter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1d3b69d-37a2-4d93-a2d9-245c4e4e3e10?mode=deep",
+    "timestamp": "2026-04-28 20:37:55.638968",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a transactionId with shard=0, realm=0, num=0 (the zero entity) to probe whether the database contains transactions with payer_account_id=0, potentially revealing system-level or genesis transactions not intended for public exposure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3525bc81-74c8-4421-a7f6-f52392feb199?mode=deep",
+    "timestamp": "2026-04-28 20:38:08.815509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user cause a denial-of-service by submitting a high volume of requests with valid transactionId formats but varying payer_account_id values, forcing repeated full-table scans on the transaction table since the WHERE clause filters on payer_account_id and consensus_timestamp range, potentially exhausting database connection pool resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68d7360b-88d6-429b-9129-d74df0cda507?mode=deep",
+    "timestamp": "2026-04-28 20:38:21.419836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a transactionId where getValidStartNs() returns a string with leading zeros (e.g., validStartSeconds=0, validStartNanos=1 producing '0000000001'), causing BigInt('0000000001') to parse correctly but represent a timestamp near epoch zero, and then use maxTransactionConsensusTimestampRangeNs to scan a large historical range of transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5eb7de98-79cf-4704-8e54-56012850efb0?mode=deep",
+    "timestamp": "2026-04-28 20:38:34.820100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user exploit the fact that the query uses LIMIT 1 with ORDER BY success DESC to determine the success/failure status of any transaction for any payer by observing whether a result is returned, effectively leaking transaction result information (SUCCESS vs non-SUCCESS) for arbitrary accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98113d8b-3b70-4919-ad78-2c01ae4ef35e?mode=deep",
+    "timestamp": "2026-04-28 20:38:47.619369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a transactionId with validStartSeconds=0 and validStartNanos=0, causing getValidStartNs() to return '0000000000' and BigInt('0000000000') = 0n, making the consensus_timestamp range [0, maxTransactionConsensusTimestampRangeNs], which could match the earliest transactions in the database and leak genesis-era transaction metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51f3b61c-478d-4254-857a-d2a9ebe17df7?mode=deep",
+    "timestamp": "2026-04-28 20:39:00.335842",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user cause a type confusion by passing nonce as a string (e.g., nonce='0') instead of a Number, causing the parameterized query coalesce($4, 0) to behave differently depending on how the database driver coerces the type, potentially matching unintended nonce values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc94bcb5-53a6-45dc-8d53-8b91b89943d3?mode=deep",
+    "timestamp": "2026-04-28 20:39:14.016627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user supply a transactionId where validStartSeconds is the maximum safe integer (9007199254740991, 16 digits, within the 19-digit regex limit) so that BigInt(transactionId.getValidStartNs()) produces a value near the maximum nanosecond timestamp, and adding maxTransactionConsensusTimestampRangeNs causes the upper bound to exceed the database bigint column range, triggering a database error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38bae2f8-7ec7-4d7c-8393-174b50ee1ae2?mode=deep",
+    "timestamp": "2026-04-28 20:39:26.915731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user exploit the scheduled field returned in the query result to determine whether a specific payer's transaction was scheduled, leaking scheduling metadata about arbitrary accounts' transactions without any authorization check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_085c0ab7-ddba-485c-b70f-def13570ea80?mode=deep",
+    "timestamp": "2026-04-28 20:39:39.735790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getTransactionDetailsFromTransactionId()] Can an unprivileged external user exploit the type field returned in the query result to determine the transaction type (e.g., CONTRACTCALL, ETHEREUMTRANSACTION) for any payer's transaction, leaking behavioral metadata about arbitrary accounts without authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3e91a4f-d88d-459e-97fd-abd0d6152946?mode=deep",
+    "timestamp": "2026-04-28 20:39:53.358131",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getEthTransactionByTimestampAndPayerId()] Can an unprivileged external user supply an arbitrary timestamp value (e.g., '0' or a very large number) to getEthTransactionByTimestampAndPayerId() to probe the ethereum_transaction table for records at any consensus timestamp, leaking Ethereum transaction details (hash, signatures, call data, gas parameters) for any payer without authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0470cc8-df8e-4898-a46e-d28ce2e8bd8a?mode=deep",
+    "timestamp": "2026-04-28 20:40:05.880858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getEthTransactionByTimestampAndPayerId()] Can an unprivileged external user supply a payerId value of 0 or a system account ID to getEthTransactionByTimestampAndPayerId(), causing the JOIN between ethereum_transaction and transaction tables to return system-level Ethereum transactions not intended for public exposure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8c272a5-32d7-47ae-8860-422b01247da8?mode=deep",
+    "timestamp": "2026-04-28 20:40:18.679326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getEthTransactionByTimestampAndPayerId()] Can an unprivileged external user enumerate all Ethereum transactions for a known payer by iterating timestamp values in getEthTransactionByTimestampAndPayerId(), since the function applies no rate limiting or authorization check, leaking signature_r, signature_s, signature_v, recovery_id, and hash for every Ethereum transaction submitted by that payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95da9c01-27bd-4b73-80a9-4394ee2478ea?mode=deep",
+    "timestamp": "2026-04-28 20:40:31.740223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getEthTransactionByTimestampAndPayerId()] Can an unprivileged external user exploit the exposure of signature_r, signature_s, signature_v, and recovery_id fields returned by getEthTransactionByTimestampAndPayerId() to attempt ECDSA signature recovery attacks, potentially deriving the private key of the payer if the same nonce was reused across multiple Ethereum transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a3d0555-f043-4713-87a8-6e15a99be0ef?mode=deep",
+    "timestamp": "2026-04-28 20:40:45.711238",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/transactionService.js -> Scope: '] [Function: getEthTransactionByTimestampAndPayerId()] Can an unprivileged external user supply a timestamp string containing non-numeric characters (e.g., '1.5' or '1e9') that passes upstream validation but is interpreted differently by the database driver when bound to $1, causing unexpected query behavior or type coercion errors that leak internal error messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a398566b-67fb-4d2f-b966-0025cbbabd00?mode=deep",
+    "timestamp": "2026-04-28 20:40:58.449458",
+    "report_generated": false
+  }
+]
