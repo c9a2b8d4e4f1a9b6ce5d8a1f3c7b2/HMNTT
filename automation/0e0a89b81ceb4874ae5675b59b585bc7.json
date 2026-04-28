@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user submit a topic message with a crafted consensusTimestamp near a partition boundary such that the rounding in `seconds - (seconds % FILE_CLOSE_INTERVAL_SECS)` places the fromTimestamp in a different partition than the actual message, causing `getOverlappingTimePartitions()` to return a partition whose `timestampRange.contains()` check fails, silently dropping the lookup entry and erasing that message from the queryable history index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5efcd194-9283-442d-a965-fdc74e7069ec?mode=deep",
+    "timestamp": "2026-04-28 20:21:52.329489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp exactly equal to the upper boundary of a partition (exclusive end), so that `partition.getTimestampRange().contains()` returns false for all partitions and the `break` is never reached, causing the message to be permanently absent from `topic_message_lookup` and thus invisible to sequence-number-based history queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01a54252-923e-4e37-a4d8-a7a3f6c8ff3c?mode=deep",
+    "timestamp": "2026-04-28 20:22:04.531766",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user craft a topic message with a consensusTimestamp that, after `Instant.ofEpochSecond(0, topicMessage.getConsensusTimestamp()).getEpochSecond()`, produces a negative `seconds` value, causing `seconds % FILE_CLOSE_INTERVAL_SECS` to yield a negative remainder in Java, making `fromSeconds` larger than `seconds` and causing `getOverlappingTimePartitions()` to query a future time window, returning no partitions and silently omitting the message from the lookup table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e2a4ae4-5f26-4d29-b137-01ba0e400c68?mode=deep",
+    "timestamp": "2026-04-28 20:22:17.164137",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user submit a topic message with a consensusTimestamp near Long.MAX_VALUE such that `DomainUtils.convertToNanosMax(fromSeconds + FILE_CLOSE_INTERVAL_SECS, 0L)` saturates to Long.MAX_VALUE for `toTimestamp`, causing `getOverlappingTimePartitions()` to return all partitions from `fromTimestamp` to the end of time, and the first matching partition's `contains()` check assigns the message to a historically incorrect partition, reorganizing the sequence number range of that partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83f6e08b-b832-47b9-96be-afe1834f69ed?mode=deep",
+    "timestamp": "2026-04-28 20:22:30.545501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: mergeTopicMessageLookup()] Can an unprivileged external user publish two topic messages for the same topicId in the same batch where the second message has a lower sequenceNumber than the first, causing `cached.getSequenceNumberRange().span(newValue.getSequenceNumberRange())` to expand the range backwards, making the `topic_message_lookup` record claim a broader sequence number range than actually exists in that partition and causing clients to query wrong partitions for historical messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3c6e70a-4982-4947-a4bd-36453205565b?mode=deep",
+    "timestamp": "2026-04-28 20:22:43.983940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: mergeTopicMessageLookup()] Can an unprivileged external user publish a topic message with a sequenceNumber of Long.MAX_VALUE - 1 so that `TopicMessageLookup.from()` creates a range `[Long.MAX_VALUE-1, Long.MAX_VALUE)`, and when `span()` is called with a previously cached range, the resulting merged range covers an astronomically large sequence number space, causing all subsequent REST API queries using `sequence_number_range && $2::int8range` to match this lookup entry for nearly any sequence number, reorganizing which partition is returned for historical queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11299dc5-16a1-4384-92dc-54bc8f3d9576?mode=deep",
+    "timestamp": "2026-04-28 20:22:58.313171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp of 0 (epoch), causing `Instant.ofEpochSecond(0, 0).getEpochSecond()` to return 0, `fromSeconds` to be 0, and `DomainUtils.convertToNanosMax(0, 0L)` to return 0 for `fromTimestamp`, potentially matching the very first partition and inserting a lookup entry that falsely claims the topic has messages at the beginning of time, corrupting the historical sequence number range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93a67598-4ab9-40b2-9825-31e079534b73?mode=deep",
+    "timestamp": "2026-04-28 20:23:12.044595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp that is negative (e.g., -1), causing `Instant.ofEpochSecond(0, -1)` to produce a timestamp before epoch, `getEpochSecond()` to return -1, and the modulo arithmetic `seconds % FILE_CLOSE_INTERVAL_SECS` to produce a negative value in Java, resulting in `fromSeconds` being computed incorrectly and the message being assigned to a wrong or nonexistent partition, corrupting the lookup index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f52cde9e-b447-47e1-8bef-448d9cfc6ca2?mode=deep",
+    "timestamp": "2026-04-28 20:23:27.015369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish multiple topic messages for the same topicId with out-of-order sequenceNumbers within a single record file batch, causing `parserContext.merge()` to call `mergeTopicMessageLookup()` repeatedly and `span()` to produce a range that spans non-contiguous sequence numbers, making the lookup table falsely indicate that a contiguous block of sequence numbers exists in a partition when gaps actually exist, causing history queries to return incorrect partition ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2b32866-038e-4879-b8e3-e3c7eff1d984?mode=deep",
+    "timestamp": "2026-04-28 20:23:41.993145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a sequenceNumber of 0, causing `TopicMessageLookup.from()` to create `Range.closedOpen(0, 1)` for `sequenceNumberRange`, and when merged via `span()` with an existing range starting at a higher sequence number, produce a range `[0, N)` that falsely claims sequence number 0 exists in the partition, causing REST API clients to incorrectly route queries for the earliest messages to the wrong partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0415a8e5-80ae-4014-b7af-e41925dac526?mode=deep",
+    "timestamp": "2026-04-28 20:23:55.559861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: isEnabled()] Can an unprivileged external user trigger a condition where `timePartitionService.getTimePartitions(TOPIC_MESSAGE_TABLE_NAME)` returns an empty list due to a cache miss or partition drop, causing `isEnabled()` to return false and the entire `onTopicMessage()` processing to be skipped, resulting in a gap in the `topic_message_lookup` table that makes a range of messages permanently unqueryable through the sequence-number-based history API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d03f716d-ab23-4259-be16-5cf7cfa903c9?mode=deep",
+    "timestamp": "2026-04-28 20:24:10.092595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp that falls in a gap between two partitions (i.e., not covered by any partition's `timestampRange`), causing the inner `if (partition.getTimestampRange().contains(...))` check to fail for all returned partitions, silently dropping the lookup entry and creating a permanent hole in the sequence number range index that causes the REST API to return `NotFoundError` for valid historical messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84c0a3b9-6dad-4196-bb10-b97ec3453695?mode=deep",
+    "timestamp": "2026-04-28 20:24:24.859837",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a high volume of topic messages for a single topicId within one record file batch, causing `parserContext.merge()` to call `mergeTopicMessageLookup()` many times and the `span()` operation to progressively widen the `sequenceNumberRange` and `timestampRange` to cover the entire partition, making the lookup entry so broad that it matches every sequence number query for that topic and routes all history queries to a single partition, hiding messages in other partitions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd22a813-8b59-4660-b9ee-1d1575cfa303?mode=deep",
+    "timestamp": "2026-04-28 20:24:38.743275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp such that `fromSeconds + FILE_CLOSE_INTERVAL_SECS` overflows a long before being passed to `DomainUtils.convertToNanosMax()`, and since `convertToNanosMax` catches `ArithmeticException` and returns `Long.MAX_VALUE`, the `toTimestamp` becomes `Long.MAX_VALUE`, causing `getOverlappingTimePartitions()` to return all partitions and the first one whose range contains the timestamp to be selected, potentially assigning the message to an incorrect historical partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b29b8b6a-9850-4f82-9c28-3a02d3161e4c?mode=deep",
+    "timestamp": "2026-04-28 20:24:53.437421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: mergeTopicMessageLookup()] Can an unprivileged external user publish two topic messages for the same topicId where one has a very small sequenceNumber (e.g., 1) and another has a very large sequenceNumber (e.g., Long.MAX_VALUE - 1), causing `span()` to create a range `[1, Long.MAX_VALUE)` that covers the entire possible sequence number space, making the lookup table claim all sequence numbers for that topic exist in one partition and causing all historical queries to be routed to that single partition regardless of where messages actually reside?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50b9fcb6-cc86-44ff-a53c-6b04e2021a2e?mode=deep",
+    "timestamp": "2026-04-28 20:25:07.795967",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp that is exactly at the lower boundary of a partition (inclusive), verify it is correctly assigned, then publish another message with a timestamp one nanosecond before that boundary, causing the second message to be assigned to the previous partition and the `mergeTopicMessageLookup()` to expand the `timestampRange` of the previous partition's lookup entry to overlap with the next partition's range, confusing partition-based routing for history queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16fbaaf9-c7e0-49a1-80f8-522678564a67?mode=deep",
+    "timestamp": "2026-04-28 20:25:21.474778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user exploit the `break` statement after the first matching partition in the `for (var partition : partitions)` loop to ensure that when `getOverlappingTimePartitions()` returns multiple partitions (due to the FILE_CLOSE_INTERVAL window spanning a boundary), only the first matching partition is used, causing messages near partition boundaries to always be indexed in the earlier partition even if their actual consensusTimestamp belongs to the later partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4973abe-20b5-4f36-b214-4b582bdf1b12?mode=deep",
+    "timestamp": "2026-04-28 20:25:36.253529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp that causes `Instant.ofEpochSecond(0, topicMessage.getConsensusTimestamp())` to throw an exception (e.g., if the nanosecond value exceeds 999,999,999 per `Instant` contract), causing an unhandled exception in `onTopicMessage()` that aborts processing of the entire record file batch, leaving all subsequent messages in that batch without lookup entries and creating a gap in the history index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c68a5977-7a73-42df-a7f3-9f1b9b180c02?mode=deep",
+    "timestamp": "2026-04-28 20:25:50.747623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a topicId that collides with an existing `TopicMessageLookup.Id` (same partition + topicId) already in `parserContext`, causing `parserContext.merge()` to invoke `mergeTopicMessageLookup()` and the `span()` operation to silently absorb the new message's range into the existing range, potentially hiding the fact that a sequence number gap exists between the cached entry and the new message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c7b84fa-c90c-4c7e-94ce-82ce6e0f5ca3?mode=deep",
+    "timestamp": "2026-04-28 20:26:04.591950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: mergeTopicMessageLookup()] Can an unprivileged external user publish a topic message with a timestampRange that, after `TopicMessageLookup.from()` creates `Range.closedOpen(timestamp, timestamp + 1)`, and when `span()` is called with a cached entry whose `timestampRange` ends at `timestamp - 1000`, produces a merged range `[old_start, timestamp + 1)` that spans a 1000-nanosecond gap, causing the lookup table to falsely claim continuous timestamp coverage and routing queries for timestamps in the gap to the wrong partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ae75df1-ba9f-4d96-97ef-11da85f3399b?mode=deep",
+    "timestamp": "2026-04-28 20:26:19.493173",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp such that `seconds % FILE_CLOSE_INTERVAL_SECS` equals 0 (i.e., the timestamp is exactly on a FILE_CLOSE_INTERVAL boundary), causing `fromSeconds` to equal `seconds` and `toTimestamp` to be exactly one interval ahead, and if the partition boundary does not align with `FILE_CLOSE_INTERVAL`, the `getOverlappingTimePartitions()` call returns a partition that does not actually contain the message's timestamp, causing the inner `contains()` check to fail and silently dropping the lookup entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17a44460-5747-464b-8d11-8703d6219aa8?mode=deep",
+    "timestamp": "2026-04-28 20:26:32.667047",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp in a partition that has already been pruned from `topic_message_lookup` (via `TopicMessageLookupRepository.prune()`), causing a new lookup entry to be created for a partition that no longer holds the actual messages, making the lookup table point to a non-existent or empty partition and causing history queries to return incorrect or empty results for that sequence number range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4265a8a-2f95-46a5-a03e-b77d41696499?mode=deep",
+    "timestamp": "2026-04-28 20:26:46.903470",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a sequenceNumber equal to Long.MAX_VALUE, causing `TopicMessageLookup.from()` to compute `sequenceNumber + 1` which overflows to Long.MIN_VALUE, creating an invalid `Range.closedOpen(Long.MAX_VALUE, Long.MIN_VALUE)` where the lower bound exceeds the upper bound, potentially causing a runtime exception in `span()` during merge or corrupting the sequence number range in the lookup table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f991cca-787c-4d72-9d50-7c5e96e6b1a7?mode=deep",
+    "timestamp": "2026-04-28 20:27:01.481396",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: onTopicMessage()] Can an unprivileged external user publish a topic message with a consensusTimestamp equal to Long.MAX_VALUE, causing `TopicMessageLookup.from()` to compute `timestamp + 1` which overflows to Long.MIN_VALUE, creating an invalid `Range.closedOpen(Long.MAX_VALUE, Long.MIN_VALUE)` for `timestampRange`, and when this is merged via `span()` with a valid cached range, producing a corrupted timestamp range that covers the entire long space and causes all timestamp-based history queries to match this lookup entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc49b4a7-a433-4e08-9f78-5bc3ff1bc81d?mode=deep",
+    "timestamp": "2026-04-28 20:27:16.400725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: isEnabled()] Can an unprivileged external user trigger repeated calls to `timePartitionService.getTimePartitions(TOPIC_MESSAGE_TABLE_NAME)` through the `isEnabled()` check in a way that causes a cache stampede or stale cache hit, where the cached partition list is outdated and does not include a newly created partition, causing `isEnabled()` to return false and all topic messages in a new partition to be silently excluded from the lookup index, creating a gap in the historical record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4360477-0a5b-4c8a-bd7a-d44209f5d19a?mode=deep",
+    "timestamp": "2026-04-28 20:27:29.611770",
+    "report_generated": false
+  }
+]
