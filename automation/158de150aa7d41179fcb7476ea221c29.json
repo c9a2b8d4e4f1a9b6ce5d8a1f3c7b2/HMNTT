@@ -94,5 +94,101 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c33a008d-a5b0-427c-b09c-4f1da8321850?mode=deep",
     "timestamp": "2026-04-28 14:59:44.960604",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: backoff()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_BASE_BACKOFF` to `0` or a negative duration, causing `toDuration()` to fall back to `1 * time.Second` but the `backoff()` function's bit-shift `base * time.Duration(1<<(attempt-1))` to produce unexpected timing, potentially causing retry storms that submit multiple overlapping `hiero.NewTransferTransaction()` calls and inject duplicate records into Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a01226e-bb22-4611-9e58-cb2842d73ef6?mode=deep",
+    "timestamp": "2026-04-28 20:20:26.519950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: submitWithRetry()] Can an unprivileged external user exploit the `backoff()` function's use of `1<<(attempt-1)` bit shift, where for `attempt=64` or higher (reachable if `HIERO_MIRROR_PINGER_MAX_RETRIES` is set to 63+), the shift overflows a 64-bit integer and produces a zero or negative duration, causing `time.NewTimer(sleep)` to fire immediately and the retry loop to submit transactions at maximum rate, flooding Hashgraph with artificial transfer records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14d6aef0-826b-4713-b3a6-ac595676e697?mode=deep",
+    "timestamp": "2026-04-28 20:20:38.720767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: main()] Can an unprivileged external user who can send `SIGTERM` to the pinger process (e.g., via a shared PID namespace or container escape) trigger the `signal.NotifyContext` cancellation, causing `ctx.Done()` to fire mid-transaction in `submitWithRetry()`, so that a transaction is submitted to the Hedera network but its receipt is never retrieved, leaving an untracked and unverified transaction in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c69831ce-8b8e-4378-9de0-f51881480320?mode=deep",
+    "timestamp": "2026-04-28 20:20:51.521375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user serve a `nodesEnvelope` JSON response where `serviceEndpoint.DomainName` contains a specially crafted hostname with Unicode or null bytes that passes `strings.TrimSpace()` but causes `net.JoinHostPort()` to produce a malformed address string, leading the Hiero SDK to connect to an unintended host and submit transactions to a node that manipulates Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_099fe34d-3f40-4c30-9f23-d223a549ed2f?mode=deep",
+    "timestamp": "2026-04-28 20:21:05.452224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the URL construction logic in `buildNetworkFromMirrorNodes()` where `strings.HasSuffix(base, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa73f9e7-8ef1-4526-8458-ca3a8395d1c7?mode=deep",
+    "timestamp": "2026-04-28 20:21:18.285272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user serve a `nodesEnvelope` JSON response with a `node_account_id` that passes `hiero.AccountIDFromString()` validation but maps to a non-existent or attacker-controlled account, causing the SDK's network map to associate a fake account ID with a malicious gRPC endpoint, so that transaction routing is corrupted and Hashgraph records are submitted to the wrong node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f970ed07-9850-4bb0-aece-d922c2cb0973?mode=deep",
+    "timestamp": "2026-04-28 20:21:32.030765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: main()] Can an unprivileged external user exploit the fact that `os.WriteFile(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d631f0ad-280b-4f7c-9c88-8c3ec6893dae?mode=deep",
+    "timestamp": "2026-04-28 20:21:45.266293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: loadConfig()] Can an unprivileged external user exploit the `envOr()` function's use of `os.Getenv()` to inject environment variables via a process environment manipulation attack (e.g., through a shared environment in a misconfigured container), overriding `HIERO_MIRROR_PINGER_OPERATOR_KEY` with a known private key to sign all subsequent `hiero.NewTransferTransaction()` calls with an attacker-controlled key, injecting fraudulent transactions into Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c7d3a02-8bce-4a7d-a095-bb48a068c177?mode=deep",
+    "timestamp": "2026-04-28 20:21:58.688648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user serve a `nodesEnvelope` JSON response with `serviceEndpoint` entries containing IPv6 addresses in `IPAddressV4` field, causing `net.JoinHostPort()` to produce a malformed address (e.g., missing brackets for IPv6), leading the Hiero SDK to fail to connect to any node and silently drop all transaction submissions, creating a gap in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f2fb846-329d-47ef-bf30-b65111cebe82?mode=deep",
+    "timestamp": "2026-04-28 20:22:11.828138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: submitWithRetry()] Can an unprivileged external user who controls a malicious consensus node (injected via mirror REST manipulation) return a fake successful receipt with a manipulated `TransactionID` in the `resp.TransactionID.String()` log output, causing the pinger to log a false transaction ID that does not correspond to any real Hashgraph record, making it impossible to audit or verify the actual on-chain history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b968e97b-4966-4113-9c1f-1068be5d6c94?mode=deep",
+    "timestamp": "2026-04-28 20:22:24.668080",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: newClient()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `mainnet` instead of `testnet`, causing `hiero.ClientForName(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c56ce73-1257-407f-a378-40be2b027888?mode=deep",
+    "timestamp": "2026-04-28 20:22:38.273385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user serve a `nodesEnvelope` JSON response with a very long `DomainName` string (e.g., 1MB), causing `strings.TrimSpace(ep.DomainName)` and `net.JoinHostPort()` to process an oversized hostname, potentially triggering a buffer overflow or excessive memory allocation in the network map construction, leading to a crash that halts Hashgraph transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_237fed85-e076-4f3e-ae73-ccf0da441276?mode=deep",
+    "timestamp": "2026-04-28 20:22:51.890979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the `strings.TrimRight(strings.TrimSpace(cfg.mirrorRest), \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39a81d3b-875d-4143-be8f-85588efa2723?mode=deep",
+    "timestamp": "2026-04-28 20:23:06.053019",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user serve a `nodesEnvelope` JSON response with duplicate `node_account_id` values mapping to different `serviceEndpoint` addresses, causing the `network[addr] = nodeAccountId` map to be populated with multiple entries for the same account ID, some pointing to legitimate nodes and some to attacker-controlled nodes, so that the SDK non-deterministically routes transactions to either legitimate or malicious nodes, intermittently injecting tampered records into Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5dfe2c5d-f6b3-43c1-bb62-278bd095d381?mode=deep",
+    "timestamp": "2026-04-28 20:23:19.050333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: main()] Can an unprivileged external user exploit the goroutine that writes to `/tmp/alive` every 15 seconds by racing with the main ticker loop, causing a scenario where the heartbeat goroutine and the `submitWithRetry()` call both access shared state concurrently without synchronization, leading to a data race that corrupts the client state and causes malformed transactions to be submitted to Hashgraph?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d403536-1a16-4d3f-b4fd-6e39518e3a1f?mode=deep",
+    "timestamp": "2026-04-28 20:23:32.468816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: loadConfig()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_AMOUNT_TINYBAR` to `0`, bypassing the `cfg.amountTinybar == 0` check only if the flag is not explicitly set (since the check fires after `flag.Parse()`), or alternatively set it to a negative value to cause `hiero.HbarFromTinybar(-cfg.amountTinybar)` to produce a positive debit and `hiero.HbarFromTinybar(cfg.amountTinybar)` a negative credit, reversing the transfer direction and recording inverted fund flows in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0f276a2-6393-4b22-8753-b35bac8781ce?mode=deep",
+    "timestamp": "2026-04-28 20:23:45.036767",
+    "report_generated": false
   }
 ]
