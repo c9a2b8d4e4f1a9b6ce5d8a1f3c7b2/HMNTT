@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user exhaust the database connection pool (maxConnections=10) by sending concurrent GET /api/v1/schedules requests, each of which triggers three pool.queryQuietly() calls (one sequential plus two via Promise.all()), causing all subsequent requests to block until connectionTimeoutMillis expires and the service becomes unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2079c35f-8c02-4a05-90a9-4bc8ea9827fa?mode=deep",
+    "timestamp": "2026-04-28 20:53:33.805850",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user trigger a non-network DoS by sending five or more concurrent GET /api/v1/schedules requests, where each request issues two parallel pool.queryQuietly() calls via Promise.all([entityQuery, signatureQuery]), consuming all 10 available pool connections and starving every other API endpoint of database access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2333fd4b-f2d2-4420-9cd9-96e20a79c3af?mode=deep",
+    "timestamp": "2026-04-28 20:53:45.761893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getScheduleById()] Can an unprivileged external user cause unbounded PostgreSQL memory and CPU consumption by repeatedly querying GET /api/v1/schedules/{scheduleId} for a schedule that has accumulated thousands of transaction_signature rows, forcing the getScheduleByIdQuery to execute json_agg(json_build_object(...) order by ts.consensus_timestamp) over all signatures in a single aggregation, exhausting DB worker memory and causing query timeouts that hold connections for up to statementTimeout (20s)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_310a1fc7-53b1-487d-9c91-543cabfb5e5d?mode=deep",
+    "timestamp": "2026-04-28 20:53:58.282926",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause unbounded PostgreSQL aggregation work by querying GET /api/v1/schedules with the maximum limit, where the signatureQuery executes transactionSignatureJsonAgg (json_agg with ORDER BY) across all transaction_signature rows for every returned schedule_id in a single IN() clause, causing the DB to sort and aggregate potentially millions of signature rows and holding the connection for the full statementTimeout duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e42ed289-c676-4a5e-93f7-fb064141e645?mode=deep",
+    "timestamp": "2026-04-28 20:54:11.270271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user cause every GET /api/v1/schedules/{scheduleId} request for an active (non-executed, non-expired) schedule to bypass all caching by exploiting the fact that getScheduleCacheControlHeader() returns an empty object {} (no cache-control header) for active schedules, forcing every repeated request to hit the database and enabling a sustained DB-exhaustion DoS with no cache protection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a003e6c2-b6ea-4f08-9fb6-a6b68382181a?mode=deep",
+    "timestamp": "2026-04-28 20:54:24.925593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause Node.js heap exhaustion by querying GET /api/v1/schedules at maximum limit where each returned schedule has a large number of signatures, causing formatScheduleRow() to call row.signatures.filter().map() on a large array and utils.encodeBase64(row.transaction_body) on a large binary blob for every row simultaneously in memory, leading to OOM and process crash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1810874-bf66-47f1-b314-12fcd6e83334?mode=deep",
+    "timestamp": "2026-04-28 20:54:38.817578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: mergeScheduleEntities()] Can an unprivileged external user cause excessive Node.js memory allocation by querying GET /api/v1/schedules at maximum limit, where mergeScheduleEntities() calls entities.reduce() and signatures.reduce() to build in-memory maps and then schedules.map() with Object.assign() to merge all results, creating multiple large intermediate objects simultaneously and causing GC pressure or OOM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d93dac9-2d07-4462-a6e5-7e3f187c4bb6?mode=deep",
+    "timestamp": "2026-04-28 20:54:53.170994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user amplify database query cost by sending GET /api/v1/schedules?account.id=gte:1 which matches all schedules in the database, causing the schedulesMainQuery to perform a full table scan on the schedule table with no selective WHERE predicate, followed by two additional full-scan queries (entityQuery and signatureQuery) on the entity and transaction_signature tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed646a2d-2a48-4eec-ae18-b2b7505bbd7e?mode=deep",
+    "timestamp": "2026-04-28 20:55:07.900113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user cause repeated database scans by sending GET /api/v1/schedules with multiple account.id filter values (e.g., account.id=gte:1&account.id=lte:9999999999), generating a WHERE clause with multiple AND conditions that prevents index usage on creator_account_id and forces a sequential scan of the entire schedule table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b88a08f-2979-44d6-b531-111c670fcc21?mode=deep",
+    "timestamp": "2026-04-28 20:55:24.556562",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a sustained DoS by rapidly paginating through all schedules using GET /api/v1/schedules?schedule.id=gt:X with incrementing X values, where each request triggers three separate pool.queryQuietly() calls and the lack of caching on active schedules means every page request hits the database fresh, exhausting DB connections over time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f79142e9-4f48-4835-96db-495081588be4?mode=deep",
+    "timestamp": "2026-04-28 20:55:39.992011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause the Node.js event loop to stall by sending many concurrent GET /api/v1/schedules requests that each await pool.queryQuietly(schedulesQuery) sequentially before firing Promise.all([entityQuery, signatureQuery]), creating a queue of pending async operations that blocks the event loop and degrades response times for all other API endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8940210-283d-46c4-8100-4f07bbecd6ff?mode=deep",
+    "timestamp": "2026-04-28 20:55:54.564718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getScheduleByIdQuery] Can an unprivileged external user cause a PostgreSQL sort-memory exhaustion by querying GET /api/v1/schedules/{scheduleId} for a schedule with a very large number of transaction_signature rows, where the getScheduleByIdQuery uses 'order by ts.consensus_timestamp' inside json_agg(), forcing PostgreSQL to sort all signature rows in memory before aggregating, consuming work_mem and potentially spilling to disk?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7186e54c-4f04-40b0-abb8-cfb216b0e72b?mode=deep",
+    "timestamp": "2026-04-28 20:56:09.120660",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a database CPU spike by querying GET /api/v1/schedules with order=desc, where scheduleOrderQuery(order) generates 'ORDER BY s.schedule_id DESC' requiring a reverse index scan or sort on the schedule table, combined with the two subsequent parallel queries also using the same order direction, tripling the sort overhead per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c998ff7-8f66-4f52-bafd-dc4620fe008f?mode=deep",
+    "timestamp": "2026-04-28 20:56:22.682504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: formatScheduleRow()] Can an unprivileged external user cause CPU exhaustion in the Node.js process by querying GET /api/v1/schedules for schedules with large transaction_body blobs, where formatScheduleRow() calls utils.encodeBase64(row.transaction_body) on every row in the result set simultaneously, causing synchronous base64 encoding of large binary buffers that blocks the event loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44a27bb1-3a3e-4e5d-8daa-8eb5552452ea?mode=deep",
+    "timestamp": "2026-04-28 20:56:35.883692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a database GROUP BY memory exhaustion by querying GET /api/v1/schedules at maximum limit, where the signatureQuery uses 'GROUP BY entity_id' with json_agg() across all transaction_signature rows for up to 100 schedule IDs in a single IN() clause, forcing PostgreSQL to maintain a hash aggregate for each group and consuming large amounts of shared_buffers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1d086dc-9b51-4e93-bc53-6c4fe1c9ddf7?mode=deep",
+    "timestamp": "2026-04-28 20:56:49.880987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a connection pool starvation DoS by sending requests that trigger the preQueryHint code path in queryQuietly(), which checks out a dedicated client from the pool via this.connect() and holds it through begin/query/commit, preventing other requests from obtaining connections until the statement completes or times out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60e4762d-cd37-4db1-b78b-ae1cfd65fd62?mode=deep",
+    "timestamp": "2026-04-28 20:57:04.463028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getScheduleById()] Can an unprivileged external user cause repeated full-table-join scans by rapidly querying GET /api/v1/schedules/{scheduleId} for many different valid schedule IDs, where getScheduleByIdQuery performs a LEFT JOIN between schedule, entity, and transaction_signature tables with GROUP BY, and the lack of caching for active schedules means every request re-executes the full join?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75c843e7-1b82-4b40-ac21-6c7748dd202c?mode=deep",
+    "timestamp": "2026-04-28 20:57:19.526623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a Node.js memory spike by querying GET /api/v1/schedules at maximum limit where each schedule has many signatures, causing the signatureQuery to return a large JSON blob per schedule_id that is then deserialized into JavaScript objects by the pg driver, allocated in the V8 heap, and processed by mergeScheduleEntities() and formatScheduleRow() before GC can reclaim them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d20ae137-5fb4-4954-b627-d6705caf86b1?mode=deep",
+    "timestamp": "2026-04-28 20:57:32.628863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user cause the database to perform an unindexed range scan by sending GET /api/v1/schedules?schedule.id=gte:1&schedule.id=lte:9999999999999999, generating a WHERE clause 'where s.schedule_id >= $1 and s.schedule_id <= $2' that spans the entire schedule table and forces a sequential scan regardless of index availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a86ad8af-5b15-4720-85a5-001b84dbef1b?mode=deep",
+    "timestamp": "2026-04-28 20:57:45.550247",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a sustained database load DoS by alternating between GET /api/v1/schedules?order=asc and GET /api/v1/schedules?order=desc in rapid succession, where each direction change prevents the database query planner from reusing cached execution plans and forces re-planning of the schedulesMainQuery, entityQuery, and signatureQuery on every request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b5982b6-3f44-49e1-9953-a4d35e60ca10?mode=deep",
+    "timestamp": "2026-04-28 20:57:59.227641",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a database index bloat DoS by exploiting the fact that the signatureQuery uses 'WHERE entity_id IN ($1,...,$N) GROUP BY entity_id ORDER BY entity_id' with up to 100 parameters, causing PostgreSQL to perform a bitmap index scan that reads a large portion of the transaction_signature index into shared_buffers, evicting other cached pages and degrading performance for all queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3bcff57-3d00-400e-b6bf-dadcb9d721f6?mode=deep",
+    "timestamp": "2026-04-28 20:58:12.688241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getScheduleById()] Can an unprivileged external user cause a DoS by querying GET /api/v1/schedules/{scheduleId} for a schedule whose transaction_body field contains the maximum allowed binary payload size, where formatScheduleRow() calls utils.encodeBase64(row.transaction_body) to encode the entire blob into a base64 string, causing synchronous CPU work proportional to the blob size on every request with no caching for active schedules?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33cefa31-42f6-4878-965f-be63badb89ef?mode=deep",
+    "timestamp": "2026-04-28 20:58:26.566794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a three-query amplification DoS by sending GET /api/v1/schedules?account.id=1 where the account has many associated schedules, causing: (1) schedulesMainQuery to scan all matching rows, (2) entityQuery to fetch all entity records for those schedule IDs, and (3) signatureQuery to aggregate all signatures for those IDs, tripling the database work per single HTTP request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20288c11-eda1-4fc8-8843-36f6b06a7267?mode=deep",
+    "timestamp": "2026-04-28 20:58:40.442509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a Node.js CPU DoS by querying GET /api/v1/schedules at maximum limit where each schedule has the maximum number of signatures, causing formatScheduleRow() to call SignatureType.getName(signature.type) and utils.nsToSecNs(signature.consensus_timestamp) for every signature of every schedule in a tight synchronous loop, blocking the event loop for an extended period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3314d7e1-1ee9-4ed5-933e-217363f693b8?mode=deep",
+    "timestamp": "2026-04-28 20:58:54.340704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getSchedules()] Can an unprivileged external user cause a database connection hold DoS by sending GET /api/v1/schedules requests that result in slow signatureQuery execution (due to large json_agg aggregation), where the Promise.all() waits for both entityQuery and signatureQuery to complete before releasing the connection, holding two pool connections for the full duration of the slower query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2893002-e108-47db-8b4a-f93e4f2aeecc?mode=deep",
+    "timestamp": "2026-04-28 20:59:08.256578",
+    "report_generated": false
+  }
+]
