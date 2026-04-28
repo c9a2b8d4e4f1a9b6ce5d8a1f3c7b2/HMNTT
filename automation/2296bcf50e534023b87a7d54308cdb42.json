@@ -124,5 +124,131 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27fba28d-dc70-4c2e-81fc-bdeeb9908123?mode=deep",
     "timestamp": "2026-04-28 14:51:11.362194",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause a memory leak by flooding findStorageBatch() with unique contractId values, where each unique contractId causes cacheManagerSlotsPerContract.getCache(contractId.toString()) to create and register a new named cache in the CaffeineCacheManager, and since CaffeineCacheManager retains all created cache names internally, the list of registered cache names grows unboundedly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7e40ae7-f0ce-4534-ac0c-30264bbcb0f3?mode=deep",
+    "timestamp": "2026-04-28 22:10:16.187482",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user exploit the concurrent access to contractSlotsCache.getNativeCache().asMap().keySet() (a live ConcurrentHashMap view) in findStorageBatch() by sending many concurrent requests for the same contractId, causing the keySet iteration to observe keys added by other threads mid-iteration, resulting in a larger-than-expected cachedSlots list being sent to the DB query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0614775c-e312-45fe-a8af-be9c6e4f2433?mode=deep",
+    "timestamp": "2026-04-28 22:10:28.429132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractStateCache to be populated with entries where the key is a SimpleKey(contractId, slotKey) with a null slotKey (by passing null as the key parameter), causing a NullPointerException or unexpected cache behavior in generateCacheKey() that disrupts service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9a797fa-0c9b-4ddc-b995-0eef047a81ae?mode=deep",
+    "timestamp": "2026-04-28 22:10:41.102813",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user cause a DB denial-of-service by calling findStorageByBlockTimestamp() with a null slotKeyByteArray, causing a NullPointerException or DB error in the native query (slot = ?2) that propagates as an unhandled exception, disrupting the service for all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f5e4e00-99e1-4432-9847-f01fa0e3ae42?mode=deep",
+    "timestamp": "2026-04-28 22:10:54.257499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the slotsPerContract cache (maximumSize=1500) to be filled with 1500 unique slot keys for a single popular contract, so that every new findStorage() call for that contract triggers a batch DB query with 1500 slots in the IN-list, and the new key is immediately evicted (isKeyEvictedFromCache=true), causing a fallback to an additional individual findStorage() DB query, resulting in 2 DB queries per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_802cc950-ccea-411b-b770-e0e88545ff6e?mode=deep",
+    "timestamp": "2026-04-28 22:11:08.668685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user exploit the isKeyEvictedFromCache fallback path in findStorageBatch() by deliberately causing cache eviction of their own key (by filling the slotsPerContract cache to maximumSize=1500 with other keys), so that every findStorage() call for their key triggers both a batch query (1500 slots) AND an individual findStorage() query, doubling DB load per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf267dd8-85e1-4e1b-9a3d-17dd9593c77c?mode=deep",
+    "timestamp": "2026-04-28 22:11:23.002018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractSlotsCache (maximumSize=3000, expireAfterAccess=5m) to be filled with 3000 unique contractId entries, each holding a full slotsPerContract cache, so that when a legitimate new contractId is accessed, the oldest contractId's entire slot cache is evicted, causing all subsequent reads for that evicted contract to re-execute batch DB queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62136fa8-50ab-47d6-bf79-504881103939?mode=deep",
+    "timestamp": "2026-04-28 22:11:38.058590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause a heap memory spike by calling findStorage() for a single contractId with 1500 unique 32-byte slot keys in rapid succession, causing findStorageBatch() to allocate a new ArrayList<byte[]> of size 1500 on every call (since cachedSlotKeys is re-read each time), creating significant GC pressure under high concurrency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2488f42-903d-495d-9391-b846f1b7482e?mode=deep",
+    "timestamp": "2026-04-28 22:11:54.543054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user grieve the system by calling findStorageByBlockTimestamp() with a negative blockTimestamp value (e.g., -1L), causing the DB query (consensus_timestamp <= ?3) to match no rows but still execute a full index scan, and by repeating this at high frequency, saturate DB query processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ed46f5c-4f2c-4ad9-8f3d-3e2690653d1d?mode=deep",
+    "timestamp": "2026-04-28 22:12:11.762337",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the contractStateCache to be populated with incorrect (stale) values by exploiting the race condition where thread A reads cachedSlotKeys, thread B updates a slot value in the DB, and thread A's batch query returns the old value which is then stored in contractStateCache, causing all users to receive stale data for up to 2 seconds (contractState TTL)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84e3888c-7c51-47d6-baa4-142b64be3359?mode=deep",
+    "timestamp": "2026-04-28 22:12:29.672858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractStateCache to serve incorrect results by exploiting the identity comparison (cachedValue != EMPTY_VALUE) instead of Arrays.equals(), where a cached byte[] that happens to be a different object but contains all zeros could be treated as a valid value rather than EMPTY_VALUE, causing findStorage() to return Optional.of(allZerosArray) instead of triggering a DB lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b348b495-0ef9-4eca-8a55-a27d0a18cb5c?mode=deep",
+    "timestamp": "2026-04-28 22:12:49.225996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the DB to receive malformed batch queries by passing a key byte[] of length 0 to findStorage(), which gets wrapped as ByteBuffer.wrap(new byte[0]) and stored in the slotsPerContract cache, and when included in the cachedSlots list for findStorageBatch(), causes the native SQL query (slot in (:slots)) to include an empty byte array, potentially causing a DB error or unexpected behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_376b4669-80c7-4a07-b359-3eb460efd89a?mode=deep",
+    "timestamp": "2026-04-28 22:13:06.869032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() does not synchronize access to the contractSlotsCache per contractId, allowing two concurrent threads to both call putIfAbsent() for different keys of the same contract, both read the same cachedSlotKeys snapshot, and both issue identical batch DB queries, causing duplicate DB load with no benefit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c47f32f0-5133-482c-8c35-61d8736271c7?mode=deep",
+    "timestamp": "2026-04-28 22:13:26.078993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractStateCache to be permanently polluted with EMPTY_VALUE entries for non-existent slots by calling findStorage() for slots that do not exist in the DB, where the batch query returns no result for those keys and contractStateCache.put() is never called for them, but the slotsPerContract cache retains those keys, causing every future batch query for that contract to include those non-existent slots in the IN-list?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6efc13d-15fa-42bd-9825-0b6764e24d14?mode=deep",
+    "timestamp": "2026-04-28 22:13:46.879991",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause a DB connection pool exhaustion by issuing many concurrent findStorageByBlockTimestamp() calls (which have no caching) simultaneously with many concurrent findStorageBatch() calls, saturating all available DB connections and causing legitimate requests to queue or timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d26651e-77cc-4b67-b301-d818ae7116c4?mode=deep",
+    "timestamp": "2026-04-28 22:14:07.601600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the slotsPerContract cache to grow to its maximum size (1500 entries) for a target contract by issuing 1500 findStorage() calls with unique keys, and then by continuously issuing new unique keys, cause the LRU eviction policy to evict the most recently accessed legitimate slot keys, forcing legitimate users' reads for those slots to fall back to individual DB queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83d521b5-429b-4b5f-bbe1-58cc94458261?mode=deep",
+    "timestamp": "2026-04-28 22:14:29.814501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the contractStateCache to be populated with entries for all 1500 slots of a target contract by triggering a single findStorageBatch() call that returns all 1500 slot values, consuming 1500 of the 25000 available contractStateCache slots (6% of total capacity) for a single contract, reducing available cache space for other contracts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55fd9553-6d46-48d0-aa9b-d69716ef8465?mode=deep",
+    "timestamp": "2026-04-28 22:14:52.904176",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractStateCache to serve stale data to legitimate users by filling the cache with entries for a contract's slots just before those slots are updated on-chain, and since contractStateCache has a 2-second TTL (expireAfterWrite=2s), all users reading those slots within the next 2 seconds receive the pre-update (stale) values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90154e61-e0a6-4f91-a000-1ef50bc5a3f9?mode=deep",
+    "timestamp": "2026-04-28 22:15:15.794648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user cause the findStorageBatch() method to issue a DB query with an IN-list of 1500 byte[] arrays where each array is 32 bytes, resulting in a 48KB+ SQL query string being sent to the DB on every cache miss, and by triggering many concurrent cache misses for the same contract, cause the DB to process many large identical queries simultaneously?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a6beceb-3335-4f16-b404-8914de47e2e8?mode=deep",
+    "timestamp": "2026-04-28 22:15:40.007789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that the contractSlotsCache stores CaffeineCache instances as values (not primitive types), and since Caffeine's size-based eviction counts each entry as weight=1 regardless of the size of the stored CaffeineCache, cause the outer cache to evict a contractId's entire slot cache (containing 1500 entries) to make room for a new contractId, causing a massive cache miss burst for the evicted contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac10680b-005f-4879-af1c-4ccc62e8cf5c?mode=deep",
+    "timestamp": "2026-04-28 22:16:05.546909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findStorage()] Can an unprivileged external user cause the contractStateCache to be populated with entries using SimpleKey(contractId, slotKey) where slotKey is a very large byte array, causing the SimpleKey's hashCode() computation to be expensive (iterating over the full array), and by issuing many concurrent findStorage() calls with large keys, cause CPU saturation from hash computation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_918137c0-b628-44c3-8aa8-b1e661058446?mode=deep",
+    "timestamp": "2026-04-28 22:16:31.126892",
+    "report_generated": false
   }
 ]
