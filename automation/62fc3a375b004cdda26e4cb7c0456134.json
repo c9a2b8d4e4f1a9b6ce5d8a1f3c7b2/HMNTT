@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user supply a crafted encoded EntityId (e.g., shard=0,realm=0,num=X that encodes to the same long as shard=1,realm=Y,num=Z) to cause TopicServiceImpl.topicRepository.findById(id.getId()) to resolve to a different topic's current state, making the mirror node present a reorganized history for the wrong topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_397da32b-1a2f-45d7-a308-d1b65611fa7d?mode=deep",
+    "timestamp": "2026-04-28 23:10:50.620011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the EntityId.CACHE (Caffeine cache keyed by encoded long) by racing concurrent requests with different shard.realm.num combinations that encode to the same long, causing the cache to return a stale or wrong EntityId object and thus serve a reorganized topic history to subsequent callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d117d818-e812-4c58-bccd-bb179a9cc9c5?mode=deep",
+    "timestamp": "2026-04-28 23:11:02.594168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user send a GET /api/v1/topics/{id} request with a topic ID whose encoded long value (via EntityId.encode()) overflows into a negative long, causing topicRepository.findById() to match a different row in the topic table and return a historically incorrect topic state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad27d8ec-c5e6-4d0b-84da-8827cb308b53?mode=deep",
+    "timestamp": "2026-04-28 23:11:15.648446",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that TopicServiceImpl.findById() only queries the current topic table (not topic_history) to make the API present the most recent state as if it were the only historical state, effectively erasing prior history entries from the consumer's view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc56a8b5-bf51-4b08-b806-2ed978230685?mode=deep",
+    "timestamp": "2026-04-28 23:11:28.464266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user craft a topic ID path parameter that passes EntityIdNumParameter.ENTITY_ID_PATTERN validation but resolves via EntityId.of(shard, realm, num) to a long that collides with a deleted topic's ID, causing the service to return a ghost historical record that should no longer be visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0aa9787b-e410-43b1-80e0-8a0eb19977ec?mode=deep",
+    "timestamp": "2026-04-28 23:11:42.966719",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user trigger EntityNotFoundException from TopicServiceImpl.findById() for a valid topic that exists only in topic_history (its current row was pruned), causing the mirror node to misrepresent the topic's historical existence and reorganize the visible transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7908c3d2-1da9-4cb2-a37d-1d759779169c?mode=deep",
+    "timestamp": "2026-04-28 23:11:57.854231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the two-part lookup in TopicController.getTopic() (topicService.findById + entityService.findById) where each service uses the same EntityId but queries different tables, causing a time-of-check/time-of-use inconsistency that presents a topic's adminKey from one historical snapshot paired with a timestampRange from a different snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9ed0271-c0ec-4ef7-b5e9-926fab4a6f28?mode=deep",
+    "timestamp": "2026-04-28 23:12:12.772261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user send concurrent requests to GET /api/v1/topics/{id} during a topic update transaction ingestion window, causing TopicServiceImpl.findById() to return a partially-merged topic state (from mergeTopic()) that reflects an out-of-order combination of adminKey, submitKey, and timestampRange fields?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_051e7adb-0cc5-4001-88be-1dc1a2967236?mode=deep",
+    "timestamp": "2026-04-28 23:12:29.360585",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the EntityId.of(long id) cache path where id=0 always returns EntityId.EMPTY, by requesting GET /api/v1/topics/0, causing TopicServiceImpl to query topicRepository.findById(0L) and potentially return a sentinel or default topic row that misrepresents the historical state of topic 0.0.0?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_287fdef4-bc1f-428a-a22c-dffd3b368ff5?mode=deep",
+    "timestamp": "2026-04-28 23:12:46.188244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user supply a two-part realm.num path parameter (e.g., '65535.1') to EntityIdNumParameter.valueOfNullable() where the realm is parsed into the shard slot due to the ambiguous group matching logic, causing EntityId.of() to encode a different long than intended and retrieve a different topic's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e56b5ac-eddc-40c7-8141-8f54bd344dd8?mode=deep",
+    "timestamp": "2026-04-28 23:13:04.072324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that EntityIdNumParameter allows up to 12-digit num values (regex \\\\d{1,12}) to supply a num that, when encoded with shard=0 and realm=0, produces a long identical to a different shard/realm/num combination's encoded ID, causing findById() to return that topic's history instead?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9600f96b-e26a-462c-a5c1-adf791ea0710?mode=deep",
+    "timestamp": "2026-04-28 23:13:22.677696",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the Caffeine cache (maximumSize=500000, expireAfterAccess=60m) in EntityId by flooding it with 500,001 unique encoded IDs to evict a legitimate EntityId entry, causing a subsequent findById() call to re-parse and potentially misroute to a different topic's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eac4b31c-87f1-4ee2-b7e0-f5a1ce46ca90?mode=deep",
+    "timestamp": "2026-04-28 23:13:42.648114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the three-service fan-out in TopicController.getTopic() (topicService, entityService, customFeeService all called with the same EntityId) where a topic update is committed between the topicService.findById() and customFeeService.findById() calls, causing the response to mix a pre-update topic state with a post-update custom fee schedule, reorganizing the apparent fee history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44752f9a-e59a-49d1-aa5f-5f03c15252e1?mode=deep",
+    "timestamp": "2026-04-28 23:14:03.402696",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the absence of any timestamp-pinning parameter in GET /api/v1/topics/{id} to repeatedly query the same topic ID and observe non-monotonic changes in the timestampRange.lower field returned by TopicServiceImpl.findById(), inferring or triggering apparent history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba395e3e-902e-4d8b-a726-2e20ac152d68?mode=deep",
+    "timestamp": "2026-04-28 23:14:24.323893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that TopicServiceImpl.findById() calls topicRepository.findById(id.getId()) where getId() returns the raw encoded long, and that the topic table uses this long as primary key, to probe for topics whose encoded IDs are numerically adjacent to known topics and retrieve unintended historical states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b606873e-3fa9-4a08-987b-3aada55c2d9d?mode=deep",
+    "timestamp": "2026-04-28 23:14:46.457651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the EntityId bit-packing (10 bits shard, 16 bits realm, 38 bits num) to craft a shard=1023, realm=65535, num=274877906943 input that encodes to -1 (all bits set), causing topicRepository.findById(-1L) to match a row that was inserted with a negative ID due to a database migration bug, presenting a fabricated history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7be2c69-d280-49b9-88e4-d610df3e4434?mode=deep",
+    "timestamp": "2026-04-28 23:15:08.671297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the lack of shard/realm cross-validation in TopicServiceImpl.findById() — which only passes id.getId() (the encoded long) to the repository — to retrieve a topic row that was created under a different shard/realm context, making the history appear to belong to the requested shard/realm?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62e14bd1-c824-4446-8df0-3357d91aa3de?mode=deep",
+    "timestamp": "2026-04-28 23:15:32.460662",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the TopicRepository extending CrudRepository<Topic, Long> (with no custom query methods) to observe that findById() always returns the latest topic row, never a historical snapshot, and use this to make the API misrepresent the topic's state at a past timestamp, effectively reorganizing what history is visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f34c2319-eefd-4dc7-bb4b-073e34a6a7f0?mode=deep",
+    "timestamp": "2026-04-28 23:15:55.379521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user trigger a denial-of-history attack by sending a valid topic ID for a topic that exists only in topic_history (pruned from the current topic table via the prune() method deleting rows where timestamp_range << int8range(?1, null)), causing TopicServiceImpl.findById() to throw EntityNotFoundException and hide all historical evidence of that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b25f1cb5-b132-4d88-9909-c9f9a22bec2f?mode=deep",
+    "timestamp": "2026-04-28 23:16:18.789764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that TopicServiceImpl is declared final and @Named (not @Transactional), meaning findById() runs outside any transaction boundary, allowing a concurrent importer commit to change the topic row between the repository read and the mapper call in TopicController, producing a response that mixes history from two different consensus timestamps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e3f9351-ac82-40e3-8792-cd64cba005e5?mode=deep",
+    "timestamp": "2026-04-28 23:16:43.277795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the EntityIdNumParameter regex (^((\\\\d{1,4})\\\\.)?((\\\\d{1,5})\\\\.)?(\\\\d{1,12})$) accepting a bare numeric string (e.g., '274877906943') to cause EntityId.of(shard=0, realm=0, num=274877906943) to encode to the same long as a topic with shard>0, thereby retrieving that topic's history under a false identity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20da94c8-655b-4f1d-b465-e31f0566a53e?mode=deep",
+    "timestamp": "2026-04-28 23:17:09.164008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the absence of a @Cacheable annotation on TopicServiceImpl.findById() combined with the presence of the EntityId Caffeine cache to create a scenario where the EntityId object is cached but the underlying topic row has been updated, causing repeated calls to return the same EntityId but different topic history states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17d49161-117a-47e5-ab7a-46a135d45491?mode=deep",
+    "timestamp": "2026-04-28 23:17:36.275800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the TopicController calling topicService.findById(), entityService.findById(), and customFeeService.findById() sequentially without a shared transaction, where each call may read from a different database snapshot, causing the assembled Topic response to reflect a historically impossible combination of adminKey, feeScheduleKey, and timestampRange?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf4f8cf8-eefb-4ade-87a6-c697501ad887?mode=deep",
+    "timestamp": "2026-04-28 23:18:04.078098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that AbstractTopic.timestampRange is a Range<Long> (not validated for monotonicity by TopicServiceImpl) to observe a topic whose timestampRange.lower is greater than a previously observed value, inferring that the importer reorganized the topic's history by updating the timestamp_range column without creating a proper history entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06215dd7-1832-4715-82bd-726239433796?mode=deep",
+    "timestamp": "2026-04-28 23:18:31.661129",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the EntityId.of(long id) factory method's cache lookup (CACHE.get(id, k -> new EntityId(id))) to poison the cache with a crafted long value that maps to an EntityId whose getNum(), getRealm(), getShard() decode to a different topic than the one stored in the database under that long key, causing findById() to return mismatched history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0653991-2392-476c-8cbd-dbf641447b16?mode=deep",
+    "timestamp": "2026-04-28 23:19:01.790505",
+    "report_generated": false
+  }
+]
