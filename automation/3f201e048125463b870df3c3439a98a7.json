@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the fallback logic in fetchMirrorNodeNetwork() where host falls back from ep.DomainName to ep.IPAddressV4 without validating that the IP is a routable public address, allowing a malicious mirror node to inject loopback (127.0.0.1) or link-local addresses into the network map, causing all hiero.NewTransferTransaction().Execute(client) calls to connect to the local container instead of real Hedera nodes, permanently freezing the operator's HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f94686af-3359-4acb-9c4f-fcb80efcb68b?mode=deep",
+    "timestamp": "2026-04-28 23:26:37.575100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the absence of pagination handling in fetchMirrorNodeNetwork() (only the first page of nodes is fetched, Links.Next is parsed but never followed) to cause the pinger to build a network map with only a subset of real nodes, and if those nodes are all offline or frozen, all TransferTransaction.Execute(client) calls fail, permanently preventing HBAR from leaving the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13691f54-1ecf-4ad7-9519-8262cf95c242?mode=deep",
+    "timestamp": "2026-04-28 23:26:49.657172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user who can inject a response with HTTP status 429 (TooManyRequests) from the mirror node cause fetchMirrorNodeNetwork() to set retry=true and buildNetworkFromMirrorNodes() to retry up to cfg.mirrorNodeClientMaxRetries+1 times, and if all retries return 429, newClient() returns an error, the pinger crashes, and all operator HBAR is permanently frozen because no transfers can ever be initiated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_998653d6-a4bc-4672-a9bb-7da3a5ede6d9?mode=deep",
+    "timestamp": "2026-04-28 23:27:01.919856",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the json.NewDecoder(resp.Body).Decode(&payload) call in fetchMirrorNodeNetwork() by serving a maliciously crafted JSON response with a NodeAccountID that parses successfully via hiero.AccountIDFromString() but maps to an attacker-controlled account, causing the network map to route all TransferTransaction.Execute(client) calls to attacker-controlled nodes that silently drop transactions and permanently freeze the operator's HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7dc2ee7d-2668-4281-a662-00352d60516a?mode=deep",
+    "timestamp": "2026-04-28 23:27:14.724415",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: newClient()] Can an unprivileged external user exploit the 'other' network path in newClient() where cfg.network == 'other' triggers buildNetworkFromMirrorNodes() with a user-controlled cfg.mirrorRest URL, allowing the attacker to serve a crafted node list that maps all Hedera node account IDs to attacker-controlled gRPC endpoints, causing all hiero.NewTransferTransaction() calls to be submitted to fake nodes that accept but never process transactions, permanently freezing the operator's HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08a2635c-0d43-4134-b062-ad85f12f9a03?mode=deep",
+    "timestamp": "2026-04-28 23:27:28.053449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: newClient()] Can an unprivileged external user exploit the fact that hiero.PrivateKeyFromString(cfg.operatorKey) in newClient() accepts the hardcoded default key without any entropy or validity check, and if the default key corresponds to a well-known test account that has been frozen on mainnet, client.SetOperator(opID, opKey) configures the pinger to use a frozen operator, causing every AddHbarTransfer(client.GetOperatorAccountID(), ...) to fail with ACCOUNT_FROZEN and permanently locking all HBAR in that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a55677f9-1249-4079-8806-2867b9ef79b4?mode=deep",
+    "timestamp": "2026-04-28 23:27:41.757657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: newClient()] Can an unprivileged external user exploit the absence of operator account existence validation in newClient() so that if cfg.operatorID is set to a deleted or frozen Hedera account via HIERO_MIRROR_PINGER_OPERATOR_ID, client.SetOperator(opID, opKey) succeeds locally but every subsequent Execute(client) call fails with ACCOUNT_DELETED or ACCOUNT_FROZEN, and since submitWithRetry() retries unconditionally, all HBAR in the operator account is permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5a193bf-a8b6-4ccd-94cc-2dc8dd951742?mode=deep",
+    "timestamp": "2026-04-28 23:27:56.285613",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()/live] Can an unprivileged external user exploit the 2-minute staleness threshold (age > 2*time.Minute) in the healthcheck live mode by causing the pinger's heartbeat goroutine to be starved of CPU (e.g., via a CPU exhaustion attack on the container), preventing os.WriteFile('/tmp/alive', ...) from executing within the 15-second ticker interval, making the age exceed 2 minutes, triggering a pod restart that kills an in-flight Execute(client) call and permanently loses the deducted HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc82a05f-1c2c-40de-b01a-e4432597c5eb?mode=deep",
+    "timestamp": "2026-04-28 23:28:11.513222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()/live] Can an unprivileged external user exploit the fact that the healthcheck binary reads os.Args[1] without sanitization, and if the Kubernetes liveness probe is misconfigured to pass an attacker-controlled argument, the default 'ready' mode is bypassed and the 'live' mode's age > 2*time.Minute check is triggered with a manipulated /tmp/alive file, causing the pod to be killed during an active TransferTransaction and permanently freezing the in-flight HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_367c4654-6c34-4750-8106-7081a3e9a985?mode=deep",
+    "timestamp": "2026-04-28 23:28:27.752752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of idempotency keys in hiero.NewTransferTransaction() so that when a retry occurs after a network timeout (where the first attempt may have been committed on-chain), the retry submits a duplicate transaction, causing double-deduction from the operator account, and if the operator balance is insufficient for the second deduction, the account is left in a state where the remaining HBAR is permanently frozen due to insufficient balance for future transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18110e76-2174-4aa3-968c-961d683d7b38?mode=deep",
+    "timestamp": "2026-04-28 23:28:44.941826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that submitWithRetry() calls hiero.AccountIDFromString(cfg.toAccountID) on every invocation without caching, and if the attacker can cause cfg.toAccountID to be a syntactically valid but semantically frozen account ID, every tick of the transfer loop will attempt and fail the transfer, draining the operator account in fees until the balance is zero and all remaining HBAR is permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdf6f764-5d19-422f-b9d8-eae7526079ea?mode=deep",
+    "timestamp": "2026-04-28 23:29:02.271653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the lack of a minimum balance check before calling Execute(client) in submitWithRetry() so that when the operator account balance falls below the transaction fee threshold, every Execute(client) call fails with INSUFFICIENT_PAYER_BALANCE, and since submitWithRetry() retries unconditionally, the remaining HBAR is permanently consumed in failed transaction fees until the account reaches exactly zero and all funds are permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a849d98c-35a6-4d54-98b0-236c60ce457a?mode=deep",
+    "timestamp": "2026-04-28 23:29:19.959542",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that the error returned by resp.GetReceipt(client) is wrapped in 'err = rerr' and treated identically to an Execute() error, so that a receipt with status ACCOUNT_FROZEN is retried the same number of times as a transient network error, causing the operator account to be drained in fees for a permanently-frozen destination account with no possibility of recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e11ca0dd-0d12-4328-9f53-08c0f4576f01?mode=deep",
+    "timestamp": "2026-04-28 23:29:38.694505",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: backoff()] Can an unprivileged external user exploit the backoff() function's use of bit-shifting (1<<(attempt-1)) where attempt is an int that can be set via cfg.maxRetries to a value >= 64, causing undefined behavior or integer overflow in time.Duration(1<<(attempt-1)), producing a negative or zero sleep duration that causes the retry loop to spin without delay and rapidly drain the operator account's HBAR in transaction fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce7018e2-972a-4b0e-b398-404a22996bd9?mode=deep",
+    "timestamp": "2026-04-28 23:29:56.878225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user exploit the envOr() function's TrimSpace behavior so that a whitespace-only value for HIERO_MIRROR_PINGER_OPERATOR_KEY causes the default hardcoded private key to be used, and if that default key is publicly known, the attacker can use it to sign a freeze transaction against the operator account, permanently locking all HBAR held by the operator?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b94447b6-27e6-4b61-ab3b-7dae9ba29f5e?mode=deep",
+    "timestamp": "2026-04-28 23:30:15.896347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user exploit the fact that cfg.maxRetries is only validated to be >= 0 (negative values are clamped to 0) but has no upper bound, allowing HIERO_MIRROR_PINGER_MAX_RETRIES=2147483647 to cause submitWithRetry() to loop for an astronomically long time on a frozen account, consuming all operator HBAR in fees and permanently freezing the remaining balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7e363a4-ecd9-4822-afac-8b968e1c6403?mode=deep",
+    "timestamp": "2026-04-28 23:30:35.754307",
+    "report_generated": false
+  }
+]
