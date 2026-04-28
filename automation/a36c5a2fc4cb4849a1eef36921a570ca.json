@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a crafted request with a URL that causes `new URL(req.url, 'http://localhost')` to throw a TypeError (e.g., URL containing null bytes or invalid percent-encoding), given that no try/catch wraps line 153, triggering an uncaught exception that bypasses `next()` and permanently stalls all in-flight fund-related API requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9be8ad8-bd25-4121-ac08-a32cbdf599c7?mode=deep",
+    "timestamp": "2026-04-28 23:11:22.685915",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a high volume of requests that each call `inFlightCounter.add(1)` at line 169 but then abort the TCP connection before the response `finish` event fires, given that `inFlightCounter.add(-1)` at line 186 is only triggered by `res.on('finish')`, causing `inFlightCounter` to grow unboundedly and trigger any upstream circuit breaker that monitors `api_all_request_in_processing_total`, permanently blocking fund-transfer API calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8e803ea-6b94-4e91-a12e-83fcf30ca722?mode=deep",
+    "timestamp": "2026-04-28 23:11:34.869812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user craft requests with arbitrary unique path segments (e.g., `/api/v1/accounts/0.0.1`, `/api/v1/accounts/0.0.2`, ... `/api/v1/accounts/0.0.N`) that, because `toOpenApiPath` falls back to `req.path` when `req.route` is null (line 18), inject unbounded unique `path` label values into `requestTotalCounter`, `durationHistogram`, `requestSizeHistogram`, and `responseSizeHistogram`, exhausting Node.js heap memory and crashing the mirror-rest process, making token freeze-status queries permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a86c0c39-ec41-4494-902d-9a6f87c413f4?mode=deep",
+    "timestamp": "2026-04-28 23:11:47.485636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toOpenApiPath()] Can an unprivileged external user send requests to unregistered routes (where `req.route` is null and `res.locals[requestPathLabel]` is unset), causing `toOpenApiPath` to use the raw `req.path` value at line 18, injecting one unique Prometheus label per unique path into all per-route histograms, leading to OOM crash of the mirror-rest service and making it impossible for users to query token freeze status to unfreeze their funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1cbd4963-9391-44f8-8aaf-99bb65fb2baa?mode=deep",
+    "timestamp": "2026-04-28 23:12:01.334569",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user trigger an unhandled promise rejection by hitting the metrics endpoint when `exporter.collect()` at line 161 rejects (e.g., due to a corrupted internal metric state caused by prior label cardinality explosion), given there is no `.catch()` handler on the promise chain, causing Node.js to emit an `unhandledRejection` event that crashes the process and permanently freezes all pending fund-related API responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfdae394-5e5d-4c88-b2c6-f482b7a26d3c?mode=deep",
+    "timestamp": "2026-04-28 23:12:15.982141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send requests with a `content-length` header set to an extremely large integer (e.g., `9999999999999`) causing `requestSizeHistogram.record(parseInt(req.headers['content-length'] ?? '0', 10) || 0, labels)` at line 209 to record a value far outside histogram bucket boundaries, corrupting the OpenTelemetry SDK's internal bucket state and causing subsequent metric collection to throw, crashing the process and freezing fund-query availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31a7d37b-cc2b-428a-8767-7f829464e0d9?mode=deep",
+    "timestamp": "2026-04-28 23:12:30.612987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send requests with a negative `content-length` header (e.g., `content-length: -1`), causing `parseInt('-1', 10) || 0` to evaluate to `-1` (since `-1` is truthy), recording a negative value into `requestSizeHistogram` at line 209, violating the histogram's non-negative invariant and potentially causing the OpenTelemetry SDK to enter an error state that prevents further metric recording and crashes the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6885541-6998-48ec-a5d3-bd9691863cb0?mode=deep",
+    "timestamp": "2026-04-28 23:12:45.492859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send requests using non-standard HTTP methods (e.g., `FREEZE`, `LOCK`, `PATCH2`) that are passed directly as the `method` label at line 191, creating unbounded unique label combinations in `requestTotalCounter` and all per-route histograms, exhausting the OpenTelemetry SDK's in-memory metric store and crashing the Node.js process, making token freeze-status endpoints permanently unreachable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69ded307-e4f1-41ec-a347-58d034cb94b5?mode=deep",
+    "timestamp": "2026-04-28 23:13:02.091298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user exploit the fact that `res.end` is monkey-patched at line 180 without a try/catch, so that if `getChunkSize(chunk)` throws an unexpected exception (e.g., due to a chunk type that is neither Buffer nor string but has a broken `length` property), `originalEnd` is never called, leaving the HTTP response permanently open and the client's fund-operation request permanently hanging?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_911f98bc-fb8c-4459-9b8d-ec42162c19b9?mode=deep",
+    "timestamp": "2026-04-28 23:13:18.620827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user exploit the fact that `res.write` is monkey-patched at line 176 without a try/catch, so that if `originalWrite` throws (e.g., due to a destroyed socket), the exception propagates uncaught through the patched `res.write`, bypassing Express error handling and leaving `inFlightCounter` permanently incremented, causing circuit breakers to block all subsequent fund-related API calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3658343d-18f4-428a-aa52-2614cea6261e?mode=deep",
+    "timestamp": "2026-04-28 23:13:35.676271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a flood of requests that are each processed by `metricsMiddleware` (incrementing `inFlightCounter` at line 169) but whose responses are never finished because a downstream middleware throws synchronously before calling `res.end`, given that `res.on('finish')` at line 185 never fires in this case, causing `inFlightCounter` to accumulate indefinitely and trigger rate-limit or circuit-breaker thresholds that freeze all fund-related API access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cedd0455-c5a9-4d27-9f6b-5de7870189bb?mode=deep",
+    "timestamp": "2026-04-28 23:13:53.687941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: authenticate()] Can an unprivileged external user exploit the condition `if (!authentication)` at line 139 where `authentication` is a falsy non-boolean value (e.g., `0`, `null`, `''`) in `config.metrics.config`, causing `authenticate` to return `true` and granting unauthenticated access to the metrics endpoint, exposing `api_all_request_in_processing_total` values that reveal when the system is under load and enabling a precisely timed DoS attack that freezes fund operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f24847fe-4b8e-4e63-8587-f2a37f9f0806?mode=deep",
+    "timestamp": "2026-04-28 23:14:10.494249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: authenticate()] Can an unprivileged external user send a request to the metrics endpoint with a `Authorization: Basic` header where `credentials.name` is an empty string, causing `tsscmp(credentials.name, username)` at line 143 to return `false` but the short-circuit `&&` evaluation to still execute `tsscmp(credentials.pass, password)`, and if `username` is also empty string, `tsscmp('', '')` returns `true`, granting unauthorized access to metrics that expose internal state enabling fund-freeze timing attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b0c5b25-4e04-4a43-af3f-749db74be58b?mode=deep",
+    "timestamp": "2026-04-28 23:14:30.283636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a request whose URL path exactly matches `metricsPath` (line 156) but with a query string that causes `exporter.collect()` to return a promise that never resolves (hangs indefinitely), given there is no timeout on the promise at line 161, permanently occupying a Node.js event loop tick and preventing other fund-related requests from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eba4ae39-cb13-4db5-88dc-908d9b32e7fd?mode=deep",
+    "timestamp": "2026-04-28 23:14:50.559905",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send requests with a URL containing a fragment identifier (e.g., `/api/v1/accounts#freeze`) that, after `new URL(req.url, 'http://localhost')` parsing at line 153, produces a `pathname` that does not match any route, causing `toOpenApiPath` to use the raw path including the fragment as a Prometheus label, injecting attacker-controlled strings into metric label values and causing label cardinality explosion that crashes the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5db3e69e-b1b7-43fa-9680-5e6ad67d3579?mode=deep",
+    "timestamp": "2026-04-28 23:15:12.022950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toOpenApiPath()] Can an unprivileged external user send requests with paths containing regex-special characters (e.g., `/api/v1/accounts/(.*)/tokens`) that are passed to `path.replace(/:([^/]+)/g, '{$1}')` at line 24, causing the replacement to produce malformed OpenAPI-style paths that are stored as unique Prometheus labels, contributing to label cardinality explosion and eventual OOM crash that freezes fund-query availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88446db2-c943-404a-a2a1-ff511e80d0fa?mode=deep",
+    "timestamp": "2026-04-28 23:15:34.058574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user exploit the lack of error handling in the `res.on('finish')` callback at line 185, where if `toOpenApiPath(req, res)` at line 189 throws an exception (e.g., due to `req.path` being undefined on a malformed request), the exception propagates out of the finish handler, `inFlightCounter.add(-1)` is never called, and the counter permanently drifts upward, eventually triggering circuit breakers that block all fund-related API calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a46770b1-0dc4-4503-a806-b28987c1aa98?mode=deep",
+    "timestamp": "2026-04-28 23:15:55.780069",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: initMetrics()] Can an unprivileged external user trigger a scenario where `metricsHandler()` is called multiple times (e.g., via hot-reload or module re-import), causing `initMetrics()` at line 147 to re-assign module-level variables `inFlightCounter`, `exporter`, etc., while old middleware instances still hold references to the previous `inFlightCounter`, creating split accounting where `add(1)` and `add(-1)` operate on different counter instances, causing permanent counter drift that triggers circuit breakers and freezes fund operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_752950c2-7826-46b6-992c-9e053bc90ca7?mode=deep",
+    "timestamp": "2026-04-28 23:16:18.957605",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with `req.url` set to a value like `//evil.com/path` that, when parsed by `new URL(req.url, 'http://localhost')` at line 153, produces a `pathname` of `/path` instead of `//evil.com/path`, causing the path normalization at line 154 to incorrectly match `metricsPath` and serve metrics without authentication, exposing `inFlightCounter` values that enable precise timing of fund-freeze attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc580206-df26-42b5-8c14-b2d9e4d29749?mode=deep",
+    "timestamp": "2026-04-28 23:16:41.477985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send requests with extremely long path strings (e.g., 100KB path) that are stored as Prometheus label values via `toOpenApiPath` at line 189, causing the OpenTelemetry SDK to allocate large strings for each unique label combination, exhausting heap memory and crashing the Node.js process, making token freeze-status and unfreeze-transaction APIs permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6d78492-fb28-4f0a-ad9c-dc1fcc7e5472?mode=deep",
+    "timestamp": "2026-04-28 23:17:05.850128",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user exploit the fact that the metrics endpoint branch at line 156 does not call `inFlightCounter.add(1)` before the `exporter.collect()` promise, but if the URL normalization at line 154 produces a false positive match for `metricsPath` on a non-metrics request, the request is handled as a metrics request without incrementing `inFlightCounter`, causing accounting drift that misrepresents system load and triggers false circuit-breaker trips that freeze fund operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1948dfe8-9219-40ff-905e-2fac166ea6de?mode=deep",
+    "timestamp": "2026-04-28 23:17:29.651965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getChunkSize()] Can an unprivileged external user trigger a scenario where a downstream middleware passes a non-Buffer, non-string, non-null chunk to the patched `res.write` at line 176 (e.g., a Uint8Array or ArrayBuffer), causing `getChunkSize` to return 0 at line 43, silently under-counting `responseSize`, and if `responseSizeHistogram` is used by an alerting rule to detect abnormally small responses (indicating frozen/empty fund-query results), the under-count suppresses the alert and allows a fund-freeze condition to go undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8743622-19f4-476a-aa03-5df10ee29ce0?mode=deep",
+    "timestamp": "2026-04-28 23:17:54.892972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send concurrent requests that each patch `res.write` and `res.end` at lines 176-183, and if the same `res` object is shared across middleware instances (e.g., due to a framework bug or test harness), the `responseSize` closure variable at line 172 is double-incremented, causing `responseSizeHistogram` to record inflated values that trigger false-positive alerts indicating abnormally large responses and causing operators to mistakenly freeze accounts under investigation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_185a6810-16e3-4364-b574-d6af6ef1170f?mode=deep",
+    "timestamp": "2026-04-28 23:18:21.053489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a request where `Date.now()` at line 168 and `Date.now()` at line 188 straddle a system clock adjustment (NTP step backward), causing `duration` to be a large negative number, which is then recorded into `durationHistogram` at line 208, violating the histogram's non-negative invariant and potentially causing the OpenTelemetry SDK to throw during the next `exporter.collect()` call, crashing the metrics endpoint and masking fund-freeze conditions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c7957e4-7570-4004-889c-28c861add156?mode=deep",
+    "timestamp": "2026-04-28 23:18:47.763980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to the metrics path with a URL-encoded trailing slash (e.g., `/swagger/metrics%2F`) that, after `new URL` parsing at line 153, produces a decoded `pathname` of `/swagger/metrics/` matching `metricsPath` at line 156, bypassing the authentication check at line 157 if the `authenticate` function has a logic flaw, and exposing internal metric state that reveals fund-freeze operation timing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f788a813-bd89-46af-8003-2ff8b383ee2d?mode=deep",
+    "timestamp": "2026-04-28 23:19:15.071056",
+    "report_generated": false
+  }
+]
