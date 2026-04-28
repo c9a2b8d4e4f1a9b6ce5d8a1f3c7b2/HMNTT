@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByIndex()] Can an unprivileged external user send FindByIndex() with index=0 repeatedly before genesis is initialized, causing each request to execute both the selectGenesis CTE and selectRecordBlockByIndex queries sequentially, doubling DB load per request and degrading >=30% of nodes through query amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cabb1796-f0b9-487b-9359-feb63e00fd88?mode=deep",
+    "timestamp": "2026-04-28 23:05:57.512998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: NewBlockRepository()] Can an unprivileged external user trigger the creation of many blockRepository instances (if the API allows per-request instantiation) by sending requests that cause NewBlockRepository() to be called repeatedly, each holding a reference to dbClient and consuming memory, leading to memory exhaustion on >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e758fd4-5831-4af6-ad60-09700e9ae07c?mode=deep",
+    "timestamp": "2026-04-28 23:06:09.604043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: initGenesisRecordFile()] Can an unprivileged external user exploit the fact that once.Do at line 257 only executes if initGenesisRecordFile() succeeds, meaning a persistent DB error condition (e.g., network partition) causes every request to retry the genesis query indefinitely, creating a DB retry storm that degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cc49581-e8b9-4420-86fa-c163665cd3b8?mode=deep",
+    "timestamp": "2026-04-28 23:06:22.209327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findBlockByHash()] Can an unprivileged external user send concurrent FindByHash() requests with the same valid hash, causing multiple goroutines to simultaneously execute the correlated subquery in selectByHashWithIndex and the genesis initialization query, creating lock contention on the record_file table that degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31f1bd06-ac3f-4b0f-852a-aabf492d8827?mode=deep",
+    "timestamp": "2026-04-28 23:06:35.218059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: ToBlock()] Can an unprivileged external user trigger a scenario where genesisBlock.Index equals math.MaxInt64, causing ToBlock() at line 99 to compute parentIndex = rb.Index - 1 with integer underflow for non-genesis blocks, producing corrupted ParentIndex values that cause downstream Rosetta API consumers to reject all block responses and effectively shut down >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6523550e-b97b-436f-b5f0-87686d2be465?mode=deep",
+    "timestamp": "2026-04-28 23:06:49.508208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByHash()] Can an unprivileged external user send FindByHash() with a hash string of exactly 1 byte (passing the empty check at line 136) that is guaranteed to never match any record, causing every request to execute the full selectByHashWithIndex query including its correlated subquery, wasting DB resources and degrading >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1372e5e9-1f89-4a60-becf-7225e2abd273?mode=deep",
+    "timestamp": "2026-04-28 23:07:03.542135",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: selectGenesis (SQL constant)] Can an unprivileged external user exploit the selectGenesis query's dependency on the account_balance table (line 52-54) by sending requests that force repeated scans of account_balance ordered by consensus_timestamp, causing index thrashing on large tables and degrading DB performance across >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69cac727-fd03-4f7b-a3c3-464238156355?mode=deep",
+    "timestamp": "2026-04-28 23:07:18.883346",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: handleDatabaseError()] Can an unprivileged external user craft requests that consistently produce non-record-not-found DB errors (e.g., by sending requests that trigger query timeouts), causing handleDatabaseError() to return ErrDatabaseError and log.Errorf() to be called on every request, filling disk with log entries and degrading >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5864f5b3-a97c-419a-9b8d-88014b5f2408?mode=deep",
+    "timestamp": "2026-04-28 23:07:35.644321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByIdentifier()] Can an unprivileged external user send FindByIdentifier() with index=math.MaxInt64 and a non-empty hash string, bypassing the index<0 check at line 151, causing findBlockByHash() to execute the full selectByHashWithIndex query and then the index comparison at line 164, wasting resources on every request and degrading >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_860fc226-6615-489d-b540-904b0a5da3e6?mode=deep",
+    "timestamp": "2026-04-28 23:07:52.715803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: initGenesisRecordFile()] Can an unprivileged external user exploit the window between the ConsensusStart check at line 244 and the once.Do at line 257 in a highly concurrent environment to cause multiple goroutines to all read genesisConsensusStartUnset (-1) simultaneously and all execute the selectGenesis CTE, creating a DB query storm that degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72916674-6822-4032-bc1d-6fa96be0adf0?mode=deep",
+    "timestamp": "2026-04-28 23:08:11.470394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findBlockByIndex()] Can an unprivileged external user send FindByIndex() with a valid genesis index repeatedly, causing findBlockByIndex() to execute selectRecordBlockByIndex with its nested correlated subquery (lines 77-80) on every request without any result caching, enabling efficient DB exhaustion that degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_464d0f1f-2d42-41af-9917-8bd43dd474a5?mode=deep",
+    "timestamp": "2026-04-28 23:08:30.252647",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: RetrieveGenesis()] Can an unprivileged external user send concurrent RetrieveGenesis() requests before genesis is initialized, causing all of them to pass the ConsensusStart check at line 244 simultaneously and all execute the selectGenesis CTE, creating a thundering herd that saturates the DB and degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41721e6b-a55e-400b-9930-1fe94f47ee56?mode=deep",
+    "timestamp": "2026-04-28 23:08:50.324700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByHash()] Can an unprivileged external user send FindByHash() with a hash string containing thousands of repeated characters (e.g., 'a' * 1MB), which passes the non-empty check at line 136 but causes the PostgreSQL server to allocate a large buffer for the parameterized query, exhausting DB server memory and degrading >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_729141c6-82f5-4684-bd46-eb6319257910?mode=deep",
+    "timestamp": "2026-04-28 23:09:10.641940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: blockRepository struct] Can an unprivileged external user exploit the lack of request rate limiting on any blockRepository method to send a sustained high-volume request stream that keeps the dbClient.GetDbWithContext() connection pool fully occupied, starving legitimate requests and effectively shutting down >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90fff5d8-da4b-4d37-9bee-cab29d478423?mode=deep",
+    "timestamp": "2026-04-28 23:09:31.021273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByIndex()] Can an unprivileged external user send FindByIndex() with index=0 when the genesis block has a very high index (e.g., 10^9), causing findBlockByIndex() to return ErrBlockNotFound at line 212 on every request after a full genesis initialization, but still consuming goroutine and connection resources at scale to degrade >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abf7a724-367c-45d2-b3c4-b1e9dae5e159?mode=deep",
+    "timestamp": "2026-04-28 23:09:52.346646",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: selectByHashWithIndex (SQL constant)] Can an unprivileged external user send FindByHash() requests with hashes that match records near the end of the record_file table, causing the correlated subquery (lines 36-41) to scan forward in the table for the next record's consensus_start, creating expensive sequential scans that degrade DB performance across >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a64698d-96bc-4761-8341-c95f7057566b?mode=deep",
+    "timestamp": "2026-04-28 23:10:15.000004",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: initGenesisRecordFile()] Can an unprivileged external user send requests that cause initGenesisRecordFile() to fail with ErrDatabaseError (not ErrNodeIsStarting) repeatedly, causing the once.Do to never fire and every subsequent request to re-execute the expensive selectGenesis CTE, creating a persistent DB amplification attack that degrades >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb6418c7-2362-40e3-92ad-7caccdd9e477?mode=deep",
+    "timestamp": "2026-04-28 23:10:37.923543",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findBlockByHash()] Can an unprivileged external user send FindByHash() with a hash that is a valid hex string of 96 characters (typical block hash length) but does not exist in the DB, causing the full selectByHashWithIndex query to execute and return ErrRecordNotFound on every request, enabling efficient DB query exhaustion across >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79a09639-a023-4497-8477-12e23cad83db?mode=deep",
+    "timestamp": "2026-04-28 23:11:02.353160",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: RetrieveLatest()] Can an unprivileged external user exploit the fact that RetrieveLatest() checks rb.Index < br.genesisBlock.Index at line 203 after a DB query, meaning every call executes selectLatestWithIndex regardless of the result, by flooding this endpoint to keep the DB under constant ORDER BY index DESC query load and degrade >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9af04922-cf62-41ea-a22c-64133ae1410c?mode=deep",
+    "timestamp": "2026-04-28 23:11:26.707737",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: FindByIdentifier()] Can an unprivileged external user send FindByIdentifier() with index=0 and hash=\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe1f3d4b-72d3-4bc0-a4b3-290d0b9e7c88?mode=deep",
+    "timestamp": "2026-04-28 23:11:53.297888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: selectRecordBlockByIndex (SQL constant)] Can an unprivileged external user send FindByIndex() with a sequence of valid block indices in rapid succession, causing selectRecordBlockByIndex to execute its nested correlated subquery (lines 77-80) for each request, creating sustained nested query load that degrades DB performance across >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_970264a3-203b-4e34-8fdf-6a5bcf8ea3c7?mode=deep",
+    "timestamp": "2026-04-28 23:12:19.761781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: initGenesisRecordFile()] Can an unprivileged external user exploit the fact that br.genesisBlock is read at line 244 without synchronization (no mutex, only sync.Once for writing) to observe a partially-written genesisBlock struct in a concurrent scenario, causing ToBlock() to use inconsistent ConsensusStart/Index values and return corrupted block data that crashes downstream consumers on >=30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a01e5a4-9666-45b5-916d-3456c0067ace?mode=deep",
+    "timestamp": "2026-04-28 23:12:44.892765",
+    "report_generated": false
+  }
+]
