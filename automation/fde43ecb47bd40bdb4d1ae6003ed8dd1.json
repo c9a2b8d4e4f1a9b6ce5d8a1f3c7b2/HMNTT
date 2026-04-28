@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NewNetworkAPIService()] Can an unprivileged external user observe that `OperationTypeFee` ('FEE') is appended to `operationTypes` in `NewNetworkAPIService()` and then submit it as the `operation_type` option to `/construction/metadata`, causing `GetDefaultMaxTransactionFee('FEE')` to return `ErrInvalidOperationType` and leaking internal fee routing logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a32ffa72-5028-468a-a1b6-64eaa4d46c39?mode=deep",
+    "timestamp": "2026-04-28 21:28:47.642706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `/network/options` and observe that `OperationTypeFee` ('FEE') is listed as a valid `OperationTypes` entry in the `Allow` block, then use that advertised type to attempt fee-type operations in `/construction/preprocess`, causing the system to accept 'FEE' as a valid operation type string and bypass the intended fee-only-read-only design?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acbd042d-20ae-45a2-ba60-371a5c34f576?mode=deep",
+    "timestamp": "2026-04-28 21:28:59.827213",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user enumerate all operation types returned by `NetworkOptions()` including 'FEE', then craft a `/construction/payloads` request with operations of type 'FEE' to attempt constructing a transaction that explicitly sets fee transfers, causing fee amounts to be set outside the SDK's default max fee design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1e49019-c59e-4209-ae59-55bd2c72a713?mode=deep",
+    "timestamp": "2026-04-28 21:29:12.185432",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user exploit the fact that `NetworkOptions()` advertises 'FEE' as an allowed operation type (via `operationTypes = append(operationTypes, types.OperationTypeFee)`) while no constructor is registered for it in `compositeTransactionConstructor`, causing a discrepancy that misleads fee-aware Rosetta clients into believing fee operations are constructable, leading to incorrect fee accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1423cfe-9f01-4796-bc72-7c6a1b443dba?mode=deep",
+    "timestamp": "2026-04-28 21:29:25.453371",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `HistoricalBalanceLookup: true` is always set, then use historical block identifiers to query fee operations at past blocks where fee schedules differed, causing the client to receive fee operation data that does not reflect current fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20f74898-19cc-492f-a88b-8e16f21c2ba9?mode=deep",
+    "timestamp": "2026-04-28 21:29:39.055453",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user observe the full list of `OperationStatuses` returned by `NetworkOptions()` — built from `GetTransactionResults()` and `IsTransactionResultSuccessful()` — and identify fee-related result codes such as 'INSUFFICIENT_TX_FEE' or 'FAIL_FEE' marked as unsuccessful, then craft transactions designed to trigger those statuses to probe fee enforcement boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49881176-c4f5-4d4f-98f2-d221e562a6f4?mode=deep",
+    "timestamp": "2026-04-28 21:29:51.705329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` repeatedly and observe that `operationStatuses` is rebuilt on every call from `GetTransactionResults()`, and if the underlying `transactionResults` map is ever mutated concurrently, cause a race condition that returns inconsistent fee-related operation statuses, leading to incorrect fee validation decisions by downstream clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63a8f731-27c1-4d48-850b-65d1c943eb98?mode=deep",
+    "timestamp": "2026-04-28 21:30:04.234143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user exploit the fact that `NetworkOptions()` includes all transaction types up to `MaxTransactionType = int32(57)` in `operationTypes` — many of which have no registered constructor — and submit one of those unsupported types as `operation_type` in `/construction/metadata` to probe which types return fee values versus `ErrInvalidOperationType`, mapping the fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34eb7b77-3296-45dd-aaaa-67d9cdd48559?mode=deep",
+    "timestamp": "2026-04-28 21:30:17.288330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NewNetworkAPIService()] Can an unprivileged external user observe that `operationTypes` is built from `tools.GetStringValuesFromInt32StringMap(types.GetTransactionTypes())` plus 'FEE', and that `GetTransactionTypes()` is initialized from proto reflection up to `MaxTransactionType=57`, then submit a transaction type string that matches a proto field name but is not in the constructor map, causing `GetDefaultMaxTransactionFee()` to return zero-value `HbarAmount` and mislead the client about the actual fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43c7ae1e-ac26-404d-b7b3-b88445e18508?mode=deep",
+    "timestamp": "2026-04-28 21:30:29.892299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and use the returned `Errors` list (which includes `ErrInvalidOperationType` and `ErrOperationTypeUnsupported`) to distinguish between 'type not found in map' vs 'type found but unsupported', enabling systematic enumeration of which operation types have fee values registered, leaking fee schedule information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a5e1d22-7492-4208-9719-57715b83221b?mode=deep",
+    "timestamp": "2026-04-28 21:30:42.854511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user observe that `NetworkOptions()` returns `errors.Errors` as a static slice and that it includes both `ErrInvalidOperationType` and `ErrInvalidOptions`, then use the distinction between these two error codes when probing `/construction/metadata` with various `operation_type` values to map which types have fee defaults, effectively reconstructing the fee schedule without authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a3acebb-07ab-4652-9049-b57bdd2a7b2b?mode=deep",
+    "timestamp": "2026-04-28 21:30:55.941580",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and note that `OperationTypeFee` is in `operationTypes` but not in `SupportedOperationTypes` (defined in `constants.go`), then exploit this inconsistency to submit a `/construction/preprocess` request with 'FEE'-typed operations, causing `compositeTransactionConstructor.validate()` to return `ErrOperationTypeUnsupported` and revealing that fee operations cannot be user-constructed, but the error itself confirms the fee type is recognized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75bd9177-d66a-4c37-b466-4d4c97d920f4?mode=deep",
+    "timestamp": "2026-04-28 21:31:09.304859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user exploit the fact that `NetworkOptions()` builds `operationStatuses` by iterating over `GetTransactionResults()` map without sorting, causing non-deterministic ordering of fee-related statuses (e.g., 'FAIL_FEE', 'INSUFFICIENT_TX_FEE') in the response, and use this to fingerprint server state or cause client-side fee validation logic to behave inconsistently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8afb3c6-bef2-402e-bcf6-8200ea2a0bac?mode=deep",
+    "timestamp": "2026-04-28 21:31:22.086772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `OperationTypeFee` is included in `operationTypes` alongside all proto-derived transaction types, then submit a `/construction/metadata` request with `operation_type` set to 'FEE' to receive a `SuggestedFee` response, causing the server to return a fee suggestion for a fee-type operation that should not be user-constructable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b439b4cc-1dab-487d-bb89-90d621a4e5a0?mode=deep",
+    "timestamp": "2026-04-28 21:31:35.218439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user observe that `NetworkOptions()` always returns `HistoricalBalanceLookup: true` regardless of network state, then use this to query fee operations at genesis block timestamps where fee schedules were different, causing the client to receive fee operation data with amounts that do not match current network fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae063510-6d3c-431f-b22a-d04d777e9898?mode=deep",
+    "timestamp": "2026-04-28 21:31:48.323704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that the `Allow.OperationTypes` list includes 'FEE' as a valid type, then use a Rosetta client library that trusts this list to validate operations before submission, causing the client to accept 'FEE'-typed operations in a transaction payload that the server will ultimately reject, leading to wasted fees on failed transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d93c40c6-fade-4f75-abe6-70f553ba2f65?mode=deep",
+    "timestamp": "2026-04-28 21:32:01.358763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NewNetworkAPIService()] Can an unprivileged external user exploit the fact that `operationTypes` is populated at service initialization time from `GetTransactionTypes()` which reads proto reflection data, and if the proto schema is updated to add new transaction types beyond `MaxTransactionType=57`, cause `NetworkOptions()` to advertise those new types as valid fee-bearing operations before constructors are registered for them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_edb15041-49c7-4c5b-a119-28e0b98c410e?mode=deep",
+    "timestamp": "2026-04-28 21:32:13.919397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `operationStatuses` includes entries for all result codes including fee-failure codes, then craft a transaction that intentionally triggers 'INSUFFICIENT_TX_FEE' by setting a max fee below the network minimum, using the Rosetta fee suggestion as a reference to calculate the exact threshold, causing targeted fee manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_371c3c2d-dd12-4b42-9601-eee01c4b3139?mode=deep",
+    "timestamp": "2026-04-28 21:32:27.419500",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `version` is returned as a static `*rTypes.Version` set at initialization, then use the `NodeVersion` field to determine the exact SDK version in use and look up known fee schedule defaults for that version, enabling precise fee manipulation without querying the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e379c09-3417-4da0-a6ab-351b34c4528c?mode=deep",
+    "timestamp": "2026-04-28 21:32:40.465365",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `errors.Errors` is a static global slice, then use the presence or absence of specific fee-related error codes (e.g., `ErrInvalidOperationsAmount`, `ErrInvalidOperationsTotalAmount`) to infer that fee operations must sum to zero, and craft operations that exploit this constraint to redirect fee payments to attacker-controlled accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d468357-332e-4cd0-b1e8-5ff999654906?mode=deep",
+    "timestamp": "2026-04-28 21:32:52.899457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `OperationTypeFee` is listed in `operationTypes`, then submit a `/construction/preprocess` request where all operations have type 'FEE' and negative amounts, causing `compositeTransactionConstructor.validate()` to return `ErrOperationTypeUnsupported` but not before the operation amounts are parsed, potentially leaking information about fee amount validation logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_daf7e677-1e1c-4c14-9668-9daa88c79684?mode=deep",
+    "timestamp": "2026-04-28 21:33:05.845574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `GetTransactionResults()` returns all result codes up to `MaxTransactionResult=337`, then use the fee-related codes to understand the exact conditions under which fee operations succeed or fail, enabling precise calibration of transaction fees to just above the minimum threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72b1b288-dd5d-4fb5-8dcf-482504aad7ed?mode=deep",
+    "timestamp": "2026-04-28 21:33:18.883556",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `persistence.IsTransactionResultSuccessful()` is used to classify result codes, then identify which fee-failure codes are classified as unsuccessful and use that knowledge to craft transactions that appear successful to the Rosetta layer but have fee operations that are outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f2d216b-bb48-4e12-a240-f8309bb56ec3?mode=deep",
+    "timestamp": "2026-04-28 21:33:31.307115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that the `Allow` block does not include a `MaxOperations` or fee cap field, then submit transactions with an arbitrarily large number of operations to the construction endpoints, causing the fee calculation in `GetDefaultMaxTransactionFee()` to be applied only once regardless of operation count, effectively reducing the per-operation fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ac4e244-7d52-46f5-a117-ac151af9216d?mode=deep",
+    "timestamp": "2026-04-28 21:33:44.538577",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/network_service.go -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: NetworkOptions()] Can an unprivileged external user call `NetworkOptions()` and observe that `OperationTypeFee` is in `operationTypes` but the `Allow` block has no `FeeExemptions` or fee-type-specific constraints, then use this absence of constraints to submit mixed-type operation sets where 'FEE' operations are interleaved with 'CRYPTOTRANSFER' operations, attempting to bypass the single-operation-type enforcement in `compositeTransactionConstructor.validate()`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9a2ab3a-2a17-4b5d-b11f-6ab9b2c5e88b?mode=deep",
+    "timestamp": "2026-04-28 21:33:57.558532",
+    "report_generated": false
+  }
+]
