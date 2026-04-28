@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: isValidAccount()] Can an unprivileged external user trigger isValidAccount() through API endpoints that call it for account validation, sending requests with valid but non-existent account IDs (encoded entity IDs), causing entityExistenceQuery to execute on every request with no caching, and since getSingleRow() fetches all rows before checking length (no LIMIT in the query), each call performs a full index lookup, increasing DB load above 30% baseline at moderate request rates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8ed376a-f851-43da-b52f-010361bfae33?mode=deep",
+    "timestamp": "2026-04-28 23:54:46.642262",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user craft inputs that are valid per EntityId.isValidEntityId() (e.g., realm.num format like '0.12345') causing getEncodedId() to call EntityId.parseString() which calls piecesFromString() which calls isEvmAddressAlias() which calls isValidEvmAddress() and parseFromEvmAddress() even for non-EVM inputs, adding unnecessary regex and BigInt evaluation overhead per request that accumulates to raise CPU above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26bebfb4-c9c4-4a1b-a110-63a1b30f6f4a?mode=deep",
+    "timestamp": "2026-04-28 23:54:58.781236",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user send requests with EVM addresses that are valid but map to entities where the deleted column is NULL (not true or false), exploiting the inconsistency between entityFromEvmAddressQuery (deleted <> true, which excludes NULL) and entityFromAliasQuery (coalesce(deleted, false) <> true, which includes NULL as false), causing the EVM address query to return zero rows for entities that the alias query would find, forcing repeated DB lookups for the same entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88aead93-ff68-4577-97b1-10be930a463d?mode=deep",
+    "timestamp": "2026-04-28 23:55:11.232264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with EVM addresses in the 0x-prefixed format (e.g., 0xac384c53f03855fa1b3616052f8ba32c6c2a2fec) that pass evmAddressRegex, causing EntityId.parseString() to call stripHexPrefix() to remove the prefix, then piecesFromString() to call isEvmAddressAlias() with the stripped address, adding string manipulation overhead per request, and then getEntityIdFromEvmAddress() to call Buffer.from() for the DB query, with no caching of any intermediate result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e941c813-df48-426a-8417-f44cf2b3114c?mode=deep",
+    "timestamp": "2026-04-28 23:55:24.882891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getAccountFromAlias()] Can an unprivileged external user send requests with aliases that are valid base32 strings but decode to byte sequences that are not present in the entity table's alias column, causing entityFromAliasQuery to perform a full scan of the alias index on every request, and since the coalesce() function prevents partial index use, the scan covers all non-deleted entities, increasing DB I/O proportionally to the entity table size above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc02f2af-126a-4518-a4c5-345d18eeadec?mode=deep",
+    "timestamp": "2026-04-28 23:55:39.002175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with inputs that pass AccountAlias.isValid() (matching /^(\\\\d{1,5}\\\\.){0,2}[A-Z2-7]+$/) but fail AccountAlias.fromString() due to shard/realm mismatch in AccountAlias.validate() (BigInt(num) !== configured), causing the constructor to throw InvalidArgumentError which is caught in getEncodedId()'s catch block and re-thrown as InvalidArgumentError.forParams(), creating exception objects on every request and adding GC pressure above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_828eb154-27ac-4284-9c1e-94c9df853b98?mode=deep",
+    "timestamp": "2026-04-28 23:55:53.137291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user send requests with EVM addresses that are valid opaque addresses and exist in the entity table, causing getEntityIdFromEvmAddress() to return rows[0].id, but since the Entity model constructor uses mapKeys() with camelCase() from lodash on every row object, adding object transformation overhead per DB result, and with no caching of the transformed result, every request re-transforms the DB row?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51163ae3-79c0-4cb8-bd0b-20715f459752?mode=deep",
+    "timestamp": "2026-04-28 23:56:08.405845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getAccountFromAlias()] Can an unprivileged external user send requests with valid aliases that match existing entities, causing getAccountFromAlias() to call new Entity(rows[0]) which uses mapKeys() with camelCase() from lodash to transform all entity table columns into camelCase properties, adding CPU overhead per successful lookup, and since there is no caching of the Entity object, every request re-constructs it from the DB row?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68928bc3-925a-4caa-af51-a34b68d735c7?mode=deep",
+    "timestamp": "2026-04-28 23:56:23.408066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with inputs that are valid encoded entity IDs (matching encodedEntityIdRegex /^-?\\\\d{1,19}$/) with values near the boundary of minEncodedId (BigInt.asIntN(64, 1n << 63n)), causing parseFromEncodedId() to perform BigInt arithmetic (BigInt(id), bitwise AND, right shift, asUintN) on every request, and since the cache key includes the raw string, each unique encoded ID creates a new cache entry, filling the 100000-entry cache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fc61609-1a72-4eca-be7d-9e84cbacd585?mode=deep",
+    "timestamp": "2026-04-28 23:56:39.074123",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with EVM addresses that are valid opaque addresses (evmAddress !== null after parsing) causing getEncodedId() to await getEntityIdFromEvmAddress(), and since this is an async DB call, each request holds a DB connection for the full query duration (up to statementTimeout: 20000ms), and with concurrent requests, the node's event loop accumulates pending promises, increasing memory and CPU overhead above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be7ba1d4-4f36-4f0a-ab87-1a34b7e87a5d?mode=deep",
+    "timestamp": "2026-04-28 23:56:55.378861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getAccountIdFromAlias()] Can an unprivileged external user send requests with valid aliases (requireResult=false path) causing getAccountIdFromAlias() to call getAccountFromAlias() which issues entityFromAliasQuery, receive null (no match), and return null without any caching of the negative result, so every subsequent request for the same non-existent alias re-queries the DB, and the caller can chain multiple such calls in a single request handler, multiplying DB load above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c3e324e-6ae6-4833-bd80-fa59c7b704ea?mode=deep",
+    "timestamp": "2026-04-28 23:57:12.656316",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with inputs that are valid EVM addresses in the shard.realm.evmAddress format where shard and realm match the system values, causing EntityId.parseString() to call piecesFromString() which calls isEvmAddressAlias() twice (once in piecesFromString and once in parseCached via parseFromString), doubling the regex evaluation and BigInt arithmetic overhead per request compared to a plain EVM address input?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_407918f4-f81b-4418-8825-46579077a90f?mode=deep",
+    "timestamp": "2026-04-28 23:57:30.547864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user send requests with EVM addresses that are valid but correspond to entities where the evm_address column is not indexed, causing entityFromEvmAddressQuery (select id from entity where deleted <> true and evm_address = $1) to perform a sequential scan of the entity table on every request, and with a large entity table, each scan consumes significant DB I/O and CPU, raising node resource consumption above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cad41f4-e3cd-4694-81ec-f9da04a0b8c0?mode=deep",
+    "timestamp": "2026-04-28 23:57:48.887865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with inputs that are valid base32 aliases (pass AccountAlias.isValid()) but contain characters that trigger the loose:true auto-correction in base32.decode() (e.g., mixing '0'/'O', '1'/'L', '8'/'B'), causing AccountAlias.fromString() to produce different decoded byte arrays for visually similar inputs, preventing any application-level deduplication and causing separate DB queries for each variant, multiplying DB load above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ca38a79-4a9b-4453-89b8-ff9d57537ea6?mode=deep",
+    "timestamp": "2026-04-28 23:58:07.924990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getAccountFromAlias()] Can an unprivileged external user send requests with aliases that are valid base32 strings of maximum length (up to the regex limit of [A-Z2-7]+), causing base32.decode() to allocate a Uint8Array proportional to the alias length on every request, and with no caching of the decoded alias, each request allocates a new Uint8Array, increasing heap allocation rate and GC frequency above 30% baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a02e42f3-90c9-44c2-a2cf-8794da27da6a?mode=deep",
+    "timestamp": "2026-04-28 23:58:28.430911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getEncodedId()] Can an unprivileged external user send requests with inputs that are valid EVM addresses (opaque) causing getEncodedId() to call EntityId.parseString() which calls parseCached() which sets a cache entry for the parsed EntityId, and then calls getEntityIdFromEvmAddress() which issues a DB query, so the cache only caches the parse result but not the DB lookup result, meaning the cache provides no benefit for the expensive DB operation and every request still hits the DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_392caeea-7ce2-48e5-b8c5-a9e2923c1d17?mode=deep",
+    "timestamp": "2026-04-28 23:58:48.850932",
+    "report_generated": false
+  }
+]
