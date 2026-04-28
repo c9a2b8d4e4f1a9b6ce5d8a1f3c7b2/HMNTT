@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d68cf747-51db-4265-ac9f-8ea3c0d618a1?mode=deep",
     "timestamp": "2026-04-28 16:11:39.598492",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: shouldCompress()] Can an unprivileged external user craft a transaction query that returns a response body exactly at the config.cache.response.compressThreshold boundary (default 150 bytes), causing shouldCompress() to return true and gzipSync() to be called on the body in CachedApiResponse constructor, and by sending concurrent requests at this boundary, trigger a race condition where compressed and uncompressed versions of the same transaction response are stored under the same cache key, corrupting transaction data integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a40ad8fd-3090-44ad-862a-bd379218cac6?mode=deep",
+    "timestamp": "2026-04-28 21:56:34.121991",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a transaction request with method HEAD (isHead = true) to a cached transaction endpoint, causing responseCacheCheckHandler() to call negotiate() but then call res.end() without sending the body, and by doing this before a legitimate GET request, cause the VARY_HEADER: 'accept-encoding' to be set on the response in a way that causes downstream proxies to cache the empty HEAD response and serve it for subsequent GET requests, suppressing transaction body delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55891fa5-5b90-400a-a7f8-f411a446dfd7?mode=deep",
+    "timestamp": "2026-04-28 21:56:46.252157",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getCacheControlExpiryOrDefault()] Can an unprivileged external user exploit the CACHE_CONTROL_REGEX = /^.*max-age=(\\\\d+)/ greedy matching by sending a cache-control header value like 'max-age=1, max-age=99999' where the greedy .* causes the regex to match the last max-age=99999, causing getCacheControlExpiryOrDefault() to return 99999 and store a transaction response in Redis for over 27 hours, preventing fresh transaction data from being served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d2f3d07-f6da-4357-b2ab-594b82322c99?mode=deep",
+    "timestamp": "2026-04-28 21:56:58.719757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the absence of request method validation in responseCacheCheckHandler() (only HEAD is specially handled via isHead check) to send a transaction query via HTTP OPTIONS, PATCH, or other non-standard methods that still hit the cache check, causing unexpected behavior in the negotiate() function or response assembly that corrupts the cached transaction response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_847816f2-7dff-481f-ae66-2afc3e3ab68e?mode=deep",
+    "timestamp": "2026-04-28 21:57:11.682007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the fact that responseCacheUpdateHandler() stores the full responseBody (res.locals[responseBodyLabel]) in Redis without size limits, by triggering a transaction query that returns an extremely large response body, causing getCache().setSingle() to store a multi-megabyte value in Redis, exhausting Redis memory and evicting other transaction cache entries via the allkeys-lfu policy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_098af5f6-8ec5-4d54-988b-7277e5224e94?mode=deep",
+    "timestamp": "2026-04-28 21:57:24.746257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the headers spread {...cachedResponse.headers, ...{[CACHE_CONTROL_HEADER]: 'public, max-age=${redisTtl}'}} at line 58-61 where redisTtl comes directly from Redis TTL without validation, to cause a negative or zero TTL value (if Redis returns -1 for a key with no expiry) to be set in the cache-control header, confusing downstream clients and proxies about transaction data freshness?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eefa448c-0159-4393-a642-c04308e298de?mode=deep",
+    "timestamp": "2026-04-28 21:57:38.416344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: cacheKeyGenerator()] Can an unprivileged external user send a transaction query URL that is extremely long (e.g., 100KB of query parameters) to cause crypto.createHash('md5').update(req.originalUrl) to process a large input, and by sending thousands of such requests concurrently, create a CPU exhaustion condition that prevents cacheKeyGenerator() from completing and blocks all transaction cache lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d133608b-80de-4fd4-b0af-663365130f59?mode=deep",
+    "timestamp": "2026-04-28 21:57:51.590228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the timing difference between getCache().getSingleWithTtl() returning a cached transaction response and the response being sent via res.send(body), by sending a high volume of concurrent requests to the same transaction endpoint, causing a thundering herd where all requests miss the cache simultaneously and all hit the database, overwhelming the DB and preventing transaction data from being served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_044e177f-0c44-4dfc-a501-7f754681714c?mode=deep",
+    "timestamp": "2026-04-28 21:58:05.714030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the isUnmodified = res.statusCode === httpStatusCodes.UNMODIFIED.code check in responseCacheUpdateHandler() by crafting a request flow that causes a 304 response to be cached with statusCode = httpStatusCodes.OK.code (line 114), and then when this cached response is served via responseCacheCheckHandler(), the 200 status code causes the full transaction body to be sent even when the client already has the data, wasting bandwidth and potentially exposing transaction data to unintended recipients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4c87394-2655-4f12-a4fe-d2ea7c360633?mode=deep",
+    "timestamp": "2026-04-28 21:58:19.675414",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: negotiate()] Can an unprivileged external user send a transaction request with a crafted accept-encoding header containing an extremely long list of encodings (e.g., 10,000 comma-separated values) to cause the Negotiator library instantiation (new Negotiator(req)) to consume excessive memory or CPU during encoding negotiation, creating a denial-of-service condition that prevents transaction responses from being served from cache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_408eaae3-3ec7-433e-974d-5d6024272f05?mode=deep",
+    "timestamp": "2026-04-28 21:58:33.955125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the fact that cacheKeyGenerator() uses req.originalUrl (which includes query string) but the cache is shared across all users, by being the first to query a transaction endpoint with specific parameters and causing a stale or incorrect response to be cached (e.g., during a brief window when the transaction is not yet confirmed), which is then served to all subsequent users querying the same transaction, suppressing the correct transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31b5bdeb-3324-4fbf-b868-d02e00172baf?mode=deep",
+    "timestamp": "2026-04-28 21:58:47.898267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the absence of any cache key ownership or write authorization check in responseCacheUpdateHandler() — where any request that passes the responseBody && responseCacheKey && httpStatusCodes.isSuccess(res.statusCode) condition can update the cache — to overwrite a legitimate transaction's cached response with a different response by manipulating the request flow to produce the same cache key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3eaedbdb-f559-4750-8fbd-1706f4eed5e4?mode=deep",
+    "timestamp": "2026-04-28 21:59:03.618490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the absence of cache response integrity verification in responseCacheCheckHandler() — where Object.assign(new CachedApiResponse(), redisValue) blindly trusts the Redis-stored value — to cause a scenario where a network-adjacent attacker who can inject data into Redis (via an unauthenticated Redis port) stores a falsified transaction response that gets served to all users, suppressing real transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5474e193-85d8-4556-8c1f-52d8f9cd97d9?mode=deep",
+    "timestamp": "2026-04-28 21:59:19.928208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit URL case sensitivity in cacheKeyGenerator() where req.originalUrl is used as-is for MD5 hashing, by sending /api/v1/Transactions?id=X vs /api/v1/transactions?id=X to generate two different cache keys for the same transaction, causing cache fragmentation where the same transaction data is stored multiple times under different keys, wasting Redis memory and potentially serving inconsistent transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bf8c693-7ebc-4e3c-b5f4-e02e5f7b0115?mode=deep",
+    "timestamp": "2026-04-28 21:59:36.177204",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the fact that shouldCompress(responseBody) is called with config.cache.response.compress and config.cache.response.compressThreshold at the time of caching, but these config values could change between when the response is cached and when it is served, causing CachedApiResponse.compressed to be true but the body to be served as if uncompressed (or vice versa), corrupting transaction data delivered to clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9716c68b-f5fa-4f59-87ed-b9b68e8919a1?mode=deep",
+    "timestamp": "2026-04-28 21:59:53.041511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a transaction query where the cached response's cachedResponse.headers[ETAG_HEADER] is undefined or null, and the if-none-match header is also set to 'undefined' or 'null' as a string, causing the string comparison conditionalHeader === cachedResponse.headers[ETAG_HEADER] to evaluate to true and return a false 304 response, suppressing the transaction body?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11a84f17-30ca-40f7-bafb-acbaa5818b0f?mode=deep",
+    "timestamp": "2026-04-28 22:00:11.625989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the parseInt(maxAge[1], 10) call in getCacheControlExpiryOrDefault() by causing a cache-control header with max-age=9999999999999 (exceeding 32-bit integer bounds) to be parsed, causing parseInt to return a very large number that is passed to getCache().setSingle() as the expiry, potentially causing Redis to reject the command or store the entry with an unexpected TTL that locks transaction data in cache indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a02f760a-c077-465a-a606-211c41db44fb?mode=deep",
+    "timestamp": "2026-04-28 22:00:30.340719",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the fact that responseCacheCheckHandler() does not call next() when a cache hit occurs (it calls res.send() or res.end() directly and returns), causing the middleware chain to be short-circuited and any downstream middleware that would update transaction state or log transaction access to be skipped, creating an audit gap that hides transaction gossip suppression?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d5a9d9c-7f7d-4fd0-9758-8f1c689bb1a5?mode=deep",
+    "timestamp": "2026-04-28 22:00:50.316376",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: negotiate()] Can an unprivileged external user send a transaction request with accept-encoding: gzip to a cached transaction response where compressed=true, causing negotiate() to set CONTENT_LENGTH_HEADER to cachedResponse.getLength() which uses the approximation Math.floor((this.body.length * 3) / 4) (from CachedApiResponse.getLength()), and by exploiting this approximation error, cause the client to receive a content-length that doesn't match the actual body size, corrupting the transaction response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d0000b3-654d-4a49-99a7-e29995291e31?mode=deep",
+    "timestamp": "2026-04-28 22:01:10.046260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the startTime = res.locals[requestStartTime] || Date.now() fallback in responseCacheCheckHandler() by crafting a request where res.locals[requestStartTime] is set to a future timestamp, causing the elapsed time calculation (Date.now() - startTime) to produce a negative value that is logged, potentially corrupting monitoring systems that track transaction cache performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5c28abe-5fb1-435a-a153-a694f56c0c5a?mode=deep",
+    "timestamp": "2026-04-28 22:01:31.036234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the absence of a mutex or lock around the check-then-set pattern in responseCacheUpdateHandler() (check responseBody && responseCacheKey, then call setSingle()) to create a TOCTOU race condition where two concurrent requests for the same transaction both pass the check and both call setSingle(), with the second write overwriting the first with potentially different transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_631593e2-f095-4748-919d-8396524e7518?mode=deep",
+    "timestamp": "2026-04-28 22:01:51.132911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the fact that the cache key is based solely on req.originalUrl without including any user identity, session, or authorization context, causing a scenario where a request for a restricted transaction endpoint (if any access control exists upstream) populates the cache with a response that is then served to all other users regardless of their authorization, leaking transaction data across user boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6c19be6-6eac-46d0-8edb-ecf7e68ddb1d?mode=deep",
+    "timestamp": "2026-04-28 22:02:14.052265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: cacheKeyGenerator()] Can an unprivileged external user send a transaction query URL containing a fragment identifier (#) or other URL components that are included in req.originalUrl but not in the actual resource path, causing cacheKeyGenerator() to generate a different MD5 hash than expected and resulting in a cache miss for a transaction that should have been cached, forcing a database hit and potentially exposing timing information about transaction existence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce795486-9ee1-4a35-844e-aee29d90cfc8?mode=deep",
+    "timestamp": "2026-04-28 22:02:37.364814",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the header deletion logic (delete headers[CACHE_CONTROL_HEADER], delete headers[CONTENT_ENCODING_HEADER], delete headers[CONTENT_LENGTH_HEADER], delete headers[VARY_HEADER]) in responseCacheUpdateHandler() to cause a scenario where a custom header injected via responseHeadersLabel that mimics one of these deleted headers (with different casing) survives the deletion and is stored in the cached transaction response, causing header injection for all subsequent cache hits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41ce9ff7-b7f7-4462-89b3-e1bbf51fd57a?mode=deep",
+    "timestamp": "2026-04-28 22:03:01.422255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send concurrent transaction requests that all miss the cache simultaneously (thundering herd), causing all of them to set res.locals[responseCacheKeyLabel] = responseCacheKey and proceed to the database, and then all of them to call responseCacheUpdateHandler() and write to the same Redis key concurrently, causing the last write to win with potentially inconsistent transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9561fabd-eb6a-45fa-af0d-37d286963b2b?mode=deep",
+    "timestamp": "2026-04-28 22:03:26.174281",
+    "report_generated": false
   }
 ]
