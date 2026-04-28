@@ -1,0 +1,122 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `takeWhile(t -> t.getConsensusTimestamp() < filter.getEndTime())` check so that during a network partition where the DB returns stale timestamps, messages with timestamps beyond `endTime` are not filtered, causing the subscriber to receive messages outside the requested time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0eee632b-bad4-4330-b655-905883a004d1?mode=deep",
+    "timestamp": "2026-04-28 20:30:43.157419",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `Mono.delay(Duration.ofSeconds(1L))` in the safety check so that by opening many subscriptions simultaneously, the 1-second delayed safety checks all fire at the same time, creating a thundering herd of `missingMessages()` calls that spike DB load at a predictable time after subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d3f23f4-2759-4deb-bdeb-25355c1c4935?mode=deep",
+    "timestamp": "2026-04-28 20:30:55.247807",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: incomingMessages()] Can an unprivileged external user exploit the `topicListener.listen(newFilter).concatMap(t -> missingMessages(topicContext, t))` pipeline so that during a network partition recovery, the listener delivers a burst of messages all at once, each triggering a sequential `missingMessages()` DB query via `concatMap`, creating a sequential chain of DB queries that holds the stream open for an extended period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1eea036f-29a8-48b3-a413-c2ca8daa40bd?mode=deep",
+    "timestamp": "2026-04-28 20:31:07.708464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onNext()] Can an unprivileged external user exploit the `AtomicReference<TopicMessage> last` in `TopicContext` so that during a network partition where both the safety check stream and the live stream deliver messages concurrently via `Flux.merge()`, two threads call `onNext()` simultaneously, causing a race condition where `isNext()` passes for both but `last.set()` is called twice, corrupting the sequence tracking state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04d4ed2f-73d9-4c0d-8989-f3fcd8805643?mode=deep",
+    "timestamp": "2026-04-28 20:31:20.404776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the fact that `topicExists()` queries `entityRepository.findById()` synchronously before the reactive pipeline starts, so that during a network partition where the entity repository is slow, many concurrent `subscribeTopic()` calls block the reactive scheduler threads waiting for the entity lookup, causing thread starvation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27e4d080-738c-4d86-ad39-c65695778bd2?mode=deep",
+    "timestamp": "2026-04-28 20:31:33.836084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: missingMessages()] Can an unprivileged external user exploit the safety check path where `current == null` and `last != null`, causing `missingMessages()` to build a `gapFilter` with `startTime = last.getConsensusTimestamp() + 1` and no `endTime` or `limit` constraints, issuing an open-ended DB query that could return an unbounded number of rows during partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6c2810d-46f4-4ec4-82fa-ef91867ec8dd?mode=deep",
+    "timestamp": "2026-04-28 20:31:48.696844",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `subscriberCount` gauge metric exposed via `MeterRegistry` so that by opening many subscriptions during a network partition (where streams never complete), the inflated subscriber count triggers auto-scaling or alerting systems, causing operational disruption disproportionate to the actual attack cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ff08b71-3ee3-45d0-80de-a9ad82071964?mode=deep",
+    "timestamp": "2026-04-28 20:32:03.659261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: pastEndTime()] Can an unprivileged external user exploit the `RepeatSpec.create(r -> !topicContext.isComplete(), Long.MAX_VALUE).withFixedDelay(grpcProperties.getEndTimeInterval())` so that with `endTimeInterval` at 30 seconds and `Long.MAX_VALUE` repetitions, a subscription with a far-future `endTime` during a network partition creates a timer that fires every 30 seconds for effectively forever, consuming scheduler resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5e14a64-c33c-4d03-bdde-4a49ac0e250d?mode=deep",
+    "timestamp": "2026-04-28 20:32:17.789666",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `historical` Flux from `topicMessageRetriever.retrieve(filter, true)` so that during a network partition where the retriever hangs waiting for DB, the `concatWith` operator blocks the entire pipeline including the live stream, preventing any messages from being delivered even after the partition heals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4bcdd0eb-3380-4c51-93e0-00da554eb81f?mode=deep",
+    "timestamp": "2026-04-28 20:32:31.292678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: incomingMessages()] Can an unprivileged external user exploit the `filter.toBuilder().limit(limit).startTime(startTime).build()` filter construction in `incomingMessages()` so that when `limit` is 0 (because `filter.hasLimit()` is false), the new filter has `limit = 0` which `hasLimit()` returns false for, causing the listener to subscribe with no limit and potentially receive an unbounded stream of messages during partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b36087c6-6817-4de0-9943-a5d172c5cb7c?mode=deep",
+    "timestamp": "2026-04-28 20:32:45.154878",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `doOnNext(topicContext::onNext)` side effect so that during a network partition recovery where messages arrive out of order, `onNext()` throws `IllegalStateException` which propagates as an error signal through the reactive pipeline, causing the gRPC stream to terminate with an error that reveals internal sequence number state to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8593ae29-bb5a-40c7-b201-2cff5a905aba?mode=deep",
+    "timestamp": "2026-04-28 20:33:01.409091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: missingMessages()] Can an unprivileged external user exploit the `log.info()` call in `missingMessages()` that logs `newFilter.getSubscriberId()`, `topicContext.getTopicId()`, and sequence numbers, so that during a network partition causing repeated gap recovery attempts, the log output is flooded with info-level messages, filling disk storage and causing log-based denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b3c2bb07-cba9-4bc2-b310-3b1de8475b61?mode=deep",
+    "timestamp": "2026-04-28 20:33:16.513598",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `Flux.defer(() -> incomingMessages(topicContext))` combined with `Flux.merge(safetyCheck, live)` so that during a network partition, the deferred live stream is never subscribed to (because `topicContext.isComplete()` returns false but the stream is stuck), while the safety check keeps firing, creating an asymmetric resource consumption pattern?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3aaee10b-add4-48c9-87c0-d775180a0139?mode=deep",
+    "timestamp": "2026-04-28 20:33:31.202520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isComplete()] Can an unprivileged external user exploit the `Instant.ofEpochSecond(0, filter.getEndTime()).plus(grpcProperties.getEndTimeInterval()).isBefore(Instant.now())` check in `isComplete()` so that by setting `endTime` to `Long.MAX_VALUE`, the `Instant.ofEpochSecond(0, Long.MAX_VALUE)` causes an arithmetic overflow or `DateTimeException`, crashing the `isComplete()` check and preventing the stream from ever completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_202d1a87-ff8a-4c4c-8c40-a410f3fe1390?mode=deep",
+    "timestamp": "2026-04-28 20:33:45.634102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `take(filter.getLimit())` operator so that during a network partition where messages are delayed, the `take()` operator keeps the stream open waiting for the limit to be reached, holding server resources indefinitely even though no messages will arrive during the partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f302b6c3-f67b-44c0-9d63-9ca77a56911d?mode=deep",
+    "timestamp": "2026-04-28 20:34:00.478293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: incomingMessages()] Can an unprivileged external user exploit the `topicContext.isComplete()` check at the start of `incomingMessages()` so that during a network partition, `isComplete()` returns false (because `endTime` is in the future), causing `incomingMessages()` to create a new filter and call `topicListener.listen()` even though the listener is partitioned, resulting in a hung listener subscription that never delivers messages or errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8302e5c3-78b9-4354-8dda-13bc2b7afed4?mode=deep",
+    "timestamp": "2026-04-28 20:34:17.144474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: missingMessages()] Can an unprivileged external user exploit the `topicMessageRetriever.retrieve(newFilter, false)` call in `missingMessages()` so that during a network partition where the DB is intermittently available, the retriever returns partial results, causing `concatWithValues(current)` to emit an incomplete gap followed by the current message, creating a sequence gap that `onNext()` does not detect because `isNext()` only checks the immediately preceding message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ff287b-5979-4d4b-b52e-d067cbd85050?mode=deep",
+    "timestamp": "2026-04-28 20:34:32.499839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `filter(t -> { TopicMessage last = topicContext.getLast(); return last == null || t.getSequenceNumber() > last.getSequenceNumber(); })` lambda so that during a network partition recovery, the `getLast()` call returns a stale value from `AtomicReference` while another thread is updating it, causing a race where messages are incorrectly filtered out or passed through?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_487d9619-b20b-4d0b-8918-b17c5c170df2?mode=deep",
+    "timestamp": "2026-04-28 20:34:46.514810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the `topicExists(filter).thenMany(flux...)` chain so that during a network partition where `topicExists()` hangs waiting for `entityRepository.findById()`, the `thenMany` operator never subscribes to the main flux, but the `subscriberCount.incrementAndGet()` in `doOnSubscribe` is never called, causing the metric to undercount active connections while resources are still consumed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bbd18317-a354-460e-ab5f-6330db7dec86?mode=deep",
+    "timestamp": "2026-04-28 20:34:59.751728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageServiceImpl.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: missingMessages()] Can an unprivileged external user exploit the safety check path in `missingMessages()` where `current == null` so that by timing subscription to coincide with a network partition, the safety check fires repeatedly (since `Mono.delay(1s)` fires once but the safety check result feeds back into the merge), causing multiple gap recovery queries to be issued for the same time range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47b2a49c-568c-427a-8274-0b2293cfa07a?mode=deep",
+    "timestamp": "2026-04-28 20:35:14.249414",
+    "report_generated": false
+  }
+]
