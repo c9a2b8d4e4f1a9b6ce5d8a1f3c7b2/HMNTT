@@ -1,0 +1,56 @@
+[
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEntityBalanceQuery() (line 164)] Can an unprivileged external user craft a request where accountBalanceQuery.query is non-empty (balance snapshot found) but accountBalanceQuery.forceUnionEntityHistory is false, causing needHistoricalBalanceInfo=true and the entity table to be a union, while the entity_stake join uses isHistorical=true — and the balance timestamp used for the entity union differs from the timestamp used for the entity_stake union, causing the pending_reward to be from a different staking period than the entity state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4d8e5b1-7f66-455b-bc22-d6345be094d4?mode=deep",
+    "timestamp": "2026-04-28 23:51:00.821953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: processRow() (line 82)] Can an unprivileged external user observe that pending_reward is returned as row.pending_reward (the raw SQL CASE result) without any cross-validation against the account's current balance or staking state in processRow(), and use this to identify accounts where the pending_reward in entity_stake has not been updated after a staking configuration change (e.g., decline_reward was set to true but entity_stake.pending_reward was not zeroed), returning a stale non-zero pending_reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcb97a41-7762-4f73-8f07-65271d86c182?mode=deep",
+    "timestamp": "2026-04-28 23:51:12.700397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEntityStakeQuery() (line 22-28)] Can an unprivileged external user trigger the historical entity_stake query and observe that the subquery aliases both entity_stake and entity_stake_history as 'e' (select * from entity_stake as e where ${filter} union all select * from entity_stake_history as e where ${filter}), and the filter contains a reference to 'e.id', causing the filter to be applied correctly to both tables — but verify whether the filter also contains 'e.timestamp_range' which exists in entity_stake_history but may not in entity_stake, causing the union to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc58dc8d-4840-420f-8d3a-c83280ec9492?mode=deep",
+    "timestamp": "2026-04-28 23:51:25.200036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getOneAccount() (line 435-438)] Can an unprivileged external user supply a timestamp filter that causes balances.getAccountBalanceTimestampRange() to return an empty object (no balance snapshot found), triggering forceUnionEntityHistory=true, and then the entity_stake join with isHistorical=true selects the most recent entity_stake record — but since the entity table union also returns the most recent entity row (not constrained to the queried timestamp), the pending_reward CASE compares current entity state with current entity_stake, effectively bypassing the historical query intent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d35161f7-ea0c-4685-a6d8-fd034ebc51c4?mode=deep",
+    "timestamp": "2026-04-28 23:51:37.570072",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: entityFields CASE expression (line 114-118)] Can an unprivileged external user enumerate accounts via GET /api/v1/accounts and observe that the pending_reward CASE expression is evaluated in SQL for every account in the result set, and by filtering on specific account IDs or balance ranges, identify accounts with large pending_reward values that have not yet been claimed, enabling targeted social engineering or front-running of reward claims?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33e78534-6016-41c9-9883-f05a70982e07?mode=deep",
+    "timestamp": "2026-04-28 23:51:50.561895",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEntityStakeAccountCondition() (line 307-308)] Can an unprivileged external user craft an account ID that, when processed by parseAccountIdQueryParam() and then replaceAll('e.id', 'es.id'), produces a condition like 'es.id = $1 and es.timestamp_range && $2' on the entity_stake join, causing the join to filter entity_stake rows by timestamp_range — and if entity_stake does not have a timestamp_range column (in some schema versions), the query fails and pending_reward defaults to 0, hiding legitimate rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc56d227-db96-4bed-ad98-3066252a322f?mode=deep",
+    "timestamp": "2026-04-28 23:52:04.868974",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getAccounts() (line 342)] Can an unprivileged external user call GET /api/v1/accounts?balance=false to set includeBalance=false, causing getAccountQuery() to use the entityOnlyQuery path (line 277-286) which joins entity_stake with 'left join entity_stake es on es.id = e.id', and the entityFields CASE expression still computes pending_reward — verify whether the entityOnlyQuery path correctly applies the same pending_reward CASE logic as the balance-included path, or whether there is a discrepancy that returns different pending_reward values for the same account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a01198f-c770-40db-a890-40d62aabd8c9?mode=deep",
+    "timestamp": "2026-04-28 23:52:19.431043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getAccountQuery() (line 268-287)] Can an unprivileged external user call GET /api/v1/accounts?balance=false and observe that the entityOnlyQuery uses 'left join entity_stake es on es.id = e.id' without the getEntityStakeAccountCondition() filter (line 280), while the balance-included path uses getEntityStakeAccountCondition() — and this difference in join conditions causes the entity_stake join to match differently, returning a different pending_reward for the same account depending on whether balance=false or balance=true is specified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a49599e1-61fa-4f7e-9919-1e77dad06370?mode=deep",
+    "timestamp": "2026-04-28 23:52:35.025816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getAccountQuery() (line 280)] Can an unprivileged external user verify that when balance=false, the entityOnlyQuery at line 280 uses 'left join entity_stake es on es.id = e.id' with getEntityStakeAccountCondition(entityAccountQuery) appended — and if entityAccountQuery.query is empty (no account filter), getEntityStakeAccountCondition() returns '' (empty string), causing the join condition to be just 'es.id = e.id', which is correct — but when entityAccountQuery.query is non-empty, the replaceAll('e.id', 'es.id') transformation may produce an incorrect condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69a9343b-9f6f-4c78-96f7-546080430cc6?mode=deep",
+    "timestamp": "2026-04-28 23:52:50.129336",
+    "report_generated": false
+  }
+]
