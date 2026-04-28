@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatScheduleRow()] Can an unprivileged external user decode the base64-encoded `transaction_body` field returned by `formatScheduleRow()` to extract embedded `max_fee` or fee-denominator parameters from the scheduled transaction protobuf, then replay or reconstruct a crafted schedule that executes with a fee outside the originally intended design parameters, causing unauthorized fee manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_895ecfd3-211f-4ad8-882b-7e393a37f88b?mode=deep",
+    "timestamp": "2026-04-28 22:30:58.612496",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the fact that `formatScheduleRow()` returns `transaction_body: utils.encodeBase64(row.transaction_body)` without any sanitization or fee-field stripping, allowing the attacker to reconstruct the full scheduled transaction body including fee fields and submit a modified version to the network with altered fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdef0320-2754-4fd2-8f86-9c3bd1c73fbe?mode=deep",
+    "timestamp": "2026-04-28 22:31:10.747457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleById()] Can an unprivileged external user call `GET /api/v1/schedules/:scheduleId` to retrieve the raw `transaction_body` of any schedule, decode the protobuf to learn the exact `max_fee` ceiling set by the original creator, and use that knowledge to craft a competing schedule with a lower fee that undercuts the original payer's fee budget, causing the original scheduled transaction to fail due to fee exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17b6b429-7ce7-416d-bb12-3fe40119066b?mode=deep",
+    "timestamp": "2026-04-28 22:31:23.652971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user trigger the `LONGER_SCHEDULE_CACHE_CONTROL_HEADER` (`public, max-age=3600`) path in `getScheduleCacheControlHeader()` by querying a schedule whose `executed_timestamp` is non-null, causing downstream CDN or proxy caches to serve stale fee-related schedule data for up to 3600 seconds, leading to clients making fee decisions based on outdated transaction body parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d2b12e8-1a6b-4428-a93a-62003581ce8d?mode=deep",
+    "timestamp": "2026-04-28 22:31:36.760045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `hasAutoExpired` branch in `getScheduleCacheControlHeader()` — where `expirationTime === null && nowNs >= consensusTimestamp + THIRTY_ONE_MINUTES * NANOS_PER_SECOND` — to force a long-lived cache entry for a schedule whose `transaction_body` contains fee parameters, causing fee-sensitive clients to read stale fee data from cache and submit transactions with incorrect fee amounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de7fd531-df3e-4b20-b847-54f46b56ed54?mode=deep",
+    "timestamp": "2026-04-28 22:31:52.153167",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `hasExpired` branch — `expirationTime !== null && nowNs >= expirationTime + SIXTY_SECONDS * NANOS_PER_SECOND` — to cause a schedule's fee-bearing `transaction_body` to be cached for 3600 seconds after expiry, so that any integrator reading the cached response believes the scheduled fee transaction is still valid and submits payments based on the stale fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_afb2ee67-0c18-494a-a83d-790839e2b375?mode=deep",
+    "timestamp": "2026-04-28 22:32:07.110943",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply a crafted `filter.operator` value in the query string that is not sanitized before being interpolated into `whereQuery += \\`${filterColumnMap[filter.key]}${filter.operator}$${paramCount}\\``, injecting SQL operators or expressions that alter the WHERE clause to return schedules with fee-related `transaction_body` data belonging to other users, enabling fee parameter reconnaissance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad8fb63c-95a8-475b-9031-1ead4e1bf899?mode=deep",
+    "timestamp": "2026-04-28 22:32:22.711608",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user set the `limit` query parameter to an extremely large integer value, causing `extractSqlFromScheduleFilters()` to pass an unbounded `filterQuery.limit` into the SQL query, resulting in a full table scan that returns thousands of schedule rows with their `transaction_body` fee parameters, enabling mass fee-schedule reconnaissance and DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2aff3e15-55f5-4cba-a24a-7387139b96b4?mode=deep",
+    "timestamp": "2026-04-28 22:32:39.460195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user submit multiple conflicting `account.id` filter values in a single request, causing `extractSqlFromScheduleFilters()` to build a WHERE clause with multiple `creator_account_id` conditions that together bypass intended account-scoping, returning fee-bearing `transaction_body` data for schedules across multiple accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdf3b0d1-ae24-4c9c-be59-13a61d29b86d?mode=deep",
+    "timestamp": "2026-04-28 22:32:57.695425",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply both `account.id` and `schedule.id` filters with boundary operators (`gt`, `lt`, `gte`, `lte`) to enumerate all schedules in a range, extracting `transaction_body` fee parameters from every schedule in the system without any rate limiting or authentication, enabling complete fee-schedule mapping?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9118b60c-2c5f-4b74-a0fb-65e545865a8d?mode=deep",
+    "timestamp": "2026-04-28 22:33:15.830749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSchedules()] Can an unprivileged external user call `GET /api/v1/schedules` with no filters to retrieve the default page of schedules including their `transaction_body` fields, decode the protobuf fee parameters from each, and identify schedules with high `max_fee` values to target for fee-draining attacks by submitting competing transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ec4b5ee-dd22-483d-8a8e-ed78a019a15f?mode=deep",
+    "timestamp": "2026-04-28 22:33:34.411540",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSchedules()] Can an unprivileged external user exploit the absence of authentication on `getSchedules()` to enumerate all `payer_account_id` values across all schedules, identifying accounts that are set as fee payers for scheduled transactions, then submitting transactions that drain those payer accounts below the fee threshold to cause scheduled transaction failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0f3bc76-12c5-42f1-a154-d38d11cdcd68?mode=deep",
+    "timestamp": "2026-04-28 22:33:54.042614",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSchedules()] Can an unprivileged external user issue rapid repeated calls to `getSchedules()` with varying `schedule.id=gt:X` pagination cursors to perform a full enumeration of all scheduled transactions and their embedded fee parameters, building a complete map of fee obligations across the network without any access control?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b96da2a3-32f0-4b88-b138-521bc94ed3cb?mode=deep",
+    "timestamp": "2026-04-28 22:34:14.530832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: mergeScheduleEntities()] Can an unprivileged external user craft a request that causes `mergeScheduleEntities()` to merge a `signatureMap` entry with a mismatched `entity_id`, overwriting the `signatures` field of a schedule with signatures from a different schedule, causing fee-authorization checks downstream to use incorrect signature data and potentially approve a fee-modified transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a5e2cb7-5785-4b24-a17c-cb38ab7304cc?mode=deep",
+    "timestamp": "2026-04-28 22:34:35.427835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: mergeScheduleEntities()] Can an unprivileged external user exploit the `Object.assign(schedule, entityMap[schedule.schedule_id] ?? {}, signatureMap[schedule.schedule_id] ?? {})` merge in `mergeScheduleEntities()` where a null or undefined `schedule_id` causes the `??` fallback to apply an empty object, silently dropping fee-relevant entity fields like `key` from the response, misleading clients about the admin key controlling fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98fb9a15-3dcc-4631-8688-aee7edf66631?mode=deep",
+    "timestamp": "2026-04-28 22:34:58.270600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleByIdQuery] Can an unprivileged external user supply a `scheduleId` path parameter that, after `EntityId.parseString()` processing, resolves to a valid but unintended entity ID (e.g., via shard/realm aliasing), causing `getScheduleByIdQuery` to return a different schedule's `transaction_body` with different fee parameters than the user intended to query, enabling fee parameter confusion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_661454c5-a6e2-4579-b984-7523474b49f9?mode=deep",
+    "timestamp": "2026-04-28 22:35:21.266865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleById()] Can an unprivileged external user exploit the `allowEvmAddress: false` constraint in `EntityId.parseString(req.params.scheduleId, parseOptions)` by supplying a numeric ID that maps to a system-reserved entity, causing `getScheduleByIdQuery` to return internal fee-schedule data that should not be publicly accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7222415c-9f32-4022-8b25-4f3f1ca2a6ff?mode=deep",
+    "timestamp": "2026-04-28 22:35:46.483143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleById()] Can an unprivileged external user call `GET /api/v1/schedules/:scheduleId` for a schedule whose `transaction_body` encodes a `TokenFeeScheduleUpdate` transaction, decode the base64 payload to extract the new custom fee parameters before they are applied on-chain, and front-run the fee update by submitting transactions under the old fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a7fdb95-45cd-43b4-9f52-9b0660018bfc?mode=deep",
+    "timestamp": "2026-04-28 22:36:10.742397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the fact that `formatScheduleRow()` returns `payer_account_id: EntityId.parse(row.payer_account_id).toString()` without any masking, allowing enumeration of all fee-payer accounts across all schedules, enabling targeted attacks to drain payer balances below the fee threshold before scheduled transactions execute?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed38cd2a-0f30-41d4-ba1c-cd419af49024?mode=deep",
+    "timestamp": "2026-04-28 22:36:35.455634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatScheduleRow()] Can an unprivileged external user observe the `wait_for_expiry` boolean in `formatScheduleRow()` output to determine whether a schedule will execute at expiry regardless of signature count, then time a fee-draining attack on the `payer_account_id` to coincide with the forced execution, causing the scheduled transaction to fail due to insufficient fee balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbb0e9ba-1fdc-4821-bfbe-230fd4ccd46b?mode=deep",
+    "timestamp": "2026-04-28 22:37:01.512650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `schedule.deleted` check in `hasExecuted = executedTimestamp !== null || schedule.deleted` to cause a deleted schedule's `transaction_body` (containing fee parameters) to be cached for 3600 seconds, so that clients reading the cached response incorrectly believe the fee-bearing schedule is still active and make fee payments against it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7cd6899-770b-4191-831d-a127e9ae7276?mode=deep",
+    "timestamp": "2026-04-28 22:37:27.145816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: transactionSignatureJsonAgg] Can an unprivileged external user query a schedule with a very large number of associated `transaction_signature` rows, causing the `json_agg(...order by ts.consensus_timestamp)` aggregation in `transactionSignatureJsonAgg` to consume excessive memory and CPU, degrading the mirror node's ability to serve fee-schedule queries and causing a denial-of-service against fee parameter lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_627cbbec-954b-422a-a953-52adf90c07ce?mode=deep",
+    "timestamp": "2026-04-28 22:37:53.166976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSchedules()] Can an unprivileged external user exploit the parallel `Promise.all([pool.queryQuietly(entityQuery, entityIds), pool.queryQuietly(signatureQuery, entityIds)])` in `getSchedules()` by submitting many concurrent requests with large `limit` values, exhausting the database connection pool and preventing legitimate fee-schedule queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77a42cd5-473e-48e7-9bcb-2beb72a34d17?mode=deep",
+    "timestamp": "2026-04-28 22:38:20.634617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSchedulesQuery()] Can an unprivileged external user supply an `order=desc` parameter that causes `scheduleOrderQuery(order)` to generate `order by s.schedule_id desc`, combined with a large `limit`, to retrieve the most recently created schedules first and extract their `transaction_body` fee parameters before the scheduled transactions execute, enabling fee front-running?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17474bee-7d71-4a89-b429-a56a5f84b295?mode=deep",
+    "timestamp": "2026-04-28 22:38:49.126608",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply `order=asc` and `order=desc` as duplicate parameters, causing `extractSqlFromScheduleFilters()` to use the last-seen value for `filterQuery.order`, potentially bypassing an expected ordering invariant that downstream fee-processing logic depends on?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43463a74-eda3-4630-8294-abeff3109428?mode=deep",
+    "timestamp": "2026-04-28 22:39:18.558207",
+    "report_generated": false
+  }
+]
