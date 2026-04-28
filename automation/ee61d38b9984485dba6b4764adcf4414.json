@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccountQuery()] Can an unprivileged external user exploit the parameter index replacement loop in `getAccountQuery()` where `query.query.replace(/\\\\?/g, ...)` is called on each query fragment, by supplying the maximum number of `account.id` values to create a query string with many `?` placeholders, causing the regex replacement to iterate over a large string on every request and consuming CPU resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51fe13df-8ee9-4136-a37d-0d8b5b7dbe87?mode=deep",
+    "timestamp": "2026-04-28 23:04:03.333988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: processRow()] Can an unprivileged external user cause `processRow()` to be called on the maximum number of result rows (up to `responseLimit.max`) per request by sending GET /accounts with maximum `limit`, where each row invokes `base32.encode()`, `utils.toHexString()`, `EntityId.parse()`, `utils.nsToSecNs()`, `utils.parseTokenBalances()`, and `utils.encodeKey()`, creating CPU-intensive per-row processing that amplifies the cost of high-limit requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc777c7d-68b2-4aad-a8b0-e5f51dba4bc2?mode=deep",
+    "timestamp": "2026-04-28 23:04:15.451087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: processRow()] Can an unprivileged external user trigger the `evmAddress` computation branch in `processRow()` where `row.evm_address` is null and `alias.length === constants.EVM_ADDRESS_LENGTH`, causing `utils.toHexString(row.alias, true)` to be called for every row in a maximum-limit response, adding unnecessary hex encoding overhead per row and amplifying CPU cost for bulk account listing requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48957a53-e650-41b7-b65e-83e06570590b?mode=deep",
+    "timestamp": "2026-04-28 23:04:28.200913",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.id=gte:1` and `order=asc` without specifying `limit`, causing `parseLimitAndOrderParams()` to use the default limit and `getPaginationLink()` to generate a `next` link, then follow that link repeatedly in an automated loop to paginate through all accounts, causing sustained sequential DB load that degrades performance for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e1e0a2a-889f-4f82-9ac2-e649f29f2be0?mode=deep",
+    "timestamp": "2026-04-28 23:04:40.975811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.id=gte:1&account.id=lte:100&account.id=gte:50` (overlapping ranges), causing `parseAccountIdQueryParam()` in `utils.js` to produce a compound WHERE clause with multiple conditions that the DB cannot optimize with a single index range scan, forcing a more expensive query plan and griefing DB performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6831762d-b093-4fb6-b7e8-0de1745fd748?mode=deep",
+    "timestamp": "2026-04-28 23:04:54.571265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.publickey=gte:0000000000000000000000000000000000000000000000000000000000000000` (all-zeros key), causing `parsePublicKeyQueryParam()` to pass the key through `parsePublicKey()` and `ed25519.derToEd25519()` decoding attempt, then execute a full public_key index range scan from the beginning of the index, returning the maximum number of results and consuming maximum DB and network resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_608fe11a-5898-406c-9af0-162fa8559680?mode=deep",
+    "timestamp": "2026-04-28 23:05:09.036258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.publickey` set to a DER-encoded key prefix that matches many accounts, combined with `limit=max`, causing the `zeroRandomPageCostQueryHint` to be applied and the DB to scan a large portion of the public_key index, returning a maximum-size response that consumes both DB and network bandwidth, griefing other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d69c556e-99b6-48a4-9738-4a05e57d6729?mode=deep",
+    "timestamp": "2026-04-28 23:05:24.123827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.balance=gte:0&account.balance=lte:99999999999` (full balance range), causing `parseBalanceQueryParam()` to produce a two-condition WHERE clause on `e.balance` that cannot use a selective index and forces a full entity table scan, consuming maximum DB resources and griefing concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ac10242-7332-456d-8349-9d561c3b3d89?mode=deep",
+    "timestamp": "2026-04-28 23:05:40.360686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with a non-existent account ID, causing `EntityService.getEncodedId()` to return an encoded ID, then `pool.queryQuietly(entityQuery, entityParams)` to execute and return zero rows, then `throw new NotFoundError()` — all while the `transactionsPromise` (via `Promise.all`) has already been dispatched and is executing a transaction query that will be discarded, wasting DB resources on every 404 request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f88ec507-2a65-4902-98a3-0acee70a8392?mode=deep",
+    "timestamp": "2026-04-28 23:05:57.512683",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with `transactions=true` (default) and a non-existent account ID, causing both `entityPromise` and `transactionsPromise` to be dispatched in parallel via `Promise.all()` before the 404 check at line 497, so the transaction query runs and consumes DB resources even though the result is discarded, allowing the attacker to double DB load per 404 request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25f55e64-8a8d-42f7-8880-82ca9a377bfd?mode=deep",
+    "timestamp": "2026-04-28 23:06:14.071745",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with `transactiontype` filter set to a valid transaction type and `limit=max`, causing `transactions.doGetTransactions()` to execute a maximum-limit transaction query in parallel with the entity query, doubling the DB load per request and allowing the attacker to amplify DB resource consumption at half the request rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_448672e3-d56b-41a8-8005-ddc8af836f41?mode=deep",
+    "timestamp": "2026-04-28 23:06:32.654206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with multiple `timestamp` filters at the maximum allowed repetition count, causing `parseTimestampFilters()` to build a complex range object and `buildTimestampRangeQuery()` to generate a multi-condition timestamp range query appended to `entityAccountQuery.query`, forcing the DB to evaluate a complex compound condition on the `timestamp_range` column for every row in the entity/entity_history union?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aeae8155-3aeb-4c23-aafa-4f05d5491ec9?mode=deep",
+    "timestamp": "2026-04-28 23:06:51.966299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with a timestamp filter that triggers `balances.getAccountBalanceTimestampRange()` to return `upper !== undefined`, causing `getOneAccount()` to build an `accountBalanceQuery` with a `coalesce((select balance from account_balance where ...), 0)` correlated subquery embedded in the SELECT clause, which executes an additional subquery per row and increases per-request DB cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e3f4c46-8eae-4bec-8fcb-6408464690be?mode=deep",
+    "timestamp": "2026-04-28 23:07:11.770145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.id` repeated exactly `maxRepeatedQueryParameters` times with distinct valid IDs, causing `validateReq()` to pass, `parseAccountIdQueryParam()` to build a large `IN (?, ?, ..., ?)` clause, and the resulting query to perform a large multi-value index lookup on the entity table, consuming disproportionate DB resources compared to a single-ID lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a876570-2b9b-469a-9e3a-57adb4f56e03?mode=deep",
+    "timestamp": "2026-04-28 23:07:32.349933",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.id` repeated `maxRepeatedQueryParameters + 1` times to trigger the `PARAM_COUNT_EXCEEDS_MAX_CODE` error in `validateReq()`, causing the server to iterate over all parameters before throwing, and then repeat this at high frequency to consume CPU in the validation loop without ever reaching the DB, griefing the API server's request processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9819a7af-51a6-4fd9-a9a2-ffe999bd9cb3?mode=deep",
+    "timestamp": "2026-04-28 23:07:53.960663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with an unknown query parameter (e.g., `foo=bar`) to trigger the `UNKNOWN_PARAM_USAGE` error path in `validateReq()`, and then flood the endpoint with such requests to consume server-side request processing resources in the validation loop, griefing the API server without ever reaching the DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d1060cd-2a0e-4193-966d-30b4c4f010af?mode=deep",
+    "timestamp": "2026-04-28 23:08:13.741672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `limit=100` (maximum) and `balance=true`, causing `getEntityBalanceQuery()` to build a query that fetches up to 100 accounts each with up to `tokenBalanceResponseLimit.multipleAccounts` (50) token balances, generating a response with up to 5000 token balance entries and consuming significant DB I/O, memory, and network bandwidth per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe90b439-af74-495e-a553-73c518640067?mode=deep",
+    "timestamp": "2026-04-28 23:08:35.416701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with a valid account ID and no timestamp filter, causing `getAccountQuery()` to be called with `isHistorical=false` and `includeBalance=undefined` (treated as truthy), triggering the `getEntityBalanceQuery()` path with the `with latest_token_balance` CTE that scans the entire `token_account` table for associated tokens, consuming significant DB I/O per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_facb8be0-2837-40fe-bef7-d47ac1ac30b6?mode=deep",
+    "timestamp": "2026-04-28 23:08:57.074477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getEntityBalanceQuery()] Can an unprivileged external user trigger the `selectTokenBalance` path that uses `token_balance` table (historical path) by supplying a timestamp filter, causing the subquery `select distinct on (token_id) token_id, balance from token_balance where ... order by token_id, consensus_timestamp desc limit N` to execute, which requires a sort operation on potentially large token_balance data, consuming more DB resources than the non-historical `token_account` path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eba814ff-764c-4663-b9c5-431d0b42e033?mode=deep",
+    "timestamp": "2026-04-28 23:09:19.977659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.publickey=gte:A&account.publickey=lte:Z` (a wide key range), causing `parsePublicKeyQueryParam()` to produce a two-condition WHERE clause on `public_key` that matches many accounts, and combined with `limit=max`, forces the DB to scan a large portion of the public_key index while also applying the `zeroRandomPageCostQueryHint`, consuming maximum DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4510504e-6c75-450e-bc1d-a14de0099a66?mode=deep",
+    "timestamp": "2026-04-28 23:09:43.399467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.publickey` set to a valid but non-existent key, causing the `zeroRandomPageCostQueryHint` to be applied and the DB to perform an index scan that returns zero results, while still consuming the overhead of the hint application and index scan setup on every request, allowing the attacker to generate DB load without receiving any useful data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b354ea63-7e11-4072-9387-2a307cab87b7?mode=deep",
+    "timestamp": "2026-04-28 23:10:07.082665",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with a valid alias that resolves to an account, then immediately send the same request again before the first completes, causing multiple concurrent `EntityService.getEncodedId()` alias lookups against the entity table, creating a thundering herd of alias resolution queries that saturate the DB connection pool and grieve other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ca82086-7141-4579-91a0-831f3e40a7f9?mode=deep",
+    "timestamp": "2026-04-28 23:10:31.622828",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOneAccount()] Can an unprivileged external user send GET /accounts/:idOrAliasOrEvmAddress with a valid EVM address that requires `getEntityIdFromEvmAddress()` lookup, causing `EntityService.getEncodedId()` to execute `entityFromEvmAddressQuery` with a `Buffer.from(entityId.evmAddress, 'hex')` parameter, and then flood with many distinct EVM addresses to prevent query plan caching and force repeated query planning overhead on the DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31b2dfb5-990d-411c-a8d2-74b0ae598fd5?mode=deep",
+    "timestamp": "2026-04-28 23:10:58.388782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user send GET /accounts with `account.id=gte:1` and `order=desc` combined with `limit=max`, causing the query to scan from the highest account ID downward and return the maximum number of accounts with full token balance data, generating the largest possible response payload and consuming maximum network bandwidth, griefing the API server's outbound bandwidth?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e838b77-22f5-4cc1-8b6d-ccc9dced46d5?mode=deep",
+    "timestamp": "2026-04-28 23:11:25.693693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/accounts.js -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getAccounts()] Can an unprivileged external user exploit the `tokenBalanceQuery.query` construction in `getAccounts()` where `entityAccountQuery.query.replaceAll('e.id', 'account_id')` is called, by supplying an `account.id` filter that produces a query string with many occurrences of `e.id`, causing `replaceAll()` to perform many string replacements and consuming CPU on every request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_404424f7-bee4-4c4e-9d13-60faea9f7724?mode=deep",
+    "timestamp": "2026-04-28 23:11:53.059232",
+    "report_generated": false
+  }
+]
