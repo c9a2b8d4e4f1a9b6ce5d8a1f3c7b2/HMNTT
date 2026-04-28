@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: init()] Can an unprivileged external user trigger a race condition by causing the Spring context to reinitialize so that INSTANCE.set(this) replaces the singleton with a new CommonProperties object carrying a different realm/shard value mid-operation, causing EntityId resolution to silently shift and map freeze/unfreeze transactions to wrong accounts, permanently freezing funds in the originally targeted account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8f31b1b-5742-46c9-833d-1f994b6101ba?mode=deep",
+    "timestamp": "2026-04-28 21:03:48.885788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInstance()] Can an unprivileged external user craft a request that arrives before the Spring context fully initializes so that getInstance() throws IllegalStateException, crashing the token-freeze-status resolution path and leaving a previously submitted freeze transaction permanently applied with no unfreeze ever processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0196b5a8-3ea8-4a14-802d-f07fa858c56e?mode=deep",
+    "timestamp": "2026-04-28 21:04:01.080245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInstance()] Can an unprivileged external user submit a high volume of concurrent API requests that all call getInstance() simultaneously during a rolling restart, causing some threads to see a null INSTANCE and throw IllegalStateException, which aborts in-flight unfreeze transaction processing and leaves token accounts permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a2eee4c-dbf9-4736-9f2f-86b844c2a3b5?mode=deep",
+    "timestamp": "2026-04-28 21:04:13.785762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRealm()] Can an unprivileged external user exploit the fact that realm defaults to 0L and is used globally as a singleton to craft an entity ID query (e.g., via the REST API) that resolves to a different account than intended when the mirror node is deployed on a non-zero realm network, causing freeze status lookups to return incorrect results and effectively hiding a frozen state from the account owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65e778cf-0ded-4869-a0f9-b4de0e390f4e?mode=deep",
+    "timestamp": "2026-04-28 21:04:27.007283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getShard()] Can an unprivileged external user exploit the default shard=0L value in CommonProperties to submit a token freeze query using a shard-omitted entity ID (e.g., '1234') that resolves to shard 0 via getInstance().getShard(), while the actual frozen account lives on a different shard, causing the freeze status to be invisible to the account owner and the funds to remain permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42751094-da12-4648-89a0-c7f9fb6d25c5?mode=deep",
+    "timestamp": "2026-04-28 21:04:41.072747",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.isEnabled()] Can an unprivileged external user cause the database to become temporarily unreachable (e.g., via connection exhaustion through unauthenticated public endpoints) so that DatabaseStartupProperties.enabled=true causes the importer to block indefinitely in DatabaseWaiter.waitForDatabase(), preventing unfreeze transactions from being ingested and leaving token accounts permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_935877c2-9ee6-4996-89a0-2886d2ce15ba?mode=deep",
+    "timestamp": "2026-04-28 21:04:53.614507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user exploit the default timeout of Duration.ofMinutes(5) in DatabaseStartupProperties to cause a 5-minute window during which the importer is blocked and cannot process unfreeze transactions, and if the freeze was applied just before the outage, the funds remain frozen for the entire blocking window with no recovery path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcd7c7af-adb1-49e0-b5bf-140e5b896a6b?mode=deep",
+    "timestamp": "2026-04-28 21:05:06.860219",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getInterval()] Can an unprivileged external user exploit the retry interval (default 2s) in DatabaseStartupProperties to time a database disruption attack so that each retry attempt fails, the importer never processes the unfreeze transaction within the timeout window, and the freeze state becomes permanent in the mirror node's view of the ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0b4e9cc-5ab8-402f-a37b-743f160ca414?mode=deep",
+    "timestamp": "2026-04-28 21:05:21.091977",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user exploit the 2-second connectTimeout in DatabaseStartupProperties by causing slow TCP connections to the database (e.g., via network-level interference on a shared cloud environment) so that every connection attempt times out, the importer never starts, and freeze transactions submitted on-chain are never reflected in the mirror node, causing users to see their funds as permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d1bcda1-1300-4bd5-bc8d-9efcffc44afe?mode=deep",
+    "timestamp": "2026-04-28 21:05:34.420281",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getSocketTimeout()] Can an unprivileged external user exploit the 2-second socketTimeout in DatabaseStartupProperties by injecting slow-read responses at the database socket level (e.g., via a man-in-the-middle on an unencrypted DB connection) to cause repeated socket timeouts, blocking the importer startup loop and preventing unfreeze transactions from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d25d469-1786-4eb8-9898-b5bad5588132?mode=deep",
+    "timestamp": "2026-04-28 21:05:47.203567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user exploit the validationTimeout (default 2s, max Integer.MAX_VALUE seconds) by causing Connection.isValid() to hang for exactly 2 seconds on every attempt, so the importer loops indefinitely within the outer timeout window without ever successfully connecting, and unfreeze transactions are never processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ec3500-80da-4910-856d-3825d18ebd9f?mode=deep",
+    "timestamp": "2026-04-28 21:06:01.586913",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: init()] Can an unprivileged external user exploit the fact that @PostConstruct init() sets the INSTANCE without any synchronization guard beyond AtomicReference, so that in a multi-context Spring deployment (e.g., multiple application contexts in the same JVM), a second init() call overwrites the INSTANCE with a CommonProperties object having realm/shard=0, causing all subsequent entity ID resolutions to use wrong coordinates and misidentify frozen accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da69d233-fd7d-407e-b5de-c0ca72fd83b9?mode=deep",
+    "timestamp": "2026-04-28 21:06:15.370748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: setRealm()] Can an unprivileged external user exploit an environment variable injection vulnerability (e.g., via a misconfigured Spring Boot Actuator endpoint or externalized config) to set hiero.mirror.common.realm to an arbitrary value, causing all entity ID lookups via getInstance().getRealm() to resolve to wrong accounts, so that freeze status queries return results for a different account and the actual frozen account's status is never surfaced?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b67f4b3e-00cc-47b8-be1e-c5a43f886436?mode=deep",
+    "timestamp": "2026-04-28 21:06:29.105244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: setShard()] Can an unprivileged external user exploit a misconfigured externalized configuration source to set hiero.mirror.common.shard to a non-zero value, causing getInstance().getShard() to return the wrong shard for all entity ID resolutions, so that token freeze status is looked up against the wrong shard's entity IDs and frozen accounts appear unfrozen (or vice versa) to API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f11622b-d6cb-4c65-ba0c-29433085e161?mode=deep",
+    "timestamp": "2026-04-28 21:06:42.305725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInstance()] Can an unprivileged external user trigger a service restart (e.g., via OOM caused by a large malformed request) so that during the restart window getInstance() throws IllegalStateException for all callers, causing the token freeze status endpoint to return errors rather than the actual frozen state, effectively hiding the freeze from the account owner and preventing them from taking corrective action?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90c5d339-ced4-42c0-be55-aed0373d1e85?mode=deep",
+    "timestamp": "2026-04-28 21:06:56.631030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.isEnabled()] Can an unprivileged external user exploit the fact that databaseStartup.enabled defaults to true to cause a denial-of-service on the importer startup by repeatedly disrupting the database connection, so that the importer never finishes startup, never processes any transactions (including unfreezes), and all token accounts that were frozen on-chain remain frozen in the mirror node indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80462502-7dc0-4346-afcf-1717779c67c3?mode=deep",
+    "timestamp": "2026-04-28 21:07:11.143005",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRealm()] Can an unprivileged external user submit a token freeze status API request using a partial entity ID (e.g., just the account number without shard/realm) that gets resolved using getInstance().getRealm() returning 0, while the actual account is in realm 1, causing the API to return 'not frozen' for the wrong entity and the actual frozen account's status to be permanently invisible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fd8def0-0437-46df-a053-6097b84d2b96?mode=deep",
+    "timestamp": "2026-04-28 21:07:25.415765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getShard()] Can an unprivileged external user submit a token freeze status API request using a partial entity ID (e.g., just the account number without shard) that gets resolved using getInstance().getShard() returning 0, while the actual account is in shard 1, causing the API to return 'not frozen' for the wrong entity and the actual frozen account's status to be permanently invisible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb9c5323-44d9-4754-a8f8-6085464d7b40?mode=deep",
+    "timestamp": "2026-04-28 21:07:39.382887",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getTimeout()] Can an unprivileged external user exploit the @DurationMin(seconds=10) lower bound on timeout to ensure that even a minimal misconfiguration causes at least a 10-second blocking window during which unfreeze transactions are not processed, and if the attacker times a freeze transaction to land just before a forced restart, the 10-second minimum guarantees a window where the freeze is permanent from the mirror node's perspective?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71c2e32a-cd10-4fc3-b7b5-5453ac257ab8?mode=deep",
+    "timestamp": "2026-04-28 21:07:53.685939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: init()] Can an unprivileged external user exploit a Spring Boot hot-reload or DevTools restart to cause init() to be called again with a fresh CommonProperties instance that has realm=0 and shard=0 (defaults), overwriting a previously correctly configured INSTANCE, so that all subsequent freeze status lookups use wrong entity IDs and frozen accounts are misidentified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b952ab4e-8189-4c91-93a5-951511cbd5b5?mode=deep",
+    "timestamp": "2026-04-28 21:08:09.134472",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInstance()] Can an unprivileged external user exploit the absence of a null-safe fallback in getInstance() (it throws IllegalStateException rather than returning a default) to cause a cascading failure in the token freeze status resolution chain, where one failed request causes a thread pool exhaustion that prevents all subsequent unfreeze transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb47b370-bbc4-4db7-8ac2-ba818a1c48ec?mode=deep",
+    "timestamp": "2026-04-28 21:08:24.788898",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getConnectTimeout()] Can an unprivileged external user exploit the @DurationUnit(ChronoUnit.SECONDS) annotation on connectTimeout to cause a unit confusion vulnerability where a configuration value intended as milliseconds is interpreted as seconds (e.g., '2' becomes 2 seconds instead of 2 milliseconds), causing the importer to wait 1000x longer per connection attempt and effectively blocking unfreeze transaction processing for an extended period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_767bca0a-aa6d-42d1-8367-145aead9dfb1?mode=deep",
+    "timestamp": "2026-04-28 21:08:39.617722",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getInterval()] Can an unprivileged external user exploit the @DurationUnit(ChronoUnit.SECONDS) annotation on interval to cause a unit confusion where a value intended as milliseconds is interpreted as seconds, causing the retry interval to be 1000x longer than intended, and during this extended retry window, unfreeze transactions submitted on-chain are never processed by the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fac7927c-8050-4c23-929a-39879f4aaf71?mode=deep",
+    "timestamp": "2026-04-28 21:08:53.711020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: DatabaseStartupProperties.getValidationTimeout()] Can an unprivileged external user exploit the @DurationMax(seconds = Integer.MAX_VALUE) upper bound on validationTimeout to cause an integer overflow in DatabaseWaiter when Math.toIntExact(properties.getValidationTimeout().toSeconds()) is called with a value exceeding Integer.MAX_VALUE, throwing ArithmeticException and crashing the database waiter loop, preventing the importer from ever starting and leaving freeze transactions permanently unprocessed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a690a4a6-c0a2-4b16-baee-42965ed23f87?mode=deep",
+    "timestamp": "2026-04-28 21:09:08.160742",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/CommonProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRealm()] Can an unprivileged external user exploit the fact that realm is a primitive long with no upper bound constraint (only @Min(0)) to cause an EntityId encoding overflow when realm is set to a very large value, producing an EntityId that collides with a different account's ID, causing a freeze operation on one account to be recorded as a freeze on a completely different account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80509471-0cb1-45b3-8009-bdbf73b44e03?mode=deep",
+    "timestamp": "2026-04-28 21:09:22.213478",
+    "report_generated": false
+  }
+]
