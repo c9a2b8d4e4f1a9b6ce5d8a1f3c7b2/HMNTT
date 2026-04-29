@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a token ID value of `NULL` or an empty string in inConditions, causing the IN clause at line 85 to become `in (NULL)` or `in ()`, which in PostgreSQL either matches nothing or throws a syntax error, resulting in missing token records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d45135f-b45a-45c9-8c31-7c551a564ce6?mode=deep",
+    "timestamp": "2026-04-29 02:30:09.130644",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply duplicate token IDs in inConditions, causing the IN clause at line 85 to contain duplicates, which while not causing SQL errors, could interact with the LRU cache population in getCachedTokens() to produce duplicate or inconsistent cache entries, leading to incorrect records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23e13ebc-f7be-479d-822d-54a6e2e6127f?mode=deep",
+    "timestamp": "2026-04-29 02:30:21.327600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that getCachedTokens() at line 156 calls `tokenCache.set(tokenId, cachedToken)` for every DB-fetched token, overwriting any existing cache entry, while putTokenCache() at line 123 never overwrites, creating an inconsistency where two code paths have different cache-update semantics, causing one path to export stale data while the other exports fresh data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc3ec567-6ccf-449f-8255-a260b8b38cdf?mode=deep",
+    "timestamp": "2026-04-29 02:30:33.804743",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user trigger a scenario where getCachedTokens() fetches a token from the DB (line 152) but the token has been deleted from the token table by the time the query executes, causing the function to return a Map with missing entries for that token_id, and getTokenAccounts() at line 106 to export a TokenAccount with null decimals/freeze_status/kyc_status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe4780e2-aaea-47ad-b1e0-5f39808df762?mode=deep",
+    "timestamp": "2026-04-29 02:30:47.158568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause getTokenAccounts() to export a TokenAccount where freeze_status is taken from the stale cache (via line 109 null-coalescing) even though the token_account row's freeze_status was explicitly set to null to indicate 'not applicable', causing the mirror node to export a misleading non-null freeze_status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f60d7848-d90b-48a3-90b6-d96f9b07b00d?mode=deep",
+    "timestamp": "2026-04-29 02:31:00.513820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause getTokenAccounts() to export a TokenAccount where kyc_status is taken from the stale cache (via line 110 null-coalescing) even though the token_account row's kyc_status was explicitly set to null to indicate 'KYC not required', causing the mirror node to export an incorrect kyc_status that misrepresents the token's compliance state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_231abb55-fcc5-4efd-bc39-71a188087cb0?mode=deep",
+    "timestamp": "2026-04-29 02:31:14.978011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: putTokenCache()] Can an unprivileged external user trigger putTokenCache() with a token object that has undefined decimals (e.g., if the SQL row is missing the column), causing CachedToken to store undefined as decimals, which is then exported via getTokenAccounts() line 108 as the authoritative decimal value, resulting in incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d6926b1-b238-471c-ac4a-be74b2345ddd?mode=deep",
+    "timestamp": "2026-04-29 02:31:30.136638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: putTokenCache()] Can an unprivileged external user trigger putTokenCache() with a token object where freeze_status is undefined (not null), causing CachedToken to store undefined as freezeStatus, which then passes the null-coalescing check at line 109 (`?? cachedToken.freezeStatus` returns undefined since undefined is falsy for ??), resulting in incorrect freeze_status exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c9e5bbe-c93b-4edd-b162-93ba874b2006?mode=deep",
+    "timestamp": "2026-04-29 02:31:45.326889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user submit a request referencing a token_id that exists in token_account but not in the token table, causing tokenCacheQuery at line 152 to return no row for that token_id, leaving it absent from cachedTokens Map, and getTokenAccounts() at line 106 to export a TokenAccount with null decimals and potentially wrong freeze/kyc status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7353c49-756d-4212-b325-0d55916d88a7?mode=deep",
+    "timestamp": "2026-04-29 02:32:02.379582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a conditions array with a condition whose key maps to a non-existent column name, causing TokenAccount.getFullName() at line 56 to produce an invalid column reference, resulting in a DB error that causes the mirror node to export zero records instead of the correct set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5da8ae8-d438-4af5-a748-0e4ddca28608?mode=deep",
+    "timestamp": "2026-04-29 02:32:19.741145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a conditions array with an operator value that is not a valid SQL comparison operator (e.g., a string containing SQL keywords), causing the condition at line 56 to produce a malformed WHERE clause that either errors out or matches unintended records, resulting in incorrect or missing exported records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6dc57c83-2c6e-4b4d-bdbb-42784590d3fe?mode=deep",
+    "timestamp": "2026-04-29 02:32:37.986199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause a race condition between two concurrent getTokenAccounts() calls for the same ownerAccountId, where one call populates the cache via getCachedTokens() line 156 with a DB snapshot at time T1, and the other call reads from the cache at time T2 after an on-chain update, causing the mirror node to export a mix of T1 and T2 state records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21ef5b83-37e0-4f89-9678-e05bc4fc8da2?mode=deep",
+    "timestamp": "2026-04-29 02:32:56.227748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that getCachedTokens() builds uncachedTokenIds as a plain array (line 144) and passes it directly to `token_id = any ($1)` at line 152, and if the array contains non-BigInt values (e.g., strings), the DB driver may coerce them incorrectly, causing the query to match wrong token records and export incorrect metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1d27358-bd8a-4d46-b872-aaab98e734c8?mode=deep",
+    "timestamp": "2026-04-29 02:33:15.100794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a token ID value that is a very long string, causing the directly-interpolated IN clause at line 85 to produce an oversized SQL query that exceeds DB query length limits, resulting in a query error and missing token records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7646bfc6-a37a-4549-ae3b-a7e089506938?mode=deep",
+    "timestamp": "2026-04-29 02:33:33.610032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a token ID value containing a comment sequence (e.g., `--` or `/* */`), which when interpolated at line 85 comments out the rest of the SQL query, causing the mirror node to execute a truncated query that returns incorrect or missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56a2158a-536b-414e-8c1c-f8e4dc82d597?mode=deep",
+    "timestamp": "2026-04-29 02:33:53.428918",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a token ID value containing a semicolon followed by a DROP or UPDATE statement, which when interpolated at line 85 executes as a second SQL statement (if the DB driver allows stacked queries), causing permanent corruption of token records exported by the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e85b4cdd-1fb7-4e75-8006-cb4352da7e94?mode=deep",
+    "timestamp": "2026-04-29 02:34:13.924643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause getTokenAccounts() to return a TokenAccount with a decimals value from the cache (line 108) that differs from the decimals in the token_account table, because the token_account table stores a per-account override decimals but the cache stores the global token decimals, causing incorrect balance calculations in exported records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_810c02a2-d403-4550-8ecd-2f91a772c788?mode=deep",
+    "timestamp": "2026-04-29 02:34:34.991879",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user trigger a scenario where getTokenAccounts() at line 103 builds a tokenIds Set from row.token_id values, but if two rows have the same token_id (due to a DB anomaly or query bug), the Set deduplicates them, causing getCachedTokens() to fetch only one cache entry, and the second row's metadata to be populated from the same (potentially wrong) cache entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32c6d21a-032b-45c0-a966-1d36d08962d0?mode=deep",
+    "timestamp": "2026-04-29 02:34:57.341990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that getCachedTokens() at line 152 uses `super.getRows(TokenService.tokenCacheQuery, [uncachedTokenIds])` where uncachedTokenIds is an array, and if the array is empty (all tokens cached), the function returns early at line 149, but if a concurrent request evicts a cache entry between the cache-check loop (line 139) and the early return (line 149), the evicted token's metadata is missing from the returned Map, causing incorrect exported records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c042eae1-45e0-4ecd-a31e-dbc71d0b6771?mode=deep",
+    "timestamp": "2026-04-29 02:35:19.941392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: putTokenCache()] Can an unprivileged external user cause putTokenCache() to cache a CachedToken with a freeze_status of 0 (falsy in JavaScript), and then when getTokenAccounts() evaluates `row.freeze_status ?? cachedToken.freezeStatus` at line 109, the `??` operator correctly handles 0 (since ?? only checks null/undefined), but if the intent was to use `||`, a freeze_status of 0 from the cache would be correctly propagated, while a freeze_status of 0 from the row would not be overridden — verify whether this causes incorrect exported freeze_status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7dfacd65-c434-4bd8-b8fe-6352ed524618?mode=deep",
+    "timestamp": "2026-04-29 02:35:42.079263",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a query object where inConditions contains values that are JavaScript objects (not primitives), causing the string interpolation at line 85 to produce `[object Object]` in the SQL IN clause, resulting in a type mismatch that either errors or matches no records, causing missing token records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01c769da-9232-477c-a46f-74d677ba20c1?mode=deep",
+    "timestamp": "2026-04-29 02:36:06.654392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a query object where conditions contains a very large number of entries, causing the params array to grow unboundedly and the resulting SQL query to exceed PostgreSQL's parameter limit ($1..$65535), causing a DB error and missing records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3eb93fd-9601-4af5-9c55-958f23615feb?mode=deep",
+    "timestamp": "2026-04-29 02:36:31.220241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause getTokenAccounts() to export a TokenAccount where the balance field (line 12 of tokenAccount.js) reflects a stale value from the token_account table that has not been updated by the importer after a recent transfer, resulting in incorrect balance records exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8fbcffd-a1e0-42df-b1bf-d4232cc55f8d?mode=deep",
+    "timestamp": "2026-04-29 02:36:56.809153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTokenAccounts()] Can an unprivileged external user cause getTokenAccounts() to export a TokenAccount with an incorrect createdTimestamp (line 13 of tokenAccount.js) if the token_account table has a null or zero created_timestamp due to an importer parsing error, resulting in missing or incorrect timestamp records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ea6fd48-9768-484b-b8c5-73311a401c97?mode=deep",
+    "timestamp": "2026-04-29 02:37:22.324097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that getCachedTokens() at line 156 always overwrites the cache entry (`tokenCache.set(tokenId, cachedToken)`) while putTokenCache() at line 123 never overwrites, so that if putTokenCache() is called first with correct data and then getCachedTokens() is called with a DB snapshot containing stale data, the cache is overwritten with stale data, causing incorrect records to be exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd13eadd-7f8f-44b6-be67-d6ae2274473f?mode=deep",
+    "timestamp": "2026-04-29 02:37:47.880235",
+    "report_generated": false
+  }
+]
