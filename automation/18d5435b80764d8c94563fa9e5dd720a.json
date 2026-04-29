@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRangeFromFilters()] Can an unprivileged external user submit a sequence_number filter with value equal to MAX_LONG - 1n causing the computed range.upper to equal range.lower at the boundary, silently returning an empty range that causes getTopicMessageTimestampRanges() to return [] and extractSqlFromTopicMessagesRequest() to return {}, permanently hiding messages that downstream fund-release applications depend on?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f1d7a26-7a8d-4e3b-904c-fc79a8b2668e?mode=deep",
+    "timestamp": "2026-04-29 02:12:45.138628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRangeFromFilters()] Can an unprivileged external user craft a filter with operator opsMap.gt and value equal to MAX_LONG - 1n, causing value += 1n to overflow BigInt into MAX_LONG, making range.lower > range.upper and returning null, so getTopicMessageTimestampRanges() returns [] and any HCS-coordinated fund release is permanently blocked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4feced10-99cb-413b-af58-4602d92dd4a7?mode=deep",
+    "timestamp": "2026-04-29 02:12:57.341406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRangeFromFilters()] Can an unprivileged external user supply a filter with operator opsMap.lt and value 1n (minimum positive long), causing value -= 1n to produce 0n, setting range.upper = 0n while range.lower defaults to 1n for sequence numbers, returning null and causing all downstream topic message lookups to silently return empty, freezing any fund-coordination workflow that polls this endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4bcaf3ce-cc8f-4fb5-b8c5-cd0eb8a2580b?mode=deep",
+    "timestamp": "2026-04-29 02:13:09.886328",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getRangeFromFilters()] Can an unprivileged external user combine opsMap.gte and opsMap.lte filters with equal values at the MAX_LONG - 1n boundary to produce a single-element range that is then passed to getTopicMessageTimestampRanges() where the range size check (upper - lower + 1n <= limit) evaluates to 1 <= limit, selecting the non-expanded query path, but the lookup table has no matching row, causing NotFoundError to propagate and crash the consumer application holding funds in escrow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_861de1e6-c652-4be9-9f98-e23f566b749f?mode=deep",
+    "timestamp": "2026-04-29 02:13:22.791632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user send a request with a very large limit value (e.g., 9223372036854775806) causing the rangeExpression for ASC order to compute least(upper(range) + least($4, 9223372036854775807::bigint - upper(range)), upper($2::int8range)) to overflow or produce an unexpected range in PostgreSQL, returning wrong timestamp_range rows and causing a fund-release application to process messages from the wrong time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_717319f8-0f6f-42ee-b316-c9ba75f11bc9?mode=deep",
+    "timestamp": "2026-04-29 02:13:37.620090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user craft a DESC order request with limit=1 and a sequenceNumberRange where lower(range) - ($4 - 1) underflows to a negative bigint in PostgreSQL, causing greatest() to select lower($2::int8range) and returning a timestamp_range that excludes the actual target message, so a fund-coordination application permanently misses the unlock message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65ad89eb-99db-4426-a8bc-6403f2ac5dea?mode=deep",
+    "timestamp": "2026-04-29 02:13:51.613029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user submit simultaneous requests with conflicting sequenceNumberFilters and timestampFilters such that the intersection of ranges is non-empty but the topic_message_lookup table returns rows whose timestamp_range does not actually contain the target message, causing getMessage() to throw NotFoundError and permanently blocking a fund-release workflow that depends on exactly one message being found?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec5adf2a-b39f-4d12-989d-0426bb1599a2?mode=deep",
+    "timestamp": "2026-04-29 02:14:06.637589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user exploit the feature-flag branch where config.query.topicMessageLookup is enabled to inject both sequenceNumberFilters and timestampFilters that individually pass getRangeFromFilters() but whose combined timestamp_range conditions in the SQL WHERE clause exclude the actual message row, causing getTopicMessages() to return an empty messages array and a null next link, permanently halting pagination for a fund-coordination consumer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d80f6ac-d988-47cb-854b-816a0194b774?mode=deep",
+    "timestamp": "2026-04-29 02:14:21.851836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user send a request where topicMessageLookup is disabled (config.query.topicMessageLookup = false) but supply a sequence_number filter that is added to conditions via the default branch, causing the SQL query to filter by sequence_number without the timestamp_range optimization, and if the sequence_number column is not indexed, cause a full table scan that times out and leaves the consumer application in a hung state, freezing any funds awaiting message confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d145090-d0ed-4a75-b3e2-1249f4cd40e6?mode=deep",
+    "timestamp": "2026-04-29 02:14:38.603802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply duplicate filter keys (e.g., two timestamp= parameters) that both pass buildAndValidateFilters() and are both pushed into timestampFilters, causing getRangeFromFilters() to compute a range intersection that is empty (null), making getTopicMessageTimestampRanges() return [] and extractSqlFromTopicMessagesRequest() return {}, so getTopicMessages() returns an empty response and a fund-release application permanently stalls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c02aa335-52fb-4948-979a-f6c0e72038d5?mode=deep",
+    "timestamp": "2026-04-29 02:14:56.004854",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessages()] Can an unprivileged external user craft a request where the last message in the response has a consensus_timestamp that, when used as the next pagination cursor, produces a timestamp filter that getRangeFromFilters() evaluates as an empty range (null), causing the next page request to return {} from extractSqlFromTopicMessagesRequest() and an empty messages array, permanently truncating the message stream and freezing any fund-release application that requires all messages to be processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ed0a3bf-da46-400d-98fb-67e5d9bc6e6c?mode=deep",
+    "timestamp": "2026-04-29 02:15:12.551943",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessages()] Can an unprivileged external user exploit the pagination link generation in utils.getPaginationLink() by requesting messages with order=desc so that the last message timestamp becomes the next cursor, and if the cursor timestamp equals the boundary of a timestamp_range in topic_message_lookup, the next request returns an empty range and permanently stops pagination, causing a fund-coordination application to miss critical messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_135d9f87-78a2-4e29-9398-cebc1532c6ec?mode=deep",
+    "timestamp": "2026-04-29 02:15:29.996004",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessages()] Can an unprivileged external user send a request with limit=1 and order=asc, receive a response where topicMessagesResponse.messages.length === limit (1 === 1), causing getPaginationLink() to generate a next link, but the next request with the returned timestamp cursor falls into a timestamp_range gap in topic_message_lookup, returning an empty range and permanently halting the consumer's message processing loop, freezing funds held in escrow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66255b30-b6d3-426a-9842-caaf801a073f?mode=deep",
+    "timestamp": "2026-04-29 02:15:48.537633",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user submit a consensusTimestamp that matches a transaction row with result=22 and type=27 but where the corresponding topic_message row has been deleted or not yet replicated, causing getMessage() to throw NotFoundError, and if the calling application treats NotFoundError as a permanent failure and freezes associated funds, the attacker can trigger this by timing the request during replication lag?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87a80fe1-c473-4332-9b9d-672383596b41?mode=deep",
+    "timestamp": "2026-04-29 02:16:08.037780",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user exploit the hardcoded filter result = 22 and type = 27 in the transaction query to cause a scenario where a valid HCS submit message transaction with a different result code (e.g., result=1 for SUCCESS in some versions) is never returned, causing a fund-release application that polls this endpoint to permanently miss the confirmation message and freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_260da86e-1e8d-4484-83df-6c555f909df1?mode=deep",
+    "timestamp": "2026-04-29 02:16:27.934619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user craft a consensusTimestamp at the exact nanosecond boundary (e.g., 9999999999.999999999) that passes validateConsensusTimestampParam() but causes utils.parseTimestampParam() to produce a value that matches multiple transaction rows (rows.length !== 1), throwing NotFoundError and causing a fund-release application to permanently fail on that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c252f3c7-781b-4c7a-847f-d94afa09a137?mode=deep",
+    "timestamp": "2026-04-29 02:16:48.690825",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateConsensusTimestampParam()] Can an unprivileged external user submit a consensusTimestamp with leading zeros (e.g., 0001234567.000000001) that passes utils.isValidTimestampParam() regex validation but is parsed by utils.parseTimestampParam() into a different numeric value than expected, causing the database query to return no rows and throwing NotFoundError, permanently blocking a fund-release application that uses this timestamp as a confirmation key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0845578d-d855-4dd3-aeb0-7f8ab72a5cfd?mode=deep",
+    "timestamp": "2026-04-29 02:17:09.874759",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateGetSequenceMessageParams()] Can an unprivileged external user submit a sequenceNumber of '0' that fails utils.isPositiveLong() (since 0 is not positive), throwing InvalidArgumentError, but if the application's fund-release logic treats any error on sequence number 0 as a permanent failure state rather than a retryable error, the attacker can trigger this to permanently freeze funds associated with that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_964e0696-8250-4482-b203-761f52813e67?mode=deep",
+    "timestamp": "2026-04-29 02:17:32.125279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user submit a valid topicId and seqNum where config.query.topicMessageLookup is true, causing getTopicMessageTimestampRange() to be called, and if the topic_message_lookup table has no row for that sequence number (rows.length === 0), NotFoundError is thrown even though the message exists in topic_message, permanently blocking a fund-release application that relies on this endpoint for confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f1e025a-fd93-48c9-9132-2b4c8642b8ab?mode=deep",
+    "timestamp": "2026-04-29 02:17:54.711299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user exploit a race condition where a message is inserted into topic_message but the corresponding topic_message_lookup row has not yet been created, causing getTopicMessageTimestampRange() to return rows.length === 0 and throw NotFoundError, and if the fund-release application treats this as a permanent failure (no retry), funds are permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fde10e7-848a-4b4f-a444-d6d84bc24689?mode=deep",
+    "timestamp": "2026-04-29 02:18:17.574065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user craft a topicId and seqNum combination where the sequence_number_range @> $2::bigint operator in the lookup query matches multiple rows (due to overlapping ranges in topic_message_lookup), causing rows[0].timestamp_range to be an incorrect range, leading getMessage() to query with wrong timestamp bounds and throw NotFoundError, permanently blocking fund confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac4bfef5-8b99-45a4-8150-2675fb46d6e5?mode=deep",
+    "timestamp": "2026-04-29 02:18:42.007760",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user send a request with sequenceNumberRange.upper - sequenceNumberRange.lower + 1n exactly equal to limit (boundary condition), causing the non-expanded query path to be selected, but if the topic_message_lookup table has a row whose sequence_number_range spans the boundary and the timestamp_range does not include the actual message timestamp, the returned timestamp_range is wrong and getMessage() throws NotFoundError, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3114fdf-497c-4d42-80b2-4e499596ebaa?mode=deep",
+    "timestamp": "2026-04-29 02:19:06.187869",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user submit a request with both sequenceNumber and timestamp filters where topicMessageLookup is enabled, causing both filters to be added to conditions (line 194) AND to filtersMap (line 192), resulting in the SQL query having redundant conditions that, combined with the timestamp_range conditions from getTopicMessageTimestampRanges(), produce an over-constrained query that returns no rows, permanently hiding messages from a fund-release consumer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0065ff37-fb46-44cf-aab8-516e8dad5d90?mode=deep",
+    "timestamp": "2026-04-29 02:19:30.156181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessages()] Can an unprivileged external user exploit the zeroRandomPageCostQueryHint (applied when limit !== 1) to force the PostgreSQL planner to use the (topic_id, consensus_timestamp) index instead of the primary key, and if the index is stale or has a corruption, cause the query to return an incorrect set of messages, causing a fund-release application to process wrong messages and permanently freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00051d81-0056-4905-83e1-fc5d56eceef0?mode=deep",
+    "timestamp": "2026-04-29 02:19:53.807433",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicMessages()] Can an unprivileged external user send a request with limit=1 to trigger the primary key path (no zeroRandomPageCostQueryHint), while a concurrent request with limit=2 uses the index path, causing the two requests to return different messages for the same topic and timestamp range due to index inconsistency, leading a fund-coordination application to process conflicting state and permanently freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e17e912-27bd-4215-928a-efbe8611ac59?mode=deep",
+    "timestamp": "2026-04-29 02:20:19.268936",
+    "report_generated": false
+  }
+]
