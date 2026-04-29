@@ -1,0 +1,104 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxBlockItems()] Can an unprivileged external attacker exploit the fact that maxBlockItems is an int (not long), and if the block node sends a block with more than Integer.MAX_VALUE items across multiple BlockItemSet messages, the pendingCount += blockItems.size() addition overflows to a negative number, causing the check pendingCount > streamProperties.getMaxBlockItems() to always be false, allowing an unbounded tampered block to be assembled and injected into the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63d9cc01-55b5-4690-ab34-84f459d37670?mode=deep",
+    "timestamp": "2026-04-29 01:51:42.381595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxStreamResponseSize()] Can an unprivileged external attacker exploit the DataSizeUnit(DataUnit.MEGABYTES) annotation on maxStreamResponseSize, where the value is interpreted in megabytes, by setting maxStreamResponseSize=1 (1 MB) via environment variable to cause all legitimate block nodes' responses to exceed the gRPC inbound message limit, triggering repeated errors that mark all legitimate nodes inactive, while the attacker's node serves tampered 1-MB blocks containing forged Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51752a2a-d25a-4c03-ac64-8b6392bdb3db?mode=deep",
+    "timestamp": "2026-04-29 01:51:54.627049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxStreamResponseSize()] Can an unprivileged external attacker exploit the int cast of streamProperties.getMaxStreamResponseSize().toBytes() in BlockNode constructor, where DataSize.ofMegabytes(2049) produces a byte value exceeding Integer.MAX_VALUE (2147483648 bytes > 2^31-1), causing the cast to produce a negative maxInboundMessageSize that gRPC treats as unlimited, allowing the attacker's block node to stream arbitrarily large tampered blocks that bypass size-based defenses and corrupt Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2c0b255-f3d0-4d65-8a16-bb7abdb3584a?mode=deep",
+    "timestamp": "2026-04-29 01:52:06.983761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxSubscribeAttempts()] Can an unprivileged external attacker who controls a block node exploit the fact that the error counter (errors AtomicInteger) is per-BlockNode instance and is reset to 0 on any successful stream (errors.set(0) in the while loop), by sending 2 errors then 1 success repeatedly to keep the error count perpetually below maxSubscribeAttempts (3), while each successful stream delivers a tampered block that passes hash chain verification due to a pre-computed forged hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68f4aca8-dd58-4b57-93b2-c22175dfe582?mode=deep",
+    "timestamp": "2026-04-29 01:52:20.347321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxSubscribeAttempts()] Can an unprivileged external attacker exploit the fact that maxSubscribeAttempts applies per-BlockNode instance (not globally), so if the attacker controls multiple block nodes each with maxSubscribeAttempts-1 errors, none are ever marked inactive, and all serve tampered Hashgraph history in round-robin, making it impossible for the importer to detect the coordinated history manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fde8b001-6204-43b0-8ef7-87f78cbf5105?mode=deep",
+    "timestamp": "2026-04-29 01:52:34.537958",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getReadmitDelay()] Can an unprivileged external attacker exploit the readmitDelay minimum of 10 seconds (@DurationMin(seconds = 10)) by setting it to exactly 10 seconds, then triggering maxSubscribeAttempts errors on all legitimate nodes every 10 seconds to keep them perpetually inactive, while the attacker's node (which never errors) continuously serves tampered Hashgraph history without interruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a230ce47-7e15-491f-bfef-debef458a979?mode=deep",
+    "timestamp": "2026-04-29 01:52:49.655424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getReadmitDelay()] Can an unprivileged external attacker exploit the tryReadmit(true) force-readmit path in BlockNodeSubscriber.getNode(), where inactive nodes are force-readmitted if they have the next block, by ensuring the attacker's node is the only one reporting the correct next block number via getBlockRange(), causing the importer to force-readmit and use the attacker's node regardless of readmitDelay, serving tampered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e5fdda9-90bf-4fd7-b549-89d7fac70a34?mode=deep",
+    "timestamp": "2026-04-29 01:53:04.565314",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getResponseTimeout()] Can an unprivileged external attacker set responseTimeout to exactly 100ms (the minimum) via environment variable, then introduce 101ms of artificial latency on all legitimate block nodes' gRPC status endpoints (e.g., via network-level interference), causing getBlockRange() to always return EMPTY_BLOCK_RANGE for legitimate nodes, while the attacker's co-located node responds in <100ms and is always selected to serve tampered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ccfe36c-22e1-4f70-88a9-2b6fb70f3b28?mode=deep",
+    "timestamp": "2026-04-29 01:53:20.520627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getResponseTimeout()] Can an unprivileged external attacker exploit the fact that responseTimeout is used only for the server status (getBlockRange) call and not for the actual block streaming (streamBlocks uses commonDownloaderProperties.getTimeout()), by setting responseTimeout to 100ms to eliminate all legitimate nodes from selection while the attacker's streaming node has no timeout constraint, allowing indefinite tampered block delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1513d6f-d89a-4074-9e27-9e1832861bd4?mode=deep",
+    "timestamp": "2026-04-29 01:53:36.309290",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxBlockItems()] Can an unprivileged external attacker who controls a block node exploit the BlockAssembler's pending list (List<List<BlockItem>>) by sending a single BlockItemSet with exactly maxBlockItems items where the last item is a tampered BlockProof with a forged block hash, so that onEndOfBlock() assembles the block and passes it to BlockStreamVerifier.verifyHashChain() which only checks previousHash but not the integrity of individual transaction items, allowing tampered transaction history within a valid hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e3c2db8-8fa1-43b4-beb8-8856852454c8?mode=deep",
+    "timestamp": "2026-04-29 01:53:52.770280",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxBlockItems()] Can an unprivileged external attacker exploit the fact that maxBlockItems is validated with @Min(1000) but has no @Max constraint, allowing it to be set to Integer.MAX_VALUE via environment variable, causing the BlockAssembler to never reject any block regardless of size, enabling a malicious block node to stream a single block with billions of tampered items that overwhelm the verifier's memory and cause an OOM crash, preventing legitimate Hashgraph history from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b073049-4a23-435b-9c5f-e54a955bd33a?mode=deep",
+    "timestamp": "2026-04-29 01:54:09.430786",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxStreamResponseSize()] Can an unprivileged external attacker exploit the fact that maxStreamResponseSize controls the gRPC channel's maxInboundMessageSize at construction time (in BlockNode constructor), meaning changes to maxStreamResponseSize after construction have no effect on existing channels, by triggering a node list refresh that creates new BlockNode instances with a manipulated maxStreamResponseSize, allowing oversized tampered block responses to bypass the size limit on newly created channels?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be503f5a-2c6d-43db-a210-41f304280baf?mode=deep",
+    "timestamp": "2026-04-29 01:54:27.665586",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxSubscribeAttempts()] Can an unprivileged external attacker exploit the fact that maxSubscribeAttempts is read dynamically via streamProperties.getMaxSubscribeAttempts() on each onError() call (not cached at construction), so if the attacker can modify the Spring configuration at runtime (e.g., via Spring Cloud Config or actuator), they can set maxSubscribeAttempts to Integer.MAX_VALUE mid-stream to prevent any legitimate node from ever being marked inactive while the attacker's node serves tampered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e482fa3-4e19-4437-aed0-acb86b46895c?mode=deep",
+    "timestamp": "2026-04-29 01:54:45.106421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getReadmitDelay()] Can an unprivileged external attacker exploit the fact that readmitDelay is read dynamically via streamProperties.getReadmitDelay() on each onError() call, so if the attacker can modify the Spring configuration at runtime, they can set readmitDelay to Duration.ofSeconds(10) (minimum) just before triggering errors on all legitimate nodes, ensuring they are readmitted after only 10 seconds and the attacker's node has only a brief window to serve tampered Hashgraph history, making the attack harder to detect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b41e0e2f-b02f-415e-98eb-4f9e587c52d8?mode=deep",
+    "timestamp": "2026-04-29 01:55:04.661774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxBlockItems()] Can an unprivileged external attacker who controls a block node send a stream where the first BlockItemSet contains a BLOCK_HEADER followed by maxBlockItems-1 tampered items, and a second BlockItemSet contains exactly 1 more item (the BlockProof), so that the total pendingCount equals maxBlockItems and the check pendingCount > streamProperties.getMaxBlockItems() is false (equal, not greater), allowing the tampered block to be assembled and passed to BlockStreamVerifier, corrupting Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69a76d55-c32d-4d4f-a57b-5d6080424752?mode=deep",
+    "timestamp": "2026-04-29 01:55:24.061075",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxStreamResponseSize()] Can an unprivileged external attacker exploit the fact that maxStreamResponseSize defaults to 36 MB but the original design document specifies 8 MB, meaning the production default is 4.5x larger than the design intent, allowing a malicious block node to send 36 MB blocks containing tampered Hashgraph history that would have been rejected under the original 8 MB limit, exploiting the configuration discrepancy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2adc16bf-db9c-49fa-ab5e-54e87a16598a?mode=deep",
+    "timestamp": "2026-04-29 01:55:43.672234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getMaxSubscribeAttempts()] Can an unprivileged external attacker exploit the fact that the error counter is shared across all streaming sessions for a given BlockNode instance, by opening multiple concurrent streaming sessions to a legitimate node and causing all of them to fail simultaneously, incrementing the error counter by N (number of concurrent sessions) in a single cycle, reaching maxSubscribeAttempts faster than expected and marking the legitimate node inactive prematurely, leaving only the attacker's node active to serve tampered Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3eec19a9-0ada-45b2-9860-dfd5e2cb7566?mode=deep",
+    "timestamp": "2026-04-29 01:56:04.313899",
+    "report_generated": false
+  }
+]
