@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user induce a network partition by flooding the REST endpoint to cause TCP connection exhaustion, triggering the `.timeout(properties.getTimeout())` to fire on every in-flight request simultaneously, causing all active `RestSubscription` sinks to accumulate unprocessed `PublishResponse` items and exhaust JVM heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_deb08b39-5d42-4e4e-88ff-7de70a887de4?mode=deep",
+    "timestamp": "2026-04-29 04:44:03.643990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldRetry()] Can an unprivileged external user cause a network partition that returns TCP RST packets instead of HTTP 404, bypassing the `shouldRetry()` check (which only retries `WebClientResponseException` with `HttpStatus.NOT_FOUND`), so that all retry budget is silently wasted and the monitor permanently stops tracking transactions without alerting operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b89028b-f2da-4117-a3fa-89474f6d4b2e?mode=deep",
+    "timestamp": "2026-04-29 04:44:15.573328",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user trigger a network partition that causes the REST API to hang indefinitely (no TCP RST, no response), so that `.timeout(properties.getTimeout())` fires a `TimeoutException` which is NOT a `WebClientResponseException`, causing `shouldRetry()` to return false and `onErrorResume(e -> Mono.empty())` to silently discard the error, resulting in zero monitoring coverage with no visible failure signal?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdd2df64-c2b9-4c9e-9cf8-e7e48ccf1b61?mode=deep",
+    "timestamp": "2026-04-29 04:44:27.750402",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onPublish()] Can an unprivileged external user cause a sustained network partition so that `RestSubscription.getSink().tryEmitNext(response)` keeps being called while the downstream `clientSubscribe()` flatMap is blocked waiting for timed-out REST responses, causing the `directBestEffort()` sink to silently drop all new `PublishResponse` items and produce a false impression of zero transaction activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f409825d-64ef-4245-ab64-2fdfab01877d?mode=deep",
+    "timestamp": "2026-04-29 04:44:40.521578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user exploit a network partition to cause repeated `TimeoutException` errors that are swallowed by `onErrorResume(e -> Mono.empty())`, while `subscription.onError(t)` is still called via `doOnError`, causing the error counter in `RestSubscription.errors` to grow unboundedly and exhaust memory in a long-running partition scenario?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8066f8c-d109-4232-93a3-d5733539b112?mode=deep",
+    "timestamp": "2026-04-29 04:44:55.325174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 404 repeatedly, causing `shouldRetry()` to return true and the `RetryBackoffSpec` to exhaust `maxAttempts` retries, after which a `RetryExhaustedException` is thrown but then swallowed by `onErrorResume(e -> Mono.empty())`, leaving the monitor silently degraded with no operator notification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efa33320-c8af-413d-9da7-2226dc02bd42?mode=deep",
+    "timestamp": "2026-04-29 04:45:09.205759",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user induce a partial network partition (intermittent packet loss) so that `.retryWhen(retrySpec)` fires repeatedly with exponential backoff, and because `Schedulers.parallel()` is used, the retry threads accumulate faster than they complete, exhausting the parallel scheduler thread pool and causing unrelated reactive pipelines in the JVM to stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c00ef7fc-b340-4cbc-b1db-5f3daa744a84?mode=deep",
+    "timestamp": "2026-04-29 04:45:23.757451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: createSubscriptions()] Can an unprivileged external user exploit a network partition scenario where `Flux.defer(this::createSubscriptions).cache()` has already cached an empty or partial subscription list before the partition, causing the monitor to permanently operate with zero active subscriptions for the lifetime of the process even after the partition heals, because the cached `Flux` is never re-evaluated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7c0f163-6674-4460-a46a-fc5ae877d6aa?mode=deep",
+    "timestamp": "2026-04-29 04:45:39.001835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes every REST call time out, so that `flatMap` in `clientSubscribe()` accumulates an unbounded number of in-flight `Mono` pipelines (one per `PublishResponse` emitted by `onPublish()`), each holding a thread on `Schedulers.parallel()`, leading to thread starvation across the entire monitor application?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3adf6449-aa3c-478d-863c-4e275b0ad213?mode=deep",
+    "timestamp": "2026-04-29 04:45:54.942054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toResponse()] Can an unprivileged external user cause a network partition that allows a malicious or corrupted REST response to pass through with a `consensusTimestamp` field containing a non-numeric string, causing `Long.parseLong(parts[0])` or `Long.parseLong(parts[1])` in `toResponse()` to throw `NumberFormatException`, which propagates up the reactive chain and terminates the subscription permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24cbb388-13ec-41a1-b890-64afe0411254?mode=deep",
+    "timestamp": "2026-04-29 04:46:10.641962",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toResponse()] Can an unprivileged external user exploit a network partition that causes a rogue or misconfigured mirror node to respond with a `TransactionByIdResponse` containing a `consensusTimestamp` with more than two dot-separated parts, causing `StringUtils.split(timestamp, '.')` to return an array of length > 2, bypassing the `parts.length == 2` check and silently setting `consensusTimestamp` to null, corrupting monitoring metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f93e4382-c5a1-4815-8b0d-70feddbc3424?mode=deep",
+    "timestamp": "2026-04-29 04:46:28.313224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that results in the REST API returning HTTP 503 (Service Unavailable), which is not handled by `shouldRetry()` (only 404 is retried), causing `onErrorResume(e -> Mono.empty())` to silently absorb the error and the monitor to report zero errors while actually experiencing a complete service outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d6dfaed-94b6-4b2c-907c-e45e0c5e2fab?mode=deep",
+    "timestamp": "2026-04-29 04:46:46.022978",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 429 (Too Many Requests) with a Retry-After header, which `shouldRetry()` does not handle (only retries 404), causing the monitor to silently drop all transaction verifications without respecting the rate-limit signal, leading to a false healthy state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8986930-4e18-4cbc-b084-e7afb4c3b74f?mode=deep",
+    "timestamp": "2026-04-29 04:47:04.492049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 502 (Bad Gateway) from an intermediate proxy, which is not retried by `shouldRetry()`, causing `doOnError(t -> subscription.onError(t))` to record a '502' error string in `RestSubscription.errors` map, and if this happens at high frequency, cause the `errors` ConcurrentHashMap to grow without bound and exhaust heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09e10031-36b8-421b-9716-a53da9e88a33?mode=deep",
+    "timestamp": "2026-04-29 04:47:22.919942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onPublish()] Can an unprivileged external user cause a network partition that blocks the `clientSubscribe()` flatMap, while `onPublish()` continues to call `s.tryEmitNext(response)` at high frequency, causing the `Sinks.Many` internal buffer to overflow and emit `Sinks.EmitResult.FAIL_OVERFLOW`, silently dropping all new publish responses with no error recorded in `subscription.errors`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b07ec67-c504-4f23-a057-d30428711fc7?mode=deep",
+    "timestamp": "2026-04-29 04:47:42.462677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes all REST calls hang until `.timeout()` fires, and because `doFinally(s -> subscription.onComplete())` is only called when the upstream flux terminates, the subscription never transitions to COMPLETED state, causing the monitor to report the subscription as perpetually RUNNING even though no transactions are being verified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9490f77b-3418-4477-a78a-81769949c0d7?mode=deep",
+    "timestamp": "2026-04-29 04:48:02.607993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldRetry()] Can an unprivileged external user cause a network partition that results in `java.net.ConnectException` (connection refused) being thrown, which is not a `WebClientResponseException`, causing `shouldRetry()` to return false and the retry mechanism to be completely bypassed, so that a single connection failure permanently stops transaction verification for that subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f158821-5c43-4e24-b8cd-993f512202be?mode=deep",
+    "timestamp": "2026-04-29 04:48:21.844971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 404 exactly `maxAttempts` times, exhausting the retry budget, after which `RetryExhaustedException` wraps the original `WebClientResponseException`, and `onError()` in `RestSubscription` logs the combined message string, potentially leaking internal URL paths or transaction IDs into log files accessible to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f120639c-192a-442e-809f-19f410b140ec?mode=deep",
+    "timestamp": "2026-04-29 04:48:42.709020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toString(TransactionId)] Can an unprivileged external user cause a network partition that results in a null `TransactionId` being passed to `toString(TransactionId tid)`, causing a `NullPointerException` when accessing `tid.accountId` or `tid.validStart`, which propagates through the reactive chain and terminates the subscription without proper error recording?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08ab9ec0-b163-44c0-89b3-b9ccd27965a0?mode=deep",
+    "timestamp": "2026-04-29 04:49:04.007410",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API intermittently return HTTP 404 (triggering retries) and then recover, causing the retry backoff timer to fire on `Schedulers.parallel()` threads, and if the partition is sustained long enough, the accumulated backoff delays cause the `take(properties.getDuration())` window to expire, terminating the subscription before the partition heals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_762cbe97-7053-4a5a-8151-ba8ea0da93f1?mode=deep",
+    "timestamp": "2026-04-29 04:49:27.005989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 404 on every retry attempt, and because `minBackoff` and `maxBackoff` are configurable with very small values (e.g., 1 nanosecond as in tests), the retry loop spins at near-zero delay, consuming 100% CPU on `Schedulers.parallel()` threads and causing a denial-of-service for the entire monitor process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8565d7a8-3c4d-41d7-81f7-0e0f20f74642?mode=deep",
+    "timestamp": "2026-04-29 04:49:49.849878",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] Can an unprivileged external user cause a network partition that makes `subscriptions.flatMap(this::clientSubscribe)` emit errors for all subscriptions simultaneously, and because `flatMap` by default has unbounded concurrency, all error-handling paths execute concurrently, causing a thundering-herd effect on `Schedulers.parallel()` that starves other reactive pipelines?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e4df309-2bc2-45d9-bdcf-a35809fc946a?mode=deep",
+    "timestamp": "2026-04-29 04:50:12.631764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return a valid HTTP 200 response but with an empty body, causing `bodyToMono(TransactionByIdResponse.class)` in `RestApiClient.retrieve()` to emit an empty `Mono`, which then causes `Iterables.getFirst(response.getTransactions(), null)` to receive a null `response`, throwing a `NullPointerException` in `toResponse()` that terminates the subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb827d2a-511e-409f-b755-134ed13fdefd?mode=deep",
+    "timestamp": "2026-04-29 04:50:35.255962",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 200 with a `TransactionByIdResponse` containing an empty `transactions` list, causing `Iterables.getFirst(response.getTransactions(), null)` to return null, setting `consensusTimestamp` to null in `toResponse()`, and causing downstream consumers of `SubscribeResponse` to fail with `NullPointerException` when they assume `consensusTimestamp` is non-null?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52f8ad3c-a3e0-45f5-888b-aa04837f72cc?mode=deep",
+    "timestamp": "2026-04-29 04:51:00.551981",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: clientSubscribe()] Can an unprivileged external user cause a network partition that makes the REST API return HTTP 200 with a malformed JSON body, causing Jackson deserialization to throw an exception inside `retrieve()`, which propagates as a non-`WebClientResponseException` error, bypassing `shouldRetry()` and being silently swallowed by `onErrorResume(e -> Mono.empty())`, resulting in zero monitoring coverage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a306e352-4423-45d9-a2e7-82effb7ada9e?mode=deep",
+    "timestamp": "2026-04-29 04:51:24.858106",
+    "report_generated": false
+  }
+]
