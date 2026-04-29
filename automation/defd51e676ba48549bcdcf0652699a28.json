@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getRandomNodeAccountId()] Can an unprivileged external user exploit the fact that `getRandomNodeAccountId()` falls back to `nodeAccountIds[0]` when `rand.Int` fails, by triggering conditions that exhaust the system's entropy source, causing all metadata requests to return the same node account ID and enabling the attacker to predict and control which node processes their transaction, manipulating consensus ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56baf828-3186-4254-a73c-367847f98288?mode=deep",
+    "timestamp": "2026-04-29 03:13:40.281624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getRandomNodeAccountId()] Can an unprivileged external user flood `ConstructionMetadata()` with concurrent requests to observe the distribution of returned `node_account_id` values, statistically infer the node list order, and then bypass the random selection by directly specifying a chosen `node_account_id` in subsequent `ConstructionPayloads` requests to deterministically route transactions to a target node for ordering manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f2c7a22-b8cc-4330-a12f-0d4580670210?mode=deep",
+    "timestamp": "2026-04-29 03:13:53.277687",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply both `metadataKeyValidUntilNanos` and `metadataKeyValidStartNanos` in the same metadata map, and since `getTransactionTimestampProperty()` gives priority to `metadataKeyValidUntilNanos` and ignores `metadataKeyValidStartNanos` when the former is present, craft a `validUntil` that produces a `validStartNanos` far in the past, backdating the transaction's ID to a historical slot in the mirror node's timeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80538de1-46ee-43b8-8054-948085b9d302?mode=deep",
+    "timestamp": "2026-04-29 03:14:06.759066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getIntMetadataValue()] Can an unprivileged external user supply a `metadataKeyValidStartNanos` string value of `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f614891-ad35-4202-945d-d7373a399db3?mode=deep",
+    "timestamp": "2026-04-29 03:14:22.126230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionPreprocess()] Can an unprivileged external user submit operations where `operations[0].Type` is set to a valid operation type string but the actual operations list contains mixed types, causing `ConstructionPreprocess()` to set `options[optionKeyOperationType] = operations[0].Type` based only on the first operation's type, and then use this mismatched type in `ConstructionMetadata()` to obtain fee/metadata for a different operation type than what is actually being constructed, enabling construction of a transaction whose type differs from what the metadata was generated for?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d61e2a70-87f0-4147-8a4d-efdcfaae2411?mode=deep",
+    "timestamp": "2026-04-29 03:14:47.062677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionPreprocess()] Can an unprivileged external user pass `request.Metadata` with pre-populated keys in `ConstructionPreprocess()`, since the function uses `request.Metadata` directly as `options` when non-empty (line 306-307), allowing the attacker to inject arbitrary key-value pairs into the options map that are then passed through to `ConstructionMetadata()` and potentially override server-computed values like `node_account_id` or `valid_until_nanos`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68c7d5d6-a402-49e3-8708-5146f0cb059a?mode=deep",
+    "timestamp": "2026-04-29 03:15:16.391383",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user supply a `metadataKeyNodeAccountId` in the `ConstructionPayloads` metadata that was not returned by `ConstructionMetadata()` (i.e., a node not in the current network), causing `transactionSetNodeAccountId()` to set an invalid node, and when submitted, the transaction is rejected by the network but still logged by the mirror node's submission attempt, creating phantom history entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52f34dec-bb93-4913-b4a1-048e48fc22b5?mode=deep",
+    "timestamp": "2026-04-29 03:15:46.194567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: transactionSetTransactionId()] Can an unprivileged external user supply a `validStartNanos` value that is in the future (e.g., current time + 170 seconds, within the 180-second valid window), causing the transaction to be constructed with a future `TransactionID` timestamp, and when submitted, the network holds it until that future time before processing, inserting it into the history at a future slot that the attacker chose, reorganizing the sequence relative to transactions submitted later but processed earlier?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_288ac448-895e-4894-930a-29041132eccc?mode=deep",
+    "timestamp": "2026-04-29 03:16:29.454837",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionCombine()] Can an unprivileged external user call `ConstructionCombine()` with an `UnsignedTransaction` that has already been frozen with a specific `TransactionID`, add their own signature, and then call `ConstructionCombine()` again on the resulting `SignedTransaction` to add more signatures, effectively building up a multi-signature transaction incrementally without the original parties' knowledge, and submit it to create a history entry that appears to have been authorized by multiple parties at a specific historical timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bfc6175-9040-4158-8af1-55372c910d4b?mode=deep",
+    "timestamp": "2026-04-29 03:17:04.798950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: isSupportedTransactionType()] Can an unprivileged external user craft a transaction that is a `hiero.TransferTransaction` (which passes `isSupportedTransactionType()`) but encodes zero-value transfers between accounts they control, submitting it with a carefully chosen `validStartNanos` to insert a no-op transaction at a specific historical timestamp, polluting the mirror node's transaction history at that slot without moving any funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5a987e8-0707-4a5e-b351-d24efbc09a05?mode=deep",
+    "timestamp": "2026-04-29 03:17:30.873785",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionSubmit()] Can an unprivileged external user construct a `TransferTransaction` with a `validStartNanos` set to a timestamp just 1 nanosecond after a known historical transaction's timestamp, submit it via `ConstructionSubmit()`, and cause the mirror node to insert this new transaction immediately after the target in the ordered history, effectively injecting an entry between two existing history records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a76d6aed-f32c-4702-a8c0-6c7bcb6a9d12?mode=deep",
+    "timestamp": "2026-04-29 03:18:05.739662",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply a `metadataKeyValidUntilNanos` string that encodes `maxValidDurationNanos + 1` (i.e., `180_000_000_001` nanoseconds), causing `validStartNanos = 1`, which is positive and passes the `validStartNanos <= 0` check, resulting in a transaction with a `TransactionID` timestamp of 1 nanosecond (epoch start), placing it at the very beginning of the mirror node's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a57a759-1a21-440d-8a54-74d9895c39b5?mode=deep",
+    "timestamp": "2026-04-29 03:18:27.994699",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user supply an `account_map` string with no colon separator (e.g., `alias_only`), causing `strings.Split(aliasMap, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50087ccd-e664-4a82-b7a3-9f5008725952?mode=deep",
+    "timestamp": "2026-04-29 03:19:13.231146",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user supply an `account_map` with a mapping like `alias:shard.realm.num:extra` (containing multiple colons), causing `strings.Split(aliasMap, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c955b753-9759-4805-ad99-b350cd529152?mode=deep",
+    "timestamp": "2026-04-29 03:20:01.093216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionMetadata()] Can an unprivileged external user call `ConstructionMetadata()` with an `options` map that already contains `metadataKeyNodeAccountId` or `metadataKeyValidUntilNanos` keys, and since `metadata = maps.Clone(request.Options)` copies all options before the server overwrites them, observe whether the server's computed values differ from the injected ones, and use this to fingerprint the server's internal state (node list, current time) for timing attacks on transaction ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ffd019-5993-4a00-b8e2-6fdd3a57a2e9?mode=deep",
+    "timestamp": "2026-04-29 03:20:54.390392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionMetadata()] Can an unprivileged external user inject a key `metadataKeyAccountMap` into the `request.Options` of `ConstructionMetadata()`, and since `maps.Clone(request.Options)` copies it into `metadata` before `resolveAccountAliases()` potentially overwrites it, cause the metadata response to contain an attacker-controlled `account_map` value when no `account_aliases` are present, which is then used in `getSdkPayerAccountId()` to resolve the payer to an attacker-chosen account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8baff373-eec8-46a4-8906-8ba0a98e85f9?mode=deep",
+    "timestamp": "2026-04-29 03:21:44.869166",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user supply a `metadataKeyAccountMap` directly in the `ConstructionPayloads` metadata (bypassing `ConstructionMetadata()` entirely), and since `getSdkPayerAccountId()` reads `request.Metadata[metadataKeyAccountMap]` without verifying it was server-generated, cause the payer account ID in the transaction's `TransactionID` to be set to an arbitrary account, inserting the transaction into that account's history timeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dac6903e-aef1-402c-a6ed-41871e1e232d?mode=deep",
+    "timestamp": "2026-04-29 03:22:13.125383",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: transactionFreeze()] Can an unprivileged external user trigger `transactionFreeze()` to fail by supplying a transaction with an invalid state (e.g., missing required fields), causing `ConstructionPayloads()` to return `ErrTransactionFreezeFailed`, and then exploit the partial state of the transaction object that was modified by earlier `updateTransaction()` steps (memo, node, transaction ID) before the freeze failure, to infer internal server state used for transaction ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bce4b8f7-515b-49c1-8b4f-1fec25604747?mode=deep",
+    "timestamp": "2026-04-29 03:22:36.087746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateTransaction()] Can an unprivileged external user exploit the sequential nature of `updateTransaction()` (which applies updaters in order: memo → nodeAccountId → transactionId → validDuration → freeze) to cause a partial update failure at the `transactionSetTransactionId` step by providing an invalid payer, while the memo and node have already been set, leaking information about which node was selected for the transaction before the error occurs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb9125fd-6459-4e3c-a98e-cabf01e41cc0?mode=deep",
+    "timestamp": "2026-04-29 03:23:08.766701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionDerive()] Can an unprivileged external user call `ConstructionDerive()` with a crafted public key whose derived account ID matches an existing account's alias, causing the mirror node to associate the attacker's key with that account's history, and then use this derived account ID as the payer in a transaction to insert entries into that account's historical transaction sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58c098d3-c79a-4b07-960a-46475ad6c680?mode=deep",
+    "timestamp": "2026-04-29 03:23:43.133126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionPreprocess()] Can an unprivileged external user submit a single-operation `OperationSlice` where `signers[0]` (the payer) has an alias, causing `ConstructionPreprocess()` to set `options[optionKeyAccountAliases] = payer.String()`, and then in `ConstructionMetadata()`, `resolveAccountAliases()` looks up the alias in the account repository, potentially revealing the numeric account ID of any alias-based account, which the attacker can then use to craft transactions that appear in that account's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7530a01f-a283-475f-b037-1a49821f0c07?mode=deep",
+    "timestamp": "2026-04-29 03:24:23.063687",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getIntMetadataValue()] Can an unprivileged external user supply a `metadataKeyValidStartNanos` string value of `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb8b2859-961f-4474-acf8-a8eddb4d02f4?mode=deep",
+    "timestamp": "2026-04-29 03:25:09.302697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionCombine()] Can an unprivileged external user submit a `ConstructionCombineRequest` where `request.UnsignedTransaction` is actually a previously signed transaction (already containing signatures), and since `unmarshallTransactionFromHexString()` does not distinguish between signed and unsigned transactions, successfully add additional signatures to an already-signed transaction and resubmit it, creating a history entry with a different signature set than the original?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e95cf67-bcfa-45c8-8aaf-893bb7f9c55e?mode=deep",
+    "timestamp": "2026-04-29 03:25:41.303517",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: ConstructionHash()] Can an unprivileged external user call `ConstructionHash()` on an unsigned transaction (since `unmarshallTransactionFromHexString()` accepts both signed and unsigned), obtain a hash that does not correspond to any submittable transaction, and use this hash to pollute the mirror node's hash index or confuse hash-based transaction lookups, disrupting the integrity of the historical transaction index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce52c336-b4a9-4d11-9b83-c285aeca7876?mode=deep",
+    "timestamp": "2026-04-29 03:26:12.440699",
+    "report_generated": false
+  }
+]
