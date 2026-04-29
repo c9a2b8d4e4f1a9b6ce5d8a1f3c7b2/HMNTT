@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: createCryptoTransferList()] Can an unprivileged external user observe a transfer where is_approval is NULL in the database being silently coerced to false by the isNil(is_approval) ? false : is_approval logic, causing a transfer that was never owner-approved to appear as a non-approval transfer in the API response, misleading downstream clients into treating an unauthorized debit as a legitimate owner-initiated one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff0617a9-32d2-4b19-94f1-7343a295dddf?mode=deep",
+    "timestamp": "2026-04-29 00:56:10.930393",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: createTokenTransferList()] Can an unprivileged external user exploit the same isNil(is_approval) ? false : is_approval default in createTokenTransferList() to observe token transfers where the owner never granted an allowance being returned with is_approval: false, effectively hiding the fact that the transfer was executed under an allowance mechanism and bypassing downstream approval-status checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10e3fc3e-2393-4954-b533-587c59c4dc6e?mode=deep",
+    "timestamp": "2026-04-29 00:56:22.816893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a transaction hash that matches multiple rows in transaction_hash with different payer_account_id values, causing the code to unconditionally use rows[0].payer_account_id and then return transactions belonging to a different payer, effectively authorizing cross-account transaction disclosure without the true owner's consent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a0e57dc-2262-4b2c-a173-cfe5f43d35c6?mode=deep",
+    "timestamp": "2026-04-29 00:56:35.352836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user craft a base64url-encoded hash that decodes to the same 32-byte prefix as a victim's transaction hash, causing getTransactionHash() to return the victim's payer_account_id and then exposing all transactions associated with that payer within the consensus timestamp range, without any ownership verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ebdb154-aa44-4855-84f8-a550189971bc?mode=deep",
+    "timestamp": "2026-04-29 00:56:48.780565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user submit a transaction ID where the payer_account_id is set to a victim's account number, causing the SQL query to return all transactions for that payer within the maxTransactionConsensusTimestampRangeNs window, disclosing transfer amounts, is_approval flags, and token movements without the victim's authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5156bcd-ed34-4a41-bd68-0383230eab1e?mode=deep",
+    "timestamp": "2026-04-29 00:57:02.026752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query /transactions/:transactionIdOrHash with scheduled=true to force mayMissLongTermScheduledTransaction() to expand the consensus timestamp upper bound by maxScheduledTransactionConsensusTimestampRangeNs, thereby retrieving scheduled transactions that were authorized by signers but not yet executed, exposing pending multi-sig approval state to an unauthorized observer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d88baea-78e0-42bb-bd02-45e4bca546b9?mode=deep",
+    "timestamp": "2026-04-29 00:57:16.085587",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: mayMissLongTermScheduledTransaction()] Can an unprivileged external user trigger the condition scheduled === true && transactions.length === 0 to cause a second database query with an expanded timestamp range, leaking the existence or non-existence of a long-term scheduled transaction that required multi-signer approval, without being one of the required signers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_570c43a7-c684-4e9e-9af7-deeccab6a2df?mode=deep",
+    "timestamp": "2026-04-29 00:57:30.549119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user omit the scheduled query parameter to trigger the mayMissLongTermScheduledTransaction() path where scheduled === undefined and scheduleExists === true, causing the API to silently perform a second expanded-range query and return the scheduled (multi-signer-approved) inner transaction alongside the ScheduleCreate, disclosing signer-gated execution results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_442a6d8e-51a4-4bbc-b2d1-eb50b14f90d9?mode=deep",
+    "timestamp": "2026-04-29 00:57:45.935065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user retrieve inner_transactions from a batch transaction by querying a transaction ID, causing the code at line 949-958 to fetch all inner transactions via getTransactionsByTransactionIdsSql() without verifying that the caller is an authorized signer or owner of those inner transactions, exposing the full transfer details of every inner transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76a86f74-01f5-45d1-b5d9-d0fa598b53ef?mode=deep",
+    "timestamp": "2026-04-29 00:58:01.544136",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatTransactionRows()] Can an unprivileged external user receive transaction_bytes (raw serialized transaction body) via utils.encodeBase64(row.transaction_bytes) in the formatted response, allowing them to reconstruct the full transaction including all signer keys and approval flags without being a party to the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_886d7530-f7f8-4e81-a68d-99a6e41f8819?mode=deep",
+    "timestamp": "2026-04-29 00:58:18.941811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatTransactionRows()] Can an unprivileged external user receive batch_key via utils.encodeKey(row.batch_key) in the formatted response, exposing the cryptographic key used to authorize a batch of transactions, which could be used to infer which accounts are authorized signers for future batch transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e13202d-b68a-460e-96c4-2dcf92f7e7cd?mode=deep",
+    "timestamp": "2026-04-29 00:58:36.564125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an account.id filter that causes the entityTransactionCondition regex replacement (ctl|t)\\. to strip table prefixes from resultTypeQuery and transactionTypeQuery, producing a malformed WHERE clause that omits the result-type filter and returns failed transactions (including failed unauthorized transfer attempts) alongside successful ones?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab238c57-b585-46c7-90d9-ffb322d0a3c5?mode=deep",
+    "timestamp": "2026-04-29 00:58:53.806949",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user exploit the full outer join between the transaction table, crypto_transfer table, and token_transfer table to observe transactions where a transfer exists in crypto_transfer or token_transfer but not in the main transaction table, potentially exposing orphaned approval-based transfers that were recorded without a corresponding parent transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aad35e57-c51c-4210-afac-2ab986f81355?mode=deep",
+    "timestamp": "2026-04-29 00:59:12.020063",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply an account.id filter to cause the getTransferDistinctTimestampsQuery() to join the transaction table using (consensus_timestamp, payer_account_id) and return transactions where the queried account is a transfer recipient (not the payer/signer), thereby exposing the payer's full transaction history without the payer's consent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4528df89-42fe-4f08-a0b9-434cdc2b7cd9?mode=deep",
+    "timestamp": "2026-04-29 00:59:31.696111",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user submit multiple account.id=eq filters to populate accountIdEqValues with multiple account IDs, causing getQueryWithEqualValues() to generate an entity_id = any($N) condition that returns transfers across all specified accounts in a single response, aggregating cross-account approval data without authorization from any of those account owners?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bab77b6-82b4-4357-8547-e6ad54af2834?mode=deep",
+    "timestamp": "2026-04-29 00:59:51.905968",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user combine account.id with credit/debit type filters to isolate only debit transfers (amount < 0) with is_approval=true, effectively enumerating all allowance-based debits from a target account without being the account owner or an authorized spender?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3e51528-e810-487f-9472-1a12d798c3b8?mode=deep",
+    "timestamp": "2026-04-29 01:00:12.700747",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user query a SCHEDULECREATE transaction ID shortly after consensus to receive a SHORTER_CACHE_CONTROL_HEADER (max-age=5) response, and by timing the cache-control header change, infer the exact moment a scheduled transaction's required signers have all approved and the transaction executed, without being a signer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65a706f2-4e3d-4898-9964-ce42a918a963?mode=deep",
+    "timestamp": "2026-04-29 01:00:32.917834",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: doGetTransactions()] Can an unprivileged external user exploit the cache.get() call with keyMapper() generating keys like transaction:{timestamp} to perform a cache poisoning attack by racing a legitimate request, causing a cached response with incorrect is_approval values to be served to subsequent users querying the same transaction timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_211b434b-c367-4cca-8a3e-f3a47e594da8?mode=deep",
+    "timestamp": "2026-04-29 01:00:54.842244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: keyMapper()] Can an unprivileged external user observe that the cache key is derived solely from consensus_timestamp (transaction:{timestamp}) without including payer_account_id, causing two transactions with the same consensus_timestamp but different payers to collide in the cache, returning one payer's is_approval and transfer data to a requester querying the other payer's transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_130b928f-e964-442d-99e9-1a012914c977?mode=deep",
+    "timestamp": "2026-04-29 01:01:16.488817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a valid_start_ns timestamp that falls within the maxValidStartTimestampDriftNs window before a victim's transaction, causing the lower consensus timestamp bound to be set to minTimestamp - maxValidStartTimestampDriftNs and returning transactions from the victim's account that predate the queried transaction ID?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77ba3a28-bd87-4d47-9ab1-b5ff0ee17ea4?mode=deep",
+    "timestamp": "2026-04-29 01:01:38.960213",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user craft a transaction ID with a payer_account_id of 0 (falsy in JavaScript) to trigger the else branch at line 850-854 where only the timestamp condition is used without a payer constraint, causing the query to return all transactions at that consensus timestamp regardless of which account authorized them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_273689b3-a3a0-4246-a57d-8fc3333b1c9d?mode=deep",
+    "timestamp": "2026-04-29 01:02:02.749176",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply inner_transactions keys where payer is falsy (null/0/undefined) to bypass the payer_account_id constraint in the SQL query, causing the subqueryConditions to use only timestamp bounds and returning crypto_transfer and token_transfer records for all payers within that range, exposing approval flags across accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0817ee07-ae4a-4eca-94d8-a316169f6aff?mode=deep",
+    "timestamp": "2026-04-29 01:02:26.360006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction ID that corresponds to a ScheduleCreate transaction, receive the inner_transactions array from the response, and then use those inner transaction keys to make a second request that fetches the fully-executed scheduled transaction (which required multi-signer approval) without being one of the required signers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f6f937e-acf1-4e74-85a6-27cf8c26b07d?mode=deep",
+    "timestamp": "2026-04-29 01:02:51.258965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: createNftTransferList()] Can an unprivileged external user query a transaction and receive NFT transfer records including is_approval status via NftTransferViewModel, exposing whether an NFT was transferred under an approved allowance (approved_for_all or specific serial approval) without the NFT owner's consent to disclose this information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b67dd24e-8671-4263-8245-967e02b4ac6d?mode=deep",
+    "timestamp": "2026-04-29 01:03:16.224260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: createAssessedCustomFeeList()] Can an unprivileged external user retrieve effective_payer_account_ids from the assessedCustomFeeJsonAgg in the response, exposing which accounts were charged custom fees (potentially under allowance-based transfers) without those accounts' authorization to disclose their fee payment history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_575cc0c3-f4d2-4fa1-b562-b3d55854f453?mode=deep",
+    "timestamp": "2026-04-29 01:03:42.102957",
+    "report_generated": false
+  }
+]
