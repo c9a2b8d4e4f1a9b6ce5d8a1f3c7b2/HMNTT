@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user submit `limit=9223372036854775807` (MAX_LONG) to the `/topics/:topicId/messages` endpoint, causing the SQL query to request an unbounded number of rows from the `topic_message` table, thereby exhausting DB resources and bypassing the `defaultLimit` design constraint of 25/100, leading to denial of service or fee-related data exfiltration at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af0ce7de-a00a-4b19-a455-d0178646c6b9?mode=deep",
+    "timestamp": "2026-04-29 02:46:06.060706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply multiple `limit` query parameters (e.g., `limit=1&limit=100`) to `/topics/:topicId/messages`, causing `extractSqlFromTopicMessagesRequest()` to iterate over all filter entries and use the last `limit` value, effectively overriding the design-intended cap and retrieving more fee-bearing topic messages than permitted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c52a066-3826-4561-9a81-0f49ab4c8500?mode=deep",
+    "timestamp": "2026-04-29 02:46:18.118098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRangeFromFilters()] Can an unprivileged external user exploit the JavaScript switch-case fallthrough from `utils.opsMap.gt` into `utils.opsMap.gte` (lines 236-239) by supplying `sequencenumber=gt:0`, causing `value` to be incremented to `1n` and then immediately used as `range.lower`, silently shifting the effective sequence number range and altering which fee-bearing messages are returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e7b79bb-5ccf-4019-a6a7-5ff580d49f30?mode=deep",
+    "timestamp": "2026-04-29 02:46:30.683638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRangeFromFilters()] Can an unprivileged external user exploit the switch-case fallthrough from `utils.opsMap.lt` into `utils.opsMap.lte` (lines 241-244) by supplying `sequencenumber=lt:1`, causing `value` to be decremented to `0n` and then used as `range.upper`, producing a range `[1n, 0n]` that returns `null` and silently suppresses all fee-bearing messages without an error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f73e0737-7696-4644-a0c7-43834bc7fb4c?mode=deep",
+    "timestamp": "2026-04-29 02:46:44.285714",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRangeFromFilters()] Can an unprivileged external user supply `sequencenumber=ne:100` to `/topics/:topicId/messages`, triggering the `InvalidArgumentError` throw at line 247 for the `ne` operator, causing an unhandled exception path that leaks internal error details about the fee-related query structure to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bc24f55-3c36-4d79-abb9-a55e619b7d8e?mode=deep",
+    "timestamp": "2026-04-29 02:46:58.187763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRangeFromFilters()] Can an unprivileged external user supply `sequencenumber=gt:9223372036854775806` (MAX_LONG - 1), causing `value += 1n` to produce `9223372036854775807n` (MAX_LONG), which equals `constants.MAX_LONG - 1n` used as the upper bound, collapsing the range to a single sequence number and bypassing the intended broad fee-data retrieval design?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8a49711-45fe-49f9-a6c1-3f880eb3051c?mode=deep",
+    "timestamp": "2026-04-29 02:47:12.552770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a `limit` value equal to `sequenceNumberRange.upper - sequenceNumberRange.lower + 1n` (line 269) to force the code into the simpler non-CTE query path, bypassing the range-expansion logic that accounts for partial sequence number ranges, causing the API to return fee-bearing messages outside the intended timestamp bounds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_045757e8-89f0-42cb-9e7e-0b1a74b61a71?mode=deep",
+    "timestamp": "2026-04-29 02:47:28.019446",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a very large `limit` value combined with `order=desc` to trigger the `int8range(greatest(lower(range) - ($4 - 1), lower($2::int8range)), upper(range), '[)')` range expansion (line 293), causing the expanded sequence number range to cover far more rows than intended and returning fee-bearing messages outside the design-intended window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26d7d7ff-dd59-4ba9-835b-bb38139dcaae?mode=deep",
+    "timestamp": "2026-04-29 02:47:44.361623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply `order=asc` with a large `limit` to trigger the `int8range(lower(range), least(upper(range) + least($4, 9223372036854775807::bigint - upper(range)), upper($2::int8range)), '[)')` expansion (line 292), causing the timestamp range to expand beyond the intended upper bound and exposing fee-bearing messages from future or unintended time windows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_599a2473-dbb3-482c-973a-4b114cea7ce4?mode=deep",
+    "timestamp": "2026-04-29 02:48:01.418202",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessages()] Can an unprivileged external user set `limit=1` to force `queryHint` to `undefined` (line 142: `limit !== 1 ? constants.zeroRandomPageCostQueryHint : undefined`), causing the PostgreSQL query planner to choose a suboptimal index and perform a full table scan on `topic_message`, leading to resource exhaustion that degrades fee-related query performance for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d591f34-7037-4f26-8821-06079056acd8?mode=deep",
+    "timestamp": "2026-04-29 02:48:17.966362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessages()] Can an unprivileged external user supply any `limit` value other than 1 to force `constants.zeroRandomPageCostQueryHint` to be applied (line 142), manipulating the PostgreSQL query planner's cost model by setting `random_page_cost = 0`, causing the planner to always prefer the `(topic_id, consensus_timestamp)` index regardless of data distribution, potentially causing incorrect fee-related query results under certain data layouts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24aeb6e1-3757-4905-88a6-055c1ad6288e?mode=deep",
+    "timestamp": "2026-04-29 02:48:36.009908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user supply a `consensusTimestamp` that matches a transaction with `result = 22 and type = 27` (line 69) but whose associated `topic_message` row has been deleted or is inconsistent, causing `getMessage()` to throw `NotFoundError` and leaking information about the existence of fee-bearing transactions at specific timestamps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_601bf7a9-8f75-4ad4-b787-c306b87d97b9?mode=deep",
+    "timestamp": "2026-04-29 02:48:54.608173",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user enumerate valid `consensusTimestamp` values by probing the `/messages/:consensusTimestamp` endpoint, using the binary `NotFoundError` vs success response to map out which timestamps correspond to `ConsensusSubmitMessage` transactions (type=27, result=22), thereby inferring the fee-paying activity pattern of the network without any authentication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b29676e1-d65b-4baa-b968-84164b07d769?mode=deep",
+    "timestamp": "2026-04-29 02:49:13.675645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: validateConsensusTimestampParam()] Can an unprivileged external user supply a timestamp value of `0.000000000` to `validateConsensusTimestampParam()`, which passes `utils.isValidTimestampParam()` validation, and then use `utils.parseTimestampParam()` to produce a zero nanosecond value that matches genesis-era transactions, potentially exposing fee-bearing messages from the network's earliest state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1bc5f38-a2e2-4b24-afe2-05369cd61f92?mode=deep",
+    "timestamp": "2026-04-29 02:49:33.924526",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user supply a `sequenceNumber` as a string (e.g., `'1'`) that passes `utils.isPositiveLong()` validation but is passed directly as `params[1]` (line 101) without numeric coercion, causing PostgreSQL to perform an implicit type cast that may behave differently from an integer comparison, potentially matching unintended fee-bearing messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7cbf0f2e-1932-4832-a03e-ebb8b2777731?mode=deep",
+    "timestamp": "2026-04-29 02:49:53.678950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user exploit the conditional `config.query.topicMessageLookup` branch (line 103) by sending requests when `topicMessageLookup` is disabled, causing the query to scan the entire `topic_message` table without the timestamp range constraint, returning fee-bearing messages that would otherwise be filtered by the lookup optimization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baf7df7c-6fc4-4a1c-98d1-b81e14d9f685?mode=deep",
+    "timestamp": "2026-04-29 02:50:15.302762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user supply a `seqNum` value that exists in `topic_message_lookup` but whose `timestamp_range` spans an unexpectedly large interval, causing the `getMessageByTopicAndSequenceRequest()` to add a very wide `consensus_timestamp >= $3 and consensus_timestamp < $4` constraint that matches multiple fee-bearing messages, but `getMessage()` only expects exactly one row (line 324), throwing `NotFoundError` and leaking structural information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6e69083-5202-47a4-9fe3-a5ec7c4581fb?mode=deep",
+    "timestamp": "2026-04-29 02:50:37.218185",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply both `sequencenumber` and `timestamp` filters simultaneously to `/topics/:topicId/messages`, causing `extractSqlFromTopicMessagesRequest()` to add both to `conditions` (line 194) and also to `sequenceNumberFilters`/`timestampFilters` (line 192), resulting in duplicate filter application that narrows the fee-bearing message result set in an unintended way?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c57d15e-2ab7-41ef-aea9-bfa2f6487f05?mode=deep",
+    "timestamp": "2026-04-29 02:50:57.560753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply `sequencenumber=eq:1&sequencenumber=eq:2` to `/topics/:topicId/messages`, causing `getRangeFromFilters()` to process both `eq` filters sequentially, where the second `eq` sets `range.lower = range.upper = 2n` but the first already set `range.lower = range.upper = 1n`, resulting in `range.lower (2n) > range.upper (1n)` returning `null` and silently returning an empty result for fee-bearing messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41159394-5d26-42ca-80ab-6dcf2bec1b68?mode=deep",
+    "timestamp": "2026-04-29 02:51:21.419984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRangeFromFilters()] Can an unprivileged external user supply `sequencenumber=eq:0` to `/topics/:topicId/messages`, causing `getRangeFromFilters()` to check `value (0n) < range.lower (1n)` (line 229, since `defaultLower=1n` for sequence numbers), returning `null` and causing `getTopicMessageTimestampRanges()` to return an empty array, which causes `extractSqlFromTopicMessagesRequest()` to return `{}` and `getTopicMessages()` to silently return an empty response without error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a58acfb-ddbc-4465-89d3-94a7b4691f03?mode=deep",
+    "timestamp": "2026-04-29 02:51:45.366085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessages()] Can an unprivileged external user supply `encoding=base64` to the `/topics/:topicId/messages` endpoint, causing `TopicMessageViewModel` to encode the message content in base64, and then use the encoded output to infer the raw binary content of fee-bearing messages that contain sensitive fee schedule data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24b1b12a-023b-47ee-8746-f49c146d9dc0?mode=deep",
+    "timestamp": "2026-04-29 02:52:09.873154",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessages()] Can an unprivileged external user supply an invalid `encoding` value that passes `buildAndValidateFilters()` but is not handled by `TopicMessageViewModel`, causing the view model to fall back to a default encoding that exposes raw binary fee data in an unintended format?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ac70553-9095-4b61-aa93-a67581bcd0de?mode=deep",
+    "timestamp": "2026-04-29 02:52:35.810158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply `timestamp=gt:0` to `/topics/:topicId/messages`, causing `getRangeFromFilters()` to set `range.lower = 1n` (after `value += 1n` fallthrough), which combined with `range.upper = MAX_LONG - 1n` produces a range covering all timestamps, causing `getTopicMessageTimestampRanges()` to return all timestamp ranges for the topic and exposing the complete fee-bearing message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9fce576-efb4-4fcf-b790-885e3d0c4266?mode=deep",
+    "timestamp": "2026-04-29 02:53:02.475980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply `sequencenumber=gte:1` with a large `limit` to cause the `actual_range` CTE (lines 295-312) to expand the sequence number range by `limit - 1` in desc order or `limit` in asc order, causing the outer query to join against a much larger range of `topic_message_lookup` rows than intended, resulting in excessive DB work proportional to the attacker-controlled `limit`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_401623c6-9d47-438b-a95e-92746146d45b?mode=deep",
+    "timestamp": "2026-04-29 02:53:29.119813",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply `timestamp=gte:0&timestamp=lte:9223372036854775806` to produce a `timestampRange` of `{lower: 0n, upper: 9223372036854775806n}` (MAX_LONG - 1n), causing the `topic_message_lookup` query to scan all timestamp ranges for the topic and return the maximum possible set of fee-bearing message ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2dd8c5b-8ee8-45cc-b8c4-80ba00642b03?mode=deep",
+    "timestamp": "2026-04-29 02:53:55.261716",
+    "report_generated": false
+  }
+]
