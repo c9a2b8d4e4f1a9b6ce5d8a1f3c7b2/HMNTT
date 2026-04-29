@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user repeatedly call findStorage() for a contract with many distinct slot keys, filling the contractSlotsCache (maximumSize=3000) and causing LRU eviction of legitimate slot keys, so that subsequent findStorageBatch() calls for those evicted keys fall back to the stale @Cacheable findStorage() path and return incorrect or missing contract state records to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8b5fc4c-9d09-422a-8b3d-974471346349?mode=deep",
+    "timestamp": "2026-04-29 03:12:30.779969",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the race condition in findStorageBatch() where contractSlotsCache.getNativeCache().asMap().keySet() is a live view, causing concurrent evictions during iteration to produce a cachedSlots list that omits the requested key, so that isKeyEvictedFromCache remains true and the fallback contractStateRepository.findStorage() returns a stale @Cacheable value instead of the current DB record, resulting in incorrect contract state exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72174c65-9c69-4c27-ac77-ca1cb04136ac?mode=deep",
+    "timestamp": "2026-04-29 03:12:42.860184",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user trigger the EMPTY_VALUE sentinel bypass in findStorage() by causing a concurrent thread to store a different new byte[0] instance (not the EMPTY_VALUE reference) into contractStateCache, so that the reference-equality check cachedValue != EMPTY_VALUE passes and an empty byte array is returned as a valid slot value, causing incorrect records to be exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45dd4891-b131-4298-9008-e3a348d45545?mode=deep",
+    "timestamp": "2026-04-29 03:12:55.521073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass Long.MAX_VALUE as blockTimestamp to findStorageByBlockTimestamp(), bypassing the intended historical block boundary and retrieving the most recent contract state regardless of the requested block, causing incorrect historical records to be exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85a291ed-bd16-414e-b6d6-d261d0c95811?mode=deep",
+    "timestamp": "2026-04-29 03:13:08.630325",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass blockTimestamp=0 to findStorageByBlockTimestamp(), causing the query consensus_timestamp <= 0 to return no rows and produce an empty Optional, so that mirror node consumers receive a missing record for a slot that actually has a valid current state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eda16bc3-6eeb-47d5-b766-ec797d71ad83?mode=deep",
+    "timestamp": "2026-04-29 03:13:22.147197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user craft a ByteBuffer.wrap(key) where the underlying byte array is shared and mutated after the call to findStorageBatch(), corrupting the cached ByteBuffer key in contractSlotsCache so that subsequent batch queries use the wrong slot key and return incorrect slot values to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01692652-888f-4d78-9502-267c4ccef72e?mode=deep",
+    "timestamp": "2026-04-29 03:13:36.627260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the ((ByteBuffer) slot).array() call in findStorageBatch(), where a ByteBuffer created with a non-zero arrayOffset() returns the full backing array instead of the intended slice, causing findStorageBatch() to query the wrong slot bytes and cache an incorrect value for the requested key, resulting in incorrect records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c26ae30-9158-4962-bc14-adad2a754b08?mode=deep",
+    "timestamp": "2026-04-29 03:13:51.565057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user exploit the contractStateCache expireAfterWrite=2s window by querying a slot immediately after a new block is processed, receiving a cached pre-update value that does not reflect the latest on-chain state, causing incorrect contract state records to be exported to mirror nodes during that 2-second window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ab33ec0-76c0-461c-ab7d-a1aec4634773?mode=deep",
+    "timestamp": "2026-04-29 03:14:07.193282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user flood findStorageBatch() with requests for a single contract using many unique slot keys, causing the slotsPerContract cache (maximumSize=1500) to evict older keys, so that the next batch query for an evicted key triggers isKeyEvictedFromCache=true and falls back to the @Cacheable findStorage() which may return a stale cached value, producing incorrect records for mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_109ed164-8039-40f1-b115-c0142542d0e5?mode=deep",
+    "timestamp": "2026-04-29 03:14:24.151929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user trigger a scenario where findStorageBatch() calls contractStateRepository.findStorageBatch() with a cachedSlots list that includes keys belonging to a different contract (due to cache key collision in contractSlotsCache), causing the batch query to return slot values from the wrong contract and cache them under the requesting contract's key, resulting in incorrect records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d9ff5e5-e4e7-400f-94ee-c9359ef7fcf9?mode=deep",
+    "timestamp": "2026-04-29 03:14:41.377072",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() does not hold any lock while iterating cachedSlotKeys and calling findStorageBatch on the repository, so that a concurrent write to the DB between the cache snapshot and the DB query causes the cached value to differ from the actual current state, resulting in incorrect contract state records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_245b7805-899c-4b0d-a1b7-7538943b3562?mode=deep",
+    "timestamp": "2026-04-29 03:14:59.865118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user cause findStorage() to return Optional.empty() for a slot that exists in the DB by timing their request to coincide with a contractStateCache eviction (expireAfterWrite=2s) and a concurrent slotsPerContract eviction, so that both cache paths miss and the fallback findStorage() DB query is skipped due to isKeyEvictedFromCache=false, resulting in a missing record exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e3cdbdd-4a2f-4cc1-b5d8-b3c58e83db06?mode=deep",
+    "timestamp": "2026-04-29 03:15:18.508074",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass a negative blockTimestamp value to findStorageByBlockTimestamp(), causing the SQL query consensus_timestamp <= negative_value to return no rows and produce an empty Optional, so that mirror node consumers receive a missing record for a slot that has valid historical state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b2f91fa-205c-4ab3-a220-16d3f11ee83e?mode=deep",
+    "timestamp": "2026-04-29 03:15:37.782465",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the coalesce(value_written, value_read) logic in the findStorageByBlockTimestamp() SQL query, where a slot deletion (value_written=null) causes the query to return value_read (the last read value) instead of indicating the slot is deleted, causing mirror node consumers to receive an incorrect non-null value for a slot that should be reported as deleted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2d1ed8a-fb22-4624-8644-6be704474e00?mode=deep",
+    "timestamp": "2026-04-29 03:15:56.403557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user send concurrent requests for the same contractId and key to findStorageBatch(), causing multiple threads to each call putIfAbsent(wrappedKey, EMPTY_VALUE) and then each independently call findStorageBatch() with overlapping cachedSlots lists, resulting in one thread's contractStateCache.put() overwriting another thread's correct value with a stale DB result, producing incorrect records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04b4c700-e225-4254-8a67-2819ae0ab454?mode=deep",
+    "timestamp": "2026-04-29 03:16:16.783270",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractSlotsCache.get(contractId, () -> cacheManagerSlotsPerContract.getCache(contractId.toString())) uses contractId.toString() as the cache name, and two EntityIds with different encoded long IDs but the same shard.realm.num string representation could share a per-contract cache, causing slot keys from one contract to be included in batch queries for another contract and returning incorrect records to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_238e2e96-8159-4620-8c2d-fcdc2c21a94d?mode=deep",
+    "timestamp": "2026-04-29 03:16:37.579100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user pass a null key byte array to findStorage(), causing ByteBuffer.wrap(null) in findStorageBatch() to throw a NullPointerException that is not caught, resulting in the request failing silently and a missing record being exported to mirror node consumers instead of the correct slot value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_317e04ee-3d3f-4499-9dff-f2a9d6e67784?mode=deep",
+    "timestamp": "2026-04-29 03:16:58.502774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user pass a zero-length byte array as the slot key to findStorageBatch(), causing contractSlotsCache.putIfAbsent(ByteBuffer.wrap(new byte[0]), EMPTY_VALUE) to register an empty key, which then gets included in the batch query and potentially matches unintended rows in the contract_state table, returning incorrect slot values to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d1fdbdf-5de3-42dd-9ee3-55f0d2b4ebab?mode=deep",
+    "timestamp": "2026-04-29 03:17:20.515100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the isKeyEvictedFromCache logic where the wrappedKey comparison uses ByteBuffer.equals() (content equality), but the cachedSlotKeys set contains ByteBuffers whose position/limit may have been modified by other operations, causing wrappedKey.equals(slot) to return false even for the same underlying bytes, so isKeyEvictedFromCache remains true and the fallback path returns a stale @Cacheable value instead of the current DB record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e7c0caf-69da-46af-94a5-d88384b713ea?mode=deep",
+    "timestamp": "2026-04-29 03:17:42.061994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user exploit the contractStateCache maximumSize=25000 limit by querying 25001 distinct (contractId, slotKey) pairs, causing the oldest entry to be evicted, and then immediately re-querying the evicted slot during the 2-second expireAfterWrite window of a different cached entry, so that the batch path returns a stale value from the DB that was updated between the original cache population and the re-query, producing incorrect records for mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a8c55c0-cec2-4688-b2e3-66061faca2c5?mode=deep",
+    "timestamp": "2026-04-29 03:18:04.487703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user cause findStorageBatch() to include a very large number of cached slot keys (up to slotsPerContract maximumSize=1500) in a single findStorageBatch() DB query, and if the DB query times out (statementTimeout=3000ms), the method returns Optional.empty() for the requested key, causing a missing record to be exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6af170d6-da61-4aa6-9d31-9270a1d0c809?mode=deep",
+    "timestamp": "2026-04-29 03:18:27.122031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass a blockTimestamp equal to the exact consensus_timestamp of a state-changing transaction, and due to the <= boundary in the SQL query, receive the value from that transaction rather than the value just before it, causing an off-by-one error in historical state reconstruction that results in incorrect records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08338c5d-5e8c-4527-aee7-d743411ef325?mode=deep",
+    "timestamp": "2026-04-29 03:18:50.561179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractStateCache.put() in findStorageBatch() uses generateCacheKey(contractId, slotKey) where slotKey comes from contractSlotValue.getSlot() (DB result), and if the DB returns a slot with different byte padding than the original key, the cache entry is stored under a different key than what findStorage() would look up, causing a cache miss on the next call and returning a stale value to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f35327e4-a97f-4cc2-bbb1-5954deef08fd?mode=deep",
+    "timestamp": "2026-04-29 03:19:15.993047",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorage()] Can an unprivileged external user exploit the enableBatchContractSlotCaching=true default by sending requests that bypass the batch path (when the flag is false via configuration) and rely solely on the @Cacheable findStorage() which caches by (contractId, key) but does not invalidate on DB updates, causing stale contract state to be returned and exported to mirror nodes for the full cache TTL?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d35c788-b367-4a87-812b-765af7875f72?mode=deep",
+    "timestamp": "2026-04-29 03:19:41.411099",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findStorageBatch()] Can an unprivileged external user trigger a scenario where findStorageBatch() is called with a cachedSlots list containing duplicate byte arrays (due to concurrent putIfAbsent calls from multiple threads for the same key), causing the SQL IN clause to have duplicates and potentially returning duplicate rows that overwrite the correct cached value with an incorrect one, resulting in incorrect records exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56211e91-87c8-4fac-9aba-0c5530f185db?mode=deep",
+    "timestamp": "2026-04-29 03:20:07.400966",
+    "report_generated": false
+  }
+]
