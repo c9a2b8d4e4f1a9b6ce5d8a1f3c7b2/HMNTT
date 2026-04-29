@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: registerGauge()] Can an unprivileged external user exploit the METRIC_NAME 'hiero.mirror.monitor.health' with tag 'type'='release' being registered without access control, so that by querying the metrics endpoint they can infer when the HelmRelease is degraded and records are not being exported, enabling targeted timing attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bae8059a-6547-4f69-9dfd-593e91e21bc5?mode=deep",
+    "timestamp": "2026-04-29 01:27:25.707474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: health()] Can an unprivileged external user exploit the fact that health() calls getHealth() (lazy-initialized via Lombok @Getter(lazy=true)) which returns the same cached Mono for all callers, so that a single poisoned cache entry (e.g., a stale UP) is served to all concurrent health check consumers, masking record-export failures across the entire monitoring window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ecf89c2-75d0-4325-8976-7a7838b7ea47?mode=deep",
+    "timestamp": "2026-04-29 01:27:38.033875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the Mono.fromCallable(this::getHelmRelease) being wrapped in a blocking callable on a reactive thread, so that a slow Kubernetes API response blocks the scheduler thread, causing health() to time out and return UNKNOWN, masking a real record-export degradation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ffc922c-1f68-41e6-9c2a-667bce79e7cb?mode=deep",
+    "timestamp": "2026-04-29 01:27:50.651821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the absence of a timeout on the Kubernetes API calls inside createHelmReleaseHealth(), so that a slow or unresponsive Kubernetes API causes the health Mono to hang indefinitely, preventing the health endpoint from responding and masking the true state of record exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92c5d463-7942-4e76-af15-c3e88c4ea3ac?mode=deep",
+    "timestamp": "2026-04-29 01:28:04.067882",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmRelease()] Can an unprivileged external user exploit the fact that getHelmRelease() calls client.pods().withName(hostname).get() synchronously inside a Mono.fromCallable(), so that if the Kubernetes API is slow, the blocking call ties up the reactive scheduler thread, causing cascading health check failures and masking record-export status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_260b12e0-647a-4597-96b7-7e2b498a67ae?mode=deep",
+    "timestamp": "2026-04-29 01:28:17.596311",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the synchronous client.genericKubernetesResources(RESOURCE_DEFINITION_CONTEXT).withName(release).get() call inside a reactive flatMap(), so that a slow HelmRelease API response blocks the reactive thread, causing health() to hang and the record-export health status to be unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd2c2c83-6743-441e-9410-b9d7f36fecae?mode=deep",
+    "timestamp": "2026-04-29 01:28:32.183784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: health()] Can an unprivileged external user exploit the fact that health() returns a cached Mono that is shared across all subscribers, so that if the cache is populated with UNKNOWN (due to a swallowed error), all subsequent health checks within the cacheExpiry window return UNKNOWN, causing operators to ignore a real record-export outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_958fdd25-c52d-4f37-9993-454221e46cc9?mode=deep",
+    "timestamp": "2026-04-29 01:28:47.456595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the switchIfEmpty(UNKNOWN) fallback so that any empty Mono result (caused by both onErrorComplete() calls consuming errors) causes the health check to return UNKNOWN, which may be treated as non-critical by alerting systems, allowing record-export failures to go undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76d7ad71-a1ff-4b8b-8525-663980e4501e?mode=deep",
+    "timestamp": "2026-04-29 01:29:03.586519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: mapStatus()] Can an unprivileged external user exploit the static Mono<Health> DOWN, UNKNOWN, and UP instances being shared across all invocations, so that if a downstream subscriber modifies the Health object (if mutable), it could corrupt the shared state and cause all future health checks to return incorrect status, masking record-export failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f828356-5360-4939-a1a3-8503c4003763?mode=deep",
+    "timestamp": "2026-04-29 01:29:21.138321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the fact that conditions.stream().findFirst() only looks at the first 'Ready' condition, so that if the HelmRelease has multiple 'Ready' conditions (e.g., one True and one False), only the first is evaluated, potentially causing the health check to return UP when the release is actually degraded and records are not being exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a56f2f0-cf60-420c-b55d-b35ad97278bd?mode=deep",
+    "timestamp": "2026-04-29 01:29:37.623317",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the absence of validation on the 'release' string passed to client.genericKubernetesResources(RESOURCE_DEFINITION_CONTEXT).withName(release), so that a maliciously crafted INSTANCE_LABEL value containing path traversal characters could cause the Kubernetes client to query an unintended resource, returning incorrect health status for record exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fcfd2860-d8d1-4033-89a1-5b4564bfa8a4?mode=deep",
+    "timestamp": "2026-04-29 01:29:55.979060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: health()] Can an unprivileged external user exploit the doOnNext(this::recordHealthMetric) side effect in health() so that by flooding the health endpoint with requests, they cause RELEASE_UP to be set and unset rapidly, creating a noisy gauge that masks the true record-export health trend in monitoring dashboards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8d8b634-74b9-4944-ba95-63b15e9bc445?mode=deep",
+    "timestamp": "2026-04-29 01:30:15.160341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the cache(properties.getCacheExpiry(), Schedulers.newSingle('helmrelease-health-cache')) so that the single-threaded scheduler becomes a bottleneck under high health-check load, causing cache refresh to be delayed and stale health data to be served, hiding record-export failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07f3aaa5-49c2-45d2-831d-8190ddec433a?mode=deep",
+    "timestamp": "2026-04-29 01:30:36.542334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmRelease()] Can an unprivileged external user exploit the fact that getHelmRelease() does not validate that the pod's labels map is non-null before calling labels.get(INSTANCE_LABEL), so that a pod with null metadata labels causes a NullPointerException, swallowed by onErrorComplete(), and the health check returns UNKNOWN, masking a real record-export problem?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09550b1c-9053-4852-9562-60315ffe6cf8?mode=deep",
+    "timestamp": "2026-04-29 01:30:57.353357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmRelease()] Can an unprivileged external user exploit the fact that getHelmRelease() does not validate that the pod's metadata is non-null before calling getMetadata().getLabels(), so that a pod with null metadata causes a NullPointerException, swallowed by onErrorComplete(), and the health check returns UNKNOWN, hiding a genuine record-export outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c495606d-a2bd-446c-b125-b1cfb52eecae?mode=deep",
+    "timestamp": "2026-04-29 01:31:20.879338",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: health()] Can an unprivileged external user exploit the fact that when properties.isEnabled() is false, health() returns the static UP Mono without ever calling recordHealthMetric(), so that RELEASE_UP remains at its initial value of 0 (from AtomicInteger initialization), causing the gauge to falsely report the release as DOWN even though the check is disabled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21e0bccd-50f9-46d3-b58e-6cd4d35d2ff9?mode=deep",
+    "timestamp": "2026-04-29 01:31:43.764368",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: health()] Can an unprivileged external user exploit the fact that when properties.isEnabled() is false, health() returns UP without any Kubernetes API validation, so that a misconfigured deployment with disabled health checks silently exports incorrect or missing records to mirror nodes without any detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24868460-cc5f-465b-9e10-23995814aca6?mode=deep",
+    "timestamp": "2026-04-29 01:32:06.509342",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the fact that the Mono is cached with .cache(properties.getCacheExpiry(), ...) but the cacheExpiry minimum is only 30 seconds, so that during a 30-second window after a HelmRelease transitions to a failed state, the health check continues to report UP, allowing up to 30 seconds of undetected missing record exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e69db14-24c0-4f9c-aece-631723fccdd4?mode=deep",
+    "timestamp": "2026-04-29 01:32:30.164118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the fact that resource.getAdditionalProperties() could return null if the HelmRelease has no additional properties, causing a NullPointerException on .get('status'), which is swallowed by onErrorComplete(), and the health check returns UNKNOWN, masking a real record-export failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c0da53e-536c-47d0-9cd1-e3fb6d8e327c?mode=deep",
+    "timestamp": "2026-04-29 01:32:54.433516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the fact that status.get('conditions') could return null if the HelmRelease status has no conditions field, causing a NullPointerException on conditions.stream(), which is swallowed by onErrorComplete(), and the health check returns UNKNOWN, hiding a genuine record-export outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4eea8afd-f1fe-42c1-891c-439d909dd1d5?mode=deep",
+    "timestamp": "2026-04-29 01:33:20.017344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the doOnError(e -> log.error('Unable to get helm release', e)) logging so that by causing repeated Kubernetes API errors, they flood the application logs with error messages, causing log storage exhaustion and making it harder for operators to detect real record-export failures in the noise?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7c97c99-57ed-455f-b0b3-c20a74ddf3f7?mode=deep",
+    "timestamp": "2026-04-29 01:33:46.927240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createHelmReleaseHealth()] Can an unprivileged external user exploit the doOnError(e -> log.error('Unable to get helm release ready status', e)) logging so that by causing repeated HelmRelease status parsing errors, they flood the application logs, obscuring real record-export failure signals from operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3637fc0-cec3-44a9-988e-dfd8baefbaf1?mode=deep",
+    "timestamp": "2026-04-29 01:34:13.267640",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/health/ReleaseHealthIndicator.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getHelmReleaseReadyStatus()] Can an unprivileged external user exploit the log.info('Release status: {}', h) call in doOnNext() so that by causing the health check to cycle between states rapidly, they generate excessive log output that obscures real record-export failure events in the application logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4336dfbc-c114-4d39-961f-a2416b82ddf9?mode=deep",
+    "timestamp": "2026-04-29 01:34:42.540299",
+    "report_generated": false
+  }
+]
