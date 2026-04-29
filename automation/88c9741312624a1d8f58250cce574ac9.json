@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user send repeated GET /api/v1/tokens?token.id=eq:1&token.id=eq:2&...&token.id=eq:N requests with the maximum allowed repeated parameters to force an unbounded `inClause` array that generates a massive `= any($N)` SQL parameter, causing the PostgreSQL query planner to stall and exhausting DB connection pool slots, resulting in sustained service unavailability for all token queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5de78288-c209-4449-862f-1c93cd314caf?mode=deep",
+    "timestamp": "2026-04-29 01:31:44.385903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user submit GET /api/v1/tokens?name=aaa (a 3-byte minimum valid name) to trigger a `t.name ILIKE '%aaa%'` full-table scan on the token table with no index support for ILIKE with leading wildcards, causing the DB to perform sequential scans on every request and degrading response times for all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_801fc2a7-ed89-4058-8663-60bcdeca9b68?mode=deep",
+    "timestamp": "2026-04-29 01:31:56.426031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user submit GET /api/v1/tokens?name=X where X is exactly 100 bytes (maximum allowed by `isByteRange(val, 3, 100)`) of a common substring to force the most expensive possible ILIKE scan across all token names, and by sending this request in a tight loop exhaust DB CPU and connection pool, causing a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9516ed6-07d8-4a92-be13-4789bc3d549e?mode=deep",
+    "timestamp": "2026-04-29 01:32:08.915972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokensRequest()] Can an unprivileged external user exploit the mutual exclusion check between `name` and `token.id` (line 362-364) being absent for `name` combined with `publickey`, by sending GET /api/v1/tokens?name=abc&publickey=<valid_64char_hex> to trigger both an ILIKE scan and a public key join simultaneously, compounding DB load and causing sustained degradation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a504345e-0008-49ef-b95c-bf9c578e1621?mode=deep",
+    "timestamp": "2026-04-29 01:32:21.880659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: buildHistoryQuery()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId?timestamp=lte:9999999999.999999999 to trigger `buildHistoryQuery()` which constructs a UNION ALL across both `token`/`token_history`, `entity`/`entity_history`, and `custom_fee`/`custom_fee_history` tables with ORDER BY and LIMIT 1 subqueries on each, causing six sequential table scans per request and exhausting DB resources under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e95a88a-2962-466b-ada3-318e73c58f24?mode=deep",
+    "timestamp": "2026-04-29 01:32:36.401847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user send multiple timestamp filters (e.g., timestamp=lte:1&timestamp=lte:2&timestamp=lte:3) to `getTokenInfoRequest()` where only the last filter is honored but all filters are parsed and validated, and by maximizing the number of repeated timestamp parameters force excessive filter-building CPU work and repeated DB round-trips, causing a DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e235407e-6060-4133-a96f-823ab1e5b99e?mode=deep",
+    "timestamp": "2026-04-29 01:32:51.129716",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances?timestamp=lte:X to trigger two sequential DB queries — first `balances.getAccountBalanceTimestampRange()` and then the main token balance query — doubling the DB connection consumption per request, and by sending many concurrent requests exhaust the connection pool and cause a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11096abb-2248-4af1-bed7-3aab73c1bdf2?mode=deep",
+    "timestamp": "2026-04-29 01:33:06.038374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances?timestamp=lte:T1&timestamp=lte:T2&...&timestamp=lte:TN with the maximum allowed repeated timestamp parameters to accumulate multiple entries in `tsConditions` and `tsParams` arrays, generating a compound AND condition that forces the DB to evaluate multiple timestamp range constraints simultaneously, degrading query performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b17181d1-3b53-4050-bdde-fbb93e06c157?mode=deep",
+    "timestamp": "2026-04-29 01:33:22.170217",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances?account.publickey=<valid_64char_hex> to force a JOIN between `token_account`/`token_balance` and the `entity` table filtered by `public_key`, causing an expensive index scan or sequential scan on the entity table for every request, and by flooding with concurrent requests cause sustained DB CPU exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a947b28f-dd64-4b15-a05e-4364af84e367?mode=deep",
+    "timestamp": "2026-04-29 01:33:38.379929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user combine timestamp and publickey filters in GET /api/v1/tokens/:tokenId/balances?timestamp=lte:X&account.publickey=<hex> to trigger the timestamp-path query branch which includes a JOIN with entity on public_key inside a `distinct on (ti.account_id)` query, compounding the cost of both operations and causing a DoS under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f06c474-e53c-4aad-8252-f831168b7889?mode=deep",
+    "timestamp": "2026-04-29 01:33:55.223271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances?account.balance=gte:0&account.balance=lte:999999999 with multiple `account.balance` filters to accumulate entries in `balanceConditions`, and when combined with a timestamp filter force a CTE-wrapped query (`with ti as (...)`) that applies balance conditions post-aggregation, causing an expensive two-phase query execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06eda897-a273-46f8-b80e-815412c2a36e?mode=deep",
+    "timestamp": "2026-04-29 01:34:13.401957",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/nfts/:serialNumber/transactions to trigger two sequential DB queries — first `extractSqlFromNftTransferHistoryRequest()` fetching timestamps via UNION ALL of `nft`, `nft_history`, and `entity` tables, then `nftTransactionHistoryDetailsQuery` using `jsonb_path_query_array` on the results — doubling DB connection usage per request and causing connection pool exhaustion under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_287dd648-faec-4fb4-8703-800a925b19dd?mode=deep",
+    "timestamp": "2026-04-29 01:34:30.771593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/nfts/:serialNumber/transactions with the maximum `limit` value to force the UNION ALL query across `nft`, `nft_history`, and `entity` tables to return the maximum number of timestamps, which are then all passed as the `$4` array parameter to `nftTransactionHistoryDetailsQuery`, causing an expensive IN-list scan on the transaction table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2aa38f25-f0af-41b7-bf4f-540d5a16e033?mode=deep",
+    "timestamp": "2026-04-29 01:34:50.549158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user exploit the `jsonb_path_query_array` call in `nftTransactionHistoryDetailsQuery` (line 906-909) by targeting a token/serial combination with many NFT transfers, causing the JSONB path query to scan large `nft_transfer` JSONB arrays on every matching transaction row, resulting in high CPU consumption per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0b1367e-ad71-47e0-b61d-eef65963e473?mode=deep",
+    "timestamp": "2026-04-29 01:35:10.164843",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user send multiple timestamp filters (e.g., timestamp=gt:1&timestamp=lt:9999999999) to accumulate conditions in both `nftConditions` and `tokenDeleteConditions` arrays, generating a complex WHERE clause applied to the UNION ALL of three tables, causing the query planner to choose suboptimal execution plans and degrading performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0e4b765-8589-4e85-91fb-665130efea65?mode=deep",
+    "timestamp": "2026-04-29 01:35:30.741243",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getNftTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/nfts with multiple `serialnumber` range filters (e.g., serialnumber=gt:1&serialnumber=lt:9999999999999999) to generate a complex WHERE clause on `nft.serial_number` combined with a LEFT JOIN on the entity table via `entityNftsJoinQuery`, causing expensive join operations on large NFT datasets?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c783c042-996f-4be5-af66-4f071f4b1b8f?mode=deep",
+    "timestamp": "2026-04-29 01:35:50.790869",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getNftTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/nfts?account.id=0.0.X&serialnumber=gt:1 with both `account.id` and `serialnumber` filters to force a multi-condition WHERE clause on the `nft` table joined with `entity`, and by flooding with concurrent requests for a high-NFT-count token cause sustained DB CPU exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e5aea3f-23e5-4a8c-a4c2-6bdf6c1e5fc0?mode=deep",
+    "timestamp": "2026-04-29 01:36:11.593223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens?account.id=0.0.X to trigger the `tokenAccountCte` CTE path which prepends a `with ta as (select * from token_account where account_id = $1 order by token_id)` subquery, causing a full scan of the token_account table for the given account and then joining with the token and entity tables, resulting in expensive multi-table operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_634096cd-6698-4c3e-9fb6-e4523792464c?mode=deep",
+    "timestamp": "2026-04-29 01:36:32.891618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens?account.id=0.0.X&type=ALL to trigger the CTE path while the `type=ALL` filter is silently skipped (line 187-189), causing the full token_account CTE scan without any type filtering, maximizing the result set size and DB work?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f40047d-3961-4561-8db9-0723e424aa01?mode=deep",
+    "timestamp": "2026-04-29 01:36:54.628223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens?publickey=<valid_64char_hex> to trigger a `e.public_key = $N` condition on the entity table joined with the token table, causing an expensive index or sequential scan on the entity table's public_key column for every request, and by flooding with concurrent requests cause sustained DB resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c1754fe-4c76-49ee-93c9-feb39989d2f9?mode=deep",
+    "timestamp": "2026-04-29 01:37:17.284180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokensRequest()] Can an unprivileged external user send GET /api/v1/tokens?symbol=X with a short symbol value to trigger a `t.symbol = $N` equality condition that, if the symbol column lacks a selective index, causes a full scan of the token table, and by sending many concurrent requests with different symbol values exhaust DB CPU?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9917624-e083-4565-a0c8-0904eccb301d?mode=deep",
+    "timestamp": "2026-04-29 01:37:41.892013",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokenInfoRequest()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId?timestamp=lte:1 (a very early timestamp) to force `buildHistoryQuery()` to scan the entire `token_history`, `entity_history`, and `custom_fee_history` tables from the beginning, causing full history table scans and high I/O load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3950ac8-0a83-4f53-a49f-cae3881a1310?mode=deep",
+    "timestamp": "2026-04-29 01:38:06.759945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: buildHistoryQuery()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId?timestamp=eq:X to trigger `transformTimestampFilterOp()` converting `eq` to `lte`, which then causes `buildHistoryQuery()` to scan all history records up to timestamp X across three pairs of tables (token/token_history, entity/entity_history, custom_fee/custom_fee_history), resulting in six expensive subqueries per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e79e8222-bdc4-43ea-856c-92f998d61be4?mode=deep",
+    "timestamp": "2026-04-29 01:38:32.834329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokenBalances()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances?limit=100 (maximum default limit) with a timestamp filter to trigger the `distinct on (ti.account_id)` query path that scans the entire `token_balance` table for the given token ordered by `account_id` and `consensus_timestamp desc`, causing expensive sort operations on large datasets?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47a65d65-61a4-406d-b3cb-eb85af37f7ef?mode=deep",
+    "timestamp": "2026-04-29 01:38:58.471486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getTokenBalances()] Can an unprivileged external user send GET /api/v1/tokens/:tokenId/balances (no timestamp filter) to trigger the `filtered_token_accounts` CTE path that queries `token_account` with `associated = true` and then computes `MAX(balance_timestamp)` as a subquery over the entire CTE result, causing an expensive aggregation on every request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_178add05-e4a7-444d-b335-1f387d0cb9df?mode=deep",
+    "timestamp": "2026-04-29 01:39:24.872265",
+    "report_generated": false
+  }
+]
