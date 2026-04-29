@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toString(TransactionId)] Can an unprivileged external user supply a crafted TransactionId whose accountId field contains path-traversal sequences (e.g., '../../admin') so that when toString() concatenates it into 'accountId-epochSecond-nano' and it is passed as the {transactionId} URI template parameter in clientSubscribe(), the resulting HTTP request targets an unintended REST endpoint, causing SSRF or unauthorized data access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2766719c-25e8-4790-8517-6a8115a6b45f?mode=deep",
+    "timestamp": "2026-04-29 00:10:44.755564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toString(TransactionId)] Can an unprivileged external user inject URL-encoded characters (e.g., '%2F', '%3F', '%23') into tid.accountId so that toString() produces a value like '0.0.1%2F..%2Ftransactions' which, when substituted into '/transactions/{transactionId}', bypasses URI template encoding and redirects the WebClient GET request to an arbitrary path, leaking internal API responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7770aa45-4d26-42dd-a855-3c2357d2cd80?mode=deep",
+    "timestamp": "2026-04-29 00:10:57.073912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toString(TransactionId)] Can an unprivileged external user craft a TransactionId with a null accountId field so that toString() produces a string starting with 'null-', causing a malformed URI to be passed to restApiClient.retrieve(), triggering an unhandled exception that leaks stack trace details through the error logging path in doOnError()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01700390-9593-456a-86ae-95d30fb76b79?mode=deep",
+    "timestamp": "2026-04-29 00:11:09.982834",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toResponse(RestSubscription, PublishResponse, TransactionByIdResponse)] Can an unprivileged external user cause the REST API to return a transaction with a consensusTimestamp containing a non-numeric string (e.g., 'abc.def') so that Long.parseLong(parts[0]) throws a NumberFormatException inside toResponse(), which propagates uncaught through the reactive pipeline and terminates the subscription stream, causing a denial-of-service for all subsequent monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dec0464a-eed1-4f91-9faf-5a172e764391?mode=deep",
+    "timestamp": "2026-04-29 00:11:23.987622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toResponse(RestSubscription, PublishResponse, TransactionByIdResponse)] Can an unprivileged external user cause the REST API to return a consensusTimestamp with only one part (no '.' separator) so that StringUtils.split(timestamp, '.') returns a single-element array, parts.length == 2 is false, consensusTimestamp remains null, and the resulting SubscribeResponse silently carries a null consensusTimestamp, corrupting latency metrics and masking real transaction delays?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96f0844c-6c79-4d50-8f42-f2082246be71?mode=deep",
+    "timestamp": "2026-04-29 00:11:39.044744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toResponse(RestSubscription, PublishResponse, TransactionByIdResponse)] Can an unprivileged external user cause the REST API to return a consensusTimestamp with an extremely large epoch second (e.g., Long.MAX_VALUE) so that Instant.ofEpochSecond(Long.parseLong(parts[0]), Long.parseLong(parts[1])) throws a DateTimeException, crashing the reactive pipeline and preventing SubscribeResponse from being emitted for legitimate transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcb8527a-82b0-4bc1-943e-074fdb179e4f?mode=deep",
+    "timestamp": "2026-04-29 00:11:53.666613",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toResponse(RestSubscription, PublishResponse, TransactionByIdResponse)] Can an unprivileged external user cause the REST API to return a transaction list where getTransactions() returns an empty list, so that Iterables.getFirst(response.getTransactions(), null) returns null, consensusTimestamp is set to null, and the SubscribeResponse is built with a null consensusTimestamp, silently skewing all latency calculations without any error being raised?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60cafb87-8158-45fa-8797-442160ce5016?mode=deep",
+    "timestamp": "2026-04-29 00:12:09.812335",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: shouldRetry(Throwable)] Can an unprivileged external user cause the monitored REST API to continuously return HTTP 404 responses for a valid transaction ID, triggering the shouldRetry() condition (HttpStatus.NOT_FOUND) repeatedly up to maxAttempts times, amplifying outbound HTTP requests by a factor of maxAttempts and causing a retry-amplification denial-of-service against the REST API backend?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24c7800c-2306-401d-8500-b23349541ff4?mode=deep",
+    "timestamp": "2026-04-29 00:12:26.386409",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: shouldRetry(Throwable)] Can an unprivileged external user exploit the fact that shouldRetry() only retries on HTTP 404 but not on other transient errors (e.g., 503, connection reset), causing legitimate transactions to be silently dropped via onErrorResume(e -> Mono.empty()) without any retry, leading to false-negative monitoring results that mask real infrastructure failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddbdffcd-895d-4cae-8ea0-8abd65991d48?mode=deep",
+    "timestamp": "2026-04-29 00:12:44.086473",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user trigger a scenario where the retryWhen(retrySpec) exhausts all maxAttempts retries on 404 responses, causing a RetryExhaustedException to propagate to doOnError(t -> subscription.onError(t)), which logs the full exception message chain including internal server details, leaking sensitive infrastructure information through the monitoring log output?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae30a2ae-e723-4720-a48e-588d1413e4e0?mode=deep",
+    "timestamp": "2026-04-29 00:13:01.873408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user cause the reactive pipeline in clientSubscribe() to emit an unbounded number of PublishResponse events into the sink before take(properties.getLimit(), true) terminates the stream, exhausting heap memory when properties.getLimit() returns Long.MAX_VALUE (because limit <= 0 in RestSubscriberProperties.getLimit()), leading to an OutOfMemoryError?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08f4524a-e243-40ef-917c-aecd58b7b754?mode=deep",
+    "timestamp": "2026-04-29 00:13:20.805448",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user exploit the publishOn(Schedulers.parallel()) call in clientSubscribe() by flooding the sink with a high volume of PublishResponse events, exhausting all threads in the parallel scheduler thread pool, starving other reactive pipelines and causing a system-wide denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89676157-deb6-455e-ace8-91c213eff728?mode=deep",
+    "timestamp": "2026-04-29 00:13:40.499495",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user craft a scenario where properties.getTimeout() is set to the minimum allowed value (500ms per DurationMin constraint) and the REST API is slow, causing every flatMap invocation to time out, generating a TimeoutException per event that is silently swallowed by onErrorResume(e -> Mono.empty()), making the monitor report zero successful subscriptions while consuming thread resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1201e88-39b2-4090-b024-adaf34d13139?mode=deep",
+    "timestamp": "2026-04-29 00:14:01.769463",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user exploit the onErrorResume(e -> Mono.empty()) error suppression in clientSubscribe() to silently hide all exceptions (including security-relevant ones like SSL certificate errors or authentication failures), preventing operators from detecting that the monitoring pipeline has been compromised or is communicating with a rogue server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2513b5f-bac6-4a52-a11f-25a71a98078a?mode=deep",
+    "timestamp": "2026-04-29 00:14:22.934132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: onPublish(PublishResponse)] Can an unprivileged external user flood the onPublish() method with a high volume of PublishResponse objects, causing s.tryEmitNext(response) to be called rapidly on every matching RestSubscription sink, overwhelming the directBestEffort multicast sink and causing legitimate publish responses to be silently dropped (FAIL_NON_SERIALIZED or FAIL_OVERFLOW), corrupting monitoring accuracy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d4b6682-d6e7-4f65-837b-bb4ccf481ad7?mode=deep",
+    "timestamp": "2026-04-29 00:14:45.904598",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: onPublish(PublishResponse)] Can an unprivileged external user exploit the fact that tryEmitNext() in onPublish() uses best-effort emission (directBestEffort sink) with no backpressure, so that under high load the sink silently drops events without any error or counter increment, causing the monitor to undercount transactions and produce misleading health metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e774d417-cfdd-486a-b5a6-320401c3ab02?mode=deep",
+    "timestamp": "2026-04-29 00:15:09.780912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: shouldSample(RestSubscription, PublishResponse)] Can an unprivileged external user exploit the ThreadLocalRandom.current().nextDouble() < properties.getSamplePercent() sampling check in shouldSample() by observing timing patterns of which events are sampled, since ThreadLocalRandom is not cryptographically secure, to predict future sampling decisions and selectively submit transactions that will always be sampled, skewing monitoring statistics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16e1fafc-a39f-4d45-9835-a9130c011d70?mode=deep",
+    "timestamp": "2026-04-29 00:15:33.421480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: shouldSample(RestSubscription, PublishResponse)] Can an unprivileged external user craft a PublishResponse whose scenario name matches an entry in the publishers set of a RestSubscription, bypassing the publishers filter check in shouldSample(), and then flood the system with matching events to force 100% sampling on a targeted subscription, amplifying REST API query load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ff5821a-b3f6-4ff9-a83a-db648b8f5ade?mode=deep",
+    "timestamp": "2026-04-29 00:15:58.178680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: shouldSample(RestSubscription, PublishResponse)] Can an unprivileged external user exploit the race condition between subscription.isRunning() check in shouldSample() and the subscription state change in doFinally(s -> subscription.onComplete()), causing a TOCTOU vulnerability where a subscription is sampled after it has logically completed, leading to events being emitted to a completed sink and triggering unexpected reactor exceptions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90c795af-d70c-497f-bf6b-aba80ae0ee0e?mode=deep",
+    "timestamp": "2026-04-29 00:16:23.749513",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: createSubscriptions()] Can an unprivileged external user exploit the Flux.defer(this::createSubscriptions).cache() pattern so that once subscriptions are cached, any runtime change to subscribeProperties is ignored, and a stale subscription configuration (e.g., with a disabled security check) persists indefinitely, allowing continued operation under a configuration that should have been disabled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e80a44d4-685a-41e7-9e4a-1e783973eabf?mode=deep",
+    "timestamp": "2026-04-29 00:16:49.605163",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: createSubscriptions()] Can an unprivileged external user trigger a scenario where properties.getSubscribers() returns a very large integer, causing createSubscriptions() to instantiate an unbounded number of RestSubscription objects in subscriptionList, exhausting heap memory and causing an OutOfMemoryError before the Flux is even subscribed to?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dedd4b0c-e59c-4ac1-9078-21bc923f0126?mode=deep",
+    "timestamp": "2026-04-29 00:17:15.791522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user cause the REST API to return a response body that cannot be deserialized into TransactionByIdResponse.class, triggering a deserialization exception inside the flatMap in clientSubscribe(), which is then silently swallowed by onErrorResume(e -> Mono.empty()), hiding a potential injection or tampering of the REST API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_925cd574-e7ee-47ef-8d06-a740f75b497a?mode=deep",
+    "timestamp": "2026-04-29 00:17:44.676534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user exploit the retry backoff configuration (minBackoff, maxBackoff, maxAttempts) in clientSubscribe() to cause a retry storm where many concurrent subscriptions all retry simultaneously after a 404 response, creating a thundering herd that overwhelms the REST API backend with synchronized bursts of requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d322f120-0ac0-465a-bd00-1a19ab23c6d3?mode=deep",
+    "timestamp": "2026-04-29 00:18:12.748253",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: clientSubscribe(RestSubscription)] Can an unprivileged external user exploit the take(properties.getDuration()) operator in clientSubscribe() by manipulating the duration property to be extremely short, causing subscriptions to terminate immediately after creation, preventing any transactions from being monitored and creating a blind spot in the monitoring system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60acb8cf-54a5-4fc1-be50-f23dee84b1e0?mode=deep",
+    "timestamp": "2026-04-29 00:18:41.875678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/rest/RestSubscriber.java -> Scope: '] [Function: toString(TransactionId)] Can an unprivileged external user supply a TransactionId where tid.validStart.getEpochSecond() returns a negative value, causing toString() to produce a string like '0.0.1--1234567890-0' with a double dash, which may bypass server-side validation on the REST API endpoint and retrieve transactions that should not be accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd769b36-ab85-4250-8d07-0558610b9fae?mode=deep",
+    "timestamp": "2026-04-29 00:19:11.748176",
+    "report_generated": false
+  }
+]
