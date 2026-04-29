@@ -112,5 +112,119 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eda9850f-02d4-4e5a-9e5b-178d951d3e84?mode=deep",
     "timestamp": "2026-04-28 13:43:07.039088",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: toBytes(ByteString byteString)] Can an unprivileged external user trigger the IOException fallback path in toBytes() by supplying a ByteString that causes UnsafeByteOperations.unsafeWriteTo() to fail, causing the method to fall back to byteString.toByteArray() which makes a copy, and if this inconsistency in byte array identity is used in staking reward key comparisons, cause the mirror node to fail to deduplicate reward transfers and pay out the same reward twice?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e71c22d9-5f8f-4208-9256-78102e141539?mode=deep",
+    "timestamp": "2026-04-29 03:38:55.976248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: fromBytes(byte[] bytes)] Can an unprivileged external user exploit the fact that fromBytes() uses UnsafeByteOperations.unsafeWrap() (zero-copy wrapping) to cause a race condition where the original byte array representing a staking reward amount is modified after being wrapped but before being written to the database, resulting in an incorrect reward amount being persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96b44f59-4b4d-44f4-a9b5-86bb125358f7?mode=deep",
+    "timestamp": "2026-04-29 03:39:08.004677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getPublicKey(byte[] protobufKey)] Can an unprivileged external user craft a protobuf Key with a KeyList containing exactly one nested KeyList containing exactly one primitive key, exploiting the depth limit of 2 in getPublicKey(Key, int depth) to cause the mirror node to extract a key that does not actually belong to the staking account, allowing the attacker to impersonate the account and claim its unpaid staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b73136f-263e-43bb-8f8e-b7d2e3fd6140?mode=deep",
+    "timestamp": "2026-04-29 03:39:20.339374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getPublicKey(byte[] protobufKey)] Can an unprivileged external user supply a malformed protobuf byte array to getPublicKey() that causes Key.parseFrom() to throw an exception, which is caught and returns null, causing the mirror node to treat the staking account as having no key and potentially allowing unauthorized staking reward claims?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_665f7bf6-808a-4de2-9948-5fbfc429395f?mode=deep",
+    "timestamp": "2026-04-29 03:39:33.721053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: sanitize(String input)] Can an unprivileged external user inject a null character (0x0000) into a transaction memo that is used as a lookup key in staking reward transfer queries, causing sanitize() to replace it with the Unicode replacement character (0xFFFD), which changes the memo's hash or comparison result and causes the mirror node to fail to match the staking reward transfer to the correct account, leaving rewards uncollected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de410a4b-c0ab-48b9-95f8-bfcf994283fa?mode=deep",
+    "timestamp": "2026-04-29 03:39:47.253391",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: now()] Can an unprivileged external user exploit the fact that now() calls convertToNanosMax(Instant.now()) which can return Long.MAX_VALUE if the system clock is in an extreme state, causing any staking period boundary check that uses now() to treat the current time as infinitely far in the future, making all staking periods appear to have ended and triggering premature reward payouts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbfc355d-5acc-4270-9f16-d74b14f22cc9?mode=deep",
+    "timestamp": "2026-04-29 03:40:01.300384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: convertToNanosMax(long second, long nanos)] Can an unprivileged external user craft a NodeStakeUpdate transaction with an endOfStakingPeriod timestamp whose seconds value is close to Long.MAX_VALUE / NANOS_PER_SECOND, causing convertToNanosMax() to clamp to Long.MAX_VALUE, making the mirror node believe the staking period never ends and thus never resetting pending_reward, allowing indefinite accumulation of staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ee578b4-a91d-4af7-aacd-a17ac06568d0?mode=deep",
+    "timestamp": "2026-04-29 03:40:16.387925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: TINYBARS_IN_ONE_HBAR] Can an unprivileged external user exploit the integer division truncation in pending reward calculations that use TINYBARS_IN_ONE_HBAR (100_000_000L) as a divisor, by maintaining a balance just below a whole HBAR boundary, causing the mirror node to calculate a pending_reward of zero for the attacker's account while the actual on-chain reward is non-zero, effectively stealing the fractional reward from the reward pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ad5b1e2-cd40-4cbf-9753-f953c4682e77?mode=deep",
+    "timestamp": "2026-04-29 03:40:31.262228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: NANOS_PER_SECOND] Can an unprivileged external user craft a Timestamp with nanos=999_999_999 and a seconds value such that Math.multiplyExact(second, NANOS_PER_SECOND) in convertToNanos() produces a value very close to Long.MAX_VALUE, causing the subsequent Math.addExact() with nanos to overflow and throw ArithmeticException, disrupting the staking reward transfer processing pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a48bf9f-2ed4-430b-bf2d-033be8914f9e?mode=deep",
+    "timestamp": "2026-04-29 03:40:47.629910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: toTimestamp(long timestamp)] Can an unprivileged external user supply a timestamp value of 0 to toTimestamp(), causing it to return the constant TIMESTAMP_ZERO ('0.0') instead of a properly formatted timestamp, and if this zero timestamp is used in staking reward transfer queries, cause the mirror node to return all staking reward transfers from the beginning of time, leaking reward data or causing incorrect reward attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5678b860-28d9-486a-94b8-676e3dc74a77?mode=deep",
+    "timestamp": "2026-04-29 03:41:03.843196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: toTimestamp(long timestamp)] Can an unprivileged external user craft a timestamp value that, when processed by toTimestamp(), produces a string where StringUtils.leftPad() inserts leading zeros that cause the decimal point insertion via StringBuilder.insert() to be placed at the wrong position, resulting in a malformed timestamp string that causes staking reward period boundary queries to return incorrect results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e85afdc-a02f-42a5-b4ea-327f5c1986af?mode=deep",
+    "timestamp": "2026-04-29 03:41:21.159438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: fromEvmAddress(byte[] evmAddress)] Can an unprivileged external user supply an EVM address where bytes 12-19 encode entity num 0, causing fromEvmAddress() to call EntityId.of(shard, realm, 0) which may throw InvalidEntityException (caught silently), returning null and causing the staking reward transfer to be attributed to no account, effectively stealing the reward from the legitimate recipient?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_868c4787-8021-4041-99f1-e5dac9dc632d?mode=deep",
+    "timestamp": "2026-04-29 03:41:38.662523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isLongZeroAddress(byte[] evmAddress)] Can an unprivileged external user pass an EVM address of length != EVM_ADDRESS_LENGTH (20) to isLongZeroAddress(), causing it to return false regardless of content, and if the caller then falls through to a different address resolution path that does not validate the address length, cause the staking reward to be attributed to an unintended account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6f8b90f-27aa-4f2e-8a9f-24ff99cfea2e?mode=deep",
+    "timestamp": "2026-04-29 03:41:57.208930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: fromTrimmedEvmAddress(byte[] evmAddress)] Can an unprivileged external user pass a byte array of length > EVM_ADDRESS_LENGTH (20) to fromTrimmedEvmAddress(), causing it to return null due to the length check, and if the caller treats null as a valid 'no account' sentinel and skips the staking reward deduction from account 0.0.800, cause the staking reward pool to be drained without proper accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6d75227-b645-4aec-9b52-8507e7918a05?mode=deep",
+    "timestamp": "2026-04-29 03:42:15.633910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: convertToNanosMax(long second, long nanos)] Can an unprivileged external user cause the staking period epoch day calculation (which divides the nanosecond timestamp by NANOS_PER_SECOND * 86400) to produce an incorrect epoch day by supplying a timestamp that convertToNanosMax() clamps to Long.MAX_VALUE, making the epoch day calculation overflow to a negative value, causing the mirror node to believe the staking period started in the past and awarding unearned rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e168053-b75c-4ad7-9355-b552f7fc10ca?mode=deep",
+    "timestamp": "2026-04-29 03:42:34.279038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: UnsafeByteOutput.write(byte[] bytes, int offset, int length)] Can an unprivileged external user craft a ByteString that causes UnsafeByteOutput.write() to store a reference to the internal byte array (this.bytes = bytes) without copying, and then trigger a concurrent modification of that array through another code path processing a staking reward transfer, causing the reward amount to be silently altered before database persistence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a70def55-4130-43a6-b3f1-44f66a33ae50?mode=deep",
+    "timestamp": "2026-04-29 03:42:54.453913",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: UnsafeByteOutput.writeLazy(byte[] bytes, int offset, int length)] Can an unprivileged external user exploit the writeLazy() method in UnsafeByteOutput, which stores a direct reference to the byte array without copying (this.bytes = bytes), to cause a time-of-check-time-of-use (TOCTOU) vulnerability where the staking reward amount bytes are modified between when they are written to UnsafeByteOutput and when they are read for database insertion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_355a4bbd-d330-4dc4-8cb6-a9231592612d?mode=deep",
+    "timestamp": "2026-04-29 03:43:14.743033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getPublicKey(KeyList keyList, int depth)] Can an unprivileged external user craft a KeyList with exactly one key that is itself a KeyList with exactly one primitive key, exploiting the depth+1 recursion in getPublicKey(KeyList, int depth) to extract a key at depth 2, and use this extracted key to impersonate a staking account and redirect its unpaid rewards to the attacker's account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6248800f-735e-4743-92d1-4f492d8aab6f?mode=deep",
+    "timestamp": "2026-04-29 03:43:35.646927",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: bytesToHex(byte[] bytes)] Can an unprivileged external user supply a byte array that bytesToHex() converts to a hex string that matches the hex-encoded public key of a staking account, causing the mirror node's key-based account lookup to return the attacker's account instead of the legitimate staking account, allowing the attacker to receive the victim's unpaid staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a19dd50-e8f3-44fa-bdce-31f63edb6bb7?mode=deep",
+    "timestamp": "2026-04-29 03:43:56.442070",
+    "report_generated": false
   }
 ]
