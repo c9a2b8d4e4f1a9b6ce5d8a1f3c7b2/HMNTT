@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user supply multiple `token.id=<value>` query parameters with eq operator, causing their values to be pushed unsanitized into `inConditions` and then directly string-interpolated into the SQL IN clause inside `getInClauseSubQuery()` (tokenService.js line 85: `in (${tokenIdInParams})`), bypassing parameterized query protections, enabling SQL injection that reads or corrupts token balance records for arbitrary accounts, leading to direct loss of funds through balance manipulation or unauthorized data exfiltration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90847a9e-1da1-4c11-a55e-1f0ff9b6e63a?mode=deep",
+    "timestamp": "2026-04-29 04:17:12.741804",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user craft a `token.id` query parameter value containing SQL metacharacters (e.g., `0.0.1); DROP TABLE token_account;--`) that passes `buildAndValidateFilters()` validation but is then directly concatenated into the IN clause string in `getInClauseSubQuery()` without parameterization, causing destructive SQL execution that permanently destroys token balance records and causes direct loss of funds for all token holders?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2221473c-27ee-4169-8ffb-2bacee0746eb?mode=deep",
+    "timestamp": "2026-04-29 04:17:24.653829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user call `/accounts/:idOrAliasOrEvmAddress/tokens` with any arbitrary account ID (e.g., `0.0.1234`) and receive the complete token balance portfolio of that account without any authentication or authorization check, enabling an attacker to enumerate all token holdings of high-value accounts and use that information to time targeted attacks causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d02340ef-231c-4a27-9409-6f688b322a3c?mode=deep",
+    "timestamp": "2026-04-29 04:17:37.737764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a crafted EVM address as the `idOrAliasOrEvmAddress` path parameter that resolves via `EntityService.getEncodedId()` to a different account than intended (e.g., through long-zero address aliasing ambiguity), causing the API to return token balances for the wrong account, misleading the caller about actual fund holdings and triggering incorrect financial decisions resulting in direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72cd6de0-4e5f-4ba8-8fe5-8a5bbeff8280?mode=deep",
+    "timestamp": "2026-04-29 04:17:50.587288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user exploit the TOCTOU window between `EntityService.isValidAccount(accountId)` at line 68 and `TokenService.getTokenAccounts(query)` at line 74, where the account is validated as existing but then deleted before the token query executes, causing the service to return stale token balance data for a deleted account, misleading downstream systems about fund availability and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f33d0f52-bfa0-4686-9d26-ed3428528ee6?mode=deep",
+    "timestamp": "2026-04-29 04:18:05.089934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user submit a request with both `token.id=gt:X` and `token.id=lt:Y` range conditions simultaneously alongside multiple `token.id=eq:Z` equality conditions, causing the `conditions` and `inConditions` arrays to be combined in `getTokenRelationshipsQuery()` in a way that produces a logically incorrect SQL WHERE clause, returning token balances for tokens outside the intended range and misrepresenting fund holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_631e119e-7e80-40a5-8d95-e107b09abdac?mode=deep",
+    "timestamp": "2026-04-29 04:18:19.861341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user set `limit=0` or a negative limit value in the query parameters, and if `buildAndValidateFilters()` fails to reject it, cause `extractTokensRelationshipQuery()` to pass `limit=0` to `TokenService.getTokenAccounts()`, resulting in the SQL `LIMIT 0` returning no rows, making the API falsely report that an account holds no tokens, causing direct loss of funds through incorrect zero-balance reporting used by downstream financial logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e578e39-ace9-478b-88cf-68ebedd89e49?mode=deep",
+    "timestamp": "2026-04-29 04:18:35.236218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user set an extremely large `limit` value (e.g., `limit=2147483647`) that bypasses the max-limit enforcement in `buildAndValidateFilters()`, causing `TokenService.getTokenAccounts()` to execute a query fetching millions of rows, exhausting database connection pool resources and causing denial of service that prevents legitimate users from checking their token balances, indirectly causing loss of funds through inability to monitor holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1801ba3-3cc1-439b-a904-1343675d7b14?mode=deep",
+    "timestamp": "2026-04-29 04:18:51.712423",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user supply the `token.id=ne:X` operator and observe that the code throws `InvalidArgumentError` at line 32, but then supply `token.id=lt:0` or `token.id=gt:9999999999` boundary values that pass validation and are pushed into `conditions`, causing the SQL query to return an empty result set that falsely indicates an account has no token holdings, misleading fund-tracking systems into believing balances are zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d354f53-0860-4cd4-ae72-4f9d372bd3f7?mode=deep",
+    "timestamp": "2026-04-29 04:19:09.045413",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user exploit the `TokenService.getCachedTokens()` quickLru cache by first querying a token that has stale or incorrect `decimals` data cached, then observing that subsequent calls to `getTokenRelationships()` return the wrong `decimals` value for that token, causing downstream applications to miscompute the actual token balance (e.g., off by 10^N factor), leading to direct loss of funds through incorrect balance display?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04109f46-605a-4d24-ab5f-b5994d1e0ae1?mode=deep",
+    "timestamp": "2026-04-29 04:19:26.221661",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user trigger cache poisoning in `TokenService.putTokenCache()` / `getCachedTokens()` by racing concurrent requests for the same token ID before the cache is populated, causing two different `CachedToken` objects with different `decimals` or `freeze_status` values to be stored, resulting in non-deterministic balance metadata returned to users and potential direct loss of funds through incorrect decimal scaling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c210d92-5f37-424e-a0cc-02bb1f387107?mode=deep",
+    "timestamp": "2026-04-29 04:19:44.682042",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply an account alias string as `idOrAliasOrEvmAddress` that matches multiple alive entities in the database, causing `EntityService.getAccountFromAlias()` to throw a generic `Error` (not `NotFoundError` or `InvalidArgumentError`) that leaks internal state, and if error handling is inconsistent, cause the wrong account's token balances to be returned, leading to direct loss of funds through cross-account data confusion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4683f5a-80c7-458f-9370-676520a7879c?mode=deep",
+    "timestamp": "2026-04-29 04:20:04.057871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a specially crafted account alias that is valid per `AccountAlias.isValid()` but resolves to a contract account (not a user account), and since `EntityService.isValidAccount()` only checks entity existence (not entity type), the API returns token balances for a contract address, potentially exposing contract-held token balances that should not be publicly enumerable, enabling targeted fund-draining attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24b40ba0-c9f5-4dd8-be55-d436b3f37b5c?mode=deep",
+    "timestamp": "2026-04-29 04:20:23.492689",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user observe that `EntityService.isValidAccount()` uses `entityExistenceQuery` which selects only `entity.type` but does not filter by type, meaning deleted entities (where `deleted=true`) that still exist in the table pass the existence check, causing the API to return token balance data for deleted accounts, misleading fund-tracking systems about actual live balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ed107e9-9364-486c-b0fa-4d9ee15fe38d?mode=deep",
+    "timestamp": "2026-04-29 04:20:44.633771",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user manipulate the pagination `next` link generated by `utils.getPaginationLink()` at line 83 by crafting a request where `lastRow.token_id` from `TokenRelationshipViewModel` is a malformed entity ID string, causing the generated next-page URL to contain an invalid `token.id` parameter that when followed returns incorrect or empty results, causing users to miss token holdings and believe their balance is lower than it actually is?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_804d43b2-38bf-4ded-802f-4279d2f2217d?mode=deep",
+    "timestamp": "2026-04-29 04:21:05.263695",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user submit repeated `token.id=eq:X` parameters with the same token ID value multiple times, causing `inConditions` to contain duplicate entries that are all directly interpolated into the SQL IN clause as `in (X, X, X, ...)`, and if the database query planner behaves unexpectedly with duplicates, return incorrect or duplicated token balance rows that misrepresent actual holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_164982c0-6176-454d-bdfe-7a593f4d1eb4?mode=deep",
+    "timestamp": "2026-04-29 04:21:26.350976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a `token.id=eq:0` or `token.id=eq:0.0.0` value that represents the zero/null token ID, which passes filter validation but when interpolated into the IN clause causes the SQL query to match unexpected rows or produce a SQL error that is caught and returns an empty result, falsely indicating zero token holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7389fe1-d9d5-4d4d-908b-517cd5042160?mode=deep",
+    "timestamp": "2026-04-29 04:21:49.153910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user exploit the fact that `TokenRelationshipViewModel` at line 75 maps `balance` directly from the database row without any range or sanity check, such that if the database contains a negative balance value (due to a bug or race condition), the API returns a negative token balance to the caller, causing downstream financial logic to miscompute net worth and trigger incorrect fund movements?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b84e339b-e0f7-47e4-b674-ffd4a8b6b8f2?mode=deep",
+    "timestamp": "2026-04-29 04:22:12.624749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a long-zero EVM address (e.g., `0x0000000000000000000000000000000000000001`) as the account identifier, which resolves via `EntityService.getEntityIdFromEvmAddress()` to account `0.0.1` (the treasury or system account), causing the API to expose the complete token balance portfolio of system accounts, enabling targeted attacks on high-value system-held tokens?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b7295f0-e519-4bae-9c46-50c11f82a9e3?mode=deep",
+    "timestamp": "2026-04-29 04:22:36.761776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: extractTokensRelationshipQuery()] Can an unprivileged external user supply both `token.id=gt:X` (range condition pushed to `conditions`) and `token.id=eq:Y` (equality pushed to `inConditions`) simultaneously, causing `getTokenRelationshipsQuery()` to combine both a range WHERE clause and an IN clause in the same SQL query, producing a logical AND that may exclude valid token holdings from the result, causing the API to underreport token balances and mislead users about their actual fund holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f89d64a-a6a8-41e6-b6c1-289d990872a5?mode=deep",
+    "timestamp": "2026-04-29 04:23:01.238770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user send a high volume of concurrent requests to `/accounts/:id/tokens` for the same account, exploiting the absence of rate limiting in `TokenController`, causing the database connection pool to be exhausted and preventing the legitimate account owner from checking their own token balances during a critical trading window, resulting in indirect loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa9e9b62-72b1-4730-bad3-006a9f415b70?mode=deep",
+    "timestamp": "2026-04-29 04:23:24.820846",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user exploit the `freeze_status` fallback logic in `TokenService.getTokenAccounts()` at line 109 (`row.freeze_status = row.freeze_status ?? cachedToken.freezeStatus`) where a null `freeze_status` in the token_account row causes the cached token's freeze status to be used instead, and if the cache contains a stale UNFROZEN status for a token that is now FROZEN, the API returns UNFROZEN to the user, causing them to attempt transfers that will fail and lose transaction fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30df8f53-4542-411c-980a-0a7faaee04bd?mode=deep",
+    "timestamp": "2026-04-29 04:23:50.592754",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user exploit the `kyc_status` fallback logic in `TokenService.getTokenAccounts()` at line 110 (`row.kyc_status = row.kyc_status ?? cachedToken.kycStatus`) where a null `kyc_status` causes the cached token's KYC status to be used, and if the cache contains a stale GRANTED status for a token whose KYC has been REVOKED, the API returns GRANTED to the user, causing them to attempt token transfers that will be rejected by the network, resulting in wasted transaction fees and potential loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_268fe226-103e-4faf-a68c-85bd5a44ef16?mode=deep",
+    "timestamp": "2026-04-29 04:24:16.947793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a `token.id` filter value that is a valid-looking entity ID string but encodes to a BigInt that overflows or underflows when processed by `EntityId.parseString()`, causing the encoded value passed to the SQL query to wrap around and match a completely different token ID, returning balance data for the wrong token and misrepresenting the user's actual fund holdings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3aa9fc1-811e-48bb-a526-4bc4e6904df0?mode=deep",
+    "timestamp": "2026-04-29 04:24:44.264145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/tokenController.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationships()] Can an unprivileged external user supply a `token.id=gte:0` filter that matches all token IDs from zero upward, combined with a very large `limit`, causing `TokenService.getTokenAccounts()` to return the complete token relationship table for the target account in a single response, enabling bulk enumeration of all token holdings for any account without pagination, facilitating targeted fund-draining attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ebfb0cb-ffbd-4c72-b8ea-64a21a2cd432?mode=deep",
+    "timestamp": "2026-04-29 04:25:11.433802",
+    "report_generated": false
+  }
+]
