@@ -1,0 +1,56 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged external user exploit the `@NullUnmarked` annotation on the `Bound` class to pass null values for `lower` or `upper` RangeParameter fields, causing `getAdjustedLowerRangeValue()` to return 0 (when lower is null) and `adjustUpperBound()` to return Long.MAX_VALUE (when upper is null), effectively removing all range filtering and returning the full unfiltered allowance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_944ece54-61dc-4534-b99a-263dfb2cea75?mode=deep",
+    "timestamp": "2026-04-29 02:15:03.271288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged external user supply a request where the `accountId` path parameter resolves to a valid entity but the `ownerOrSpenderIds` bound contains a range that excludes all spenders/owners, causing the query to return an empty result set while the actual allowance history exists, effectively hiding the complete grant history from the API consumer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79f1b23b-7ba6-4ac7-9612-214ce879537d?mode=deep",
+    "timestamp": "2026-04-29 02:15:15.096782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: checkOwnerSpenderParamValidity()] Can an unprivileged external user craft a request where ownerOrSpenderParams has `hasLowerAndUpper()=true` (both GTE and LTE present) and tokenParams has `getAdjustedLowerRangeValue() > adjustUpperBound()` (inverted range), bypassing the token range check at line 41-44 because the condition short-circuits on `!ownerOrSpenderParams.hasLowerAndUpper()`, and the inverted token range then causes the jOOQ query to return zero records, making the allowance history appear empty?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e929af8d-4823-4ea5-9b05-17bc95415d01?mode=deep",
+    "timestamp": "2026-04-29 02:15:27.280796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged external user send concurrent requests with the same pagination cursor (same account.id GTE and token.id GT values) to race against each other, and if the underlying allowance data changes between requests, receive inconsistent pages of allowance history that together either skip or duplicate records, reorganizing the apparent transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_455307da-41aa-4548-923e-8ab163494ed6?mode=deep",
+    "timestamp": "2026-04-29 02:15:40.140725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: verifyRangeId()] Can an unprivileged external user submit a Bound where the `cardinality` map contains an entry for a given operator but the `lower` or `upper` field was overwritten by a later parameter in the constructor loop, creating a state where `getCardinality(RangeOperator.GTE)` returns 1 but `lower` actually holds a different operator's parameter, causing `checkOwnerSpenderParamValidity` to make incorrect decisions about which operators are present?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b48cd7b-a957-4fe3-843f-6fa066fc47e3?mode=deep",
+    "timestamp": "2026-04-29 02:15:54.187268",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged external user supply an EVM address for the path parameter `accountId` that is a parseable long-encoded address (e.g., 0.0.1000 encoded as EVM address), causing `EntityIdEvmAddressParameter` to resolve to a different entity than the numeric form, and the allowance history query to return records for the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7c1b599-14e9-4971-b996-29821c03ed2d?mode=deep",
+    "timestamp": "2026-04-29 02:16:08.448723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: checkOwnerSpenderParamValidity()] Can an unprivileged external user exploit the fact that when `ownerOrSpenderParams.isEmpty()` is true and `tokenParams.isEmpty()` is also true, all validation checks pass trivially (the first check doesn't throw, verifyRangeId on empty bounds is a no-op), and the query executes with no bound conditions, returning all approved_for_all allowances for the account in the default sort order, potentially exposing more history than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c24d543-c6ed-4dad-a906-d5ce4254fc3b?mode=deep",
+    "timestamp": "2026-04-29 02:16:22.831835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged external user supply a request with `isOwner=true` and an account.id range (GTE:X, LTE:Y) for the spender field, causing the query to return allowances where the owner matches the path accountId AND the spender falls in [X,Y], effectively filtering the history to only show grants to a specific range of spenders and hiding all other historical grants from the result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65345c38-7b10-4221-862f-7430d31f1d15?mode=deep",
+    "timestamp": "2026-04-29 02:16:38.918111",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceServiceImpl.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: checkOwnerSpenderParamValidity()] Can an unprivileged external user supply ownerOrSpenderParams with a single LTE operator and tokenParams with a single LTE operator, where the cardinality check at line 46-48 sees LT/LTE cardinality > 0 in tokenParams and checks for EQ/LTE in ownerOrSpenderParams—LTE satisfies this—so the check passes, but the resulting query uses only upper bounds for both fields, returning all allowances below the specified values in descending order, which may not match the intended pagination semantics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_848de827-4ec6-457a-b39f-984fea5dedeb?mode=deep",
+    "timestamp": "2026-04-29 02:16:55.235205",
+    "report_generated": false
+  }
+]
