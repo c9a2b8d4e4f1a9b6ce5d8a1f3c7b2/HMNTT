@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: getProperties()] Can an unprivileged external user call getProperties() to retrieve the ParserProperties object and then invoke setEnabled(false) on it, disabling the parser entirely and causing all subsequent parse() calls to silently skip all stream files via the shouldParse() enabled check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d862e1e1-b08e-4653-b50a-21e36b70fff4?mode=deep",
+    "timestamp": "2026-04-29 01:12:39.148780",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: shouldParse()] Can an unprivileged external user exploit the fact that when parserProperties.isEnabled() returns false, shouldParse() returns false and streamFile.clear() is called, permanently destroying the bytes and items of the stream file without any error, causing silent data loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddabddc9-8cdd-41b7-a7af-baf66fb56e4f?mode=deep",
+    "timestamp": "2026-04-29 01:12:51.177086",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user supply a StreamFile with a getConsensusEnd() value far in the future (e.g., year 2500 in nanoseconds), causing parseLatencyMetric.record() to record a negative Duration.between() value, corrupting monitoring metrics and masking real latency issues?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8438de3d-ba3c-47cc-839a-1a196460e76d?mode=deep",
+    "timestamp": "2026-04-29 01:13:03.422948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user submit a StreamFile with getLoadEnd() < getLoadStart() (negative duration), causing totalDurationMetric.record() to record a negative value in TimeUnit.MILLISECONDS, corrupting the 'hiero.mirror.importer.duration' metric and misleading operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a1f6382-257c-4286-a2c9-12d035799262?mode=deep",
+    "timestamp": "2026-04-29 01:13:16.489757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: shouldParse()] Can an unprivileged external user craft a StreamFile where getPreviousHash() returns an empty string and the previous file's getHash() returns a non-empty string, causing contentEquals() to return false and throw a HashMismatchException that is retried indefinitely, blocking the parser?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_478416e7-9281-40ec-a891-f231a4d7fe89?mode=deep",
+    "timestamp": "2026-04-29 01:13:30.008568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user pass a list containing a null element so that streamFiles.get(i) returns null, causing a NullPointerException when accessing streamFile.getName() or shouldParse(), crashing the batch parser?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5200ecc-7552-4cf2-b59e-0df063f7982e?mode=deep",
+    "timestamp": "2026-04-29 01:13:44.138881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user exploit the fact that parse(List<T>) uses reference equality (initial == previous) to detect whether any file was processed, so that if the same object reference is reused for both initial and a list element, the flush is skipped even though doParse() was called?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eabc94a6-4f07-4519-8d58-9f02221b1d62?mode=deep",
+    "timestamp": "2026-04-29 01:13:58.532574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user cause a race condition by calling parse(T) concurrently from two threads (since the interface does not declare synchronization), where both threads pass shouldParse() with the same 'last' value, causing duplicate processing of the same stream file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08792340-888d-47b6-82e9-3c5c32257c79?mode=deep",
+    "timestamp": "2026-04-29 01:14:15.329597",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user exploit the window between doParse(streamFile) completing and doFlush(streamFile) being called, where another thread calling getLast() still sees the old 'last' value, to inject a file that passes hash chain verification against the stale previous hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_202a356f-9636-48ce-86f3-a6c60ad87de5?mode=deep",
+    "timestamp": "2026-04-29 01:14:31.650965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: doFlush()] Can an unprivileged external user cause streamFileListener.onEnd() to throw a RuntimeException so that streamFile.clear() is never called, leaving sensitive raw bytes and transaction items in memory indefinitely, causing a memory leak and potential data exposure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43202c06-3ef1-42e5-b6c3-eabfc3d11703?mode=deep",
+    "timestamp": "2026-04-29 01:14:48.211303",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user submit a StreamFile with an extremely large getCount() value (Long.MAX_VALUE) so that the log.info message 'Successfully processed {} items' logs misleading data, and downstream consumers relying on count for pagination or validation are corrupted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b21d3e4b-8f72-42c6-8ec5-a472e57d3df5?mode=deep",
+    "timestamp": "2026-04-29 01:15:05.036617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user submit a batch where count accumulates to Long.MAX_VALUE via overflow (many files each with large getCount()), causing the log.info 'Successfully batch processed {} items' to display a negative number, misleading operators about actual processing volume?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_881d649c-ede7-47af-9d9d-47c5c02880de?mode=deep",
+    "timestamp": "2026-04-29 01:15:22.589017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: shouldParse()] Can an unprivileged external user craft a StreamFile where getConsensusStart() equals Long.MIN_VALUE so that previous.getConsensusEnd() >= current.getConsensusStart() is always false (since any consensusEnd > Long.MIN_VALUE), bypassing the duplicate-file skip check and forcing re-processing of already-ingested data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_235159a5-a046-43fa-913c-72e4074ade15?mode=deep",
+    "timestamp": "2026-04-29 01:15:41.057847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user supply a StreamFile whose doParse() triggers an OutOfMemoryError (excluded from @Retryable), causing the JVM to crash without the finally block properly recording the failure metric, leaving the 'hiero.mirror.importer.parse.duration' metric in an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7edb7c11-a54e-441b-9432-60dadb20928b?mode=deep",
+    "timestamp": "2026-04-29 01:16:00.585578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user exploit the fact that the Stopwatch is started before shouldParse() is called, so that even skipped files (where shouldParse() returns false) still record a parse duration metric, inflating the 'hiero.mirror.importer.parse.duration' metric with false data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db169910-0d3d-4e46-ace8-a33267995974?mode=deep",
+    "timestamp": "2026-04-29 01:16:20.113248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user submit a StreamFile with a getName() that returns a very long string (e.g., 1MB), causing the log.info and log.error calls to allocate excessive memory for log message formatting, contributing to memory exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ca052b1-9fdf-498f-8be5-252a739808de?mode=deep",
+    "timestamp": "2026-04-29 01:16:39.321270",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: shouldParse()] Can an unprivileged external user exploit the fact that when previous is null (first file after restart), shouldParse() returns true unconditionally without any hash verification, allowing injection of a StreamFile with a completely forged hash that becomes the new chain anchor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_794fae23-7bc4-4f26-91ad-36a301e03200?mode=deep",
+    "timestamp": "2026-04-29 01:16:59.981550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: getLast()] Can an unprivileged external user trigger a database error in streamFileRepository.findLatest() (e.g., by exhausting DB connections) so that getLast() throws an unchecked exception, causing parse() to fail before shouldParse() is even called, resulting in a denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9854b2e-ea96-4dfe-8aac-a0e57449a7fc?mode=deep",
+    "timestamp": "2026-04-29 01:17:20.242188",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user submit an empty list to parse(List<T>), which returns immediately via CollectionUtils.isEmpty() check, but if the caller relies on a side effect (like last being updated), the silent no-op could cause the caller to incorrectly assume processing occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_088fe2cf-e9d3-4877-877a-5ba8bf79029a?mode=deep",
+    "timestamp": "2026-04-29 01:17:40.947598",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user craft a StreamFile where getType() returns null, causing a NullPointerException in previous.getType().isChained() inside shouldParse(), crashing the parser?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff7e6ccb-afd0-4544-ba3d-eb4129894ce3?mode=deep",
+    "timestamp": "2026-04-29 01:18:03.185327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: shouldParse()] Can an unprivileged external user submit a StreamFile of type BALANCE (isChained() = false) with a manipulated previousHash that does not match the previous file's hash, bypassing the hash chain entirely since the isChained() guard prevents the HashMismatchException from being thrown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26b282b2-1c5a-42ad-a1eb-0bba49c43ce7?mode=deep",
+    "timestamp": "2026-04-29 01:18:24.891564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user exploit the @Retryable annotation's exponential backoff (minBackoff=500ms, multiplier=2, maxBackoff=30s) by repeatedly triggering transient failures, causing the parser thread to be blocked for up to 30 seconds per retry cycle, effectively throttling legitimate processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1d3bc0f-a810-4834-8e4b-cc74f382ba2f?mode=deep",
+    "timestamp": "2026-04-29 01:18:47.691201",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(T streamFile)] Can an unprivileged external user submit a StreamFile that causes doParse() to succeed but streamFileListener.onEnd() to throw, so that the file is never committed to the database but last.set() is also never called, causing the next parse() to re-verify against the wrong previous hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ded0694-ed83-4c4c-944c-48fa3c9ec7a3?mode=deep",
+    "timestamp": "2026-04-29 01:19:11.582709",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user exploit the fact that in parse(List<T>), the 'previous' variable is updated to each successfully parsed file, but if a HashMismatchException is thrown mid-list, all files parsed before the exception have already had doParse() called, potentially persisting partial data without a flush?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60dd79a7-e3ab-41bf-95cf-70d2a57cef01?mode=deep",
+    "timestamp": "2026-04-29 01:19:35.387878",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: '] [Function: parse(List<T> streamFiles)] Can an unprivileged external user craft a list where the second file has a valid previousHash matching the first file's hash, but the third file has a mismatched hash, causing a HashMismatchException that leaves the first two files' data persisted (via doParse) but not committed (no doFlush), creating a data integrity gap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7d59cb3-e8db-4f60-82e2-6607b521dd89?mode=deep",
+    "timestamp": "2026-04-29 01:20:00.510570",
+    "report_generated": false
+  }
+]
