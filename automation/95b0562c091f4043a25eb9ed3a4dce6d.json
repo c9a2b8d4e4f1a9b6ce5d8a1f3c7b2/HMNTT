@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user send GET /blocks with no query parameters, causing RecordFileService.getBlocks() to execute a full table scan on record_file with no WHERE clause and the default limit, leading to excessive database CPU/IO and denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9021aff7-49c3-4972-ad2c-4d1a7f94d08a?mode=deep",
+    "timestamp": "2026-04-29 03:00:58.547559",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user repeatedly call GET /blocks with no filters to enumerate all blocks in the record_file table, leaking the full chain history including hash, prevHash, name, gasUsed, logsBloom, and consensusStart/End timestamps via BlockViewModel?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4eb57af-4054-4643-aca8-b72ce527d673?mode=deep",
+    "timestamp": "2026-04-29 03:01:10.494257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractLimitFromFilters()] Can an unprivileged external user supply limit=0 in the query string, causing extractLimitFromFilters() to pass 0 to RecordFileService.getBlocks() which interpolates it directly as 'limit 0' in SQL, resulting in an empty result set that bypasses expected pagination behavior and leaks no data while consuming query resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5cb02a11-4a5c-43b5-8e44-0826d580c61b?mode=deep",
+    "timestamp": "2026-04-29 03:01:22.885389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractLimitFromFilters()] Can an unprivileged external user supply limit=NaN or limit=Infinity as a query parameter, and if buildAndValidateFilters() passes a non-numeric value through, causing RecordFileService.getBlocks() to interpolate 'limit NaN' or 'limit Infinity' directly into the SQL string, resulting in a database error or unintended full-table fetch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0db5ec33-a0fc-4b54-8080-e5bf019d84b9?mode=deep",
+    "timestamp": "2026-04-29 03:01:35.732279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractLimitFromFilters()] Can an unprivileged external user supply multiple limit parameters (e.g., limit=1&limit=99999), causing findLast() to honor the last value, and if that last value is exactly equal to maxLimit (not greater), it bypasses the defaultLimit fallback and returns maxLimit rows, effectively maximizing the response payload for DoS amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c819062a-7cab-4501-bc57-d6def1073a05?mode=deep",
+    "timestamp": "2026-04-29 03:01:49.908890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractLimitFromFilters()] Can an unprivileged external user exploit the condition 'limit.value > maxLimit ? defaultLimit : limit.value' where a limit value exactly equal to maxLimit is accepted, and by sending limit=100 (the max), force the server to always return the maximum number of rows per request, enabling high-throughput data harvesting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d5b29d1-aa0f-4c39-a217-77dfac78eb39?mode=deep",
+    "timestamp": "2026-04-29 03:02:04.140832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractOrderFromFilters()] Can an unprivileged external user supply multiple order parameters (e.g., order=asc&order=desc), causing findLast() to use the last value, allowing the attacker to override any intended default ordering and enumerate blocks in ascending order to discover the genesis block and chain history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d654019-df4c-42ac-878c-d946a24338a8?mode=deep",
+    "timestamp": "2026-04-29 03:02:19.017377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractOrderFromFilters()] Can an unprivileged external user supply order=ASC or order=DESC in mixed case, and since orderFilterValues[order.value.toUpperCase()] is used, confirm that case normalization works correctly, or does a value like order=Asc%00 (null byte) cause toUpperCase() to produce an unexpected key lookup returning undefined, which is then passed as the ORDER clause to RecordFileService.getBlocks()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6818f430-8f41-40bb-b849-6add4c2762fa?mode=deep",
+    "timestamp": "2026-04-29 03:02:34.670327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractOrderByFromFilters()] Can an unprivileged external user send both block.number and timestamp filters simultaneously, causing extractOrderByFromFilters() to always return RecordFile.INDEX (index) as the orderBy column because block.number appears first in the filter array, potentially bypassing timestamp-based ordering and causing inconsistent pagination results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d023399a-393b-4b24-8389-fdf9b0010983?mode=deep",
+    "timestamp": "2026-04-29 03:02:50.518613",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user send many repeated block.number filters (e.g., block.number=gt:1&block.number=lt:9999999&block.number=gt:2&...) up to maxRepeatedQueryParameters, causing extractSqlFromBlockFilters() to build a large whereQuery array that generates a SQL query with many AND conditions, leading to excessive query planning overhead and DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e999b573-37cd-480e-b522-119a1ab1ab7c?mode=deep",
+    "timestamp": "2026-04-29 03:03:07.753576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user send many repeated timestamp filters up to the maxRepeatedQueryParameters limit, causing extractSqlFromBlockFilters() to produce a whereQuery with many consensus_end conditions, resulting in a complex SQL query that causes excessive database load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1e39475-5ee1-46cf-a921-39081dc32f28?mode=deep",
+    "timestamp": "2026-04-29 03:03:25.417180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user observe that when filters is a non-empty array but contains only ORDER and LIMIT keys (no BLOCK_NUMBER or TIMESTAMP), the whereQuery array will be empty (all entries filtered out), causing getBlocks() to execute a full table scan with only the limit constraint, leaking all blocks up to the limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5d6087f-b07b-418c-aa6b-358c6a89e862?mode=deep",
+    "timestamp": "2026-04-29 03:03:43.699056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: generateNextLink()] Can an unprivileged external user observe that generateNextLink() uses 'blocks.length !== filters.limit' for the isEnd check, and if the database returns exactly filters.limit rows but there are no more rows, the next link is generated pointing to a non-existent page, causing an extra database query on follow-up that returns empty results, wasting server resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e38aacc5-0367-485a-b751-01785cd282c2?mode=deep",
+    "timestamp": "2026-04-29 03:04:02.165801",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: generateNextLink()] Can an unprivileged external user exploit the fact that generateNextLink() always uses filterKeys.BLOCK_NUMBER as the pagination cursor key regardless of whether the original query used timestamp filters, causing the next link to contain block.number=gt:X even when the user queried by timestamp, potentially skipping blocks or returning inconsistent paginated results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67cc146f-de20-4a06-87de-7cf7699c1818?mode=deep",
+    "timestamp": "2026-04-29 03:04:21.900804",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: generateNextLink()] Can an unprivileged external user observe that generateNextLink() calls last(blocks).index to build the next link, and if the last block's index field is null or undefined in the RecordFile model, the generated next link contains 'block.number=gt:undefined', which when followed causes an InvalidArgumentError, leaking error details?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbac2ccf-111b-4c7e-aa24-795e3db4d679?mode=deep",
+    "timestamp": "2026-04-29 03:04:43.039914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user send GET /blocks with block.number=gte:0 to retrieve blocks starting from block 0, since isPositiveLong(val, true) allows zero for BLOCK_NUMBER in filterValidityChecks, potentially exposing the genesis block and its hash/prevHash fields?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_926dd9b5-52e4-4174-90e4-93fb4731ff06?mode=deep",
+    "timestamp": "2026-04-29 03:05:04.180297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getBlocks()] Can an unprivileged external user send GET /blocks with timestamp=gte:0.000000000 to retrieve all blocks from the beginning of time, since timestamp 0 is a valid value, effectively enumerating the entire chain history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8190047-39ac-43ca-8390-63d885548e3d?mode=deep",
+    "timestamp": "2026-04-29 03:05:25.952985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user call GET /blocks/0 (block number zero), since validateHashOrNumber() calls isPositiveLong(hashOrNumber, true) with allowZero=true, successfully retrieving the genesis block and its hash, prevHash, and consensus timestamps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8029800c-7a92-4f39-8dfc-264fbd530449?mode=deep",
+    "timestamp": "2026-04-29 03:05:48.609107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: validateHashOrNumber()] Can an unprivileged external user supply a path parameter like '0x0xabcdef...' (double 0x prefix), causing hashOrNumber.replace('0x', '') to only strip the first occurrence and produce '0xabcdef...', which then fails isValidEthHashOrHederaHash() but also fails isPositiveLong(), resulting in an InvalidArgumentError that leaks the parameter name via filterKeys.HASH_OR_NUMBER?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d34163b6-8904-4840-af61-a753e35f8167?mode=deep",
+    "timestamp": "2026-04-29 03:06:11.149208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: validateHashOrNumber()] Can an unprivileged external user supply a 96-character hex string (Hedera hash format) to getByHashOrNumber(), causing RecordFileService.getByHashOrNumber() to perform a LIKE query with the full 96-char hash + '%', which matches only exact hashes, but the LIKE operator introduces unnecessary overhead compared to an equality check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f682507-fb91-4e5a-b818-80b35e51a813?mode=deep",
+    "timestamp": "2026-04-29 03:06:35.062488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: validateHashOrNumber()] Can an unprivileged external user supply a 64-character hex string (ETH hash format) to getByHashOrNumber(), causing RecordFileService.getByHashOrNumber() to perform 'hash LIKE $1' with value 'abcdef...%', which is a prefix match that could theoretically match multiple blocks if two blocks share a 64-char hash prefix, returning the first match and hiding the second?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f9fd891-fa55-489f-90ba-dd51a932a2af?mode=deep",
+    "timestamp": "2026-04-29 03:06:58.482494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: validateHashOrNumber()] Can an unprivileged external user supply a hash with mixed case (e.g., '0xABCDEF...') to getByHashOrNumber(), and since RecordFileService.getByHashOrNumber() calls hash.toLowerCase() before the LIKE query, confirm whether the case normalization is consistent with how hashes are stored, or if a case mismatch causes a missed lookup returning NotFoundError when the block exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c148542-7c55-4076-a55a-6ce9fc54f3cf?mode=deep",
+    "timestamp": "2026-04-29 03:07:22.875830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user supply a URL-encoded path parameter (e.g., /blocks/%30%78abc...) that Express decodes to '0xabc...' before validateHashOrNumber() is called, bypassing any WAF or rate-limiting rules that inspect the raw URL, and successfully querying blocks by hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db262b93-d5b6-4265-887f-e02f1c2cbeb0?mode=deep",
+    "timestamp": "2026-04-29 03:07:47.617827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user supply a very long string as the hashOrNumber path parameter that passes neither isValidEthHashOrHederaHash() nor isPositiveLong(), causing InvalidArgumentError.forParams() to be thrown, and by sending thousands of such requests, cause excessive error-handling overhead leading to DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e3001c5-d2ed-4add-bec3-87f948fa3a9a?mode=deep",
+    "timestamp": "2026-04-29 03:08:13.876831",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: '] [Function: getByHashOrNumber()] Can an unprivileged external user append query parameters to GET /blocks/:hashOrNumber (e.g., /blocks/123?foo=bar), and since validateReq(req) is called with an empty acceptedParameters set, any query parameter causes an InvalidArgumentError to be thrown, effectively making the endpoint reject all requests with query strings and leaking the unknown parameter name in the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82fc9aec-77d2-440a-bae1-a81205a4150d?mode=deep",
+    "timestamp": "2026-04-29 03:08:40.367871",
+    "report_generated": false
+  }
+]
