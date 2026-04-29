@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toBytes(ByteString byteString)] Can an unprivileged external user trigger a code path where toBytes() returns a direct reference to the underlying byte array of a LiteralByteString (via UnsafeByteOutput), and a subsequent operation modifies that array, corrupting the stored freeze key so that future unfreeze key verification always fails and the account remains permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6c4bf00-174b-465d-9060-39259e07aaf0?mode=deep",
+    "timestamp": "2026-04-29 00:54:23.821523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toBytes(ByteString byteString)] Can an unprivileged external user craft a ByteString whose size is exactly equal to UnsafeByteOutput.SIZE (16 bytes), causing the supports() check to return false and toBytes() to fall back to toByteArray(), while a concurrent path uses the unsafe path, creating a race condition that corrupts the freeze key and permanently locks the token?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c16775d-b1db-47f0-9ebb-cd4180340db6?mode=deep",
+    "timestamp": "2026-04-29 00:54:36.790250",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fromBytes(byte[] bytes)] Can an unprivileged external user trigger a code path where fromBytes() wraps a mutable byte array via UnsafeByteOperations.unsafeWrap() without copying, and a subsequent mutation of that array changes the stored freeze key ByteString, causing key verification to fail and permanently preventing unfreeze operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93a6afc3-ae31-4226-b7d7-a79157464454?mode=deep",
+    "timestamp": "2026-04-29 00:54:49.428908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertToNanos(long second, long nanos)] Can an unprivileged external user submit a transaction with a consensus timestamp that causes convertToNanos() to throw ArithmeticException, which propagates up and aborts the processing of an unfreeze transaction, leaving the token account in a permanently frozen state with no retry mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_defc643e-b88e-40fd-95c7-d8fb1bf2bbd7?mode=deep",
+    "timestamp": "2026-04-29 00:55:02.686800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertToNanosMax(long second, long nanos)] Can an unprivileged external user craft a transaction with a negative seconds value large enough to cause negative overflow in convertToNanosMax(), returning Long.MIN_VALUE as the timestamp, which causes the freeze timestamp to be set to the earliest possible time and makes the account appear as if it has been frozen since the beginning of time, blocking all token transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7999ee8-a0bb-462e-bea7-b2f1d46629bc?mode=deep",
+    "timestamp": "2026-04-29 00:55:17.452185",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isSystemEntity(EntityId entityId)] Can an unprivileged external user craft a transaction targeting an EntityId with num <= 999 (MAX_SYSTEM_ENTITY_NUM), causing isSystemEntity() to return true and triggering special handling that skips freeze-status updates, leaving the system entity's token account in a permanently frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1297e5e4-12d6-4383-b85d-484cae7fff26?mode=deep",
+    "timestamp": "2026-04-29 00:55:32.286474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: leftPadBytes(byte[] bytes, int length)] Can an unprivileged external user supply a null freeze key byte array to a code path that calls leftPadBytes(null, length), causing it to return EMPTY_BYTE_ARRAY instead of null, which downstream logic interprets as an empty (but present) freeze key, preventing the token from being unfrozen and permanently locking all associated balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_730fd669-86cf-4a6f-98f9-c6164a4eb85a?mode=deep",
+    "timestamp": "2026-04-29 00:55:47.832488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: leftPadBytes(byte[] bytes, int length)] Can an unprivileged external user trigger a code path where leftPadBytes() is called with a length smaller than the input array length (paddingSize <= 0), causing it to return the original array reference without padding, leading to an incorrect EVM address being used for freeze-status lookup and the wrong account being frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eec9e67c-12a1-4f57-ac40-9147cfd15d64?mode=deep",
+    "timestamp": "2026-04-29 00:56:03.829662",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: sanitize(String input)] Can an unprivileged external user embed null characters (0x0000) in a token memo that is used as part of a freeze-related transaction identifier, causing sanitize() to replace them with the replacement character 0xFFFD, which changes the memo hash and causes the transaction to be misidentified, preventing the unfreeze operation from being matched and applied?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09279c26-46d4-4d4d-b454-0ee10a8eaa73?mode=deep",
+    "timestamp": "2026-04-29 00:56:21.983140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toTimestamp(long timestamp)] Can an unprivileged external user craft a transaction where the consensus timestamp is 0, causing toTimestamp() to return the sentinel string '0.0' instead of a proper timestamp, which downstream REST API consumers interpret as 'no timestamp' and skip the unfreeze state update, leaving the account permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62429e41-0896-43fd-8f41-52c20fdfc058?mode=deep",
+    "timestamp": "2026-04-29 00:56:39.766895",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toTimestamp(long timestamp)] Can an unprivileged external user submit a transaction with a negative consensus timestamp, causing toTimestamp() to produce a malformed timestamp string (due to leftPad on a negative number string), which causes the REST API to reject the unfreeze transaction record and leave the account in a permanently frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdc188ab-394b-4386-ad01-f598097e4c56?mode=deep",
+    "timestamp": "2026-04-29 00:56:57.923684",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fromEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit a 20-byte EVM address where bytes 0-11 are all zero and bytes 12-19 encode Long.MAX_VALUE, causing fromEvmAddress() to attempt EntityId.of(shard, realm, Long.MAX_VALUE), which throws InvalidEntityException that is silently caught, returning null and causing the freeze operation to be applied to no entity while the transaction is recorded as successful?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1c72109-2524-4958-8a1c-bf7dc167de42?mode=deep",
+    "timestamp": "2026-04-29 00:57:18.186609",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fromTrimmedEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit an EVM address of exactly 20 bytes that is not a long-zero address, causing fromTrimmedEvmAddress() to call fromEvmAddress() which returns null, so the freeze operation has no target entity and the account's freeze state is never updated, leaving it permanently frozen from a prior operation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae9d96e4-c61f-4ffc-951b-923085300711?mode=deep",
+    "timestamp": "2026-04-29 00:57:38.483275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toEvmAddress(ContractID contractId)] Can an unprivileged external user craft a ContractID with the EVM_ADDRESS case set to a ByteString whose toBytes() returns a shared mutable array (via UnsafeByteOutput), and then mutate that array to change the contract address after the freeze operation is initiated, causing the freeze to be applied to a different contract than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ccec8cca-5bea-48e7-b0da-5231cb97bdf7?mode=deep",
+    "timestamp": "2026-04-29 00:57:59.197183",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toEvmAddress(ContractID contractId)] Can an unprivileged external user submit a ContractID that equals ContractID.getDefaultInstance() (all-zero fields), causing toEvmAddress() to throw InvalidEntityException, which aborts the processing of an unfreeze transaction and leaves the token account in a permanently frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6ac1968-f9c6-4147-a818-15193852648f?mode=deep",
+    "timestamp": "2026-04-29 00:58:20.509872",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getPublicKey(Key key, int depth)] Can an unprivileged external user craft a Key with a KEYLIST case containing a single key that is itself a KEYLIST (depth becomes 3 > 2), causing the depth guard to return null, so the freeze key is stored as null and the token's freeze status becomes permanently unmodifiable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb004a16-42f6-4123-aba6-c55558618e0e?mode=deep",
+    "timestamp": "2026-04-29 00:58:42.643813",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getPublicKey(Key key, int depth)] Can an unprivileged external user submit a Key with the default/unset key case (KEY_NOT_SET), causing the switch default branch to return null, which is then stored as the freeze key, making it impossible to verify any future unfreeze key and permanently locking the token account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c88624c8-f7a4-4d2f-9303-a00f5a3d1fa6?mode=deep",
+    "timestamp": "2026-04-29 00:59:06.364177",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertToNanosMax(Instant instant)] Can an unprivileged external user trigger a code path that passes Instant.MAX (year 1000000000) to convertToNanosMax(), causing positive overflow and returning Long.MAX_VALUE as the freeze-related timestamp, which causes the token account to appear as if it will be frozen indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8d9059d-c250-4e89-86f8-21361182c066?mode=deep",
+    "timestamp": "2026-04-29 00:59:30.413317",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: timeStampInNanos(Timestamp timestamp)] Can an unprivileged external user craft a Timestamp with seconds=9223372036 and nanos=854775808 (just over the overflow boundary), causing timeStampInNanos() to throw ArithmeticException during the processing of a freeze-related transaction, which is not caught at the handler level and causes the transaction to be partially applied, leaving the account in an inconsistent frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d961c377-b570-4efa-92c6-6d98c729c3ff?mode=deep",
+    "timestamp": "2026-04-29 00:59:55.596203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: trim(byte[] data)] Can an unprivileged external user submit a token EVM address stored as a byte array with leading zeros (e.g., 0x000000...0001) that, after trim(), becomes a 1-byte array (0x01), causing the address lookup to fail to match the stored 20-byte address and the freeze status query to return an incorrect result, blocking unfreeze operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae195781-4c32-4ec7-9a49-d765d9980aa4?mode=deep",
+    "timestamp": "2026-04-29 01:00:20.937026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: normalize(ContractSlotKey slotKey)] Can an unprivileged external user deploy a smart contract that stores a freeze-authorization flag in a storage slot with a key of all zeros, causing normalize() to return a ContractSlotKey with an empty key (ArrayUtils.EMPTY_BYTE_ARRAY), which collides with other empty-key slots and corrupts the freeze authorization state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee460b54-ca76-4d67-a472-12e443769154?mode=deep",
+    "timestamp": "2026-04-29 01:00:46.529144",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toBytes(ByteString byteString)] Can an unprivileged external user craft a freeze key ByteString that is exactly 16 bytes (equal to UnsafeByteOutput.SIZE), causing toBytes() to bypass the unsafe path and use toByteArray() instead, while a different code path uses the unsafe path for the same ByteString, creating an inconsistency in the stored freeze key bytes that prevents key verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e64e4e0b-3603-48bf-8d8e-544ed3480924?mode=deep",
+    "timestamp": "2026-04-29 01:01:12.553264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fromBytes(byte[] bytes)] Can an unprivileged external user trigger a scenario where fromBytes() wraps a freeze key byte array with UnsafeByteOperations.unsafeWrap() and the same array is later reused for a different key, causing the ByteString to reflect the new key value and making the stored freeze key unverifiable, permanently preventing unfreeze operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70afdf82-b785-41d7-b431-d0126a360438?mode=deep",
+    "timestamp": "2026-04-29 01:01:39.249006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isLongZeroAddress(byte[] evmAddress)] Can an unprivileged external user submit an EVM address of length != 20 bytes (e.g., 19 bytes), causing isLongZeroAddress() to return false, so fromEvmAddress() returns null and the freeze operation has no target, while the transaction is still recorded as successful, leaving the intended account's freeze state unchanged (still frozen)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99608b4d-3f2b-4590-8f45-99b1a19fabaf?mode=deep",
+    "timestamp": "2026-04-29 01:02:07.529174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertToNanosMax(long second, long nanos)] Can an unprivileged external user submit a transaction with seconds=Long.MAX_VALUE and nanos=0, causing Math.multiplyExact() to overflow and convertToNanosMax() to return Long.MAX_VALUE, which is then stored as the token account's freeze timestamp, making the freeze appear to be set at the maximum possible future time and blocking all token transfers indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e26ed12-1de3-4e1a-bc46-f799e69aa97d?mode=deep",
+    "timestamp": "2026-04-29 01:02:36.555176",
+    "report_generated": false
+  }
+]
