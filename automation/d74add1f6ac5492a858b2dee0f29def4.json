@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicSequenceNumber is the same as an already-persisted message for the same topic, and since TopicMessage.isNew() always returns true (line 73 of TopicMessage.java) and the primary key is consensusTimestamp (not sequenceNumber), cause the mirror node to persist two messages with the same sequence number but different timestamps, corrupting the sequence number uniqueness invariant of the topic history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a6b3994-7051-42b3-af7c-30166713350a?mode=deep",
+    "timestamp": "2026-04-29 02:59:09.992444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage to topic A but with a receipt that contains a sequenceNumber belonging to topic B's sequence chain, and since doUpdateTransaction() does not cross-validate the receipt's sequence number against the specific topic's current sequence state, cause the mirror node to persist a message with a sequence number that is out of order relative to topic A's actual history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_650ada61-66fe-4761-ace3-67c616a2bc6b?mode=deep",
+    "timestamp": "2026-04-29 02:59:22.006062",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: addCommonEntityIds()] Can an unprivileged external user submit a ConsensusSubmitMessage where the nodeAccountId in the transaction differs from the actual node that processed it, and since addCommonEntityIds() blindly adds transaction.getNodeAccountId() to the entity tracking without validation, cause the mirror node to associate the message with a wrong node account, corrupting the provenance metadata of the topic message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_022acaaf-f66b-4b73-914d-f0f3f09dd5fe?mode=deep",
+    "timestamp": "2026-04-29 02:59:34.691204",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt containing a topicRunningHash of exactly 1 byte (non-empty but invalid length for SHA-384), which passes the isEmpty() check at line 58 but is not a valid 48-byte hash, causing the mirror node to persist a malformed running hash that breaks the cryptographic chain verification for all subsequent messages in the topic history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4867f52-9b7a-4a15-99a2-da8b1ade3a51?mode=deep",
+    "timestamp": "2026-04-29 02:59:47.823679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user exploit the fact that the running hash version comparison at line 69 uses != (not equals()) on a long primitive, and submit a receipt with getTopicRunningHashVersion() returning a value that overflows when cast to int at line 71, causing the mirror node to persist an incorrect runningHashVersion that corrupts the hash algorithm metadata for the topic message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1f6bcc7-68f5-48c3-a8df-515c03edad05?mode=deep",
+    "timestamp": "2026-04-29 03:00:01.199852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where getTopicRunningHashVersion() returns a very large long value (e.g., Long.MAX_VALUE), which when cast to int at line 71 produces a negative or unexpected integer value, causing the mirror node to persist a nonsensical runningHashVersion that corrupts the hash version metadata in the topic message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_342d7233-3f98-4643-97ea-f99c2b5175f0?mode=deep",
+    "timestamp": "2026-04-29 03:00:15.592214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with chunkInfo where the initialTransactionID bytes are crafted to be a valid protobuf TransactionID but reference a future timestamp (validStart far in the future), and since doUpdateTransaction() does not validate the initialTransactionID's temporal validity, cause the mirror node to persist a chunk linked to a non-existent future transaction, corrupting the chunk reassembly timeline in topic history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_930bfbc1-d5bf-43cd-987a-37f1eabfabd3?mode=deep",
+    "timestamp": "2026-04-29 03:00:30.513181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with chunkInfo where the initialTransactionID is set to all-zero bytes (valid byte array but invalid TransactionID), and since doUpdateTransaction() calls chunkInfo.getInitialTransactionID().toByteArray() without validating the content, cause the mirror node to persist a zeroed initialTransactionId that breaks the chunk correlation logic for the topic's message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_949cd4a5-f50c-4cc7-bd5e-71d6f37f5e4e?mode=deep",
+    "timestamp": "2026-04-29 03:00:46.452958",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage where the payerAccountId in the recordItem differs from the actual transaction signer, and since doUpdateTransaction() blindly sets topicMessage.setPayerAccountId(recordItem.getPayerAccountId()) without verifying the payer matches the transaction body, cause the mirror node to persist a falsified payer account in the topic message history, corrupting the attribution of who submitted each message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b30dbdee-416a-4396-b079-5fd746338d09?mode=deep",
+    "timestamp": "2026-04-29 03:01:03.737948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a high volume of ConsensusSubmitMessage transactions with crafted receipts containing sequence numbers that span a very large range (e.g., 1 to 10^15), causing the topic_message_lookup table's sequence_number_range to be updated to an astronomically wide range via mergeTopicMessageLookup(), making the lookup index useless for efficient range queries and degrading the integrity of the topic history index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22e205a6-7745-4417-b628-212455bab7f7?mode=deep",
+    "timestamp": "2026-04-29 03:01:22.224494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicSequenceNumber wraps around (e.g., Long.MAX_VALUE + 1 overflows to a negative value), and since doUpdateTransaction() does not validate that sequenceNumber is positive before calling topicMessage.setSequenceNumber(), cause the mirror node to persist a negative sequence number that corrupts the ordering invariant of the topic's message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_547a3db9-b1f6-4bfa-8804-fe53faef6743?mode=deep",
+    "timestamp": "2026-04-29 03:01:39.771145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicRunningHash is exactly 48 bytes of arbitrary content (valid length for SHA-384 but not a real hash), and since doUpdateTransaction() does not recompute the expected hash from the message content and prior state, cause the mirror node to accept and persist a completely fabricated running hash that breaks the end-to-end verifiability of the topic's message chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_adbde977-5518-4108-ad42-17574efb389b?mode=deep",
+    "timestamp": "2026-04-29 03:01:58.377845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with chunkInfo where chunkNum=1 and chunkTotal=1 (single-chunk fragmented message) but with an initialTransactionID that does not match the current transaction's ID, and since doUpdateTransaction() does not validate that chunk 1's initialTransactionID matches the transaction itself, cause the mirror node to persist a self-referentially inconsistent chunk record that corrupts the chunk history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3dd1db44-e31f-48f3-ac44-6e27c24e61be?mode=deep",
+    "timestamp": "2026-04-29 03:02:18.158898",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicSequenceNumber is exactly 1 for a topic that already has messages with sequence numbers 1 through 100, and since doUpdateTransaction() does not check for sequence number conflicts against existing persisted messages, cause the mirror node to persist a duplicate sequence number 1 entry that corrupts the topic's historical ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce84a5e5-ef4d-4ca3-9054-824a1f59c73f?mode=deep",
+    "timestamp": "2026-04-29 03:02:38.040150",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicRunningHash is a ByteString of length greater than 48 bytes (e.g., 100 bytes), which passes the isEmpty() check but is not a valid SHA-384 hash, causing the mirror node to persist an oversized running hash that corrupts the hash chain metadata and breaks consumers that expect exactly 48-byte running hashes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ba08607-4c68-4df8-81be-0584630b649d?mode=deep",
+    "timestamp": "2026-04-29 03:02:59.032819",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage where the transaction body's topicID (used in getEntity()) refers to topic X but the transaction record's entity_id refers to topic Y, and since doUpdateTransaction() uses transaction.getEntityId() for topicMessage.setTopicId() while getEntity() uses the body's topicID, cause a mismatch that associates the message with the wrong topic in the topic_message table, corrupting the topic's message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_975c2353-3d95-4fdc-9e96-c92a34a26108?mode=deep",
+    "timestamp": "2026-04-29 03:03:21.338761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with chunkInfo where chunkNum is set to Integer.MIN_VALUE (negative overflow), which is never validated in doUpdateTransaction(), causing the mirror node to persist a topic message with a deeply negative chunk number that corrupts the chunk ordering metadata and breaks any consumer that sorts or validates chunk numbers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0631004e-08c0-48f0-9962-6165247a290d?mode=deep",
+    "timestamp": "2026-04-29 03:03:44.115908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doUpdateTransaction()] Can an unprivileged external user submit a ConsensusSubmitMessage with a receipt where topicSequenceNumber is set to the same value as a previously persisted message for the same topic but with a different consensusTimestamp, causing the topic_message table to contain two rows with the same (topicId, sequenceNumber) pair, breaking the uniqueness invariant that consumers rely on to identify messages by sequence number?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62d1fbfc-bc76-4e17-a989-ed10eaab0516?mode=deep",
+    "timestamp": "2026-04-29 03:04:07.412248",
+    "report_generated": false
+  }
+]
