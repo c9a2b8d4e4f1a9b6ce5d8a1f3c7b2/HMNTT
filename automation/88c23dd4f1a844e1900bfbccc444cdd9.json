@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateIndex()] Can an unprivileged external user trigger a bulk rewrite of all `index` values in the `record_file` table by injecting a crafted v6 RecordFile whose `index` field is set to an arbitrary value, causing `RecordFileParser.updateIndex()` to call `repository.updateIndex(offset)` with an attacker-controlled offset, thereby renumbering every historical block and breaking block-number-based transaction lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3af25f48-3ab1-4c01-8a27-ea449b6fc461?mode=deep",
+    "timestamp": "2026-04-29 03:25:00.836055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateIndex()] Can an unprivileged user cause `updateIndex()` to apply a negative offset to all stored `index` values by supplying a v6 RecordFile with an `index` lower than the last v5 file's `index`, resulting in block numbers becoming negative or colliding and causing APIs to return transactions under wrong block numbers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91b81c75-1e8c-4903-bb6f-d37ac1029ead?mode=deep",
+    "timestamp": "2026-04-29 03:25:12.773861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setIndex()] Can an unprivileged user supply a RecordFile with a manipulated `index` field that is identical to an already-persisted block's `index`, violating the unique index constraint on `record_file(index)` and causing the mirror node to reject or skip legitimate subsequent blocks, effectively creating a gap in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b43fe1d7-200b-4586-9bb1-9844474c85bb?mode=deep",
+    "timestamp": "2026-04-29 03:25:25.503929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setPreviousHash()] Can an unprivileged user craft a RecordFile whose `previousHash` field is set to the all-zeros empty hash (matching `DigestAlgorithm.SHA_384.emptyHash`), exploiting the `verifyHashChain()` bypass that skips validation when `expectedPreviousHash` is empty, to inject a file that breaks the hash chain continuity and allows reordering of transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd076556-05a9-42cf-8503-7c4dd2aa67e1?mode=deep",
+    "timestamp": "2026-04-29 03:25:38.444909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setHash()] Can an unprivileged user inject a RecordFile with a forged `hash` field that matches the `previousHash` of a future file already in the pipeline, causing the hash chain to accept an out-of-order file and silently reorder the sequence of persisted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_519c0e51-17cb-4762-ba93-a636e611deba?mode=deep",
+    "timestamp": "2026-04-29 03:25:52.126487",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setConsensusEnd()] Can an unprivileged user supply a RecordFile with a `consensusEnd` value that is less than or equal to the `consensusStart` of the same file, bypassing the `shouldParse()` overlap check (`previous.getConsensusEnd() >= current.getConsensusStart()`) and causing the parser to skip the file silently, creating a gap in the persisted transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37e0e460-245f-4197-a85d-9f046b0d6c73?mode=deep",
+    "timestamp": "2026-04-29 03:26:06.680891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setConsensusStart()] Can an unprivileged user craft a RecordFile with a `consensusStart` value that overlaps with the `consensusEnd` of the previously persisted file, triggering the `shouldParse()` skip condition and causing the mirror node to silently drop a legitimate file, creating a permanent gap in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b06b21dd-887e-4191-9df4-915b52b08308?mode=deep",
+    "timestamp": "2026-04-29 03:26:22.315936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setVersion()] Can an unprivileged user manipulate the `version` field of a RecordFile to a value below `ProtoRecordFileReader.VERSION` (6) when the actual content is v6, causing `setStreamFileIndex()` to incorrectly assign a sequential `last+1` index instead of the canonical block number, thereby misaligning all subsequent block numbers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb54218b-7b04-4bc1-a6ce-bc1751b47af3?mode=deep",
+    "timestamp": "2026-04-29 03:26:39.282410",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setVersion()] Can an unprivileged user set `version` to a value >= `ProtoRecordFileReader.VERSION` (6) on a pre-v6 file, bypassing the `setStreamFileIndex()` call that would assign the correct sequential index, causing the file to be stored with an uninitialized or zero `index` and disrupting block number ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73abca7f-cc47-429c-8277-dfc7138d55c0?mode=deep",
+    "timestamp": "2026-04-29 03:26:55.566518",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: isEmpty()] Can an unprivileged user exploit the identity-based `isEmpty()` check (`this == EMPTY`) by constructing a RecordFile with all fields matching `RecordFile.EMPTY` but as a distinct object instance, causing downstream code that relies on `isEmpty()` to incorrectly process an empty file as a real one, inserting a phantom block into transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6edd0877-cdd0-4d02-ac25-daa17edb4e70?mode=deep",
+    "timestamp": "2026-04-29 03:27:12.618145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: copy()] Can an unprivileged user trigger a scenario where `copy()` (via `toBuilder().build()`) produces a shallow copy that shares mutable `byte[]` references (`bytes`, `logsBloom`, `previousWrappedRecordBlockHash`, `wrappedRecordBlockHash`) with the original, allowing mutation of the cached `lastStreamFile` copy after it is stored, corrupting the hash chain reference used for the next file's validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_548c9ac3-b8a4-4c19-a679-629718dca13c?mode=deep",
+    "timestamp": "2026-04-29 03:27:31.407283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: clear()] Can an unprivileged user cause `clear()` to be called on a RecordFile before its `hash` and `previousHash` are persisted to the database, by triggering a concurrent parse operation, resulting in null hash values being stored and breaking the hash chain for all subsequent files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21f27dfa-1d71-434d-8dfa-c8f1233596b5?mode=deep",
+    "timestamp": "2026-04-29 03:27:50.548792",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: hapiVersion()] Can an unprivileged user supply a RecordFile with `hapiVersionMajor`, `hapiVersionMinor`, or `hapiVersionPatch` set to null, causing `hapiVersion()` to return `HAPI_VERSION_NOT_SET` (0.0.0), which then causes version-gated parsing logic to apply incorrect deserialization paths to transaction records, silently corrupting the order or content of parsed transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e1baa64-4001-44e5-a162-ca7e95941f38?mode=deep",
+    "timestamp": "2026-04-29 03:28:11.488993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: hapiVersion()] Can an unprivileged user craft a RecordFile with `hapiVersionMajor=0`, `hapiVersionMinor=0`, `hapiVersionPatch=0` (matching `HAPI_VERSION_NOT_SET`) to force the lazy `hapiVersion` field to return the sentinel version, bypassing version-specific transaction parsing branches and causing transactions to be parsed under the wrong protocol version, reordering or misattributing historical records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_333d9bac-e5fc-41a3-b06c-c2f6a359e05f?mode=deep",
+    "timestamp": "2026-04-29 03:28:32.520554",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setCount()] Can an unprivileged user supply a RecordFile with a `count` field set to zero or a negative value while `items` contains actual transactions, causing metrics and downstream consumers that rely on `count` to believe the block is empty, effectively hiding transactions from block explorers without removing them from the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8057186-30e4-4ee8-baf9-8eb5c0aba9cc?mode=deep",
+    "timestamp": "2026-04-29 03:28:55.233030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setCount()] Can an unprivileged user set `count` to an arbitrarily large value on a RecordFile with few actual items, causing APIs that use `count` to report inflated transaction counts per block, misleading block explorers and analytics tools about the true transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e55c3e1-e843-45d8-9c30-863542fba666?mode=deep",
+    "timestamp": "2026-04-29 03:29:17.475515",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setName()] Can an unprivileged user supply a RecordFile with a `name` field that does not match the expected timestamp-based filename format, causing `StreamFilename.getTimestamp()` to return an incorrect `loadStart` value, which then corrupts the ordering of files in the download queue and causes files to be processed out of chronological order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2ecba27-784d-42bf-9348-48b684e4440a?mode=deep",
+    "timestamp": "2026-04-29 03:29:41.068430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setName()] Can an unprivileged user inject a RecordFile with a `name` that duplicates an already-processed file's name, causing the mirror node to treat it as a new file and attempt to re-parse it, potentially inserting duplicate transaction records or overwriting existing ones and disrupting the sequential transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a6dbb8e-8a86-4b6c-8797-4749d2a30181?mode=deep",
+    "timestamp": "2026-04-29 03:30:05.535407",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setFileHash()] Can an unprivileged user supply a RecordFile with a `fileHash` that does not match the actual SHA-384 digest of the file bytes, bypassing the `verifyHash()` check if the corresponding signature file is also forged, causing an unverified file to be accepted and its transactions inserted into history in the wrong order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24628580-069c-4a17-bf40-f93d085bffce?mode=deep",
+    "timestamp": "2026-04-29 03:30:31.176911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setMetadataHash()] Can an unprivileged user supply a RecordFile with a null or empty `metadataHash` (which is `@Transient` and not persisted), causing the `verifyHash()` call for metadata hash to pass vacuously when the expected hash is also null, allowing a file with tampered metadata to be accepted and its block ordering to be accepted without full verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b04e3318-2189-41f8-b5af-08dd94820a38?mode=deep",
+    "timestamp": "2026-04-29 03:30:56.167528",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setPreviousWrappedRecordBlockHash()] Can an unprivileged user craft a RecordFile with a null `previousWrappedRecordBlockHash`, exploiting the null check in `BlockStreamVerifier.verifyHashChain()` (`if (previousWrappedRecordBlockHash != null)`) to bypass the wrapped record block hash chain verification, allowing a block to be inserted without validating its continuity with the previous wrapped block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48fdd76e-5819-463f-bafe-7b8e28bc7e3f?mode=deep",
+    "timestamp": "2026-04-29 03:31:22.391408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setWrappedRecordBlockHash()] Can an unprivileged user supply a RecordFile with a forged `wrappedRecordBlockHash` that matches the `previousWrappedRecordBlockHash` of a future block, causing the wrapped block hash chain to accept an out-of-order block and silently reorder the sequence of wrapped record blocks in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be3f698b-33c7-4ca9-ac98-cf899907cfb4?mode=deep",
+    "timestamp": "2026-04-29 03:31:49.227478",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setIndex()] Can an unprivileged user supply a RecordFile with `index` set to `Long.MAX_VALUE` or `Long.MIN_VALUE`, causing integer overflow in `updateIndex()` offset calculation (`recordFile.getIndex() - lastRecordFile.getIndex() - 1`) and triggering a bulk update that sets all block indices to overflow values, completely corrupting the block number sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_155c9db0-b8a2-4a1d-86a6-e216f26eda1b?mode=deep",
+    "timestamp": "2026-04-29 03:32:16.009972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setRoundStart() / setRoundEnd()] Can an unprivileged user supply a RecordFile with `roundStart` greater than `roundEnd`, or with round values that do not correspond to the actual consensus round, causing APIs that expose round-based transaction queries to return transactions in incorrect round order, effectively reorganizing the visible transaction history by round?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f95ed348-9f71-45e4-96c6-ea67f45869e2?mode=deep",
+    "timestamp": "2026-04-29 03:32:43.968673",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordFile.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: setGasUsed()] Can an unprivileged user supply a RecordFile with `gasUsed` set to `-1` (the sentinel value used by `findLatestMissingGasUsedBefore()`), causing the gas backfill query to incorrectly identify this file as missing gas data and trigger a re-processing pass that overwrites the correct gas values of adjacent blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1171d7b-e299-4f34-87f6-f6d119db33a4?mode=deep",
+    "timestamp": "2026-04-29 03:33:13.975834",
+    "report_generated": false
+  }
+]
