@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: init()] Can an unprivileged external user exploit the `@PostConstruct init()` check that only validates the enabled state at startup, and then dynamically change `blockProperties.isEnabled()` or `recordDownloaderProperties.isEnabled()` at runtime (via Spring Actuator or config refresh), causing both sources to run simultaneously without triggering the guard, resulting in duplicate or conflicting records being exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56446b63-0b2b-400b-902a-77122edf8e28?mode=deep",
+    "timestamp": "2026-04-29 05:06:57.147705",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `ObjectProvider<JdbcConnectionDetails> detailsObjectProvider` injection point by registering a malicious `JdbcConnectionDetails` implementation in the Spring context (in a multi-tenant or plugin-enabled deployment), causing `detailsObjectProvider.getIfAvailable()` to return an attacker-controlled JDBC URL, redirecting Flyway migrations to a wrong database and causing the mirror node to export records based on a corrupted schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_460c7da8-e7d7-4f48-a322-dc3a75a32960?mode=deep",
+    "timestamp": "2026-04-29 05:07:09.267006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `dbProperties.getOwnerPassword()` being passed to both `flywayHikariConfig.setPassword()` and `dbWaiter.waitForDatabase()`, and if the owner password is weak or default, brute-force it to gain database owner access, then modify Flyway migration scripts or schema directly, causing incorrect records to be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69fb835b-1cd1-4401-a631-1b4672edd2f2?mode=deep",
+    "timestamp": "2026-04-29 05:07:21.874751",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.sslMode` defaulting to `SslMode.DISABLE` (as seen in DBProperties.java) combined with the Flyway HikariCP pool inheriting this setting via `hikariConfig.copyStateTo(flywayHikariConfig)`, to perform a man-in-the-middle attack on the Flyway database connection, injecting malicious SQL migration responses that corrupt the schema and cause incorrect records to be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_081539bd-359c-475a-8962-89316be110d3?mode=deep",
+    "timestamp": "2026-04-29 05:07:35.053812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.loadBalance = true` default setting being copied into the Flyway HikariCP pool via `hikariConfig.copyStateTo(flywayHikariConfig)`, to cause Flyway migrations to be distributed across multiple database nodes where some nodes may have stale or inconsistent state, resulting in Flyway applying migrations partially and causing missing records on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13033e60-d5c6-40ce-9209-3956af09d803?mode=deep",
+    "timestamp": "2026-04-29 05:07:50.369488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `@AutoConfigureBefore(FlywayAutoConfiguration.class)` ordering guarantee to understand that `ImporterConfiguration` always runs before Flyway auto-configuration, and craft a timing attack where a competing configuration bean modifies `importerProperties` between the `flywayConfigurationCustomizer()` bean creation and its actual invocation, causing the wrong `topicRunningHashV2AddedTimestamp` to be used in migrations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bea86ab-c501-4eb3-a8d6-2ce404f80cf5?mode=deep",
+    "timestamp": "2026-04-29 05:08:04.502175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that `importerProperties.getNetwork()` calls `StringUtils.substringBefore(this.network, NETWORK_PREFIX_DELIMITER).toLowerCase()` (as seen in ImporterProperties), and inject a network value like 'mainnet-attacker' that resolves to 'mainnet' after prefix stripping, causing the mainnet timestamp to be applied even when the actual network is different, resulting in incorrect topic running hash records on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9061b1c3-5c16-4d46-b573-fad7cd1d32ef?mode=deep",
+    "timestamp": "2026-04-29 05:08:19.525840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `getNetwork()` method's use of `StringUtils.substringBefore` with `NETWORK_PREFIX_DELIMITER` ('-') to craft a network value like '-mainnet' that causes `substringBefore` to return an empty string, which does not equal MAINNET, forcing the fallback timestamp `1588706343553042000L` to be used for a mainnet deployment, causing Flyway to apply incorrect topic running hash timestamps and corrupting mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_472969f1-64af-49dc-88ec-14ae929caaf4?mode=deep",
+    "timestamp": "2026-04-29 05:08:36.408734",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `flywayHikariConfig.setMaximumPoolSize(10)` limit combined with a slow Flyway migration to hold all 10 connections busy, preventing the main application pool from acquiring connections during startup and causing the importer to fail to process incoming records, resulting in missing records exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ccb06ca-fa93-4d32-a0a1-e804f51f2e2e?mode=deep",
+    "timestamp": "2026-04-29 05:08:53.834407",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.connectionInitSql` default empty string being copied into the Flyway HikariCP pool via `hikariConfig.copyStateTo(flywayHikariConfig)`, and if this property is externally configurable, inject malicious SQL that runs on every new Flyway connection, corrupting the database state and causing incorrect records to be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ff3febf-29a6-46ae-855c-7a2eea57820f?mode=deep",
+    "timestamp": "2026-04-29 05:09:11.864715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `dbWaiter.waitForDatabase()` call that uses the owner credentials to verify database availability, and if the database is intermittently available, cause the waiter to succeed but then have the actual Flyway pool fail to connect, resulting in Flyway migrations being skipped and the mirror node schema being out of date with missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bc405ef-48cb-4387-b36f-862f6f15134b?mode=deep",
+    "timestamp": "2026-04-29 05:09:29.813664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `new HikariDataSource(flywayHikariConfig)` construction that creates a new pool eagerly, and if the database is unavailable at this point (despite `dbWaiter` succeeding), cause a `HikariPool-1 - Exception during pool initialization` error that prevents the Spring context from starting, resulting in no records being exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40961410-07f4-47fc-8a06-389cac60aec8?mode=deep",
+    "timestamp": "2026-04-29 05:09:48.159519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the absence of validation on the `topicRunningHashV2AddedTimestamp` value (no `@Min`, `@Max`, or range check) in `ImporterProperties`, allowing an externally-supplied timestamp of 0 or a negative value to be passed to Flyway as a placeholder, causing SQL migrations to use an invalid timestamp and corrupting topic running hash records exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a436525f-125a-405d-a6d4-586d6a983f33?mode=deep",
+    "timestamp": "2026-04-29 05:10:05.883937",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the absence of an upper bound check on `topicRunningHashV2AddedTimestamp` to supply a far-future timestamp (e.g., `Long.MAX_VALUE`), causing Flyway migrations to set a topic running hash V2 threshold far in the future, effectively disabling V2 hash processing for all current records and causing incorrect hash records to be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6984479f-6427-46dc-91bf-aa46413e75ab?mode=deep",
+    "timestamp": "2026-04-29 05:10:27.272976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `timestamp.toString()` conversion in `configuration.getPlaceholders().put('topicRunningHashV2AddedTimestamp', timestamp.toString())` to inject a value that, when used in a Flyway SQL placeholder substitution, causes SQL injection if the migration SQL does not properly quote the placeholder, leading to arbitrary SQL execution and corruption of mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fd61788-ef60-415a-88c9-01dcc6bee105?mode=deep",
+    "timestamp": "2026-04-29 05:10:48.591358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: init()] Can an unprivileged external user exploit the `blockProperties.isEnabled()` check in `init()` by observing that when block source is disabled and record downloader is enabled (the default), the importer proceeds normally, and then craft a configuration change that enables block source without disabling record downloader, causing the `IllegalStateException` to crash the importer and halt all record exports to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9adf3e39-3547-43a9-b9e8-493d1f158b79?mode=deep",
+    "timestamp": "2026-04-29 05:11:09.546795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.port` defaulting to 5432 and the absence of port validation in the Flyway JDBC URL construction, to cause the Flyway pool to connect to a different PostgreSQL instance on the same host (if multiple instances exist), applying migrations to the wrong database and causing the mirror node to export records based on an incorrect schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41c58a57-2b74-4ffb-9846-9641e2fd9d09?mode=deep",
+    "timestamp": "2026-04-29 05:11:32.162350",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.schema` field being used in the Flyway connection without explicit schema locking, to cause Flyway to apply migrations to the wrong schema in a multi-schema PostgreSQL database, resulting in the mirror node's schema being corrupted and records being missing or incorrect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c3d29f2-da50-4f9a-8778-b07f1f5a5570?mode=deep",
+    "timestamp": "2026-04-29 05:11:54.758778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.tempSchema` field being included in the Flyway connection configuration, and if the temp schema is writable by the Flyway owner, inject temporary tables or views that shadow production tables, causing Flyway migrations to operate on incorrect objects and resulting in missing records on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16b9c510-ad78-46a7-8182-dbdc079dcdc2?mode=deep",
+    "timestamp": "2026-04-29 05:12:17.829588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `@Bean` annotation on `flywayConfigurationCustomizer()` to understand that multiple `FlywayConfigurationCustomizer` beans can be registered, and register a competing customizer (in a plugin or extension mechanism) that removes or overwrites the `topicRunningHashV2AddedTimestamp` placeholder, causing Flyway migrations to fail with an unresolved placeholder error and leaving the schema in an inconsistent state with missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_954a17d2-eccc-4cd9-aa3d-04917c2cdbfd?mode=deep",
+    "timestamp": "2026-04-29 05:12:42.329338",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `@RequiredArgsConstructor` on `ImporterConfiguration` to understand that all four dependencies (`blockProperties`, `importerProperties`, `recordDownloaderProperties`, `dbWaiter`) must be present, and cause one of these beans to fail initialization (e.g., by providing invalid `DBProperties` values), preventing `ImporterConfiguration` from being created and causing the entire importer to fail to start with no records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90350543-38b5-4b3a-899a-b5681301fb14?mode=deep",
+    "timestamp": "2026-04-29 05:13:07.916621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.restPassword` and `DBProperties.restUsername` fields being present in the same configuration class as the owner credentials, and if these are exposed via an API or log, use them to infer the owner password pattern and gain unauthorized database access, then modify records directly to cause incorrect data to be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_245107e1-d488-4598-96ab-cfb5cfc282e8?mode=deep",
+    "timestamp": "2026-04-29 05:13:32.607775",
+    "report_generated": false
+  }
+]
