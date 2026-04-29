@@ -214,5 +214,113 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69d54608-7141-4a62-83fb-709859198ccc?mode=deep",
     "timestamp": "2026-04-28 22:29:58.675029",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: download()] Can an unprivileged external user exploit the `@Scheduled(fixedDelayString = ...)` annotation on `download()` to observe that if a previous invocation is still running (e.g., blocked on `Flux.block()` in `downloadSidecars()`), the next scheduled invocation may run concurrently, causing `lastStreamFile` AtomicReference to be updated by two threads simultaneously and leading to race conditions in stream file ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f90c537-3a27-44b9-ae19-e2af66c3a864?mode=deep",
+    "timestamp": "2026-04-29 01:47:35.892493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file that causes `sidecarFileReader.read(sidecar, streamFileData)` to set `sidecar.setBytes()` to a very large byte array, and then when `downloaderProperties.isWriteFiles()` is true, `Utility.archiveFile()` writes this large payload to disk, causing disk exhaustion on the importer host?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04d9193d-6e7a-4cb0-83f7-cbf70d4a6678?mode=deep",
+    "timestamp": "2026-04-29 01:47:47.951620",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file where `sidecar.getBytes()` is null at the time `Utility.archiveFile(streamFileData.getFilePath(), sidecar.getBytes(), streamPath)` is called (because `sidecarFileReader.read()` failed to set bytes), causing a `NullPointerException` in `Utility.archiveFile()` that is silently swallowed, leading to missing archived files without any error propagation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7f4be55-bdde-4534-912d-121fb2a88b76?mode=deep",
+    "timestamp": "2026-04-29 01:48:00.436277",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with sidecars that all fail hash verification, causing `HashMismatchException` to be thrown inside the `Mono` chain for each sidecar, and since there is no `onErrorContinue` or `onErrorResume` in `downloadSidecars()`, the entire `Flux.block()` fails and returns null, silently skipping all sidecar assignment without alerting the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27823590-6213-461c-ab08-458bc58c26cf?mode=deep",
+    "timestamp": "2026-04-29 01:48:13.455239",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with a sidecar whose `sidecar.getName()` is null, causing `StreamFilename.from(recordFilename, null)` to throw a `NullPointerException` (given the `@NonNull` annotation on the filename parameter), which propagates through the reactive chain and aborts processing of all remaining sidecars?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_603c4d32-dec3-4372-86a0-3ecbdfe951d7?mode=deep",
+    "timestamp": "2026-04-29 01:48:27.118324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file with a name that, when combined with `recordFilename.getPath()` in `StreamFilename.from(recordFilename, sidecar.getName())`, produces a `bucketFilePath` that traverses to a different node's directory in the storage bucket, causing the importer to fetch and process a sidecar file from a different consensus node than the one that produced the record file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d00b4a2a-c5df-4452-a7ac-3bb70fd114c6?mode=deep",
+    "timestamp": "2026-04-29 01:48:41.307788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: download()] Can an unprivileged external user exploit the fact that `cutoverService.get()` is `synchronized` while `download()` is called on a scheduled thread, and if `downloadNextBatch()` inside the lambda blocks for a long time (e.g., due to slow sidecar downloads), it holds the `CutoverService` lock and starves the block stream downloader from making progress, causing a liveness issue?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bce6cdc-fcb8-42bb-b0d2-0a350e69ccce?mode=deep",
+    "timestamp": "2026-04-29 01:48:56.284221",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file where `recordFile.getItems()` contains `RecordItem` objects with null `transactionRecord` fields, causing `recordItem.getTransactionRecord().getConsensusTimestamp()` in the `forEach` loop to throw a `NullPointerException`, aborting sidecar assignment for all subsequent items?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf91e71a-56d7-4cae-9a4d-0363b1805c18?mode=deep",
+    "timestamp": "2026-04-29 01:49:13.211251",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with sidecar records whose `consensusTimestamp` values are crafted to collide with legitimate transaction timestamps in `recordFile.getItems()`, causing `recordItem.setSidecarRecords(records.get(timestamp))` to assign attacker-controlled sidecar data to legitimate transactions, corrupting the parsed transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f007d54-5a15-4500-a762-946abf682ac7?mode=deep",
+    "timestamp": "2026-04-29 01:49:30.852861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file that is a valid protobuf but contains an extremely large number of `TransactionSidecarRecord` entries, causing `sidecarFile.setRecords(protoSidecarFile.getSidecarRecordsList())` in `SidecarFileReaderImpl` to store a massive list, which is then iterated by `flatMapIterable(SidecarFile::getRecords)` in `downloadSidecars()`, causing memory exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_284cf3bd-7f0f-486a-ae39-4d056a1ff54b?mode=deep",
+    "timestamp": "2026-04-29 01:49:48.543640",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file where the hash algorithm specified in `sidecar.getHashAlgorithm()` is an unsupported or null value, causing `MessageDigest.getInstance(sidecarFile.getHashAlgorithm().getName())` in `SidecarFileReaderImpl` to throw `NoSuchAlgorithmException`, which is wrapped in `InvalidStreamFileException` and propagates through the reactive chain, aborting sidecar processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79cfb360-55da-46a1-968d-2bda572a3e74?mode=deep",
+    "timestamp": "2026-04-29 01:50:06.250848",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with a sidecar whose `sidecar.getTypes()` list contains the integer value 0 (matching `SidecarType.SIDECAR_TYPE_UNKNOWN_VALUE`), and if `acceptedTypes` contains 0, the sidecar passes the pre-download filter, allowing unknown sidecar types to be downloaded and processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38dce07a-046f-4c57-93f5-44bb6bee0ceb?mode=deep",
+    "timestamp": "2026-04-29 01:50:24.497196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file with a name containing URL-encoded path separators (e.g., `%2F`) that are decoded by the `StreamFilename` or `StreamFileProvider` implementation, causing path traversal to an unintended storage location?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2bf92804-a204-464e-bbf6-88521e695c6e?mode=deep",
+    "timestamp": "2026-04-29 01:50:43.932044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with sidecars that have mismatched `types` metadata (declaring type A but containing type B content), causing the pre-download filter to pass based on declared types while the post-download filter `acceptedTypes.contains(getSidecarType(t))` filters out the actual records, resulting in a sidecar being downloaded and hash-verified but its records silently discarded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2ce1a41-ccb1-4e27-bd92-531f903431f0?mode=deep",
+    "timestamp": "2026-04-29 01:51:04.419911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: download()] Can an unprivileged external user craft a sequence of record files that causes `cutoverService.getLastRecordFile()` to return a `RecordFile` with a very high `index` value, which is then set into `lastStreamFile` via `lastStreamFile.set(Optional.of(rf))`, causing `setStreamFileIndex()` for subsequent pre-v6 files to assign an index of `lastIndex + 1` that overflows `Long.MAX_VALUE`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18dbe545-1983-458e-ac5d-e4ab8c163754?mode=deep",
+    "timestamp": "2026-04-29 01:51:25.019630",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file where `streamFileData.getFilePath()` contains null bytes or special characters that, when passed to `Utility.archiveFile()` and resolved via `destinationRoot.resolve(filename)`, cause the Java `Path` API to throw an exception or write to an unintended location?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0e37030-2cd9-421e-b00b-e0a68c0135a2?mode=deep",
+    "timestamp": "2026-04-29 01:51:45.993087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: downloadSidecars()] Can an unprivileged external user craft a record file with an empty `sidecars` list that passes the `recordFile.getSidecars().isEmpty()` check (returns early), but then in a subsequent invocation the same `RecordFile` object is reused with a non-empty sidecars list due to mutable state, causing sidecars to be processed out of order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f45c715d-37a7-430a-8b1e-fac99a8a4495?mode=deep",
+    "timestamp": "2026-04-29 01:52:08.555870",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/record/RecordFileDownloader.java -> Scope: '] [Function: getSidecar()] Can an unprivileged external user craft a sidecar file that causes `sidecarFileReader.read()` to set `sidecar.setActualHash()` to a value that matches `sidecar.getHash()` even though the content is tampered, by exploiting a hash collision in the SHA-384 algorithm used for verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba4f41a7-5927-4e68-ac01-d44c8616c017?mode=deep",
+    "timestamp": "2026-04-29 01:52:30.932970",
+    "report_generated": false
   }
 ]
