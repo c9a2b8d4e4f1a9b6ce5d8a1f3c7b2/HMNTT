@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `replaceAll('and ', ...)` substitution on `innerWhere` to inject a crafted string that breaks the `filterOuterPlaceholder` replacement, causing the outer query to omit the `consensus_timestamp` lower-bound join condition and reconstruct file contents from an incorrect historical anchor, thereby serving a tampered version of Hashgraph system file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c214bdbb-07fa-41d1-9c2f-c7aa077a4d22?mode=deep",
+    "timestamp": "2026-04-29 02:50:20.970593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` entry whose `.query` string contains the literal substring `and ` (e.g., `and consensus_timestamp`) such that `replaceAll('and ', 'and f.')` in `getLatestFileContentsQuery` double-prefixes the table alias, producing a syntactically broken or semantically different SQL predicate that causes the outer query to skip the join with `latest_create`, allowing file content to be aggregated from an arbitrary timestamp range and returning falsified historical file data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29b6e21f-f745-4530-a706-0e8f27ed57ab?mode=deep",
+    "timestamp": "2026-04-29 02:50:32.796826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user trigger the `fallbackRetry` loop to exhaust all 10 attempts by ensuring the database contains 10 consecutive `file_data` rows with malformed protobuf payloads for the exchange rate file (entity 0.0.112), causing `new resultConstructor(row)` to throw `FileDecodeError` on every attempt, so that `fallbackRetry` returns `null` and the mirror node serves no exchange rate, effectively erasing the visible Hashgraph exchange rate history from the API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1253ea80-a2f7-4333-b479-594d3f958c2f?mode=deep",
+    "timestamp": "2026-04-29 02:50:46.617161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user observe that `fallbackRetry` uses `row.first_consensus_timestamp` as the upper-bound cutoff for the next attempt, and by crafting a scenario where `first_consensus_timestamp` equals `consensus_timestamp` (a single-row result), cause the loop to repeatedly query the same row, never making progress, and exhaust all 10 retries returning `null`, thereby permanently hiding valid historical file data from the API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a945f5b2-c746-4592-888e-9b8395360704?mode=deep",
+    "timestamp": "2026-04-29 02:50:58.760548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFileData()] Can an unprivileged external user supply a crafted `timestamp` value (e.g., a very large integer or a negative value) to `getFileData(fileId, timestamp)` such that the subquery `select consensus_timestamp from file_data where ... and consensus_timestamp <= $2` returns no anchor row, causing `string_agg` to aggregate over an empty set and return `null`, making the mirror node report that no file data exists at that timestamp even though valid historical data is present, thus manipulating the apparent Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcae069d-77c8-4fa3-b2be-a63cc4e8b955?mode=deep",
+    "timestamp": "2026-04-29 02:51:11.921174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFileData()] Can an unprivileged external user supply a `timestamp` value that exactly matches a `FileAppend` (transaction_type=19) row with empty `file_data` (length=0), causing the subquery anchor selection (`transaction_type = 17 OR (transaction_type = 19 AND length(file_data) <> 0)`) to skip that row and anchor on an earlier `FileCreate`, thereby causing `string_agg` to include append chunks from a different file version and reconstruct a historically incorrect file content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48b3f75d-7f55-4268-a1fe-92c1412bef0b?mode=deep",
+    "timestamp": "2026-04-29 02:51:25.749006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: latestFileContentsQuery (static)] Can an unprivileged external user exploit the fact that `latestFileContentsQuery` uses `transaction_type in (17, 19)` in the inner CTE but `transaction_type in (16, 17, 19)` in the outer query, causing a `FileDelete` (type=16) row to be included in the `string_agg` concatenation after the latest create anchor, thereby corrupting the reconstructed file content with delete-operation bytes and serving tampered historical file data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_019ceed5-d398-4433-9193-9ddb83684923?mode=deep",
+    "timestamp": "2026-04-29 02:51:40.279968",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries.whereQuery` array containing a `{query, param}` object where `query` is an empty string or whitespace, causing `buildWhereSqlStatement` to produce a malformed WHERE clause that removes the `consensus_timestamp` upper-bound filter, allowing the outer query to aggregate file chunks beyond the intended timestamp boundary and reconstruct a future or incorrect version of the file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d78d2ff7-c215-4225-893c-657764a0b0e7?mode=deep",
+    "timestamp": "2026-04-29 02:51:55.198267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getExchangeRate()] Can an unprivileged external user trigger `getExchangeRate` with a `filterQueries.whereQuery` that constrains `consensus_timestamp` to a range containing only a `FileAppend` (type=19) row with non-empty data but no preceding `FileCreate` (type=17), causing `latestFileContentsQuery`'s inner CTE to select that append as the anchor and the outer query to aggregate only partial file chunks, producing a truncated exchange rate protobuf that `ExchangeRate` constructor parses incorrectly, returning falsified HBAR/cent ratios?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42622e5c-7b55-4c4b-a238-25f5c3ceff31?mode=deep",
+    "timestamp": "2026-04-29 02:52:10.883971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user cause `fallbackRetry` to walk backwards through exchange rate file history by repeatedly submitting API requests that trigger parse failures, and observe from the `logger.warn` output (if logs are exposed) the `consensus_timestamp` values of each fallback attempt, thereby enumerating the full historical sequence of exchange rate file updates and reconstructing Hashgraph history that should not be directly enumerable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4c50446-3ea9-4f7f-9ded-1a2cbc32fd18?mode=deep",
+    "timestamp": "2026-04-29 02:52:26.467797",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` entry with a `query` field containing `and f.consensus_timestamp` (already prefixed with the table alias `f.`), causing `replaceAll('and ', 'and f.')` to produce `and f.f.consensus_timestamp`, which is an invalid column reference that causes a database error, making the mirror node unable to serve any historical file data for that entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75190017-d934-45bd-9de5-e5fed4e57aae?mode=deep",
+    "timestamp": "2026-04-29 02:52:43.541928",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` that corresponds to a system file (e.g., the address book entity 0.0.101 encoded ID) and a `timestamp` that falls between two `FileCreate` operations, causing `getFileDataQuery`'s subquery to anchor on the wrong `FileCreate` and aggregate append chunks from a mixed version, returning a historically inaccurate address book that misrepresents Hashgraph network topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86acb836-3f8d-45e3-8cd4-6c82cdaab9ab?mode=deep",
+    "timestamp": "2026-04-29 02:53:01.428543",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: latestFileContentsQuery (static)] Can an unprivileged external user exploit the `string_agg(..., '' order by consensus_timestamp)` aggregation in `latestFileContentsQuery` by observing that if two `file_data` rows share the same `consensus_timestamp` (a tie), the ordering within `string_agg` is non-deterministic, causing the reconstructed file content to vary between requests and produce inconsistent historical file data across API calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b72805f0-39be-42e7-ab34-ee5f83205109?mode=deep",
+    "timestamp": "2026-04-29 02:53:18.746532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries` object with `whereQuery` set to `null` (instead of `undefined` or `[]`), causing `filterQueries.whereQuery ?? []` in `fallbackRetry` to use `null` as the base, and then `buildWhereSqlStatement(null, [fileId])` to behave unexpectedly (e.g., `isEmpty(null)` returning true in lodash), bypassing all timestamp filters and returning the absolute latest file data regardless of the requested historical timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ace0069-cb18-47ae-afb1-ade8f716c7a1?mode=deep",
+    "timestamp": "2026-04-29 02:53:37.527901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that `fallbackRetry` spreads `...whereQuery` (the original caller's filters) into every subsequent retry attempt, causing the accumulated `filters.whereQuery` to grow with each failed attempt, and if the original `whereQuery` contains a future-timestamp upper bound, the retry loop never narrows the window correctly, causing it to repeatedly return the same corrupt row and exhaust all 10 attempts without ever finding valid historical data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05ddcac4-1b03-4ea8-9302-40d4266a581b?mode=deep",
+    "timestamp": "2026-04-29 02:53:57.337087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFileDataQuery (static)] Can an unprivileged external user supply a `timestamp` of `0` to `getFileData(fileId, 0)`, causing the inner subquery `consensus_timestamp <= $2` to match no rows (since all real timestamps are positive nanoseconds), making the outer `string_agg` aggregate over an empty range and return `null`, effectively erasing the file's historical existence at genesis from the API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf6617b2-dc5b-48f4-aa15-fd75a332482a?mode=deep",
+    "timestamp": "2026-04-29 02:54:16.876593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user craft a `whereQuery` entry whose `.query` value contains multiple occurrences of the substring `and ` (e.g., `and consensus_timestamp >= $2 and entity_id`), causing `replaceAll('and ', 'and f.')` to prefix `f.` on every occurrence including the second `and`, producing `and f.consensus_timestamp >= $2 and f.entity_id` which may accidentally be valid SQL but references wrong columns, silently altering the historical query semantics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2432994-9c03-4c6c-ba2b-c99b65c73d9a?mode=deep",
+    "timestamp": "2026-04-29 02:54:37.037961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getExchangeRate()] Can an unprivileged external user supply a `filterQueries.whereQuery` with a `consensus_timestamp <=` filter set to a value just before the most recent valid exchange rate `FileCreate`, causing `getExchangeRate` to return an older exchange rate version, and if this is used by downstream fee calculation logic, cause transactions to be priced using a stale HBAR/USD rate that misrepresents the true Hashgraph historical state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa299de6-bff1-4f3c-bf80-f5c5db0041d4?mode=deep",
+    "timestamp": "2026-04-29 02:54:58.426055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user cause a denial-of-service against the exchange rate endpoint by sending many concurrent requests that each trigger `fallbackRetry` to loop 10 times (each iteration executing a `getLatestFileDataContents` DB query), resulting in up to 10x query amplification per request and exhausting database connection pool resources, making historical file data unavailable to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caec4d66-d26b-45c4-8736-d961c736de9a?mode=deep",
+    "timestamp": "2026-04-29 02:55:19.227949",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user observe that `filterInnerPlaceholder` (`<filterInnerPlaceHolder>`) and `filterOuterPlaceholder` (`<filterOuterPlaceHolder>`) are replaced using `.replace()` (not `.replaceAll()`), and if the `innerWhere` string itself contains the literal text `<filterInnerPlaceHolder>`, cause a second substitution pass that injects attacker-controlled SQL fragments into the query, manipulating the historical file data returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12f77ca1-c157-4fc4-9780-b9224bfeb43f?mode=deep",
+    "timestamp": "2026-04-29 02:55:41.858529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` entry with a `param` value of type Array (triggering the `Array.isArray(current.param)` branch in `buildWhereSqlStatement`), causing the positional parameter `$N` to be replaced with a multi-value `($2,$3,...)` expression that is then injected into the `latestFileContentsQuery` template at the `filterInnerPlaceholder` position, altering the `transaction_type in (17, 19)` anchor logic and causing the CTE to select a wrong latest-create timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a84408e-1b50-40ee-853d-4d558edc75c6?mode=deep",
+    "timestamp": "2026-04-29 02:56:04.185811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` value of `0` or a negative encoded entity ID to `getFileData`, causing the query to match rows with `entity_id = 0` (which may correspond to genesis or system-level records), and aggregate file chunks that were never intended to be exposed, leaking or misrepresenting early Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61c77108-c4bd-4123-9bab-ce4e2293bb8f?mode=deep",
+    "timestamp": "2026-04-29 02:56:27.428399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries.whereQuery` array with a very large number of entries (e.g., 10,000 conditions), causing `buildWhereSqlStatement` to generate an extremely long SQL WHERE clause that exceeds PostgreSQL's query size limits or causes a query plan regression, resulting in a database error that makes historical file data inaccessible (denial of history)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58ed2a27-20cf-4247-b583-44a85f21bb02?mode=deep",
+    "timestamp": "2026-04-29 02:56:52.469774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that `fallbackRetry` uses `row.first_consensus_timestamp` (the `min(consensus_timestamp)` from the aggregated result) as the next upper-bound cutoff, and if the database contains a `file_data` row with `consensus_timestamp = 0` (or minimum bigint), cause the loop to set the cutoff to `0` and then find no earlier rows, silently returning `null` and hiding all valid exchange rate history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0922d8e8-4486-4c20-8418-2a9ab4652ac1?mode=deep",
+    "timestamp": "2026-04-29 02:57:17.211849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getExchangeRate()] Can an unprivileged external user trigger `getExchangeRate` with no timestamp filter, causing `latestFileContentsQuery` to select the absolute latest `FileCreate`/`FileAppend` anchor and aggregate all subsequent appends, and if the latest `file_data` row contains a partial/incomplete protobuf (e.g., a truncated `FileAppend`), cause `ExchangeRate` constructor to throw `FileDecodeError`, triggering `fallbackRetry` to silently fall back to an older exchange rate version without any API-visible error, misrepresenting the current Hashgraph state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a81fe26b-f296-4d85-9de4-cabe7ecd4e1b?mode=deep",
+    "timestamp": "2026-04-29 02:57:42.537821",
+    "report_generated": false
+  }
+]
