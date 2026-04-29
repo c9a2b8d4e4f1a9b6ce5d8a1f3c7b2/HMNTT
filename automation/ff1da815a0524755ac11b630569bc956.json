@@ -1,0 +1,74 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `retry.minBackoff` to its minimum value of 500ms and `retry.maxBackoff` to 500ms, causing all three retry attempts to occur in rapid succession (within 1.5 seconds total), which may not give the database enough time to recover from a transient failure, causing all retries to fail and the balance file to be permanently dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6eb76fb7-6d0f-4d72-b30e-599c835049a8?mode=deep",
+    "timestamp": "2026-04-29 02:27:08.509454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `retry.multiplier` to 1 (the minimum allowed by `@Min(1)`), disabling exponential backoff and causing all retry attempts to use the same `minBackoff` delay, which may cause all retries to fail under the same transient load condition that caused the initial failure, resulting in permanent loss of the balance file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0dadc0ab-901e-49a2-849e-dc4dee215b0a?mode=deep",
+    "timestamp": "2026-04-29 02:27:20.495054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: getStreamType()] Can an unprivileged external user exploit the `getStreamType()` returning `StreamType.BALANCE` to craft a scenario where a misconfigured `DateRangeCalculator` (influenced via `@ConfigurationProperties`) returns a filter that excludes all timestamps in the future, and by injecting a balance file with a far-future `consensusTimestamp`, cause the `filter.filter()` check in `doParse()` to return `false`, silently skipping the balance file and causing a gap in balance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0c04750-1b29-4940-9fd0-56df51b537c4?mode=deep",
+    "timestamp": "2026-04-29 02:27:33.228991",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: getBatchSize()] Can an unprivileged external user craft a balance file with exactly `batchSize` account balance entries where the last entry has an invalid format, causing `AccountBalanceLineParser.parse()` to throw an `InvalidDatasetException` that is caught and logged in `CsvBalanceFileReader.read()`, returning `null` and being filtered out, while the first `batchSize - 1` valid entries are persisted, creating an incomplete balance snapshot where one account's balance is missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef4a59b1-7473-4217-acc5-8d770cbb182e?mode=deep",
+    "timestamp": "2026-04-29 02:27:47.041226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `batch.maxFiles` to a very large value, causing the batch processor to accumulate many balance files before flushing, and if a failure occurs during the flush of this large batch, all accumulated balance files are lost in a single rollback, causing a large gap in balance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_704b2293-b721-4010-b937-b775f4eb7af4?mode=deep",
+    "timestamp": "2026-04-29 02:28:00.698282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `enabled = false` for the balance parser, causing all balance file processing to be silently disabled, and since there is no alerting mechanism for this configuration change, the mirror node continues to serve stale fund balance data indefinitely without any indication of the problem?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb56d67c-38c5-4ba8-ad3f-c2917487757d?mode=deep",
+    "timestamp": "2026-04-29 02:28:15.665545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: getBatchSize()] Can an unprivileged external user exploit the fact that `batchSize` is used as both the flush threshold for `accountBalances` and `tokenBalances` in `AccountBalanceFileParser.doParse()`, by crafting a balance file where each account has exactly `batchSize` token balances, causing the `tokenBalances` HashMap to reach `batchSize` entries after processing just one account, triggering a premature flush of token balances before the corresponding account balance is flushed, creating an inconsistency between account and token balance records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8200ec3e-4afe-480b-8f2c-51d1864310f9?mode=deep",
+    "timestamp": "2026-04-29 02:28:31.154216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `transactionTimeout` to its minimum value of 1 second (enforced by `@DurationMin(seconds = 1)`) and `batchSize` to 200,000, causing the `@Transactional(timeoutString = '#{@balanceParserProperties.getTransactionTimeout().toSeconds()}')` annotation to time out after 1 second, rolling back all balance data and causing the retry mechanism to exhaust all 3 attempts, permanently losing the balance snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27517497-b5b3-4542-87b5-a5ca4e593d34?mode=deep",
+    "timestamp": "2026-04-29 02:28:47.249719",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: getBatchSize()] Can an unprivileged external user craft a balance file where the total number of token balance entries across all accounts exceeds `batchSize * 5L` (the `maxItems` limit), causing the batch processor to split token balance persistence across multiple transactions while account balances are persisted in a single transaction, creating a state where account balances are committed but some token balances are rolled back, resulting in incorrect token fund balance reporting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7d5d8f6-0dfa-4099-ac35-bc72636eee2d?mode=deep",
+    "timestamp": "2026-04-29 02:29:04.564361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `frequency` to its minimum value of 10ms (enforced by `@DurationMin(millis = 10L)` in `AbstractParserProperties`), causing the balance parser to poll for new files every 10ms, creating a high-frequency processing loop that overwhelms the database connection pool and causes balance persistence failures due to connection exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eabce21e-8357-487f-a3e6-5845e185a967?mode=deep",
+    "timestamp": "2026-04-29 02:29:21.773449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: getBatchSize()] Can an unprivileged external user exploit the `@Min(1)` constraint on `batchSize` (with no maximum) to set `batchSize` to `Long.MAX_VALUE / 5 + 1` (approximately 1.8 * 10^18), causing `batch.setMaxItems(batchSize * 5L)` to overflow to a negative value, which when used as the `maxItems` threshold causes the batch processor to never flush, accumulating all balance records in memory until an `OutOfMemoryError` is thrown, which is excluded from retry, causing permanent loss of the balance file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2752e12b-9820-4b0a-845d-783ff02befe7?mode=deep",
+    "timestamp": "2026-04-29 02:29:40.602356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Critical: Direct loss of funds'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the `@ConfigurationProperties` binding to set `batch.queueCapacity` to `Integer.MAX_VALUE`, causing the batch processor to queue an unbounded number of balance files in memory, leading to an `OutOfMemoryError` that is excluded from retry, causing all queued balance files to be lost simultaneously and resulting in a massive gap in balance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b22a4f9b-2aa9-4569-8366-7ecde432b479?mode=deep",
+    "timestamp": "2026-04-29 02:29:59.772074",
+    "report_generated": false
+  }
+]
