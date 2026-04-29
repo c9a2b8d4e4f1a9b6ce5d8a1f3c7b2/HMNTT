@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHashChain()] Can an unprivileged external user cause the hash chain verification to be silently bypassed by ensuring the `lastStreamFile` AtomicReference holds an empty Optional (e.g., on first startup or after a restart), so that `expectedPreviousHash` resolves to null via `lastStreamFile.get().map(StreamFile::getHash).orElse(null)`, which then passes `SHA_384.isHashEmpty(null)` as true, allowing a tampered stream file with an arbitrary `previousHash` to be accepted as valid, permanently corrupting the Hashgraph history stored in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9c9fef9-88d1-4516-b938-907b71d9bc27?mode=deep",
+    "timestamp": "2026-04-29 01:09:04.395368",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHashChain()] Can an unprivileged external user exploit the `SHA_384.isHashEmpty()` check — which returns true for a 96-character all-zero hex string — by injecting a stream file whose `previousHash` field is set to the all-zero SHA-384 empty hash, causing `verifyHashChain()` to return true unconditionally and accept a file that breaks the legitimate hash chain, thereby allowing history tampering at any point where the expected hash happens to be the empty hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0159e759-d3dc-478f-9ba1-0d5208e3cf10?mode=deep",
+    "timestamp": "2026-04-29 01:09:16.459214",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHashChain()] Can an unprivileged external user exploit the `!streamFile.getType().isChained()` early-return in `verifyHashChain()` — where `StreamType.BALANCE` returns false for `isChained()` — by injecting a balance stream file with a tampered transaction history, knowing that the entire hash chain check is skipped for non-chained types, resulting in unverified balance data being accepted into the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de29fd75-bfb6-402b-84b6-da8a8701f249?mode=deep",
+    "timestamp": "2026-04-29 01:09:28.806094",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHash()] Can an unprivileged external user craft a stream file where both `streamFile.getFileHash()` and `signature.getFileHashAsHex()` return null (e.g., by exploiting a v2 signature file where `metadataHash` is null), causing `Objects.equals(null, null)` to return true in `verifyHash()`, thereby bypassing the file hash integrity check and allowing a tampered data file to be accepted as verified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a750b3a-3569-41b9-b99d-9a89df2ec4ff?mode=deep",
+    "timestamp": "2026-04-29 01:09:42.521622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHash()] Can an unprivileged external user exploit the fact that `verifyHash()` is called for `HASH_TYPE_METADATA` using `streamFile.getMetadataHash()` which returns null by default in the `StreamFile` interface, and `signature.getMetadataHashAsHex()` which also returns null when `metadataHash` is null, causing `Objects.equals(null, null)` to pass, allowing a tampered stream file with no metadata hash to bypass metadata integrity verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c5e7ff0-cf1a-47c2-8ce7-27b5068824dc?mode=deep",
+    "timestamp": "2026-04-29 01:09:55.593626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySigsAndDownloadDataFiles()] Can an unprivileged external user cause a tampered stream file group to be silently skipped by triggering a `SignatureVerificationException` on that group (e.g., by making all legitimate node signatures unavailable), so that the `sigFilenameIter.hasNext()` check causes the code to `continue` to the next group, effectively allowing the tampered file to be ignored and the chain to advance past it without proper verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4b0cf87-f945-49ef-bc88-fd16f6962110?mode=deep",
+    "timestamp": "2026-04-29 01:10:09.574851",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySigsAndDownloadDataFiles()] Can an unprivileged external user exploit the fact that when `SignatureVerificationException` is thrown and `sigFilenameIter.hasNext()` is true, the code logs a warning and continues to the next filename group without updating `lastStreamFile`, causing the hash chain anchor to remain stale and allowing subsequent files to be verified against an outdated previous hash, enabling history manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0dd8185-b6ae-45fe-9bfe-a0b4b02673d7?mode=deep",
+    "timestamp": "2026-04-29 01:10:24.430457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySignatures()] Can an unprivileged external user exploit the fact that `verifySignatures()` returns `true` immediately upon the first successful verification from any `CONSENSUS_REACHED` node, combined with the non-deterministic ordering of signatures via `STREAM_FILE_SIGNATURE_COMPARATOR` using `Ordering.arbitrary()`, to increase the probability that a specific node's (potentially tampered) data file is fetched and accepted first, manipulating which version of history is persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_531d6266-0eff-42cb-a7d2-7a6b2c3969af?mode=deep",
+    "timestamp": "2026-04-29 01:10:40.153953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySignatures()] Can an unprivileged external user cause `verifySignatures()` to return false without calling `onVerified()` by ensuring all `CONSENSUS_REACHED` nodes throw `HashMismatchException` or `FileOperationException`, so that `lastStreamFile` is never updated, causing the downloader to perpetually retry the same file with a stale hash chain anchor and never advance, effectively halting history ingestion (DoS on history)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1738e85d-a5d7-42b6-9c51-18d7889d2b33?mode=deep",
+    "timestamp": "2026-04-29 01:10:55.190650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySignatures()] Can an unprivileged external user exploit the ordering of operations in `verifySignatures()` — where `verify(streamFile, signature)` is called before the `dataFilename.getInstant().isAfter(endDate)` check — to cause a tampered stream file to pass hash verification and have `onVerified()` called, but then have the downloader disabled via `downloaderProperties.setEnabled(false)` before the next file is processed, leaving the tampered file permanently in the mirror node's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04e0e1fb-ff28-4a06-bad9-a3fcea549b5c?mode=deep",
+    "timestamp": "2026-04-29 01:11:11.067672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: downloadAndParseSigFiles()] Can an unprivileged external user exploit the `onErrorContinue((e, s) -> log.error(...))` in the Flux pipeline of `downloadAndParseSigFiles()` to silently suppress errors from legitimate nodes while allowing a malicious node's signatures to be collected, reducing the effective pool of verified signatures and potentially allowing a minority of nodes to achieve the 1/3 consensus threshold with tampered file hashes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_806913ec-40de-4177-bf8c-4384f6bde1fb?mode=deep",
+    "timestamp": "2026-04-29 01:11:28.707167",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: partialCollection()] Can an unprivileged external user exploit the `Collections.shuffle(nodes)` in `partialCollection()` — which uses a non-cryptographically-secure random source — combined with a low `downloadRatio` configuration, to increase the probability that only nodes with tampered signatures are selected for the download subset, allowing a tampered file hash to achieve consensus within the partial collection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e845194f-cd53-4eb3-bae9-b9cc0c06a434?mode=deep",
+    "timestamp": "2026-04-29 01:11:46.011189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: partialCollection()] Can an unprivileged external user exploit the fact that `partialCollection()` uses `nodes.getFirst().getTotalStake()` after a random shuffle to determine `totalStake`, where if nodes have inconsistent `totalStake` values (e.g., due to a stale address book), the `neededStake` calculation is wrong, potentially selecting fewer nodes than required for a valid consensus threshold and allowing tampered signatures to pass?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b4f7f0d-35e7-4397-8fad-3b023c6a18d9?mode=deep",
+    "timestamp": "2026-04-29 01:12:04.215048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: partialCollection()] Can an unprivileged external user exploit the `while (aggregateStake < neededStake)` loop in `partialCollection()` — which could loop indefinitely or select all nodes if individual node stakes are zero — combined with the `ConsensusNodeWrapper.getStake()` fallback that returns `1L` when `totalStake == 0`, to cause an unexpected node subset to be selected, undermining the intended download ratio and consensus guarantees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e353cdf-0a82-4329-8ae2-480d873789fa?mode=deep",
+    "timestamp": "2026-04-29 01:12:23.363751",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: onVerified()] Can an unprivileged external user exploit the fact that `onVerified()` calls `streamFile.copy().clear()` and stores the result in `lastStreamFile`, where `clear()` sets bytes and items to null but preserves the `hash` field, to verify that the hash chain anchor is correctly maintained — or conversely, if `getHash()` returns null by default in the `StreamFile` interface, that the anchor is always null, permanently bypassing all subsequent hash chain checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6de18eb8-279c-4f0d-a203-148ba9452245?mode=deep",
+    "timestamp": "2026-04-29 01:12:42.361811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: onVerified()] Can an unprivileged external user cause a race condition in `onVerified()` by triggering concurrent `downloadNextBatch()` calls, where `lastStreamFile.set(Optional.of(copy))` at line 401 races with `lastStreamFile.get().map(StreamFile::getHash).orElse(null)` at line 413 in `verify()`, causing a tampered file to be verified against a stale or incorrect previous hash, corrupting the hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ade4845-b512-46d1-b67c-c589548d40e3?mode=deep",
+    "timestamp": "2026-04-29 01:13:02.752050",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getStartAfterFilename()] Can an unprivileged external user exploit the `lastStreamFile.compareAndSet(Optional.empty(), streamFile)` in `getStartAfterFilename()` — which compares `Optional` objects by reference — to cause a race condition where two concurrent threads both see `Optional.empty()` and both attempt to set the initial stream file, potentially setting an incorrect starting point for signature file downloads and causing history gaps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac9a594a-3146-4b63-ba70-211dcca8a0b7?mode=deep",
+    "timestamp": "2026-04-29 01:13:22.920960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getStartAfterFilename()] Can an unprivileged external user exploit the fallback to `StreamFilename.EPOCH` in `getStartAfterFilename()` — triggered when both `lastStreamFile` is empty and `dateRangeCalculator.getLastStreamFile()` returns empty — to cause the downloader to re-download and re-process all stream files from the beginning, potentially allowing a history replay attack where tampered files are injected at the start of the chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0828ea2-4973-4455-9d1d-d791c008a983?mode=deep",
+    "timestamp": "2026-04-29 01:13:43.727035",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: setStreamFileIndex()] Can an unprivileged external user exploit the `setStreamFileIndex()` logic — which falls back to `importerProperties.getStartBlockNumber()` when `lastStreamFile` is empty — to cause stream files to be assigned incorrect block indices, breaking the sequential ordering of Hashgraph history and allowing tampered files to be inserted at arbitrary positions in the block sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f647af37-7b3a-4ef7-8ecf-0ea9e13c5e95?mode=deep",
+    "timestamp": "2026-04-29 01:14:05.253742",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: downloadNextBatch()] Can an unprivileged external user exploit the broad `catch (Exception e)` in `downloadNextBatch()` that only logs errors without rethrowing, causing critical verification failures to be silently swallowed, allowing the downloader to continue processing subsequent files even after a hash chain integrity violation has occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_535a6e8c-8122-48c2-bc69-20d6440e09ff?mode=deep",
+    "timestamp": "2026-04-29 01:14:28.685022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: downloadNextBatch()] Can an unprivileged external user exploit the `SignatureVerificationException` catch block in `downloadNextBatch()` — which only calls `log.warn(e.getMessage())` — to cause the entire batch's signature verification failure to be silently ignored, allowing the downloader to proceed to the next batch without the current batch's files being properly verified, creating gaps in the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84568239-a479-4acd-80b7-3a1c30597d73?mode=deep",
+    "timestamp": "2026-04-29 01:14:52.339984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifyHashChain()] Can an unprivileged external user exploit the use of `contentEquals()` instead of `equals()` in `streamFile.getPreviousHash().contentEquals(expectedPreviousHash)` — where `contentEquals` accepts any `CharSequence` — to craft a `previousHash` implementation that returns true for `contentEquals` but represents a different hash value, bypassing the hash chain integrity check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_262f2522-2493-42b4-a0da-8dcec4f4d19d?mode=deep",
+    "timestamp": "2026-04-29 01:15:15.668994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verifySignatures()] Can an unprivileged external user cause `verifySignatures()` to silently skip all `CONSENSUS_REACHED` signatures by ensuring every node's data file download throws a generic `Exception` (not `FileOperationException`, `HashMismatchException`, or `TransientProviderException`), which is caught by the broad `catch (Exception e)` block that only logs and continues, causing `verifySignatures()` to return false without any history being recorded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a55068ef-0755-463e-a08b-b690369d387e?mode=deep",
+    "timestamp": "2026-04-29 01:15:39.817427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: verify()] Can an unprivileged external user exploit the sequential order of checks in `verify()` — where `verifyHashChain()` is called first, then `verifyHash()` for file hash, then `verifyHash()` for metadata hash — to craft a stream file that passes the hash chain check (via the empty hash bypass) but has a tampered file body, knowing that if the file hash in the signature matches the tampered file's computed hash, the file will be accepted as valid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a58a4a61-be19-4955-bddc-e22836b2a4bf?mode=deep",
+    "timestamp": "2026-04-29 01:16:03.038000",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/Downloader.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: downloadAndParseSigFiles()] Can an unprivileged external user exploit the `.timeout(downloaderProperties.getCommon().getTimeout())` applied to the entire Flux in `downloadAndParseSigFiles()` to cause a timeout that truncates the signature collection mid-stream, resulting in fewer node signatures being collected than expected, potentially dropping legitimate signatures and allowing a tampered file's hash to achieve the 1/3 consensus threshold with the remaining signatures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abcad798-92c6-4575-8df0-5f02538291ac?mode=deep",
+    "timestamp": "2026-04-29 01:16:27.956594",
+    "report_generated": false
+  }
+]
