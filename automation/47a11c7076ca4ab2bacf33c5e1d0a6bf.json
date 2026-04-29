@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user submit 10 or more consecutive malformed FileUpdate transactions (transaction_type=19) to the Hedera network so that every row returned by getLatestFileDataContents() throws a FileDecodeError in new ExchangeRate(row), exhausting all 10 retry attempts and causing fallbackRetry() to return null, making the exchange rate endpoint permanently unavailable and freezing any application that depends on it for fee calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_724d687f-08b6-4bb3-8019-c39873c738e3?mode=deep",
+    "timestamp": "2026-04-29 03:06:50.670313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user craft a sequence of FileCreate (type=17) transactions with deliberately corrupt protobuf payloads so that every call to getLatestFileDataContents() returns a non-null row that fails ExchangeRate construction, causing the while (++attempts <= 10) loop to exhaust all retries and return null, permanently denying exchange rate data to downstream fee-estimation callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eaf625d2-6196-41d1-b1d1-7c7a2ab519c2?mode=deep",
+    "timestamp": "2026-04-29 03:07:02.848545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user trigger a scenario where row.first_consensus_timestamp is null or undefined (e.g., by submitting a FileCreate with zero-length file_data so the min() aggregate returns null), causing the filter appended as {query: FileData.CONSENSUS_TIMESTAMP + utils.opsMap.lt, param: null} to produce an invalid SQL predicate, breaking all subsequent retry iterations and permanently returning null for the exchange rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d514cee-6bdb-404d-81bf-597f0d70f3dd?mode=deep",
+    "timestamp": "2026-04-29 03:07:15.885263",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a timestamp query parameter whose string representation contains the literal substring 'and ' so that innerWhere.replaceAll('and ', 'and f.') corrupts the outer WHERE clause, causing the SQL query to reference a non-existent column alias and throw a database error that prevents exchange rate retrieval, effectively freezing funds for all callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a4c73a0-ffe2-4229-8abe-f7500f2a8ad3?mode=deep",
+    "timestamp": "2026-04-29 03:07:29.357401",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user craft a timestamp filter value that, after buildWhereSqlStatement() serializes it into the innerWhere string, contains the placeholder literal '<filterInnerPlaceHolder>' or '<filterOuterPlaceHolder>', causing the second .replace() call in getLatestFileContentsQuery() to substitute it again and produce a malformed SQL query that permanently breaks exchange rate lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42bd8cf2-ccc7-414b-97b0-2d7b7589f229?mode=deep",
+    "timestamp": "2026-04-29 03:07:43.734454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a whereQuery array whose .query field contains a raw SQL fragment (not a column reference) that, when inserted via buildWhereSqlStatement() into the innerWhere string and then injected via .replace(filterInnerPlaceholder, innerWhere) into latestFileContentsQuery, alters the CTE logic so that latest_create always returns no rows, making the join produce no results and causing getExchangeRate() to permanently return null?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86aae07f-44d6-4b8f-a957-39d3379d534a?mode=deep",
+    "timestamp": "2026-04-29 03:07:58.355947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getExchangeRate()] Can an unprivileged external user submit a FileUpdate transaction (type=19) with a valid protobuf structure but with current_cent or next_cent set to zero or a negative value, causing the ExchangeRate constructor to produce an object with zero-valued rates that downstream fee calculators interpret as 'free', allowing the attacker to submit transactions with zero fees that are rejected by the network, effectively freezing their own or others' funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fb03019-f321-484d-bc28-518b8bf54036?mode=deep",
+    "timestamp": "2026-04-29 03:08:13.109023",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getExchangeRate()] Can an unprivileged external user observe that getExchangeRate() is hardcoded to EntityId.systemEntity.exchangeRateFile.getEncodedId() (entity 0.0.112) and exploit the fact that there is no validation of the returned ExchangeRate fields (current_expiration, next_expiration) to cause a stale or expired exchange rate to be served, leading fee-estimation logic to use an expired rate and reject valid transactions, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c99965fa-4fce-41b8-ba60-7d8ef6a1b87e?mode=deep",
+    "timestamp": "2026-04-29 03:08:29.503666",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getFileData()] Can an unprivileged external user supply a timestamp value of 0 or a very small integer to getFileData(fileId, timestamp), causing the inner subquery (CONSENSUS_TIMESTAMP <= $2) to find no anchor row and return NULL from the subquery, making the outer CONSENSUS_TIMESTAMP >= NULL condition always false and returning null data, which callers may interpret as a frozen or unavailable file state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57ef740e-6391-474d-97f2-3f9b35582054?mode=deep",
+    "timestamp": "2026-04-29 03:08:45.943276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getFileData()] Can an unprivileged external user supply a timestamp value of Long.MAX_VALUE (9223372036854775807) to getFileData(), causing the inner subquery to select the most recent FileCreate/FileUpdate anchor and the outer query to aggregate all subsequent appends, potentially returning a multi-megabyte concatenated blob that causes a memory exhaustion or timeout, denying exchange rate service to legitimate callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1aa09ae4-76a2-4c79-bbe6-41417855d16d?mode=deep",
+    "timestamp": "2026-04-29 03:09:03.772595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that fallbackRetry() spreads the original whereQuery into every retry iteration (filters.whereQuery = [...whereQuery, {query: ..., param: row.first_consensus_timestamp}]) so that if the original whereQuery already contains a consensus_timestamp < X filter, the accumulated filters create a contradictory range that returns null on the first retry, bypassing all 10 attempts and permanently returning null?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3c60d53-3d0d-4de5-b8d3-fe83c9e5d3a3?mode=deep",
+    "timestamp": "2026-04-29 03:09:21.443736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user trigger a race condition by submitting a burst of FileUpdate transactions (type=19) with corrupt payloads in rapid succession so that during the fallbackRetry() loop, each call to getLatestFileDataContents() returns a different corrupt row, and the first_consensus_timestamp values form a descending chain that exhausts all 10 retries before reaching any valid file version, returning null and freezing exchange rate availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a6a5007-5ffa-4862-915a-609d36489cc2?mode=deep",
+    "timestamp": "2026-04-29 03:09:40.634240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a consensus_timestamp filter with operator 'lt' and a value equal to the timestamp of the only valid FileCreate record, causing the latest_create CTE to find no rows (because the max timestamp is excluded), making the JOIN produce zero results, and causing getLatestFileDataContents() to return null, which fallbackRetry() interprets as 'no data' and immediately returns null without retrying?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_476953a5-4a36-498a-85f7-196295e34719?mode=deep",
+    "timestamp": "2026-04-29 03:10:00.059006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the fact that the latestFileContentsQuery uses string_agg(..., '' order by consensus_timestamp) to concatenate file chunks, and by submitting a FileAppend (type=16) transaction with a payload that, when concatenated with the previous file content, produces a valid-looking but semantically wrong protobuf (e.g., truncated at a field boundary), causing ExchangeRate construction to silently use wrong rate values that freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ebb4f33e-1f70-4b5b-932a-dc2aa2d268e0?mode=deep",
+    "timestamp": "2026-04-29 03:10:21.985661",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user submit a FileUpdate transaction (type=19) with empty file_data (zero bytes) so that the inner CTE (TRANSACTION_TYPE in (17, 19)) selects this empty-content update as the latest anchor, and the outer query aggregates only the empty content plus any subsequent appends, causing the ExchangeRate constructor to receive an empty buffer and throw FileDecodeError, triggering the fallbackRetry() loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79d7d874-a22e-4360-8659-01b9729b2f7a?mode=deep",
+    "timestamp": "2026-04-29 03:10:43.381669",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getFileData()] Can an unprivileged external user supply a fileId that encodes to a very large integer (near BigInt boundaries) to getFileData(), causing the parameterized query to fail with a PostgreSQL integer overflow error, which propagates as an unhandled exception that crashes the exchange rate endpoint and freezes funds for all callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fdee643-53a9-4de6-ad1d-93a70696115a?mode=deep",
+    "timestamp": "2026-04-29 03:11:05.641607",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that when row is null, fallbackRetry() returns null immediately (return row === null ? null : new resultConstructor(row)) without incrementing attempts, meaning a single null result from getLatestFileDataContents() bypasses all retry logic and returns null to the caller, and an attacker can force this by ensuring no file_data rows exist for the exchange rate file at the queried timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b73910f0-a2c9-4973-8a99-6855bc2ecf2c?mode=deep",
+    "timestamp": "2026-04-29 03:11:27.217291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a whereQuery with a param value of type Array (triggering the Array.isArray(current.param) branch in buildWhereSqlStatement()), causing the position to be formatted as ($2, $3, ...) and inserted into the latestFileContentsQuery via string replacement, producing a SQL syntax error that permanently breaks exchange rate retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0363edda-ec54-45e7-a024-96f63f49a0d6?mode=deep",
+    "timestamp": "2026-04-29 03:11:50.865671",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a timestamp filter whose serialized form in innerWhere contains multiple occurrences of 'and ', causing innerWhere.replaceAll('and ', 'and f.') to prepend the table alias 'f.' to every 'and ' occurrence including those inside string literals or subquery fragments, corrupting the SQL and causing a permanent database error for all exchange rate queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca1e9751-36d0-4616-895d-e3b83428ddc7?mode=deep",
+    "timestamp": "2026-04-29 03:12:14.983108",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getExchangeRate()] Can an unprivileged external user exploit the fact that getExchangeRate() passes filterQueries.whereQuery directly to fallbackRetry() without sanitizing the query field of each whereQuery entry, so that a crafted query string containing SQL comment sequences (--) or semicolons truncates the parameterized query and causes the exchange rate lookup to return wrong data, leading to incorrect fee calculations that freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55c2e1b1-7135-4253-959c-7c7f1ef8a077?mode=deep",
+    "timestamp": "2026-04-29 03:12:38.714722",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user cause fallbackRetry() to enter an infinite-like state by submitting FileUpdate transactions where each row's first_consensus_timestamp equals the previous row's consensus_timestamp, causing the accumulated 'consensus_timestamp < X' filters to never reach a valid file version within 10 attempts, permanently returning null and freezing exchange rate availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6798ed0a-f068-4eab-b93e-3919281e5d3e?mode=deep",
+    "timestamp": "2026-04-29 03:13:04.324645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the fact that the outer query filters TRANSACTION_TYPE in (16, 17, 19) but the inner CTE only filters TRANSACTION_TYPE in (17, 19), so that a FileAppend (type=16) submitted before any FileCreate/FileUpdate causes the JOIN to produce no results (no anchor in latest_create), returning null and causing getExchangeRate() to return null, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee8969f3-5aca-49d2-ba39-c9c17c8d9532?mode=deep",
+    "timestamp": "2026-04-29 03:13:30.415594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getFileData()] Can an unprivileged external user supply a timestamp parameter that is a floating-point string (e.g., '1.5') which PostgreSQL coerces to a bigint in an unexpected way, causing the inner subquery anchor selection to pick a wrong FileCreate row and the outer aggregation to concatenate wrong chunks, producing a corrupt exchange rate that causes fee miscalculation and fund freezing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53111969-d5c8-4782-b005-7d0de373fa10?mode=deep",
+    "timestamp": "2026-04-29 03:13:56.970639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the fact that the latestFileContentsQuery uses max() and min() aggregates over consensus_timestamp to compute first_consensus_timestamp, and by submitting a FileAppend (type=16) with a consensus_timestamp that is less than the latest_create anchor, cause the min() to return a timestamp before the anchor, making the fallbackRetry() filter consensus_timestamp < (pre-anchor value) and skip valid file versions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3bd53ef5-b5eb-4a23-8573-322fb8dcb46d?mode=deep",
+    "timestamp": "2026-04-29 03:14:24.258596",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that filterQueries.whereQuery ?? [] uses nullish coalescing (not falsy check), so that if filterQueries.whereQuery is an empty array [], the spread [...whereQuery, {query: ..., param: ...}] correctly accumulates filters, but if filterQueries is a non-standard object where whereQuery is 0 or false, the ?? [] fallback is not triggered, causing the accumulated filter to be wrong and the retry to loop over the same corrupt row repeatedly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47821ed2-86c2-4c9c-ac0c-bdb2041a58f3?mode=deep",
+    "timestamp": "2026-04-29 03:14:51.622636",
+    "report_generated": false
+  }
+]
