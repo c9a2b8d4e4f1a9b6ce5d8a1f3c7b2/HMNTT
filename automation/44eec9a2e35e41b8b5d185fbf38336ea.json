@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a crafted `innerWhere` string containing the literal substring 'and ' in a column value position so that `replaceAll('and ', ...)` incorrectly prefixes the table alias onto non-column tokens, corrupting the SQL and causing the gossip-prevention transaction-type filter `in (16,17,19)` to be silently dropped, allowing gossip transactions to be included in file data reconstruction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d23663e0-a38f-4d60-8dbf-39e7b77153b1?mode=deep",
+    "timestamp": "2026-04-29 01:14:12.914196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user trigger the `filterOuterPlaceholder` replacement path where `innerWhere.replaceAll('and ', ...)` replaces every occurrence of 'and ' — including those inside string literals or operator tokens — so that the outer WHERE clause becomes syntactically invalid, causing the transaction-type guard `in (16,17,19)` to be skipped and gossip transactions to leak into the aggregated file data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e9dd2de-4669-4065-b928-b32c6c4da055?mode=deep",
+    "timestamp": "2026-04-29 01:14:25.191582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user cause `fallbackRetry` to loop all 10 iterations by repeatedly submitting requests that produce a `row` whose `resultConstructor` always throws, exhausting the database connection pool with up to 10 sequential queries per request and degrading availability for all other users who rely on gossip-free file data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35cc74ee-3fb6-4858-ac00-b7c138e16842?mode=deep",
+    "timestamp": "2026-04-29 01:14:38.034585",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user craft a timestamp filter in `filterQueries.whereQuery` such that `row.first_consensus_timestamp` returned from `getLatestFileDataContents` is `null`, causing `utils.opsMap.lt` to be applied to a null parameter and producing a malformed SQL condition that bypasses the consensus-timestamp boundary check, allowing gossip transactions outside the intended range to be included?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74c009e2-2aa0-4839-964d-41fbc0bd49c2?mode=deep",
+    "timestamp": "2026-04-29 01:14:51.942446",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries.whereQuery` array with a crafted `query` field containing SQL operator tokens that, when concatenated by `buildWhereSqlStatement`, produce a condition that overrides the `transaction_type in (16,17,19)` guard in `latestFileContentsQuery`, allowing gossip transaction types to be included in the file data aggregation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d47255fd-9f9f-475e-a2c1-8b782c41749e?mode=deep",
+    "timestamp": "2026-04-29 01:15:05.521857",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getFileData()] Can an unprivileged external user supply a `timestamp` value of `0` or a negative nanosecond value to `getFileData`, causing the inner subquery `CONSENSUS_TIMESTAMP <= $2` to match no rows and return a null anchor, so the outer `string_agg` aggregates all file_data rows regardless of transaction type, including gossip transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2507b4a-a827-406f-bf7c-b0b6a134cb4f?mode=deep",
+    "timestamp": "2026-04-29 01:15:19.665715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getFileData()] Can an unprivileged external user supply an extremely large `timestamp` value (e.g., `Number.MAX_SAFE_INTEGER`) to `getFileData` so that the inner subquery selects the most recent FileCreate/FileUpdate anchor and the outer aggregation includes every subsequent FileAppend row up to that timestamp, effectively reconstructing the full file including any gossip-injected append chunks that should have been excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ecbc8ce-4981-459a-a2e1-998c27993766?mode=deep",
+    "timestamp": "2026-04-29 01:15:35.081775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: latestFileContentsQuery (static)] Can an unprivileged external user observe that the inner CTE `latest_create` filters on `transaction_type in (17, 19)` but the outer query filters on `in (16,17,19)`, and exploit the gap where a FileAppend (type 16) row with a timestamp earlier than the latest FileCreate/FileUpdate is included in the aggregation, allowing a gossip-injected FileAppend to be prepended to the reconstructed file content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf91cc33-a3b8-438f-bf9a-07f1007e0b2b?mode=deep",
+    "timestamp": "2026-04-29 01:15:51.040229",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: latestFileContentsQuery (static)] Can an unprivileged external user exploit the fact that the inner CTE uses `max(consensus_timestamp)` over `transaction_type in (17, 19)` — which includes FileUpdate (19) — so that a gossip-crafted FileUpdate transaction with a very high timestamp becomes the anchor, causing all subsequent legitimate FileAppend rows to be excluded from the aggregation and the file content to be replaced with the gossip payload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cda3a411-c628-437d-be14-2eb2d231f2f5?mode=deep",
+    "timestamp": "2026-04-29 01:16:08.875632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` entry whose `query` field contains the string 'and ' (with trailing space) so that `replaceAll('and ', 'and f.')` in `getLatestFileContentsQuery` transforms the outer WHERE clause to reference a non-existent column `f.<attacker_token>`, causing a database error that is silently swallowed and returning null, effectively denying access to legitimate file data and preventing gossip detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caf1ed2c-f709-4d9b-8d24-8923662ca953?mode=deep",
+    "timestamp": "2026-04-29 01:16:27.323018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user trigger the `fallbackRetry` loop to accumulate an unbounded `filters.whereQuery` array across 10 iterations — each appending a new `consensus_timestamp <` condition — causing the final SQL query to have 10 additional WHERE clauses, potentially confusing the query planner and causing it to scan all file_data rows, leading to a denial-of-service through excessive I/O?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_375866f9-7c62-45b5-99bc-41f585bf58ac?mode=deep",
+    "timestamp": "2026-04-29 01:16:46.788794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getExchangeRate()] Can an unprivileged external user send concurrent requests to the exchange rate endpoint, each triggering `fallbackRetry` with up to 10 DB queries, to exhaust the database connection pool and prevent the gossip-prevention logic from completing its transaction-type filtering, causing stale or null exchange rate data to be served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_871e0011-0be0-4d35-a9ec-909e74b30f71?mode=deep",
+    "timestamp": "2026-04-29 01:17:05.628794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries` object with `whereQuery` set to `undefined` (instead of an empty array), causing `buildWhereSqlStatement` to receive `undefined` and behave unexpectedly — potentially omitting the timestamp filter entirely — so that the `latestFileContentsQuery` runs without any timestamp bound and includes gossip transactions from any time period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d1d12d8-0ec9-411b-a097-db42207f9036?mode=deep",
+    "timestamp": "2026-04-29 01:17:26.074772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that `filterQueries.whereQuery ?? []` uses nullish coalescing, meaning a `whereQuery` value of `false`, `0`, or `''` would still be used as-is (not replaced by `[]`), causing `buildWhereSqlStatement` to receive a non-array value and potentially throw or produce an empty WHERE clause that omits transaction-type filtering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03f7c834-a709-47b1-a21f-d39f31697797?mode=deep",
+    "timestamp": "2026-04-29 01:17:47.244154",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` with a `query` field that does not start with 'and ' (e.g., starts with 'AND ' in uppercase), causing `replaceAll('and ', ...)` to fail to prefix the table alias in the outer WHERE clause, resulting in an ambiguous column reference that either errors out or resolves to a different table's column, bypassing the intended transaction-type filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_342a69b9-bc60-4ea2-b59f-551067202207?mode=deep",
+    "timestamp": "2026-04-29 01:18:08.974802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` that resolves to a system entity (e.g., the exchange rate file entity 112) and a crafted `timestamp` to `getFileData`, causing the `getFileDataQuery` to aggregate all file_data rows for that system file including gossip-injected FileAppend chunks, and return the raw concatenated bytes to the caller without any gossip-prevention filtering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57922aa4-d3d1-4764-a386-7d25ea92b8f6?mode=deep",
+    "timestamp": "2026-04-29 01:18:31.140908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` of `0` or a negative encoded entity ID to `getFileData`, causing the parameterized query `$1` to match no rows in the inner subquery, returning a null anchor timestamp, and then the outer `string_agg` to return an empty or null result — effectively suppressing legitimate file data and preventing gossip detection from functioning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06d47dee-5625-4f9f-8fd8-2500cfdbde13?mode=deep",
+    "timestamp": "2026-04-29 01:18:54.563919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: latestFileContentsQuery (static)] Can an unprivileged external user exploit the `string_agg(file_data, '' order by consensus_timestamp)` aggregation in `latestFileContentsQuery` by ensuring many large FileAppend rows exist for a given entity, causing the aggregation to consume excessive memory and crash the Node.js process, preventing the gossip-prevention service from serving any requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1583b467-2a6d-4675-85ab-589ce8e4beca?mode=deep",
+    "timestamp": "2026-04-29 01:19:19.212815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries.whereQuery` array with a very large number of entries (e.g., 10,000 conditions), causing `buildWhereSqlStatement` to generate a SQL query with thousands of AND clauses that exceeds PostgreSQL's query size limit, resulting in a database error that is propagated as an unhandled exception and crashes the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcddf6da-9464-481f-9a41-f26d1ba1cb3d?mode=deep",
+    "timestamp": "2026-04-29 01:19:45.037655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that `fallbackRetry` uses `row.first_consensus_timestamp` (the `min` of the aggregated timestamps) as the upper bound for the next retry, and if `first_consensus_timestamp` equals `consensus_timestamp` (single-row result), the retry condition `consensus_timestamp < first_consensus_timestamp` would never advance, causing an infinite effective loop that exhausts DB connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98172b66-9df9-41fb-9e33-c53118da7dcd?mode=deep",
+    "timestamp": "2026-04-29 01:20:10.165529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` entry with a `param` that is an array (triggering the array branch in `buildWhereSqlStatement`), causing the generated SQL to use an `IN (...)` clause that is injected into the `filterInnerPlaceholder` position of `latestFileContentsQuery`, potentially expanding the `transaction_type` filter to include gossip transaction types beyond 16, 17, and 19?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_734d4278-b00a-42d4-8a29-7415937ecfc5?mode=deep",
+    "timestamp": "2026-04-29 01:20:36.858122",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user craft a `whereQuery` entry whose `query` field contains the substring `transaction_type not in (16,17,19)` so that when injected into `filterInnerPlaceholder`, the inner CTE `latest_create` selects the max timestamp of gossip transactions (not FileCreate/FileUpdate), causing the outer query to anchor on a gossip transaction and include all subsequent rows regardless of type?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc840f96-0dcd-4179-ba5b-fb9d6ef5320e?mode=deep",
+    "timestamp": "2026-04-29 01:21:04.425504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getLatestFileDataContents()] Can an unprivileged external user pass a `filterQueries` object where `whereQuery` is a non-array iterable (e.g., a generator or Set), causing `buildWhereSqlStatement`'s `isEmpty` check to pass but the subsequent `.map()` call to fail with a TypeError, resulting in an unhandled promise rejection that crashes the request handler and denies service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6de4d38-d6dd-4bdc-9696-ae15f6b1b405?mode=deep",
+    "timestamp": "2026-04-29 01:21:31.846643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fallbackRetry()] Can an unprivileged external user trigger a scenario where `row` is non-null but `row.first_consensus_timestamp` is `undefined` (e.g., due to a DB schema mismatch or aliasing issue), causing `utils.opsMap.lt` to be applied to `undefined` and the next iteration's SQL to contain `consensus_timestamp < $N` where `$N` is bound to `undefined`, producing a PostgreSQL type error that is not caught and leaks internal query structure in the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b527cb0-e614-4053-bde6-e1bd6d63bb31?mode=deep",
+    "timestamp": "2026-04-29 01:21:59.394692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getExchangeRate()] Can an unprivileged external user send a request that causes `getExchangeRate` to call `fallbackRetry` with `EntityId.systemEntity.exchangeRateFile.getEncodedId()` as the file entity ID, and by flooding the `file_data` table with malformed exchange rate rows (via gossip-injected FileUpdate transactions), force all 10 retry attempts to fail and return `null`, causing the exchange rate endpoint to serve no data and breaking fee calculation for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_555c6e4b-8631-4faa-b79e-19fb79440f59?mode=deep",
+    "timestamp": "2026-04-29 01:22:28.680054",
+    "report_generated": false
+  }
+]
