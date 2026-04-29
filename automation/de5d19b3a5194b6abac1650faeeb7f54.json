@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user cause a valid topic message to be permanently invisible by querying GET /api/v1/topics/messages/:consensusTimestamp for a message whose transaction row has result != 22 (e.g., a deferred or errata-corrected record), because the hardcoded filter `result = 22 and type = 27` in the transaction lookup query silently excludes it, returning 404 and causing the record to appear missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ebb53a5-5288-4caf-a021-01b48aca9094?mode=deep",
+    "timestamp": "2026-04-29 04:19:43.156020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user observe that a topic message submitted via a CONSENSUSSUBMITMESSAGE transaction with a non-standard result code (type=27 but result!=22) is never retrievable via GET /api/v1/topics/messages/:consensusTimestamp, because the first-stage query hardcodes `result = 22`, causing the mirror node to export an incomplete set of topic messages for that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3a77a99-67d3-4d0d-ad89-dc9501657e7b?mode=deep",
+    "timestamp": "2026-04-29 04:19:55.176666",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user trigger a two-step query inconsistency in getMessageByConsensusTimestamp() by submitting a timestamp that exists in the transaction table but whose corresponding topic_message row was not yet written (replication lag), causing the first query to succeed but the second query via getMessage() to return rows.length !== 1 and throw NotFoundError, making a valid record appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc9a00ca-94d6-4157-87e9-4f904d1edd01?mode=deep",
+    "timestamp": "2026-04-29 04:20:07.587155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user exploit the two-query design in getMessageByConsensusTimestamp() where entity_id and consensus_timestamp are read from the transaction table and then used to query topic_message, such that if the topic_message partition for that timestamp range is not yet available, the second query returns 0 rows and throws NotFoundError, causing the record to appear missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be53d961-191b-4002-9678-e607939c40d7?mode=deep",
+    "timestamp": "2026-04-29 04:20:20.633541",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: validateConsensusTimestampParam()] Can an unprivileged external user supply a consensusTimestamp with trailing zeros (e.g., '1234567890.000000000') that passes utils.isValidTimestampParam() but is parsed by utils.parseTimestampParam() to a value that does not match the stored nanosecond-precision timestamp in the database, causing the transaction lookup to return 0 rows and the message to appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee123a59-327c-4630-ad1a-70df44bbc7ab?mode=deep",
+    "timestamp": "2026-04-29 04:20:34.479816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user cause a valid topic message to be returned as 404 (missing) when config.query.topicMessageLookup is enabled, if the topic_message_lookup table has a stale or incorrect timestamp_range for the given sequence number, causing the additional consensus_timestamp >= $3 AND consensus_timestamp < $4 filter to exclude the actual message row?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed87cc09-3d9a-4626-bc38-e6315c38d134?mode=deep",
+    "timestamp": "2026-04-29 04:20:48.799933",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user observe that getMessageByTopicAndSequenceRequest() passes seqNum as a string (req.params.sequenceNumber) directly as SQL parameter $2 without numeric conversion, and if the database performs string-to-bigint coercion differently than expected, a sequence number like '007' could fail to match the stored integer 7, causing the record to appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae8b29fc-4bdd-46ee-82e1-a4b9b4ac7b6e?mode=deep",
+    "timestamp": "2026-04-29 04:21:03.694567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user trigger a NotFoundError (record appears missing) in getMessageByTopicAndSequenceRequest() when topicMessageLookup is enabled, by requesting a sequence number that exists in topic_message but has no corresponding entry in topic_message_lookup, because getTopicMessageTimestampRange() throws NotFoundError when rows.length === 0 before the main topic_message query is even executed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e8c0fae-ccb6-4a6c-a6a3-04f6987c77d1?mode=deep",
+    "timestamp": "2026-04-29 04:21:19.472067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user observe that getTopicMessageTimestampRange() uses `rows[0].timestamp_range` and silently discards all subsequent rows when multiple topic_message_lookup entries match `sequence_number_range @> $2::bigint`, causing the timestamp range used in the main query to be incorrect and the actual message to be excluded by the consensus_timestamp filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a01c8c8-104f-4309-9acc-8de0a574ec2f?mode=deep",
+    "timestamp": "2026-04-29 04:21:36.224634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user cause a message to appear missing by requesting a topicId in shard.realm.num format (e.g., '0.0.7') versus short format ('7'), where EntityId.parseString().getEncodedId() produces a different encoded integer for one format, causing the topic_id = $1 condition to not match the stored value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_711916dc-e5ea-4233-a7c5-c90cab8ed88d?mode=deep",
+    "timestamp": "2026-04-29 04:21:52.960694",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessages()] Can an unprivileged external user cause records to be silently skipped during pagination of GET /api/v1/topics/:topicId/messages when multiple messages share the same consensus_timestamp, because the next link is constructed using `timestamp=gt:lastTimestamp` (ASC) or `timestamp=lt:lastTimestamp` (DESC) based solely on the last message's consensus_timestamp, causing all messages with that same timestamp to be excluded from subsequent pages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44fe66fb-1fc0-4b9a-b6c6-f32f0d300a7b?mode=deep",
+    "timestamp": "2026-04-29 04:22:10.280839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessages()] Can an unprivileged external user observe that getTopicMessages() does not call utils.validateReq(req) unlike getMessageByConsensusTimestamp() and getMessageByTopicAndSequenceRequest(), allowing extra unvalidated query parameters to pass through buildAndValidateFilters() and potentially alter the SQL query behavior in ways that cause records to be missing from the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce1237a7-e33a-4831-89bb-b6c0ad41b868?mode=deep",
+    "timestamp": "2026-04-29 04:22:28.849724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessages()] Can an unprivileged external user trigger a silent empty response (200 OK with empty messages array) by sending a request where extractSqlFromTopicMessagesRequest() returns {} (empty object) due to getTopicMessageTimestampRanges() returning an empty array, causing the `if (!query) return;` branch to exit early and the client to believe no records exist when they actually do?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b88557c-2fed-4269-9f88-7db5b7c80f6a?mode=deep",
+    "timestamp": "2026-04-29 04:22:48.115599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user cause records to be incorrectly excluded when topicMessageLookup is enabled, because both the original filter conditions (e.g., sequence_number = $2) AND the computed timestamp range conditions are added to the WHERE clause with AND, meaning a message that satisfies the sequence_number filter but falls outside the computed timestamp_range is excluded even though it exists in topic_message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6755d43-cdf4-4ec8-87b6-120917abcbae?mode=deep",
+    "timestamp": "2026-04-29 04:23:07.748559",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user cause records to be missing by supplying a sequencenumber filter that causes getRangeFromFilters() to return null (empty range), which causes getTopicMessageTimestampRanges() to return [], which causes extractSqlFromTopicMessagesRequest() to return {}, which causes getTopicMessages() to return an empty 200 response, even though messages exist for that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ab9d8c2-2ae5-414e-bf05-778870453465?mode=deep",
+    "timestamp": "2026-04-29 04:23:27.930260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRangeFromFilters()] Can an unprivileged external user craft a sequencenumber=lt:1 filter that causes getRangeFromFilters() to compute value -= 1n on value=1n yielding 0n, then fall through to lte case setting range.upper = 0n, but since defaultLower is 1n for sequence numbers, range.lower (1n) > range.upper (0n) returns null, causing getTopicMessageTimestampRanges() to return [] and all messages to appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c86a567d-0002-4e11-8600-049326301248?mode=deep",
+    "timestamp": "2026-04-29 04:23:48.835197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRangeFromFilters()] Can an unprivileged external user supply sequencenumber=gt:9223372036854775806 (MAX_LONG - 1) causing getRangeFromFilters() to compute value += 1n = MAX_LONG, then bigIntMax(1n, MAX_LONG) sets range.lower = MAX_LONG, but range.upper = MAX_LONG - 1n, so range.lower > range.upper returns null, causing all messages to appear missing even if a message at sequence MAX_LONG exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8892bf31-8954-41fb-89c5-1d736566857e?mode=deep",
+    "timestamp": "2026-04-29 04:24:10.454678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRangeFromFilters()] Can an unprivileged external user supply timestamp=gt:9223372036854775806 causing getRangeFromFilters() to compute value += 1n = 9223372036854775807n (MAX_LONG), then bigIntMax(0n, MAX_LONG) sets range.lower = MAX_LONG, but range.upper = MAX_LONG - 1n, so range.lower > range.upper returns null, causing getTopicMessageTimestampRanges() to return [] and all messages to appear missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d802490d-5524-4e76-90a7-d6ee3f9f7c00?mode=deep",
+    "timestamp": "2026-04-29 04:24:32.539571",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRangeFromFilters()] Can an unprivileged external user supply two conflicting sequencenumber filters (e.g., sequencenumber=gte:10&sequencenumber=lte:5) that cause getRangeFromFilters() to set range.lower=10n and range.upper=5n, returning null, which causes getTopicMessageTimestampRanges() to return [] and extractSqlFromTopicMessagesRequest() to return {}, silently hiding all messages instead of returning an error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a426e361-4614-4c4a-8890-4f72bf0795e5?mode=deep",
+    "timestamp": "2026-04-29 04:24:54.665318",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRangeFromFilters()] Can an unprivileged external user supply two conflicting timestamp filters (e.g., timestamp=gte:1000&timestamp=lte:500) that cause getRangeFromFilters() to return null, which causes getTopicMessageTimestampRanges() to return [], which causes extractSqlFromTopicMessagesRequest() to return {}, resulting in a silent 200 OK with empty messages array instead of an error, misleading clients into thinking no records exist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe636aa5-7708-42e5-8c4a-3f2ea24ff4b8?mode=deep",
+    "timestamp": "2026-04-29 04:25:16.302580",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user cause records to be missing when topicMessageLookup is enabled and the sequence number range size exceeds the limit, because the subquery uses `limit 1` to find only the first matching topic_message_lookup row, and the range expansion logic `int8range(lower(range), least(upper(range) + least($4, ...), upper($2::int8range)), '[)')` may not cover all partitions containing the requested messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97ab8cfe-905f-4303-8acf-c545d95802b5?mode=deep",
+    "timestamp": "2026-04-29 04:25:39.260183",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user cause records to be missing in DESC order when topicMessageLookup is enabled, because the DESC range expansion `greatest(lower(range) - ($4 - 1), lower($2::int8range))` uses limit-1 as the expansion delta, and if the actual messages span more lookup partitions than limit-1 sequence numbers, the computed timestamp range will not cover all relevant partitions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5426873d-66fb-410a-8711-1a704a1d8b74?mode=deep",
+    "timestamp": "2026-04-29 04:26:02.935913",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user cause records to be missing when topicMessageLookup is enabled and limit=1 is requested in DESC order, because the DESC range expansion computes `greatest(lower(range) - (1 - 1), lower($2::int8range))` = `greatest(lower(range) - 0, ...)` = `lower(range)`, meaning no downward expansion occurs and messages in adjacent partitions below the first matching row are excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b35cce7-3de6-4a8a-ad08-d59db899c2d8?mode=deep",
+    "timestamp": "2026-04-29 04:26:26.382251",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user observe that when sequenceNumberRange.upper - sequenceNumberRange.lower + 1n <= limit (the simple query path), the query `select timestamp_range from topic_message_lookup where topic_id = $1::bigint and sequence_number_range && $2::int8range and timestamp_range && $3::int8range` may return multiple timestamp_range rows that are then all used as OR conditions, but if the topic_message_lookup table has overlapping ranges, duplicate messages could be returned or messages could be missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a064d0e-6842-49c0-99ef-b98ef47e7d57?mode=deep",
+    "timestamp": "2026-04-29 04:26:51.555581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user cause records to be missing by supplying a timestamp filter that restricts the timestamp_range overlap check (`timestamp_range && $3::int8range`), such that a valid topic_message_lookup row is excluded from the range lookup because its timestamp_range does not overlap with the user-supplied timestamp filter, even though the actual message's consensus_timestamp satisfies the filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2578dd41-851b-4ba6-82df-42e070c0c91c?mode=deep",
+    "timestamp": "2026-04-29 04:27:16.627596",
+    "report_generated": false
+  }
+]
