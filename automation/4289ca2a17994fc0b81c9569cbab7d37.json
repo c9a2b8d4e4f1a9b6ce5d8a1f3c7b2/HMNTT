@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user flood the public /api/v1/network/supply endpoint with concurrent unauthenticated GET requests, each triggering getSupply() which executes a full entity table scan via unnest+join, exhausting the database connection pool and causing ≥30% of mirror node REST API instances to stop processing requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17e4cecd-177c-40ab-8ded-3d2006162cee?mode=deep",
+    "timestamp": "2026-04-29 02:34:31.269295",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user send a sustained stream of GET /api/v1/network/supply requests without any timestamp parameter, causing repeated invocations of getSupply(lowerBounds, upperBounds) that each perform a costly unnest(cast(string_to_array(:lowerBounds,',') as bigint[]), ...) join against the entity table, saturating CPU on the database server and degrading ≥30% of dependent mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1dd921b-bc28-4003-8652-f45cacde80de?mode=deep",
+    "timestamp": "2026-04-29 02:34:43.821471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the absence of rate limiting on the /api/v1/network/supply endpoint to trigger thousands of concurrent getSupply() native SQL queries, each holding a database connection for the duration of the unnest+join aggregation, starving the HikariCP connection pool and causing ≥30% of mirror node instances to queue-timeout and reject all subsequent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ee7a121-5514-4a8e-a2f9-397a4edf3637?mode=deep",
+    "timestamp": "2026-04-29 02:34:55.848424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user send repeated GET /api/v1/network/supply?timestamp=lte:<far-future-value> requests, causing NetworkServiceImpl.getSupply() to call accountBalanceRepository.getSupplyHistory() with a very wide timestamp range, while simultaneously triggering entityRepository.getSupply() on other nodes, creating a mixed load that exhausts shared database resources and shuts down ≥30% of processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8799e459-67f8-487b-8744-65e2ff3cdc5b?mode=deep",
+    "timestamp": "2026-04-29 02:35:08.215546",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user repeatedly call account lookup endpoints (e.g., GET /api/v1/accounts/<alias>) with valid but non-existent base32 alias values, causing findByAlias(byte[] alias) to execute a full index scan on the entity.alias column for each request, and at sufficient concurrency exhaust the database thread pool and degrade ≥30% of mirror node processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71a75aff-707e-4d11-a66c-718573166533?mode=deep",
+    "timestamp": "2026-04-29 02:35:22.202176",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress()] Can an unprivileged external user flood account or contract lookup endpoints with crafted 20-byte EVM addresses that do not exist in the entity table, causing findByEvmAddress(byte[] evmAddress) to execute repeated full-scan queries, and at high concurrency exhaust database connections across ≥30% of mirror node instances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86f52a57-b36b-4488-99b9-1d62ed08b8cd?mode=deep",
+    "timestamp": "2026-04-29 02:35:36.098319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user submit requests with maximum-length alias byte arrays (up to 70 base32 characters = ~43 bytes) to the account lookup endpoint, causing findByAlias() to perform byte-array comparisons against every row in the entity table, and at scale cause memory pressure and CPU exhaustion on ≥30% of mirror node database backends?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f647375-272a-4dc8-8043-523533420d84?mode=deep",
+    "timestamp": "2026-04-29 02:35:50.958557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the fact that getSupply() performs a coalesce(sum(e.balance), 0) aggregation over all entity rows matching the unnest ranges, and by sending many concurrent requests cause the PostgreSQL query executor to hold shared locks on the entity table, blocking importer writes and degrading ≥30% of network processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d1bf58f-9148-4a45-9e89-7e77ca698501?mode=deep",
+    "timestamp": "2026-04-29 02:36:06.372669",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user trigger a slow-query DoS by sending GET /api/v1/network/supply requests at a rate that causes the unnest+join query in getSupply() to queue behind each other in PostgreSQL, creating a query pile-up that exhausts max_connections and causes ≥30% of mirror node REST API instances to fail with connection acquisition timeouts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_603bfb9c-f56f-47d2-a193-385e34375783?mode=deep",
+    "timestamp": "2026-04-29 02:36:23.653186",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress()] Can an unprivileged external user craft requests to the /api/v1/contracts/<evm_address> endpoint with all-zero or all-FF EVM addresses that are guaranteed not to exist, causing findByEvmAddress() to always miss the index and perform sequential scans, and at high concurrency degrade ≥30% of mirror node processing nodes through sustained I/O pressure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d2ae08d-6af2-406a-96c1-403879b51be8?mode=deep",
+    "timestamp": "2026-04-29 02:36:39.747146",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the lack of response caching on the /api/v1/network/supply endpoint to cause getSupply() to re-execute the full unnest+join aggregation query on every single request, and by sending requests from multiple source IPs bypass any per-IP rate limiting and overwhelm ≥30% of mirror node database connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf6f3d11-5e35-4b6b-a33b-66ff896a3c9d?mode=deep",
+    "timestamp": "2026-04-29 02:36:57.467398",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user send GET /api/v1/network/supply?timestamp=gte:0.000000001 requests, causing NetworkServiceImpl.getSupply() to invoke accountBalanceRepository.getSupplyHistory() with a near-zero lower timestamp, resulting in a full historical scan of the account_balance table while simultaneously entityRepository.getSupply() is called on other nodes, creating a cross-repository resource contention that shuts down ≥30% of nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6d567ed-7745-4159-9943-2f6c73bdadd8?mode=deep",
+    "timestamp": "2026-04-29 02:37:15.007802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user exploit the native query 'select id from entity where alias = ?1 and deleted <> true' by sending requests with alias byte arrays of exactly 0 bytes (empty), causing unexpected query behavior or exception handling overhead that, at scale, degrades ≥30% of mirror node processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9e80599-45fd-408a-b7b6-6bd8a6dcae1b?mode=deep",
+    "timestamp": "2026-04-29 02:37:33.656794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress()] Can an unprivileged external user send requests with EVM addresses that are exactly 20 bytes of 0x00, causing findByEvmAddress() to match against the zero address in the entity table and return unexpected results, and at high concurrency cause thread pool exhaustion on ≥30% of mirror node instances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9667e78-9149-4aa7-bac9-0f5886b16f6e?mode=deep",
+    "timestamp": "2026-04-29 02:37:52.156423",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the fact that the getSupply() query uses cast(coalesce(sum(e.balance), 0) as bigint) which could overflow if the sum of balances exceeds Long.MAX_VALUE, causing an unhandled arithmetic exception that propagates up and crashes the REST API thread, and at scale shuts down ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88041e25-cb5a-48f0-9596-50b8482a205c?mode=deep",
+    "timestamp": "2026-04-29 02:38:12.099555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user trigger repeated calls to getSupply() via the public /api/v1/network/supply endpoint, causing the Spring Data JPA proxy to create and destroy PreparedStatement objects for the native query on each call, leading to JDBC statement handle exhaustion and degrading ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2856e1e0-f206-4be0-8854-c84ef77812c9?mode=deep",
+    "timestamp": "2026-04-29 02:38:31.853232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user send concurrent requests to multiple account-lookup endpoints that all internally call findByAlias(), causing the Spring Data JPA repository to open multiple simultaneous transactions against the entity table, exhausting the transaction manager's thread pool and causing ≥30% of mirror node instances to stop accepting new requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab211e14-2afe-4f79-8dc5-1b6835612668?mode=deep",
+    "timestamp": "2026-04-29 02:38:53.111303",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the unnest(cast(string_to_array(:lowerBounds, ',') as bigint[]), cast(string_to_array(:upperBounds, ',') as bigint[])) pattern in getSupply() by triggering it repeatedly during peak importer load, causing lock contention on the entity table between the read aggregation and the importer's write operations, degrading ≥30% of network processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fed9423e-16e6-4e95-881b-0781042a67bc?mode=deep",
+    "timestamp": "2026-04-29 02:39:14.488208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress()] Can an unprivileged external user send requests to the /api/v1/accounts/<evm_address> endpoint with EVM addresses that are valid hex strings but correspond to no entity, causing findByEvmAddress() to always return empty and the service layer to throw EntityNotFoundException, and at high concurrency cause exception-handling overhead that degrades ≥30% of mirror node processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6b6e26c-3a3d-4bfe-af54-ed0d72212fcb?mode=deep",
+    "timestamp": "2026-04-29 02:39:37.593278",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user send GET /api/v1/network/supply requests with two timestamp parameters (e.g., timestamp=gte:X&timestamp=lte:Y) where X and Y are very close together, causing NetworkServiceImpl.getSupply() to call accountBalanceRepository.getSupplyHistory() with a near-zero window that forces a full index scan, and at scale exhaust ≥30% of mirror node database resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7003d27c-9451-461b-8c57-a9d971145268?mode=deep",
+    "timestamp": "2026-04-29 02:40:01.732971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user exploit the 'deleted <> true' condition in findByAlias() which evaluates to NULL (not FALSE) when deleted IS NULL, causing the query to silently exclude entities with null deleted status, and by repeatedly querying for such entities cause repeated DB round-trips that at scale degrade ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1b66e42-8f82-43d0-b800-422efd0a36db?mode=deep",
+    "timestamp": "2026-04-29 02:40:24.978336",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user exploit the absence of a query timeout on the getSupply() native SQL query, sending requests that cause the unnest+join aggregation to run for extended periods, holding database connections open and causing connection pool starvation that shuts down ≥30% of mirror node REST API instances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1dd2a4c4-863d-4416-84a6-3cef7ef3108a?mode=deep",
+    "timestamp": "2026-04-29 02:40:49.546068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByEvmAddress()] Can an unprivileged external user send requests to contract or account endpoints with EVM addresses that match the long-zero address format (first 12 bytes zero), causing findByEvmAddress() to be called with a byte array that triggers a different code path in EntityServiceImpl, and at high concurrency cause thread contention that degrades ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ed6d26c-5d84-466a-bddb-acc44689e572?mode=deep",
+    "timestamp": "2026-04-29 02:41:14.012040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: getSupply()] Can an unprivileged external user trigger a thundering herd attack by sending a burst of GET /api/v1/network/supply requests simultaneously after a cache miss or service restart, causing all requests to concurrently invoke getSupply() and overwhelm the database with identical aggregation queries, degrading ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66433926-1931-4c66-86af-1b8888146825?mode=deep",
+    "timestamp": "2026-04-29 02:41:38.914065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Shutdown of greater than or equal to 30% of network processing nodes without brute force actions, but does not shut down the network'] [Function: findByAlias()] Can an unprivileged external user send requests with alias values at the maximum allowed length (70 base32 characters) that decode to 43-byte arrays, causing findByAlias() to perform byte-array equality comparisons against all entity rows, and at sustained concurrency cause I/O saturation on the database that degrades ≥30% of mirror node processing nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_530b196c-5a7d-439e-b3db-979db7acb0f9?mode=deep",
+    "timestamp": "2026-04-29 02:42:04.581196",
+    "report_generated": false
+  }
+]
