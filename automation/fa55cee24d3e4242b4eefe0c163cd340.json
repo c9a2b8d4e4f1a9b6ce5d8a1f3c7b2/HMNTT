@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user supply a negative value for HIERO_MIRROR_PINGER_AMOUNT_TINYBAR (e.g., -10000) which passes the only validation check (cfg.amountTinybar == 0) in loadConfig(), causing AddHbarTransfer() in submitWithRetry() to flip the transfer direction so that cfg.toAccountID is debited and the operator receives funds, permanently draining the toAccountID account balance and freezing its ability to transact?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79d6dbab-1302-4f47-97d5-37e7e4027cb1?mode=deep",
+    "timestamp": "2026-04-29 02:18:42.456380",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.amountTinybar to math.MinInt64 (-9223372036854775808) so that the negation -cfg.amountTinybar in AddHbarTransfer(client.GetOperatorAccountID(), hiero.HbarFromTinybar(-cfg.amountTinybar)) overflows to math.MinInt64 again, causing the SDK to construct a malformed transfer that permanently locks the operator account funds in an unresolvable state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41134281-6dc0-4be7-a691-4088ba644d06?mode=deep",
+    "timestamp": "2026-04-29 02:18:54.353445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: backoff()] Can an unprivileged external user set cfg.maxRetries to a value >= 64 so that the expression 1<<(attempt-1) in backoff() overflows Go's int type, producing a zero or negative duration, causing time.NewTimer(sleep) to fire immediately and submitWithRetry() to hammer the network with rapid retries that drain the operator account balance to zero, permanently freezing all future transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_458c32da-ae56-4fc8-a9a0-f6e7c9962ec3?mode=deep",
+    "timestamp": "2026-04-29 02:19:07.704008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user control the HIERO_MIRROR_PINGER_REST environment variable to point cfg.mirrorRest at an attacker-controlled HTTP server that returns a crafted nodesEnvelope JSON with malicious serviceEndpoint entries, causing buildNetworkFromMirrorNodes() to build a poisoned network map that routes all cryptoTransfer.Execute(client) calls to attacker-controlled nodes, permanently misdirecting and freezing operator funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b59b1b2-4231-459b-8e97-f1093ca9b46d?mode=deep",
+    "timestamp": "2026-04-29 02:19:21.213037",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user observe that fetchMirrorNodeNetwork() never follows the Links.Next pagination field in nodesEnvelope, so when the mirror node returns a partial node list (first page only), the network map built by buildNetworkFromMirrorNodes() is incomplete, causing all cryptoTransfer.Execute(client) calls to route to a single node that becomes a single point of failure, permanently blocking fund transfers when that node is unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2313f122-62fb-4981-8895-7e8a4de9f8d8?mode=deep",
+    "timestamp": "2026-04-29 02:19:34.820542",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to an internal network address (e.g., http://169.254.169.254 or http://10.0.0.1) via the HIERO_MIRROR_PINGER_REST environment variable, exploiting the absence of URL validation in fetchMirrorNodeNetwork() to perform SSRF, causing buildNetworkFromMirrorNodes() to receive a crafted response that populates the network map with attacker-controlled endpoints and permanently freezes operator funds by routing transfers to invalid nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15463a39-e0b8-4374-b7cf-2abbd262e7f4?mode=deep",
+    "timestamp": "2026-04-29 02:19:49.372797",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_INTERVAL to an extremely small value (e.g., 1ns) which passes the cfg.interval <= 0 validation check in loadConfig(), causing time.NewTicker(cfg.interval) in main() to fire at nanosecond frequency and submitWithRetry() to execute thousands of transfers per second, rapidly draining the operator account to zero and permanently freezing all future fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cec25de8-a78c-40b7-811f-3b010d282a5e?mode=deep",
+    "timestamp": "2026-04-29 02:20:04.605459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_AMOUNT_TINYBAR to the operator account's entire balance, causing each tick of time.NewTicker(cfg.interval) to trigger submitWithRetry() which transfers the full balance via AddHbarTransfer(), leaving the operator account below the minimum HBAR balance required for future transactions, permanently freezing the operator account's ability to send funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b22bbca5-3bd2-45b9-95d3-83dda098c528?mode=deep",
+    "timestamp": "2026-04-29 02:20:21.605564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_TO_ACCOUNT_ID to a deleted Hedera account ID, causing submitWithRetry() to repeatedly call cryptoTransfer.Execute(client) targeting a non-existent account, which results in all transferred funds being permanently unrecoverable and frozen at the protocol level since deleted accounts cannot receive or hold HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b498329-fac6-4c03-b18d-5a05a23cf0b5?mode=deep",
+    "timestamp": "2026-04-29 02:20:37.843020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_TO_ACCOUNT_ID to a Hedera account that has receiver_sig_required=true without providing the required signature in the cryptoTransfer transaction built in submitWithRetry(), causing every transfer attempt to fail with INVALID_SIGNATURE, exhausting all cfg.maxRetries retries and permanently blocking fund movement while the operator account balance is consumed by transaction fees on each failed attempt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b471ff1-a839-4dbf-b6d7-8a9b5681e8bb?mode=deep",
+    "timestamp": "2026-04-29 02:20:54.555769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to a frozen Hedera account (one that has been frozen by its freeze key), causing every cryptoTransfer.Execute(client) call in submitWithRetry() to fail with ACCOUNT_FROZEN status, and since the retry loop runs cfg.maxRetries+1 times consuming transaction fees each time, the operator account is gradually drained of HBAR through repeated failed transfer fees, permanently freezing the pinger's ability to operate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3949d7a-456f-40f8-9d7c-15fcce5f21a6?mode=deep",
+    "timestamp": "2026-04-29 02:21:12.043138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_OPERATOR_ID to a frozen Hedera account ID, causing newClient() to call client.SetOperator() with a frozen account, so that every cryptoTransfer.Execute(client) in submitWithRetry() fails with ACCOUNT_FROZEN, permanently preventing any fund movement and freezing all HBAR held in the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_067ae0df-7e8f-4f90-bf07-a5638473b00b?mode=deep",
+    "timestamp": "2026-04-29 02:21:30.765832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: envOr()] Can an unprivileged external user inject whitespace-padded values into environment variables (e.g., HIERO_MIRROR_PINGER_TO_ACCOUNT_ID=' 0.0.98 ') that envOr() trims via strings.TrimSpace(), but then hiero.AccountIDFromString() in submitWithRetry() receives the trimmed value and resolves it to an unexpected account, causing funds to be permanently transferred to an unintended destination account from which they cannot be recovered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6efc8dc6-82e2-456f-8c3d-040abe441bbb?mode=deep",
+    "timestamp": "2026-04-29 02:21:48.847632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toDuration()] Can an unprivileged external user set HIERO_MIRROR_PINGER_INTERVAL to a malformed string (e.g., 'abc') that causes toDuration() to silently return 1*time.Second as the default without any error, masking the misconfiguration and causing main() to run time.NewTicker(1*time.Second) at an unintended rate that drains the operator account faster than expected, permanently freezing funds through accelerated depletion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_235ef938-7418-47ea-816b-250a170cd5bd?mode=deep",
+    "timestamp": "2026-04-29 02:22:08.387787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toDuration()] Can an unprivileged external user set HIERO_MIRROR_PINGER_BASE_BACKOFF to a malformed string that causes toDuration() to silently return 1*time.Second, bypassing the intended backoff() exponential delay in submitWithRetry(), causing rapid retry storms on transfer failures that consume all operator HBAR through transaction fees and permanently freeze the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_382325fb-3775-46a6-ad33-753e49e41935?mode=deep",
+    "timestamp": "2026-04-29 02:22:29.572026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a URL that returns a nodesEnvelope JSON where all nodeEntry.ServiceEndpoints have Port=0 (which is filtered by the ep.Port == 0 check in fetchMirrorNodeNetwork()), causing the network map to be empty and buildNetworkFromMirrorNodes() to return an error, preventing newClient() from initializing and permanently blocking all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_747bf8df-9ec9-4e8c-a5f8-7bb55fbdae67?mode=deep",
+    "timestamp": "2026-04-29 02:22:50.717919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user control cfg.mirrorRest to return a nodesEnvelope where serviceEndpoint.IPAddressV4 contains loopback addresses (127.0.0.1) or link-local addresses (169.254.x.x), which are not validated by fetchMirrorNodeNetwork(), causing net.JoinHostPort() to build a network map pointing to localhost, routing all cryptoTransfer.Execute(client) calls to non-existent local services and permanently freezing fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b9e4fde-730b-4a1d-ab25-430677b6cc4b?mode=deep",
+    "timestamp": "2026-04-29 02:23:11.226043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a server that returns a nodesEnvelope with negative port values in serviceEndpoint.Port (e.g., -1), which bypass the ep.Port == 0 check in fetchMirrorNodeNetwork(), causing net.JoinHostPort(host, fmt.Sprintf('%d', ep.Port)) to produce invalid addresses like 'node.example.com:-1' that the SDK cannot connect to, permanently blocking all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_644ca606-2fa7-4c98-84f9-367353040dc1?mode=deep",
+    "timestamp": "2026-04-29 02:23:33.566955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user set cfg.mirrorRest to a server that returns a nodesEnvelope with a single nodeEntry whose serviceEndpoint points to an attacker-controlled gRPC server, causing buildNetworkFromMirrorNodes() to build a single-entry network map, so that hiero.ClientForNetwork(netmap) routes all cryptoTransfer.Execute(client) calls exclusively to the attacker's server, permanently misdirecting and freezing operator funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db698198-d279-4baf-8c90-f8ea2ac3d26d?mode=deep",
+    "timestamp": "2026-04-29 02:23:56.463865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user observe that the default cfg.operatorKey ('302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137') is hardcoded in loadConfig() and publicly visible in the source code, allowing any external user to use this known private key to sign transactions from the default operator account (0.0.2), drain its HBAR balance to zero, and permanently freeze the pinger's ability to execute fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fc5469d-7d0e-4d30-b954-3c7577e00ec1?mode=deep",
+    "timestamp": "2026-04-29 02:24:20.687841",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user exploit the fact that the default cfg.toAccountID is '0.0.98' (the Hedera fee collection account) and the default cfg.operatorID is '0.0.2' (the treasury account on testnet), causing submitWithRetry() to continuously transfer funds from the treasury to the fee collection account, permanently locking those funds in the fee collection account from which they cannot be retrieved by the pinger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32844db1-f7c1-4da1-a277-aad458a4434f?mode=deep",
+    "timestamp": "2026-04-29 02:24:45.124862",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.maxRetries to math.MaxInt (via HIERO_MIRROR_PINGER_MAX_RETRIES), causing the retry loop in submitWithRetry() to run for an astronomically large number of iterations, each consuming transaction fees via cryptoTransfer.Execute(client), permanently draining the operator account to zero and freezing all future fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bf410ed-a9e7-43df-ad44-f9084850be6a?mode=deep",
+    "timestamp": "2026-04-29 02:25:10.750272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to the same value as cfg.operatorID (circular self-transfer), causing submitWithRetry() to execute AddHbarTransfer(operatorID, -amount) and AddHbarTransfer(operatorID, +amount) in the same transaction, which while net-zero in HBAR movement still consumes transaction fees on every tick of time.NewTicker(cfg.interval), gradually draining the operator account through fee accumulation and permanently freezing it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77d4ff2e-2003-461f-be24-4f2046a1e6c8?mode=deep",
+    "timestamp": "2026-04-29 02:25:37.877012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a URL with a path that already contains '/api/v1' as a substring but not as a suffix (e.g., 'http://evil.com/api/v1/inject'), bypassing the strings.HasSuffix(base, '/api/v1') check in buildNetworkFromMirrorNodes() and causing the constructed URL to be 'http://evil.com/api/v1/inject/api/v1/network/nodes', which may resolve to an attacker-controlled endpoint that returns a poisoned network map freezing all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8cfcf55-8142-43eb-a29f-be7992b238ba?mode=deep",
+    "timestamp": "2026-04-29 02:26:04.301838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a URL that triggers DNS rebinding (resolving to an internal IP after the initial connection), causing fetchMirrorNodeNetwork() to receive a crafted nodesEnvelope from an internal service that returns malicious serviceEndpoint entries, poisoning the network map used by cryptoTransfer.Execute(client) and permanently routing operator funds to unrecoverable destinations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f711a6d-9ebc-4538-8e63-1e6056723ca2?mode=deep",
+    "timestamp": "2026-04-29 02:26:31.135910",
+    "report_generated": false
+  }
+]
