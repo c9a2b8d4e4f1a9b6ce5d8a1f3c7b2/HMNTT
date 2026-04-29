@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user send a ConsensusTopicQuery with limit=0 to open an unbounded infinite gRPC stream, exhausting server-side reactive resources and disrupting fee-processing pipelines that depend on the same infrastructure, causing denial-of-service against fee assessment workflows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9aa40e43-a9b2-47e5-8087-1f366d4bb218?mode=deep",
+    "timestamp": "2026-04-29 02:24:46.919277",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user open thousands of concurrent subscribeTopic() streams with no limit set, causing subscriber count tracked by TopicMessageServiceImpl to overflow or exhaust thread pool resources, indirectly starving fee-related transaction ingestion from being processed within design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ce61aa2-3650-4856-9c26-b28e5a958020?mode=deep",
+    "timestamp": "2026-04-29 02:24:59.182579",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user craft a ConsensusTopicQuery with consensusStartTime set to epoch zero (seconds=0, nanos=0) and no limit, causing toFilter() to build a TopicMessageFilter that retrieves the entire historical fee-bearing message history of a topic, leaking all payer account IDs and assessed fee metadata outside of intended query scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f2d8f4e-6056-48a4-a6da-62d0e9e4958f?mode=deep",
+    "timestamp": "2026-04-29 02:25:11.877444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: convertTimestamp()] Can an unprivileged external user supply a consensusEndTime with seconds=9223372035 (the exact boundary in convertTimestamp()) to force the filter endTime to Long.MAX_VALUE, bypassing the intended time-range constraint and causing the server to stream all fee-bearing topic messages indefinitely beyond design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e6e7b90-6884-462e-ae95-5a96dccf5cb1?mode=deep",
+    "timestamp": "2026-04-29 02:25:25.146134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: convertTimestamp()] Can an unprivileged external user supply a consensusEndTime with seconds=9223372034 (one below the boundary) to avoid the Long.MAX_VALUE cap in convertTimestamp(), causing DomainUtils.timestampInNanosMax() to produce a near-maximum nanosecond value that effectively creates an unbounded fee-data stream while evading the overflow guard?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d30139a4-62bc-4552-a57a-e8c561dcf3cd?mode=deep",
+    "timestamp": "2026-04-29 02:25:39.331012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: convertTimestamp()] Can an unprivileged external user set consensusStartTime.seconds to a value just below 9223372035L and consensusEndTime.seconds to exactly 9223372035L, causing convertTimestamp() to return Long.MAX_VALUE for endTime while startTime is a valid nanosecond value, creating a window that exposes all future fee-bearing messages outside of design-intended time bounds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab872b7e-b13e-48e2-963d-d170f6fbcf1a?mode=deep",
+    "timestamp": "2026-04-29 02:25:53.203758",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic and receive ConsensusTopicResponse messages where toResponse() populates chunkInfo.initialTransactionID with payerAccountId and validStartTimestamp, leaking the fee-payer identity and transaction timing of chunked messages to any subscriber without any access control check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05f85913-5512-457c-a11d-116abc9ef4a3?mode=deep",
+    "timestamp": "2026-04-29 02:26:07.898341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic and observe that toResponse() falls back to constructing a TransactionID from payerAccountEntity.toAccountID() and validStartInstant when parseTransactionID() returns null, thereby receiving fee-payer account information that was not intended to be exposed through the gRPC stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66589d95-2adc-41f0-bbf9-90b658d229bd?mode=deep",
+    "timestamp": "2026-04-29 02:26:22.993090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: parseTransactionID()] Can an unprivileged external user trigger a scenario where parseTransactionID() receives malformed initialTransactionId bytes stored in the database, causing InvalidProtocolBufferException to be silently swallowed and the fallback payer-account-based TransactionID to be returned instead, resulting in incorrect fee-payer attribution in the gRPC response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ccbc057-b81e-478a-a2be-fef7639afd51?mode=deep",
+    "timestamp": "2026-04-29 02:26:40.018767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: parseTransactionID()] Can an unprivileged external user subscribe to a topic containing messages with corrupted initialTransactionId bytes, causing parseTransactionID() to silently log an error and return null, which then triggers the fallback branch in toResponse() that constructs a TransactionID from payerAccountId, potentially attributing fees to the wrong payer account in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0c303eb-40a0-4106-a2a0-5505016f7a27?mode=deep",
+    "timestamp": "2026-04-29 02:26:56.365053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user omit consensusStartTime from the ConsensusTopicQuery, causing toFilter() to use the default startTime of DomainUtils.now(), and then immediately re-subscribe in a tight loop to create many concurrent live subscriptions that each consume fee-processing resources beyond design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea726386-cd74-45af-a549-18c967c76984?mode=deep",
+    "timestamp": "2026-04-29 02:27:14.249029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the absence of any rate limiting in subscribeTopic() to open a large number of parallel subscriptions to the same topicId, causing the TopicMessageService to fan out fee-bearing message delivery to all subscribers simultaneously and exhaust downstream database connection pools used for fee data retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64161851-9d06-49fd-8b71-4fa051a5b439?mode=deep",
+    "timestamp": "2026-04-29 02:27:32.100767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a topic with a very large limit value (e.g., Long.MAX_VALUE cast to int via filter.getLimit()) causing TopicMessageRepositoryCustomImpl.findByFilter() to call typedQuery.setMaxResults() with an overflowed integer, returning more fee-bearing records than the design-intended maximum?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_edd481ff-9057-4a25-9a51-61b4217e04c6?mode=deep",
+    "timestamp": "2026-04-29 02:27:50.679364",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user set limit to Long.MAX_VALUE in the ConsensusTopicQuery protobuf (uint64 field), causing toFilter() to pass this value directly into TopicMessageFilter.builder().limit(), which is stored as a long, and then have TopicMessageRepositoryCustomImpl cast it to int via (int) filter.getLimit(), resulting in a negative setMaxResults() call that bypasses the limit entirely and returns all fee records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a1e2f08-71a6-4405-82d7-7b8cae0e73b5?mode=deep",
+    "timestamp": "2026-04-29 02:28:10.377907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user cancel and immediately re-subscribe to a topic in a rapid loop, exploiting the setOnCancelHandler(disposable::dispose) mechanism to repeatedly trigger subscription setup and teardown, causing resource churn in the fee-processing reactive pipeline beyond design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20f5dd4c-1cf0-4994-865f-f13c29f44f34?mode=deep",
+    "timestamp": "2026-04-29 02:28:30.325289",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic and receive toResponse() output where DEFAULT_RUNNING_HASH_VERSION=3 is substituted for a null runningHashVersion, causing the client to incorrectly verify the running hash of fee-bearing messages and accept tampered fee data as authentic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39608f3f-92b5-481b-92d9-3c92c0f98ece?mode=deep",
+    "timestamp": "2026-04-29 02:28:50.143744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user set consensusStartTime to seconds=0 and consensusEndTime to seconds=9223372035 in a single query, causing toFilter() to build a filter spanning from epoch zero to Long.MAX_VALUE nanoseconds, effectively requesting the entire fee history of a topic in one unbounded stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2aae4c6-7f7c-4439-a949-23d8c3bd734c?mode=deep",
+    "timestamp": "2026-04-29 02:29:10.627116",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user send a ConsensusTopicQuery targeting a non-existent topicId, causing subscribeTopic() to propagate an EntityNotFoundException through onErrorMap(ProtoUtil::toStatusRuntimeException), and by enumerating topicId values, infer which topics have fee schedules configured versus those that do not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a786dcd-b4b4-40c7-a72f-1ebe1f1ebfe2?mode=deep",
+    "timestamp": "2026-04-29 02:29:32.080336",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toResponse()] Can an unprivileged external user subscribe to a chunked-message topic and observe that toResponse() exposes the full TransactionID including accountID (fee payer) and transactionValidStart for every chunk, allowing reconstruction of the complete fee-payer transaction history without any authorization check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57976c27-de99-4e64-a728-d13e14c480b3?mode=deep",
+    "timestamp": "2026-04-29 02:29:53.253281",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user craft a ConsensusTopicQuery with consensusStartTime.nanos set to 999999999 and seconds set to a value just below the convertTimestamp() boundary, causing DomainUtils.timestampInNanosMax() to produce a nanosecond value that overflows the intended range and creates an incorrect filter startTime for fee-bearing message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fcffc69-8390-42e3-b151-a1479669652e?mode=deep",
+    "timestamp": "2026-04-29 02:30:15.065309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user exploit the lack of authentication on the gRPC subscribeTopic() endpoint to subscribe to any topic and enumerate all payerAccountId values exposed in toResponse() chunk info, building a map of which accounts paid fees for which topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fff43f1-d3d2-4c99-84c6-19d3011ab0ad?mode=deep",
+    "timestamp": "2026-04-29 02:30:38.374272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toFilter()] Can an unprivileged external user set both consensusStartTime and consensusEndTime to the same nanosecond value after convertTimestamp() processing, bypassing the isValidEndTime() check in TopicMessageFilter (which requires endTime > startTime) if the timestamps are equal after nanosecond conversion, causing an empty or undefined fee-data query result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_956ce6af-ae15-444d-ad10-d22f04985a4d?mode=deep",
+    "timestamp": "2026-04-29 02:31:02.217087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: convertTimestamp()] Can an unprivileged external user supply a Timestamp with seconds=9223372035 and nanos=0 to trigger the Long.MAX_VALUE return path in convertTimestamp(), and simultaneously supply a startTime that is also Long.MAX_VALUE after conversion, causing isValidEndTime() to fail with 'End time must be after start time' and leaking internal validation logic about fee-time boundary handling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a10fdc77-8e88-4b07-ab24-52c661dc243f?mode=deep",
+    "timestamp": "2026-04-29 02:31:26.232121",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a high-volume topic with limit=0 and startTime=0, causing the reactive Flux pipeline in subscribeTopic() to buffer an unbounded number of fee-bearing TopicMessage objects in memory, leading to OutOfMemoryError that disrupts fee processing for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e14f823f-b83b-42d9-acbf-42e906a32832?mode=deep",
+    "timestamp": "2026-04-29 02:31:51.303153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic and observe that toResponse() always sets runningHashVersion to DEFAULT_RUNNING_HASH_VERSION=3 when the stored value is null, allowing the user to detect which messages were ingested from blockstreams (null version) versus older consensus records, potentially correlating fee assessment timing with ingestion source?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d0010f1-8638-41c2-8632-3802039de118?mode=deep",
+    "timestamp": "2026-04-29 02:32:16.814073",
+    "report_generated": false
+  }
+]
