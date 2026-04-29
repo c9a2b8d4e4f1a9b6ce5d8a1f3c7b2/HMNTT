@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user query an entity whose `deleted` column is NULL via alias lookup, and observe that `deleted <> true` silently excludes it (NULL <> true = NULL in SQL), causing the mirror node to export a missing record for a live entity that was never explicitly deleted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8f98ffb-7697-4697-b9ea-09d8719ad6ad?mode=deep",
+    "timestamp": "2026-04-29 00:43:13.508690",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user query an entity by EVM address where `deleted` is NULL, and because `deleted <> true` evaluates to NULL (falsy) in PostgreSQL, the entity is silently omitted from the result, causing the mirror node to report a missing record for an active entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b061d76-fd1f-441f-b558-2c485f365e8f?mode=deep",
+    "timestamp": "2026-04-29 00:43:25.514032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the semantic difference between `deleted <> true` (used in rest-java) and `deleted is not true` (used in graphql's EntityRepository) to observe inconsistent entity visibility across mirror node APIs, where the same entity appears in one endpoint but not the other, constituting an incorrect record export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2384ceda-08f8-4e0c-9d89-dfa2ac50edbd?mode=deep",
+    "timestamp": "2026-04-29 00:43:38.268076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user trigger an incorrect `unreleasedSupply` value by observing that the `getSupply` query has no `deleted <> true` filter on the entity table, meaning deleted entities with non-zero `balance` values are included in the sum, causing the mirror node to export an inflated unreleased supply figure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f92f167-c3d5-455b-af04-e33d5d3a2ffe?mode=deep",
+    "timestamp": "2026-04-29 00:43:51.231971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `getSupply` includes entities of all types (ACCOUNT, CONTRACT, TOPIC, FILE, etc.) in the balance sum because there is no `type` filter in the query, causing the mirror node to export an incorrect unreleased supply that includes non-account entity balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa975e84-86c8-4d4c-abd8-7cafbc412a0a?mode=deep",
+    "timestamp": "2026-04-29 00:44:04.718185",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user cause the mirror node to export a duplicate-counted unreleased supply by observing that if the `lowerBounds` and `upperBounds` strings contain overlapping ID ranges (e.g., '1,5' and '10,8'), the `unnest` join would match the same entity ID multiple times, summing its balance more than once?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31eb72ce-a5a0-414a-a9cb-fa151c694127?mode=deep",
+    "timestamp": "2026-04-29 00:44:18.887275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `cast(coalesce(max(e.balance_timestamp), 0) as bigint) as consensus_timestamp` returns the maximum balance_timestamp across all matched entities rather than a single authoritative consensus timestamp, causing the mirror node to export an incorrect `consensusTimestamp` that does not correspond to any real consensus event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b5c1a8b-775c-45be-814d-54a48d0536bf?mode=deep",
+    "timestamp": "2026-04-29 00:44:33.438343",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that if some entities in the matched ID range have a NULL `balance_timestamp` while others do not, `max(e.balance_timestamp)` ignores NULLs, causing the mirror node to export a `consensusTimestamp` that does not reflect all entities contributing to the supply sum, resulting in an incorrect record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b03f28d4-9615-413a-a786-697e6f384604?mode=deep",
+    "timestamp": "2026-04-29 00:44:49.303952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `cast(coalesce(sum(e.balance), 0) as bigint)` silently returns 0 when all entities in the matched ID range have NULL `balance`, causing the mirror node to export an incorrect unreleased supply of zero instead of an error or missing-data indicator?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed184637-56fa-493a-bc95-c4e30a3b7271?mode=deep",
+    "timestamp": "2026-04-29 00:45:06.529651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user trigger an arithmetic overflow in `cast(coalesce(sum(e.balance), 0) as bigint)` if the sum of entity balances exceeds `Long.MAX_VALUE` (9,223,372,036,854,775,807), causing the mirror node to export a negative or incorrect unreleased supply value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92b9bbe0-c35d-41e3-ba09-06a21d92c1e0?mode=deep",
+    "timestamp": "2026-04-29 00:45:24.244846",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `NetworkSupply.releasedSupply()` computes `TOTAL_SUPPLY - unreleasedSupply` without overflow/underflow protection, and if `unreleasedSupply` exceeds `TOTAL_SUPPLY` (5,000,000,000,000,000,000L) due to incorrect balance aggregation, the mirror node exports a negative released supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b0c9fa7-f819-4486-bd5a-9f9df1ae1fc7?mode=deep",
+    "timestamp": "2026-04-29 00:45:41.891547",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that the `getSupply` query uses `e.id between ranges.min_val and ranges.max_val` without validating that `min_val <= max_val`, and if a range pair has `min_val > max_val` (inverted range), the BETWEEN clause returns no rows for that range, silently excluding entities that should be counted, causing missing records in the supply export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d177e998-c270-4a2b-b4a1-b593e7736c5a?mode=deep",
+    "timestamp": "2026-04-29 00:45:59.187847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `string_to_array(:lowerBounds, ',')` and `string_to_array(:upperBounds, ',')` produce arrays of different lengths when the caller provides mismatched comma-separated strings, and PostgreSQL's parallel `unnest` pads the shorter array with NULLs, causing `e.id between NULL and max_val` or `e.id between min_val and NULL` to match no rows, silently dropping entities from the supply calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15a1efdd-eb85-4e5a-824f-2445f6a8b715?mode=deep",
+    "timestamp": "2026-04-29 00:46:19.519873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that the `getSupply` query does not filter by `balance_timestamp` being non-NULL or recent, meaning entities with stale or zero-epoch balance data contribute their potentially outdated `balance` to the unreleased supply sum, causing the mirror node to export an incorrect supply figure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e9f5d58-a3f1-4279-a4af-5a2b8ebdb631?mode=deep",
+    "timestamp": "2026-04-29 00:46:39.261922",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a zero-length byte array as the alias parameter to `findByAlias`, and because the SQL query performs a binary equality check `alias = ?1` without length validation, observe whether any entity has a zero-length alias stored, potentially leaking information about incorrect entity records in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0eab922-5739-4f60-9850-145b07ca7bd7?mode=deep",
+    "timestamp": "2026-04-29 00:46:59.823469",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a byte array that is not exactly 20 bytes as the EVM address to `findByEvmAddress`, and because the SQL query `evm_address = ?1` performs no length validation, observe whether any entity has a non-standard-length EVM address stored, indicating incorrect records in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e81a2bef-1a23-4d29-a9dd-dd2cea842a23?mode=deep",
+    "timestamp": "2026-04-29 00:47:21.736514",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user observe that `findByAlias` returns `Optional<Long>` (only the ID) rather than the full entity, and if the entity's other fields (balance, type, etc.) are incorrect in the database, the caller using only the ID would proceed with stale or incorrect entity data, causing downstream incorrect records to be exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0cd18e3d-a9ed-43da-a299-9902653af5d2?mode=deep",
+    "timestamp": "2026-04-29 00:47:43.779009",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user observe that `findByEvmAddress` returns only the entity ID without verifying the entity type, allowing a CONTRACT entity's EVM address to resolve to an ACCOUNT ID (or vice versa), causing the mirror node to export an incorrect record associating the wrong entity type with the EVM address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca19c151-4c83-4fa8-b4e3-4b603f10d31c?mode=deep",
+    "timestamp": "2026-04-29 00:48:06.437102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that the `getSupply` query does not join against `entity_history`, meaning entities that were recently deleted but whose deletion has not yet been reflected in the `entity` table (due to replication lag or processing delay) are still included in the balance sum, causing the mirror node to export an incorrect unreleased supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66124e76-98d5-4384-abe2-8bd35005d19e?mode=deep",
+    "timestamp": "2026-04-29 00:48:28.818901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that the `getSupply` query sums `e.balance` from the `entity` table which reflects the latest known balance, but if the importer has not yet processed recent transactions, the balance is stale, causing the mirror node to export an incorrect unreleased supply that does not match the actual on-chain state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32f04c9b-fbd2-4462-829a-41bae78dfc57?mode=deep",
+    "timestamp": "2026-04-29 00:48:51.449875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user observe that if two entities share the same alias bytes (a data integrity violation), `findByAlias` returns only one of them (whichever the database returns first), causing the mirror node to export a missing record for the second entity and incorrect resolution for alias-based lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c06a9c59-74f9-48aa-b540-e150ed6b691a?mode=deep",
+    "timestamp": "2026-04-29 00:49:15.981552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user observe that if two entities share the same EVM address bytes (a data integrity violation), `findByEvmAddress` returns only one of them, causing the mirror node to export a missing record for the second entity and incorrect EVM address resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5d7544f-d75a-4ca7-9e80-1d7f858140f2?mode=deep",
+    "timestamp": "2026-04-29 00:49:41.573924",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that the `getSupply` query does not validate that the entity IDs in the ranges correspond to treasury/system accounts, meaning if the `lowerBounds`/`upperBounds` configuration is incorrect, arbitrary entity balances are summed, causing the mirror node to export an incorrect unreleased supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82f3693b-90af-480a-83dd-dc44f3447688?mode=deep",
+    "timestamp": "2026-04-29 00:50:08.547884",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(String, String)] Can an unprivileged external user observe that `NetworkSupply.TOTAL_SUPPLY` is hardcoded as `5_000_000_000_000_000_000L` and if the actual network total supply differs (e.g., due to a network upgrade), the `releasedSupply()` calculation exports an incorrect value, constituting an incorrect record in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abc64501-a45f-4d76-9e11-7ee07a8ff762?mode=deep",
+    "timestamp": "2026-04-29 00:50:35.105148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findByAlias(byte[])] Can an unprivileged external user observe that `findByAlias` uses positional parameter `?1` (not a named parameter), and if the Spring Data JPA binding incorrectly handles the byte array encoding (e.g., encoding as hex string vs raw bytes), the query returns no results for a valid alias, causing the mirror node to export a missing record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f749d72-0f6d-4eb8-8a28-817f72d058f7?mode=deep",
+    "timestamp": "2026-04-29 00:51:01.801956",
+    "report_generated": false
+  }
+]
