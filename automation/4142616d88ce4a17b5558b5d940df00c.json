@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user inject arbitrary SQL by supplying a crafted `filters.orderBy` value (e.g., `consensus_end; DROP TABLE record_file--`) since `filters.orderBy` is directly string-interpolated into the query at line 156 (`order by ${filters.orderBy} ${filters.order}`) without parameterization, causing unauthorized data modification or destruction of transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16eba4f5-5f05-47c6-8a87-e9fafcf5bc4c?mode=deep",
+    "timestamp": "2026-04-29 00:59:36.858831",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user inject SQL via the `filters.order` field (e.g., `asc; SELECT pg_sleep(30)--`) since it is directly interpolated into the query string at line 156 without sanitization or parameterization, causing a time-based blind SQL injection that leaks transaction data or causes denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_529fb4ac-fa01-49e8-bed1-8c8cf39da27a?mode=deep",
+    "timestamp": "2026-04-29 00:59:49.082639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user inject SQL via the `filters.limit` field (e.g., `1 UNION SELECT hash,name,prev_hash,...`) since `filters.limit` is directly interpolated at line 157 (`limit ${filters.limit}`) without parameterization, causing the API to return tampered or unauthorized transaction block data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a392a60e-1b58-4907-a95d-b809fdb6d64e?mode=deep",
+    "timestamp": "2026-04-29 01:00:01.748389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: buildWhereSqlStatement()] Can an unprivileged external user inject SQL through the `whereQuery[i-1].query` field since it is directly concatenated into the WHERE clause at line 12 (`where += ... ${whereQuery[i - 1].query} $${i}`) without any sanitization, allowing the attacker to bypass block filters and retrieve or corrupt arbitrary transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d505d687-4c98-40e7-89e4-4ae3eef004ef?mode=deep",
+    "timestamp": "2026-04-29 01:00:14.685169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash containing SQL LIKE wildcard characters (`%` or `_`) that are appended verbatim at line 170 (`params.push(hash + '%')`), causing the LIKE query to match unintended record_file rows and return a block record belonging to a different transaction than requested, breaking transaction-to-block integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b79a8e8a-9ac2-476d-a1b0-40e6eae67184?mode=deep",
+    "timestamp": "2026-04-29 01:00:29.090773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a hash string containing `%` wildcards (e.g., `%`) at line 144 (`${hash}%`) to match any record in the `record_file` table via the LIKE predicate, causing `getSingleRow()` to return null (due to multiple matches) and effectively hiding all block records from callers that depend on this lookup for transaction verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae6009c6-d40c-44ed-b2ed-593515d39c86?mode=deep",
+    "timestamp": "2026-04-29 01:00:43.351727",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user craft a hash prefix that matches multiple `record_file` rows via the LIKE pattern at line 144, causing `getSingleRow()` (which returns null when `rows.length > 1`) to silently suppress a valid block record, making downstream transaction verification fail and causing legitimate transactions to appear unconfirmed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b59cd11b-f8c1-4d6a-96a6-09f247173030?mode=deep",
+    "timestamp": "2026-04-29 01:00:58.612489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash prefix (e.g., a short hex string that is a valid prefix of multiple block hashes) to the `getByHashOrNumber()` LIKE lookup at line 169-170, causing `getSingleRow()` to return null when multiple blocks match, making the API return 404 for a valid block and hiding confirmed transaction records from users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57d72adc-bec7-4b5b-8f5b-d6e0162b0165?mode=deep",
+    "timestamp": "2026-04-29 01:01:15.010384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a crafted `timestamps` array with duplicate values to `getRecordFileBlockDetailsFromTimestampArray()` at line 92, causing the `unnest($1::bigint[])` subquery to produce duplicate rows that inflate the result set and cause incorrect timestamp-to-block mappings, leading to transaction records being associated with wrong blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bca49f7a-6f73-44ce-b59b-6991718a9b42?mode=deep",
+    "timestamp": "2026-04-29 01:01:32.723351",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply an extremely large `timestamps` array to `getRecordFileBlockDetailsFromTimestampArray()` at line 92, causing the `unnest($1::bigint[])` PostgreSQL call to consume excessive memory and CPU, resulting in denial of service that prevents legitimate transaction lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a61615c2-e0fb-4d0f-b8c0-2a63e3637b94?mode=deep",
+    "timestamp": "2026-04-29 01:01:50.085147",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTimestampArrayContext()] Can an unprivileged external user supply a `timestamps` array where the first element equals the last element to `getTimestampArrayContext()` at line 187-200, causing the function to return `order: ASC` with `maxTimestamp === minTimestamp`, which then computes `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` as the upper bound, potentially scanning a wider time window than intended and returning block records outside the requested transaction range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ec0b786-f483-4628-86df-98b327c379b9?mode=deep",
+    "timestamp": "2026-04-29 01:02:09.331399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array with the maximum possible BigInt value as `maxTimestamp` at line 101 (`BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs`), causing a BigInt overflow that wraps to a negative or zero upper bound, making the query return no results and causing all transaction-to-block lookups to silently fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_856979b5-8273-42d6-8291-494ae41a3ff1?mode=deep",
+    "timestamp": "2026-04-29 01:02:29.567100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array that is not sorted (mixed ascending and descending values) to `getTimestampArrayContext()` at line 187, causing the order detection logic (comparing `first > last`) to produce an incorrect `order` value, which then causes the inner loop at lines 109-119 to skip valid timestamp-to-block mappings and return an incomplete `recordFileMap`, making some submitted transactions appear to have no associated block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5d59e04-1056-4361-a6d2-bc459cb95d8c?mode=deep",
+    "timestamp": "2026-04-29 01:02:49.272647",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array where all values are identical to `getRecordFileBlockDetailsFromTimestampArray()`, causing the `group by consensus_end` in the subquery at line 42 to collapse all entries into one, and the outer loop at lines 109-119 to only map the first timestamp while leaving all others unmapped, causing multiple submitted transactions to appear unconfirmed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f734478-b3c9-4e56-9456-ed1533e259cd?mode=deep",
+    "timestamp": "2026-04-29 01:03:09.598939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user supply a `filters.limit` value of `0` or a negative number that bypasses upstream validation and reaches `getBlocks()` at line 157 (`limit ${filters.limit}`), causing a PostgreSQL error or returning all rows without a limit, leading to resource exhaustion and denial of service that prevents legitimate transaction queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6f72134-ffa4-4022-bd0a-2b9caceed0de?mode=deep",
+    "timestamp": "2026-04-29 01:03:30.887177",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user craft a `filters.whereQuery` array with a `query` field containing a SQL comment sequence (`--` or `/* */`) that truncates the parameterized portion of the WHERE clause in `buildWhereSqlStatement()` at line 12, causing the query to execute without the intended filter and returning all transaction block records regardless of the requested constraints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0de05dd-c8a1-4e5b-bf7b-6ee12048794f?mode=deep",
+    "timestamp": "2026-04-29 01:03:53.222621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getBlocks()] Can an unprivileged external user supply a `filters.orderBy` value containing a subquery (e.g., `(SELECT hash FROM record_file LIMIT 1)`) that is directly interpolated at line 156, causing the database to execute an attacker-controlled subquery in the ORDER BY clause and leaking sensitive block hash data from transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70b6b8c4-af45-4cfc-b6f8-79845ef72419?mode=deep",
+    "timestamp": "2026-04-29 01:04:15.549161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a negative timestamp value to `getRecordFileBlockDetailsFromTimestamp()` at line 79, causing the query `where consensus_end >= $1` to match the earliest record in the table and return a block record that does not correspond to the requested transaction, breaking transaction-to-block integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e166049-de5e-4a37-909b-e059099e5c92?mode=deep",
+    "timestamp": "2026-04-29 01:04:39.749194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a timestamp of `0` to `getRecordFileBlockDetailsFromTimestamp()` at line 79, causing the query `where consensus_end >= $1 order by consensus_end limit 1` to always return the genesis block regardless of the actual transaction timestamp, making all transaction lookups resolve to the wrong block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d3a8513-6b85-4aa1-9a05-254eeee74be1?mode=deep",
+    "timestamp": "2026-04-29 01:05:02.382168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a negative or zero block index to `getRecordFileBlockDetailsFromIndex()` at line 132, causing the query `where index = $1` to match an unexpected record or return null, disrupting the block-to-transaction mapping for callers that rely on this function to verify submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a740c573-979d-4f1a-991f-7c4c593d3d42?mode=deep",
+    "timestamp": "2026-04-29 01:05:27.418606",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getByHashOrNumber()] Can an unprivileged external user supply `null` for both `hash` and `number` parameters to `getByHashOrNumber()` at line 164, causing the function to fall into the `else` branch at line 171-173 and execute `where index = $1` with `null` as the parameter, potentially causing a PostgreSQL type error or returning unexpected results that corrupt the block lookup for transaction verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f249b8cb-00cd-4c99-a108-88e7d3c3498c?mode=deep",
+    "timestamp": "2026-04-29 01:05:53.090885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getByHashOrNumber()] Can an unprivileged external user supply an empty string `''` as the `hash` parameter to `getByHashOrNumber()` at line 167 (where `if (hash)` evaluates to false for empty string), causing the function to fall into the number branch and execute `where index = $1` with `undefined` or `null`, returning an unintended block record and misattributing a transaction to the wrong block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37b2d7dc-d859-4628-89fd-7e1a5ced6360?mode=deep",
+    "timestamp": "2026-04-29 01:06:19.383673",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash value of `%` (a single wildcard) to `getByHashOrNumber()` at line 169-170, where `hash.toLowerCase()` returns `%` and `params.push(hash + '%')` pushes `%%`, causing the LIKE query to match every row in `record_file`, and `getSingleRow()` to return null (multiple rows), making all block-by-hash lookups fail and preventing transaction confirmation verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a264cf08-3cae-4f1f-a8f1-738a9bdc88a6?mode=deep",
+    "timestamp": "2026-04-29 01:06:46.602213",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array containing `null` or `undefined` values to `getRecordFileBlockDetailsFromTimestampArray()` at line 92, causing the `unnest($1::bigint[])` cast to fail with a PostgreSQL type error, resulting in an unhandled exception that crashes the query and denies service to all callers performing transaction-to-block lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1431fc7d-1d5a-45f5-b6a8-29ed023ffc24?mode=deep",
+    "timestamp": "2026-04-29 01:07:15.232247",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array with a single element equal to `Number.MAX_SAFE_INTEGER` (not BigInt) to `getRecordFileBlockDetailsFromTimestampArray()` at line 101 (`BigInt(maxTimestamp)`), causing a precision loss when converting from Number to BigInt, resulting in an incorrect upper bound that either misses valid blocks or scans an unintended range of transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e73ea58-9559-4690-a5b2-9becf7196421?mode=deep",
+    "timestamp": "2026-04-29 01:07:42.739933",
+    "report_generated": false
+  }
+]
