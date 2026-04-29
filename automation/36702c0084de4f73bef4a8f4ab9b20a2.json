@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: callContract()] Can an unprivileged external user exploit the Suppliers.memoize() lazy evaluation of blockSupplier in callContract() to cause a BlockNumberNotFoundException to be thrown lazily during EVM execution (not at setup time), bypassing the expected error handling flow and causing gas tokens to be consumed without proper restoration, draining the throttle bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbd152d9-aafc-418d-92a9-7b3926b94a6e?mode=deep",
+    "timestamp": "2026-04-29 02:38:54.988255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user send requests with the maximum allowed gas (15,000,000) that all succeed but use exactly gasLimit gas, causing gasRemaining=0 and Math.min(0, gasLimitToRestoreBaseline)=0 to be restored, meaning each request permanently consumes 15,000,000/10,000=1,500 gas tokens from the bucket, and with gasPerSecond=750,000 (scaled), only 500 such requests per second are needed to exhaust the bucket and prevent gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b0fc105-25e5-4d45-b61b-7df8d7b51d43?mode=deep",
+    "timestamp": "2026-04-29 02:39:07.545509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user exploit the integer truncation in (long)(gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f) where gasLimit=15,000,000 and gasLimitRefundPercent=99.9f, causing the cast to long to truncate the result and restore 1 less token than expected per request, and by sending thousands of requests cause a cumulative gas deficit that prevents transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_820b42df-cbd2-4953-91a7-2163f8cce353?mode=deep",
+    "timestamp": "2026-04-29 02:39:20.205047",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user send a burst of requests simultaneously before the rateLimitBucket is depleted, exploiting the non-atomic check between rateLimitBucket.tryConsume(1) and gasLimitBucket.tryConsume(scaleGas(gas)) in ThrottleManagerImpl.throttle(), where a race condition allows more requests to pass than intended, flooding the gossip layer with more transactions than the throttle should permit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51163365-92da-4b03-bed5-a10e05b4d362?mode=deep",
+    "timestamp": "2026-04-29 02:39:33.569677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: validateResult()] Can an unprivileged external user craft a contract call that causes validateResult() to throw MirrorEvmTransactionException with a non-null result, where result.gasUsed() is very small (near 0), causing restoreGasToBucket() to restore Math.min(gasLimit - 0, gasLimitToRestoreBaseline) = gasLimitToRestoreBaseline tokens, effectively over-restoring gas to the bucket beyond what was consumed, allowing the attacker to inflate the gas bucket and enable other attackers to bypass throttling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f946b2df-d949-4625-9746-3e1c8ea1468e?mode=deep",
+    "timestamp": "2026-04-29 02:39:48.261776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user exploit the fact that the estimate=true path skips restoreGasToBucket() entirely, and by calling the ETH_ESTIMATE_GAS endpoint repeatedly with maximum gas values, drain the gas throttle bucket without any restoration, preventing all non-estimate (ETH_CALL) transactions from passing the gas throttle and being gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56f472ae-233c-4c69-8e7b-8db3d75f94c0?mode=deep",
+    "timestamp": "2026-04-29 02:40:03.106114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user send a request where result is not null, result.isSuccessful() is false, but result.gasUsed() is less than gasLimit (i.e., a revert that didn't use all gas), causing the Math.min(gasRemaining, gasLimitToRestoreBaseline) path to be taken, and if gasLimitToRestoreBaseline is very small (low gasLimitRefundPercent config), cause significant net gas loss per request that drains the bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8df45d7a-3109-4ffb-ac81-2c9091cf30d7?mode=deep",
+    "timestamp": "2026-04-29 02:40:18.200260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: callContract()] Can an unprivileged external user send a request with a block parameter set to a future block number, causing recordFileService.findByBlockType() to return empty and BlockNumberNotFoundException to be thrown from the memoized blockSupplier, and if this exception propagates outside doProcessCall()'s try-finally, cause gas tokens to be consumed without restoration, draining the throttle bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4750efd5-a5a8-4a5b-aee8-e567407fc859?mode=deep",
+    "timestamp": "2026-04-29 02:40:34.664985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user exploit the sequential (non-atomic) nature of the throttle check in ContractController (throttle() then validateContractMaxGasLimit()) where throttle() consumes gas tokens but validateContractMaxGasLimit() throws InvalidParametersException, and the controller's catch block calls throttleManager.restore(request.getGas()) which may over-restore if scaleGas() rounding causes restore to add more tokens than were consumed, inflating the bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e1a159b-f7cc-4bce-85b5-0b413a608b97?mode=deep",
+    "timestamp": "2026-04-29 02:40:52.436959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user send a request where the MirrorEvmTransactionException is thrown with a result that has gasUsed() == 0 (functionResult with gasUsed=0), causing gasRemaining = gasLimit - 0 = gasLimit, and Math.min(gasLimit, gasLimitToRestoreBaseline) = gasLimitToRestoreBaseline to be restored, which is the same as the null-result path, meaning a failed transaction with zero gas used restores the same amount as a completely failed transaction, potentially over-restoring gas?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c10d3cbf-1ab2-4af4-a3c7-f55b5dcd5445?mode=deep",
+    "timestamp": "2026-04-29 02:41:10.393194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: updateMetrics()] Can an unprivileged external user craft requests with different callType values (ETH_CALL, ETH_ESTIMATE_GAS, ETH_DEBUG_TRACE_TRANSACTION) combined with different status strings from MirrorEvmTransactionException messages to create an unbounded number of metric tag combinations in updateMetrics(), causing a metric cardinality explosion that exhausts memory and crashes the service, preventing transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c963062-3aee-4356-9502-d3650d858639?mode=deep",
+    "timestamp": "2026-04-29 02:41:29.980142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user exploit the fact that status is set from e.getMessage() of MirrorEvmTransactionException, and if the exception message contains attacker-controlled content (e.g., from a Solidity revert reason), inject arbitrary strings into the TAG_STATUS metric tag via updateMetrics(), causing unbounded metric cardinality and memory exhaustion that prevents the service from processing gossip transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed3cfa17-d573-41a1-ad0a-c2798b680e2a?mode=deep",
+    "timestamp": "2026-04-29 02:41:48.811974",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user send a high volume of requests with gas values just above GAS_SCALE_FACTOR (10,001), causing scaleGas() to return 1 token consumed per request, but restoreGasToBucket() to restore Math.min(gasLimit - gasUsed, gasLimitToRestoreBaseline) which may be 0 if gasUsed == gasLimit, causing a net loss of 1 token per request and slowly draining the bucket to prevent gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2576211f-73da-4656-9567-ffe85470cee7?mode=deep",
+    "timestamp": "2026-04-29 02:42:09.649390",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user exploit the fact that when estimate=true, the finally block condition (!estimate) is false, so neither restoreGasToBucket() nor updateMetrics() is called, meaning gas consumed during the estimate binary search loop (which calls doProcessCall() multiple times) is never restored to the bucket, causing cumulative gas depletion that prevents gossip of real transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27952b81-60ab-4a90-acbd-c365d2224447?mode=deep",
+    "timestamp": "2026-04-29 02:42:30.285150",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: callContract()] Can an unprivileged external user send requests with a block parameter that causes recordFileService.findByBlockType() to perform expensive database queries, and by sending many such requests concurrently, exhaust database connection pools or cause query timeouts that throw unchecked exceptions propagating outside doProcessCall()'s finally block, preventing gas restoration and draining the throttle bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f74deac-316a-40cd-84a8-549f60263289?mode=deep",
+    "timestamp": "2026-04-29 02:42:51.052660",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user exploit the condition where result.isSuccessful() returns false AND gasLimit != result.gasUsed() (revert with partial gas use), causing the else branch to execute Math.min(gasRemaining, gasLimitToRestoreBaseline), and if gasLimitRefundPercent is configured to a low value (e.g., 10%), only 10% of gasLimit is restored even though 90% of gas was unused, causing a 90% net gas loss per reverted transaction that drains the bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da47449b-a6c2-4906-8261-ec3b12076920?mode=deep",
+    "timestamp": "2026-04-29 02:43:13.880553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user send a request that causes transactionExecutionService.execute() to throw a MirrorEvmTransactionException with a null result (e.getResult() == null), causing result to remain null in the finally block, and restoreGasToBucket(null, gasLimit) to restore only gasLimitRefundPercent% of gasLimit, while the full gasLimit was consumed from the bucket, causing a net gas deficit that accumulates over many requests and prevents gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4154c5d-2c5d-41be-8422-cf73b0b0854a?mode=deep",
+    "timestamp": "2026-04-29 02:43:36.739508",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user exploit a thread-safety issue where multiple threads simultaneously read result.gasUsed() and gasLimit in restoreGasToBucket(), and due to the non-synchronized nature of the EvmTransactionResult record, observe stale or inconsistent values that cause incorrect gas restoration amounts, leading to either over-depletion or over-inflation of the gas bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ab25a0a-2fae-4798-8389-7b4b050672a6?mode=deep",
+    "timestamp": "2026-04-29 02:44:00.778034",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: doProcessCall()] Can an unprivileged external user send a request where transactionExecutionService.execute() succeeds but validateResult() throws MirrorEvmTransactionException, and the exception's getResult() returns the original result with gasUsed() close to gasLimit, causing restoreGasToBucket() to restore near-zero gas, effectively consuming the full gasLimit from the bucket per request and rapidly exhausting the throttle to prevent gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00293b26-cc18-4d03-8cfe-c363ea504414?mode=deep",
+    "timestamp": "2026-04-29 02:44:25.219148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: callContract()] Can an unprivileged external user exploit the ContractCallContext.run() thread-local context mechanism to cause context leakage between concurrent requests, where one request's gas parameters are used in another request's restoreGasToBucket() call, causing incorrect gas amounts to be restored and either over-depleting or over-inflating the shared gas throttle bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5080df81-5970-4902-923f-b5c2c621d068?mode=deep",
+    "timestamp": "2026-04-29 02:44:49.445773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: restoreGasToBucket()] Can an unprivileged external user send a request with gasLimit=Long.MAX_VALUE (if validation is bypassed), causing the arithmetic (long)(gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f) to overflow, producing a negative gasLimitToRestoreBaseline, and then throttleManager.restore() being called with a negative value, potentially corrupting the bucket state and preventing all future gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c538e25-f0cf-49db-90e3-2fdbd10b9e78?mode=deep",
+    "timestamp": "2026-04-29 02:45:15.811347",
+    "report_generated": false
+  }
+]
