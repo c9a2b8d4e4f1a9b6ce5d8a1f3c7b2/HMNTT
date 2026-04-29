@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractActions()] Can an unprivileged external user pass a `limit` of 0 to `getContractActions()` causing `getLimitQuery(params.length)` to produce `LIMIT $N` with value 0, returning no contract actions and making the history appear empty to any consumer that does not distinguish between 'no actions' and 'query suppressed'?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6af2e3f0-e4c5-486e-b3e6-69c57623eb09?mode=deep",
+    "timestamp": "2026-04-29 01:39:52.883371",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractActionsByConsensusTimestamp()] Can an unprivileged external user supply a `consensusTimestamp` that matches multiple transactions in `contract_action` (e.g., due to a known timestamp collision) to `getContractActionsByConsensusTimestamp()`, causing the `payerAccountId` filter to be the only differentiator and allowing a crafted payer ID to surface actions from a different transaction, reorganizing visible call history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7031d30b-2e8b-4a16-8a55-1cc1ce5b866b?mode=deep",
+    "timestamp": "2026-04-29 01:40:04.931767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractActionsByConsensusTimestamp()] Can an unprivileged external user pass a `payerAccountId` of `null` or `undefined` to `getContractActionsByConsensusTimestamp()` such that the `WHERE payer_account_id = $2` condition matches NULL rows, returning actions from transactions with no payer and reorganizing the visible action history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40735eef-de89-46f0-9d4c-f0e02566b280?mode=deep",
+    "timestamp": "2026-04-29 01:40:17.500341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user pass a `timestamps` array containing BigInt values where `maxTimestamp` and `minTimestamp` are computed incorrectly due to the `-1n` initial value for `maxTimestamp`, causing the range filter `consensus_timestamp >= $3 AND consensus_timestamp <= $4` to include or exclude transactions at the boundary, reorganizing which Ethereum transactions are visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d29314e-4bf0-4bad-b975-6fb4c966b2b6?mode=deep",
+    "timestamp": "2026-04-29 01:40:30.565552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user pass a `timestamps` array with a single element equal to `MAX_LONG` to `getEthereumTransactionsByPayerAndTimestampArray()`, causing `minTimestamp` to remain at `MAX_LONG` and `maxTimestamp` to be set to `MAX_LONG`, producing a range filter that only matches the absolute maximum timestamp and reorganizing which transactions are returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7550e29-56e8-4f02-ae25-f5f86103070b?mode=deep",
+    "timestamp": "2026-04-29 01:40:44.079718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user pass mismatched `payers` and `timestamps` arrays of different lengths to `getEthereumTransactionsByPayerAndTimestampArray()`, causing the `payer_account_id = any($1) AND consensus_timestamp = any($2)` query to return cross-product matches that associate the wrong payer with a timestamp, reorganizing the transaction-to-payer mapping?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd9cb947-160d-4c9e-abbc-4917e4544aa6?mode=deep",
+    "timestamp": "2026-04-29 01:40:58.685529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user pass a `timestamps` array with duplicate values to `getEthereumTransactionsByPayerAndTimestampArray()`, causing `transactionMap.set(row.consensus_timestamp, ...)` to overwrite earlier entries with later ones, reorganizing which EthereumTransaction object is associated with a given timestamp in the returned map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e648bcb-def0-4470-955f-bab0d065df08?mode=deep",
+    "timestamp": "2026-04-29 01:41:13.665889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user pass an empty `payers` array but a non-empty `timestamps` array to `getEthereumTransactionsByPayerAndTimestampArray()`, causing the `isEmpty(payers)` check to return early with an empty map, making all Ethereum transactions for those timestamps invisible and reorganizing the apparent transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea2ecec6-cca6-4147-b418-e32e5412641e?mode=deep",
+    "timestamp": "2026-04-29 01:41:29.968149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractResultsByIdAndFiltersQuery()] Can an unprivileged external user pass an `order` value other than `asc`/`desc` to `getContractResultsByIdAndFiltersQuery()` that is accepted by `OrderSpec.from()` without validation, causing the `ORDER BY consensus_timestamp` clause to use an unexpected sort direction and reorganizing the returned contract results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c315983-2a1d-4ed8-8f95-e661552b35a4?mode=deep",
+    "timestamp": "2026-04-29 01:41:46.825359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractResultsByIdAndFiltersQuery()] Can an unprivileged external user pass an empty `whereConditions` array to `getContractResultsByIdAndFiltersQuery()` to bypass all filters and retrieve all contract results ordered only by `consensus_timestamp`, then use the `limit` parameter to page through results in a way that reorganizes the visible transaction history relative to what a filtered query would show?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6435ef3-822e-4167-bba2-f393bb4292b0?mode=deep",
+    "timestamp": "2026-04-29 01:42:04.424107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractResultsByIdAndFilters()] Can an unprivileged external user pass a very large `limit` value to `getContractResultsByIdAndFilters()` causing the query to return an unbounded number of contract results, and then exploit the lack of secondary sort key (only `consensus_timestamp` is ordered) to observe non-deterministic ordering of results sharing the same timestamp, reorganizing the apparent transaction sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76d29e3f-9022-4dcf-b6e5-29b493e33dfd?mode=deep",
+    "timestamp": "2026-04-29 01:42:22.920488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractResultsByIdAndFilters()] Can an unprivileged external user craft `whereConditions` that include a timestamp filter pointing to a range containing a known chain reorganization event, causing `getContractResultsByIdAndFilters()` to return results from the pre-reorg chain state, presenting a reorganized transaction history to API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d30693e0-be3c-497a-9668-4d9a50ffc36e?mode=deep",
+    "timestamp": "2026-04-29 01:42:42.900309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getInvolvedContractsByTimestampAndContractId()] Can an unprivileged external user pass a `timestamp` of `0` and a valid `contractId` to `getInvolvedContractsByTimestampAndContractId()`, bypassing the null/undefined check (since `0` is falsy in JavaScript), causing the function to return `null` instead of querying the database, making involved contracts invisible and reorganizing the apparent transaction participation history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b8ba799-7774-4257-8208-6624b1835f5b?mode=deep",
+    "timestamp": "2026-04-29 01:43:02.939653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getInvolvedContractsByTimestampAndContractId()] Can an unprivileged external user pass `timestamp = 0n` (BigInt zero) to `getInvolvedContractsByTimestampAndContractId()`, which evaluates as falsy in the `!timestamp` check, causing the function to return `null` and suppressing the involved contracts lookup, reorganizing which contracts appear associated with a transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_249a18ef-3843-4824-a142-5957534b48cd?mode=deep",
+    "timestamp": "2026-04-29 01:43:23.719365",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user supply an EVM address that matches a deleted contract (`DELETED = true`) to `getContractIdByEvmAddress()`, which filters `DELETED <> true`, causing the function to throw `NotFoundError` for a contract that exists but is deleted, reorganizing the visible contract history by making historical transactions appear to reference non-existent contracts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99c04812-9d21-417c-acb8-675af74c049d?mode=deep",
+    "timestamp": "2026-04-29 01:43:45.390684",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractIdByEvmAddress()] Can an unprivileged external user exploit the `rows.length > 1` error path in `getContractIdByEvmAddress()` by finding an EVM address with multiple non-unique index entries, causing the function to throw an unhandled `Error` that disrupts transaction history lookups for all users querying that address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1057976e-b279-43e6-8e7d-d153bb3dae79?mode=deep",
+    "timestamp": "2026-04-29 01:44:06.879691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: computeContractIdFromString()] Can an unprivileged external user pass a `contractIdValue` that satisfies `hasOwnProperty('create2_evm_address')` to `computeContractIdFromString()` but whose hex value decodes to a buffer matching multiple contracts, causing `getContractIdByEvmAddress()` to throw and preventing legitimate transaction history lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49455c12-6f8e-4780-9772-543d189789b6?mode=deep",
+    "timestamp": "2026-04-29 01:44:29.287409",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: computeContractIdFromString()] Can an unprivileged external user pass a malformed `contractIdValue` string to `computeContractIdFromString()` that passes the `create2_evm_address` check but contains invalid hex, causing `Buffer.from(create2EvmAddress, 'hex')` to produce a zero-length or truncated buffer that matches unintended contracts, reorganizing which contract's history is returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc5d2824-4a63-4304-8529-b3809e11d5c4?mode=deep",
+    "timestamp": "2026-04-29 01:44:51.582363",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user supply `conditions` containing a raw SQL fragment to `getContractLogsQuery()` via `buildSelectQuery()` that modifies the effective WHERE clause of all three UNION subqueries, causing logs from unintended time ranges to be included and reorganizing the visible event history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3112c094-397f-42db-abf6-957765b43c91?mode=deep",
+    "timestamp": "2026-04-29 01:45:15.545932",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user supply a `params` array that is shared by reference across all three UNION subqueries in `getContractLogsQuery()`, causing `buildSelectQuery()` to mutate `params` with each subquery's filter values and producing incorrect parameter bindings that reorganize which logs are returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_113c8a61-43c7-4859-a41b-e8c88e7b5c98?mode=deep",
+    "timestamp": "2026-04-29 01:45:39.741461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user supply `lower`, `inner`, and `upper` filter arrays where all three are non-empty, causing the UNION path to apply `orderClauseNoAlias` (without table alias) after the UNION, while each subquery uses `orderClause` (with alias), creating an ordering inconsistency that reorganizes the final log sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_891e6820-dff4-4097-aef0-1f12747d8e32?mode=deep",
+    "timestamp": "2026-04-29 01:46:04.974998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user supply a `limit` value that is pushed to `params` before the subqueries are built, causing the limit parameter position `$N` to be reused or misaligned across UNION subqueries, resulting in incorrect limits being applied and reorganizing which logs are returned per page?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ebbfb76e-61f6-43c1-913f-259d022d2f89?mode=deep",
+    "timestamp": "2026-04-29 01:46:30.711394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user pass `timestamp = true` (the boolean) to `getContractStateByIdAndFilters()` to trigger the timestamp branch, which switches to `contractStateTimestampQuery` with `DISTINCT ON (slot)`, without providing any actual timestamp filter in `whereConditions`, causing the query to return the latest value for each slot across all time and reorganizing the apparent current state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9401200-b29a-4689-8408-dd94a501c491?mode=deep",
+    "timestamp": "2026-04-29 01:46:57.283616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user pass conflicting `order` values to `getContractStateByIdAndFilters()` where the slot ordering and the `consensus_timestamp DESC` secondary ordering in `contractStateTimestampQuery` interact to cause `DISTINCT ON (slot)` to select a non-latest state change, reorganizing the apparent slot history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_183fa4ea-0aa1-4258-9eda-198bc00f298f?mode=deep",
+    "timestamp": "2026-04-29 01:47:25.069117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user pass an `involvedContractIds` array containing the string `'null'` or `'undefined'` to `getContractStateChangesByTimestamps()`, which is directly interpolated into the SQL via `.join(',')`, causing a SQL syntax error or unexpected matching behavior that reorganizes the returned state change history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d00bd6b0-6962-4ffa-8432-c566616ebe96?mode=deep",
+    "timestamp": "2026-04-29 01:47:53.438414",
+    "report_generated": false
+  }
+]
