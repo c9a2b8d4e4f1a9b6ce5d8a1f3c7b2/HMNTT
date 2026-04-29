@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_917579e8-3541-430b-8458-f2626228c979?mode=deep",
     "timestamp": "2026-04-29 00:20:00.776284",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user submit a transaction request with a crafted `req.url` containing URL-encoded path separators (e.g., `%2F`) so that `new URL(req.url, 'http://localhost')` normalizes it differently than Express routing, causing the transaction to be recorded under a spoofed `path` label in `requestTotalCounter`, corrupting audit metrics for that transaction route?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6e74d2e-aa35-487c-8bd8-49e20e8ac95f?mode=deep",
+    "timestamp": "2026-04-29 02:35:42.731697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a forged `content-length` header set to an arbitrarily large integer so that `requestSizeHistogram.record(parseInt(req.headers['content-length'] ?? '0', 10) || 0, labels)` records a falsified request size, causing operators to believe a transaction payload was far larger than it actually was and triggering false capacity alerts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c57f72bf-ca71-4b88-b5ef-e302b2001540?mode=deep",
+    "timestamp": "2026-04-29 02:35:55.342979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with `content-length: 0` while including a non-empty body, so that `requestSizeHistogram` records zero bytes for a real transaction payload, hiding the true size of the submitted transaction from monitoring systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10101e83-2fb6-479c-b1e2-44406067aa2b?mode=deep",
+    "timestamp": "2026-04-29 02:36:08.307806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a negative `content-length` value (e.g., `-1`) so that `parseInt(req.headers['content-length'] ?? '0', 10) || 0` evaluates to `0` due to the `|| 0` fallback, silently suppressing the request size metric for that transaction submission?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dccebbab-6711-4d1f-b4df-08c3ec52357f?mode=deep",
+    "timestamp": "2026-04-29 02:36:21.400006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toOpenApiPath()] Can an unprivileged external user craft a transaction request URL with a path that does not match any registered Express route (so `req.route` is null), causing `toOpenApiPath` to fall back to `req.path` and record the raw, unsanitized path as a Prometheus label, injecting arbitrary strings into `requestTotalCounter` labels and causing unbounded label cardinality that exhausts memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_651bc834-f21b-41ed-b84d-9f67643aed33?mode=deep",
+    "timestamp": "2026-04-29 02:36:35.632960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toOpenApiPath()] Can an unprivileged external user send a transaction request with a path containing Prometheus label injection characters (e.g., `{`, `}`, `",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1fb930e-8ecf-4ab8-bbb9-b47ff2615527?mode=deep",
+    "timestamp": "2026-04-29 02:36:50.171282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toOpenApiPath()] Can an unprivileged external user send a transaction request with a path that starts with the `apiPrefix` value (`/api/v1`) but contains additional crafted segments, so that `toOpenApiPath` returns the attacker-controlled path verbatim as a metric label, allowing the attacker to inject arbitrary label values into `durationHistogram` for transaction routes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_804e92ff-5715-4cb7-854d-fd1d4d8fe8b3?mode=deep",
+    "timestamp": "2026-04-29 02:37:05.435399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user flood the server with thousands of concurrent transaction requests, each keeping the connection open, so that `inFlightCounter.add(1)` is called for each without a corresponding `inFlightCounter.add(-1)` (if `res.finish` never fires due to connection abort), causing `api_all_request_in_processing_total` to grow unboundedly and mislead operators into thinking the system is under legitimate load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_566ca2b2-ebd1-45bb-bca5-0b2a6d8569e1?mode=deep",
+    "timestamp": "2026-04-29 02:37:21.825834",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user abruptly close a transaction request connection before the response finishes, so that the `res.on('finish')` callback never fires, leaving `inFlightCounter` permanently incremented by 1 per aborted request, and over time causing the `api_all_request_in_processing_total` gauge to drift to an arbitrarily high value that masks real in-flight transaction counts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_530185fe-1d32-4f15-a689-629b24d3b82e?mode=deep",
+    "timestamp": "2026-04-29 02:37:39.144856",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: authenticate()] Can an unprivileged external user access the metrics endpoint at `metricsPath` when `config.metrics.config.authentication` is `false` (the default or misconfigured state), bypassing the `authenticate(req)` check entirely since it returns `true` unconditionally, and thereby reading all Prometheus metrics including transaction rate, error rate, and timing data that reveals system behavior and transaction processing patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d90d4a88-e731-45d0-82f8-2a93caa359fc?mode=deep",
+    "timestamp": "2026-04-29 02:37:57.135361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: authenticate()] Can an unprivileged external user enumerate valid metric credentials by timing the response of the `authenticate(req)` function — even though `tsscmp` is used for the password comparison, can the attacker exploit the fact that `basicAuth(req)` parsing or the `credentials.name` check with `tsscmp` still leaks timing information when the username does not exist vs. when it does, allowing username enumeration against the metrics endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ed24b46-6f13-4285-b2ae-52b76c009881?mode=deep",
+    "timestamp": "2026-04-29 02:38:16.470276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a crafted `req.method` value containing special characters (e.g., newlines, Prometheus label delimiters) so that `const method = req.method` is used directly as a label in `labels = {method, path, code}` without sanitization, injecting malformed data into `requestTotalCounter`, `durationHistogram`, `requestSizeHistogram`, and `responseSizeHistogram`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33749515-27e5-4c08-82ae-8f5be15c3bb5?mode=deep",
+    "timestamp": "2026-04-29 02:38:34.991003",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a crafted `req.url` that, when parsed by `new URL(req.url, 'http://localhost')`, produces a `pathname` that exactly equals `metricsPath` (e.g., by appending a trailing slash or using URL encoding), causing the middleware to serve the Prometheus metrics page instead of processing the transaction, effectively hijacking the request flow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f02f116-66b8-4e14-b2e7-1bd99106d404?mode=deep",
+    "timestamp": "2026-04-29 02:38:55.365373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a `req.url` containing a query string or fragment that causes `new URL(req.url, 'http://localhost').pathname` to match `metricsPath`, bypassing the intended routing and causing the metrics endpoint to be served in response to a transaction API call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_373ab019-ccff-4a8f-af92-b9b471cb2814?mode=deep",
+    "timestamp": "2026-04-29 02:39:14.568970",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a high volume of unique transaction-like paths (e.g., `/api/v1/transactions/UNIQUE_ID_1`, `/api/v1/transactions/UNIQUE_ID_2`, ...) so that each unique path becomes a distinct label value in `requestTotalCounter`, `durationHistogram`, `requestSizeHistogram`, and `responseSizeHistogram`, causing unbounded label cardinality that exhausts the Node.js heap and causes a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3c38cf2-e405-4b7b-b887-baacfb3ddc15?mode=deep",
+    "timestamp": "2026-04-29 02:39:36.134934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: res.write()] Can an unprivileged external user trigger a transaction response that calls `res.write` multiple times with large chunks, causing `responseSize += getChunkSize(chunk)` to accumulate a very large value in `responseSizeHistogram`, and if the histogram bucket boundaries in `responseSizeBuckets` are not large enough, causing all observations to fall into the overflow bucket and corrupting response size distribution data for transaction endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c179f4a-fcd1-4cab-a87d-e16a169151c7?mode=deep",
+    "timestamp": "2026-04-29 02:39:58.849081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: res.end()] Can an unprivileged external user craft a transaction request that causes the server to call `res.end` with a very large chunk, so that `getChunkSize(chunk)` returns a large value and `responseSizeHistogram.record(responseSize, labels)` records an inflated response size, misleading operators about the actual data volume returned for transaction queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed389c02-bf21-4627-9e24-59e8d68edd19?mode=deep",
+    "timestamp": "2026-04-29 02:40:20.115249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getChunkSize()] Can an unprivileged external user trigger a code path where `res.end` or `res.write` is called with a non-Buffer, non-string chunk type (e.g., a typed array or object), causing `getChunkSize(chunk)` to return `0` and silently under-report the actual response size in `responseSizeHistogram` for transaction responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d98f0ab8-c3fd-4445-ae39-37aa9e2bc180?mode=deep",
+    "timestamp": "2026-04-29 02:40:43.427989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a `content-length` header set to `NaN` or a non-numeric string (e.g., `abc`), causing `parseInt(req.headers['content-length'] ?? '0', 10)` to return `NaN`, which then evaluates to `0` via `|| 0`, silently recording zero bytes for the transaction request size and hiding the actual payload size from metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e312d05-bb1a-4a7f-bf64-ab7aab710341?mode=deep",
+    "timestamp": "2026-04-29 02:41:07.277635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with `content-length: Infinity` or `content-length: 9999999999999999`, causing `parseInt` to return a very large number that, when passed to `requestSizeHistogram.record()`, causes the OpenTelemetry SDK to throw an exception or behave unexpectedly, potentially crashing the metrics recording for all subsequent transaction requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16ce3a56-4566-4e00-8a80-3efa3c95e643?mode=deep",
+    "timestamp": "2026-04-29 02:41:31.881873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request that results in a 5xx server error, causing both `allServerErrorCounter.add(1)` and `allErrorCounter.add(1)` to increment, and by repeatedly triggering server errors through malformed transaction payloads, can the attacker inflate the `api_all_server_error` and `api_all_errors` counters to trigger false alerting thresholds and cause operators to investigate phantom incidents?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1f6aa89-82ea-4512-a6fb-0a632baa2b71?mode=deep",
+    "timestamp": "2026-04-29 02:41:57.034578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request that results in a 4xx client error, causing `allClientErrorCounter.add(1)` and `allErrorCounter.add(1)` to increment, and by flooding with 4xx-generating requests, can the attacker drown out legitimate error signals in `api_all_client_error` metrics, making it impossible for operators to distinguish real transaction failures from attacker-generated noise?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72a4b448-4a8c-4ba8-b149-52b445445eea?mode=deep",
+    "timestamp": "2026-04-29 02:42:22.452183",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: metricsMiddleware()] Can an unprivileged external user send a transaction request with a crafted `req.url` that causes `new URL(req.url, 'http://localhost')` to throw a `TypeError` (e.g., by providing a URL with invalid characters), and since there is no try/catch around this call in `metricsMiddleware`, does this crash the middleware and prevent `next()` from being called, effectively blocking all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8050233-6ddf-4dcb-ae6b-22708711b9a9?mode=deep",
+    "timestamp": "2026-04-29 02:42:48.970914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toOpenApiPath()] Can an unprivileged external user send a transaction request where `res.locals[requestPathLabel]` has been set to an attacker-controlled value (e.g., via a prior middleware that echoes user input into `res.locals`), causing `toOpenApiPath` to use that value directly as the `path` label in all per-route metrics, injecting arbitrary strings into `requestTotalCounter` and `durationHistogram`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c6760e7-52bc-4852-9b88-62af145dc4ab?mode=deep",
+    "timestamp": "2026-04-29 02:43:16.468196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toOpenApiPath()] Can an unprivileged external user send a transaction request with a path containing a colon followed by special regex characters (e.g., `/:foo(bar)/`), causing the regex `/:([^/]+)/g` in `path.replace(/:([^/]+)/g, '{$1}')` to produce unexpected output that corrupts the OpenAPI path label stored in Prometheus metrics for transaction routes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f99e2239-401c-40d1-92d9-28206390e921?mode=deep",
+    "timestamp": "2026-04-29 02:43:42.227050",
+    "report_generated": false
   }
 ]
