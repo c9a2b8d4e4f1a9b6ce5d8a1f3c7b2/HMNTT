@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user supply a crafted `accountId` path parameter that resolves to a different account's `EntityId` via `entityService.lookup()`, causing `getBaseCondition()` to bind the wrong `baseField` value and return another user's pending airdrop records, leading to information leakage that enables a targeted claim-race attack resulting in direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b5a9af8-144d-4cd3-ab3d-5189747d0246?mode=deep",
+    "timestamp": "2026-04-29 00:46:24.049557",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the hardcoded `TOKEN_AIRDROP.STATE.eq(AirdropState.PENDING)` filter in `findAll()` by observing that CANCELLED(0) and CLAIMED(1) airdrops are never returned, and use timing differences in response sizes to infer whether a competing claim transaction has been processed, enabling a front-running attack that causes direct loss of funds to the legitimate recipient?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d6789b7-23ff-450b-a085-00eb9408dd21?mode=deep",
+    "timestamp": "2026-04-29 00:46:35.611485",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user send a request where `request.getOrder()` does not match any key in `SORT_ORDERS.getOrDefault(type, Map.of())`, causing `order` to be `null`, and then `dslContext.selectFrom(TOKEN_AIRDROP).where(condition).orderBy(null).limit(request.getLimit())` to execute with an undefined ordering, returning airdrop records in an unpredictable sequence that causes pagination cursors to skip or duplicate airdrop entries, leading to missed or double-processed fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a03e896f-27ae-446c-9efd-1e8c1ced3549?mode=deep",
+    "timestamp": "2026-04-29 00:46:48.372421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user craft a `serialNumber` range parameter with `operator=LT` and `value=0` so that `adjustUpperBound()` computes `upperBound = 0 - 1 = -1` (or `Long.MIN_VALUE` on underflow), producing an invalid SQL condition that bypasses the serial number filter and returns NFT airdrops belonging to other token IDs, causing incorrect fund attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83a4fcda-53d9-4ec6-b8b7-cfd1527cf77a?mode=deep",
+    "timestamp": "2026-04-29 00:47:00.823888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user supply a `receiverId` or `senderId` range parameter with `operator=GT` and `value=Long.MAX_VALUE` so that `getAdjustedLowerRangeValue()` computes `lowerBound = Long.MAX_VALUE + 1` causing a signed integer overflow to `Long.MIN_VALUE`, which then passes the `adjustedLower > adjustedUpper` range validation check and generates a SQL condition that matches all account IDs, leaking all pending airdrops across all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de22db88-8f47-43e2-8eb9-ac985a2e569f?mode=deep",
+    "timestamp": "2026-04-29 00:47:14.559634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `getBounds()` method in `TokenAirdropRequest` where the primary bound selection logic (`!entityIds.isEmpty() ? entityIds : tokenIds`) silently promotes `tokenIds` to the primary sort field when `entityIds` is empty, causing `getBoundConditions()` to generate a SQL WHERE clause that omits the `receiver_account_id`/`sender_account_id` filter entirely, returning airdrops across all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be53afe2-7d6b-475d-94f9-59f31f24d524?mode=deep",
+    "timestamp": "2026-04-29 00:47:28.375427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user provide two identical `token_id` range parameters (e.g., `token_id=gte:100&token_id=gte:200`) where `verifySingleOccurrence()` is never called in the airdrop query path, causing the `Bound` constructor to silently overwrite the `lower` field with the last seen lower-bound parameter, producing a SQL condition that uses `200` instead of `100` and skips a range of token airdrops, causing the user to miss claimable airdrops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f8e4240-67e0-43ac-bed6-deb0ab144e7e?mode=deep",
+    "timestamp": "2026-04-29 00:47:42.592103",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `@Size(max = 2)` constraint on `receiverIds`/`senderIds` arrays by providing exactly two parameters with conflicting operators (e.g., `gte:100` and `gte:200`) where `verifyEqualOrRange()` is never invoked in the airdrop controller path, causing the `Bound` to silently use only the last-assigned lower bound and generate an incorrect SQL range that omits valid airdrop records from the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bdcfa1f-ae82-4f20-bb2b-b72802157124?mode=deep",
+    "timestamp": "2026-04-29 00:47:57.888255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `mapToNullIfZero()` mapping in `TokenAirdropMapper` where `serialNumber=0` is mapped to `null`, causing the `EXTRACTOR` function in `TokenAirdropsController` to emit `DEFAULT_SERIAL_NUMBER = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b4f5ddb-fb90-493b-8cb0-d03521a92d2a?mode=deep",
+    "timestamp": "2026-04-29 00:48:14.549043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `getSort()` method in `TokenAirdropsController` where `lastSerial == DEFAULT_SERIAL_VALUE` (comparing `Long` object to `long` primitive `0L`) to trigger an `NullPointerException` when `lastSerial` is `null` and auto-unboxing is attempted, causing a 500 error that prevents the user from paginating through their pending airdrops and missing time-sensitive claim windows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd4471cb-8a70-4f49-8541-561b53049c16?mode=deep",
+    "timestamp": "2026-04-29 00:48:31.116041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user craft a request with `AirdropRequestType.OUTSTANDING` but supply `senderIds` query parameters (which are only valid for `PENDING` type), causing the `processRequest()` method to construct an `entityIdsBound` using `OUTSTANDING.getPrimaryField()` (which is `RECEIVER_ACCOUNT_ID`) but bind it to sender ID values, generating a SQL condition that matches wrong accounts and leaks outstanding airdrop data for unintended recipients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_994adc8a-47ec-411f-ad73-96cf09dd1ce5?mode=deep",
+    "timestamp": "2026-04-29 00:48:48.605858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `CrudRepository` interface inherited by `TokenAirdropRepository` (which exposes `findById(Id)`, `findAll()`, `existsById(Id)`) to enumerate all `TokenAirdrop` records by calling the unguarded `findAll()` Spring Data method if it is exposed via an auto-generated REST endpoint, bypassing the account-scoped `findAll(TokenAirdropRequest, EntityId)` filter and leaking all pending airdrops across all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c77a6ac9-e30c-4e31-b4ce-151bd3754f58?mode=deep",
+    "timestamp": "2026-04-29 00:49:05.872553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user supply a `limit` value at exactly `MAX_LIMIT` combined with a broad range on `token_id` to cause the jOOQ query in `findAll()` to perform a full table scan on `TOKEN_AIRDROP`, and by observing response timing differences, infer the existence and approximate count of pending airdrops for a target account, enabling targeted fund-theft attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9699226-bf3d-454e-9fe1-cfb92bc65bc1?mode=deep",
+    "timestamp": "2026-04-29 00:49:22.963663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `adjustUpperRange()` method in `Bound` where `upper = lower` is set when `lower.operator() == EQ`, causing the secondary bound (e.g., `token_id`) to have both lower and upper set to the same EQ value, and then `getBoundConditions()` to generate a SQL condition that is logically equivalent to `token_id = X AND token_id = X` rather than a range, silently filtering out valid airdrop records and causing the user to miss claimable funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_def235c4-0a3f-42e2-881d-ecded7219b5b?mode=deep",
+    "timestamp": "2026-04-29 00:49:41.986870",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `getBoundConditions()` recursive logic in `JooqRepository` where `removeRanges()` creates new `Bound` objects with only lower or upper parameters, and the recursive call with `lowerProcessed=true` skips the `adjustUpperRange()` call, causing the secondary bounds to have inconsistent state between recursive invocations and generating a SQL OR condition that matches a superset of the intended records, leaking airdrop data for other accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7103ef99-b76b-45fd-8b83-b5c21e8ff1dc?mode=deep",
+    "timestamp": "2026-04-29 00:50:01.395012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user provide a `serialNumber` range with `operator=GT` and `value=Long.MAX_VALUE - 1` so that `getInclusiveRangeValue(false)` computes `value + 1L = Long.MAX_VALUE`, and then a second call with `operator=LT` and `value=Long.MIN_VALUE + 1` computes `value - 1L = Long.MIN_VALUE`, producing a SQL condition `serial_number >= Long.MAX_VALUE AND serial_number <= Long.MIN_VALUE` that matches no records, causing the user to silently receive an empty result set and miss all their pending NFT airdrops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_592d9e99-8f13-4838-b8d5-47348e384909?mode=deep",
+    "timestamp": "2026-04-29 00:50:21.344354",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `EntityIdRangeParameter.getInclusiveValue()` method where `operator=GT` returns `value + 1` without overflow protection, by supplying `value=Long.MAX_VALUE`, causing `value + 1 = Long.MIN_VALUE` (overflow), which is then used as a SQL lower bound that matches all positive account IDs, leaking all pending airdrops for all accounts with IDs greater than `Long.MIN_VALUE`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e902e71-b2b5-4f3f-9388-8d391a96707e?mode=deep",
+    "timestamp": "2026-04-29 00:50:42.311555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `getEntityId()` parsing in `EntityIdRangeParameter` where a 3-part entity ID `shard.realm.num` is accepted, and by supplying a shard/realm combination that differs from the node's `CommonProperties`, cause the `EntityId.of(parts.get(0), parts.get(1), parts.get(2))` to encode a different numeric ID than the account's canonical ID, bypassing the `getBaseCondition()` account filter and returning airdrops for a different account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9794ec7-e2ff-4e52-87a8-8902a9285ebf?mode=deep",
+    "timestamp": "2026-04-29 00:51:04.134388",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user supply an EVM address as the `{id}` path variable in `/api/v1/accounts/{id}/airdrops/outstanding`, causing `EntityIdParameter.valueOf()` to parse it via `EntityIdEvmAddressParameter`, and if the EVM address resolves to a different account's `EntityId` than expected (e.g., due to alias collision), `getBaseCondition()` would filter on the wrong `senderAccountId`, returning another account's outstanding airdrops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b78a2542-789a-4f68-ab2b-9c269f29dc79?mode=deep",
+    "timestamp": "2026-04-29 00:51:26.322858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `Bound` constructor's range validation (`if (primarySortField && adjustedLower > adjustedUpper)`) which only throws for `primarySortField=true`, meaning that `tokenIds` and `serialNumbers` bounds (constructed with `primarySortField=false`) accept inverted ranges (lower > upper) without error, causing `getBoundConditions()` to generate a SQL condition that is always false and silently returns zero results, causing the user to miss all their pending airdrops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5637102-54db-4f31-b0a1-0bc044083fdc?mode=deep",
+    "timestamp": "2026-04-29 00:51:48.316996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `getBounds()` method where when both `entityIds` and `tokenIds` are non-empty, the return is `List.of(primaryBound, secondaryBound, serialNumbers)` including `serialNumbers` even when it is `Bound.EMPTY`, causing `getBoundConditions()` to process an empty bound as a secondary condition and generate a `noCondition()` that effectively removes the serial number filter, returning NFT airdrops across all serial numbers when only specific ones were intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41a4363b-ff7e-4e02-9396-74411f4ca0c3?mode=deep",
+    "timestamp": "2026-04-29 00:52:11.301522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `SORT_ORDERS` map where `OUTSTANDING` sorts by `RECEIVER_ACCOUNT_ID` and `PENDING` sorts by `SENDER_ACCOUNT_ID` as the primary sort field, and by providing a pagination cursor with a `receiver_id` value that belongs to a different account, cause the next-page query to return airdrops anchored to the wrong account's receiver ID, leaking cross-account airdrop data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f58f844e-ce64-4ee2-8988-4ec7729d3699?mode=deep",
+    "timestamp": "2026-04-29 00:52:35.125288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `amount` field in `AbstractTokenAirdrop` which is of type `Long` (nullable), and if the jOOQ `fetchInto(TokenAirdrop.class)` mapping returns a record where `amount=null` for a fungible token airdrop, cause downstream processing to treat a null amount as zero, leading to incorrect fund accounting where a non-zero airdrop appears as a zero-value transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be7aaab6-4b02-4d43-af60-9b06a5761e10?mode=deep",
+    "timestamp": "2026-04-29 00:52:59.642282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user exploit the `timestampRange` field in `AbstractTokenAirdrop` (of type `Range<Long>`) where the jOOQ `fetchInto(TokenAirdrop.class)` mapping may incorrectly deserialize a PostgreSQL range type, causing the returned `TokenAirdrop` to have a `null` or incorrect `timestampRange`, which downstream consumers use to determine airdrop validity windows, leading to premature or missed claim processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9de1e725-2dd9-4212-ab5c-13eee6b0cb68?mode=deep",
+    "timestamp": "2026-04-29 00:53:23.709506",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged external user craft a request to `/api/v1/accounts/{id}/airdrops/pending` with a `sender_id` range that spans a very large range (e.g., `gte:1&lte:9999999999`), causing `getBoundConditions()` to generate a SQL OR condition with three branches (lower outer, middle, upper outer) that together perform multiple full-index scans, and by observing which airdrop records appear in the response, infer the existence of pending airdrops from specific senders to mount a targeted claim-front-running attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_897f8506-4477-4428-ac17-1303edba6305?mode=deep",
+    "timestamp": "2026-04-29 00:53:48.959667",
+    "report_generated": false
+  }
+]
