@@ -70,5 +70,77 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_891f114b-7b7c-4e66-af7b-13ea23a52ffe?mode=deep",
     "timestamp": "2026-04-28 20:07:15.356167",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause a response that leaks `deleted: true` schedules by default, since `getSchedules` does not filter out deleted schedules in the WHERE clause, allowing enumeration of all deleted schedule IDs and their associated `transaction_body` data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e669dc09-5fc9-4bd9-b84f-2428488a18ec?mode=deep",
+    "timestamp": "2026-04-29 03:34:56.090382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user retrieve the full details of a deleted schedule (including `transaction_body`, `signatures`, `admin_key`) since `getScheduleById` does not check `schedule.deleted` before returning data at line 127, exposing historical sensitive data of deleted schedules?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07f63463-a3b9-41b2-a2da-bb030d86fa8a?mode=deep",
+    "timestamp": "2026-04-29 03:35:08.217139",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user cause a SQL parameter index collision by supplying filters in a specific order where `LIMIT` and `ORDER` filters are interspersed with `ACCOUNT_ID` and `SCHEDULE_ID` filters, causing `paramCount` to be misaligned with `pgSqlParams` array indices, resulting in wrong parameter binding and data leakage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3fbce9a-9789-4255-a262-b19607c9704d?mode=deep",
+    "timestamp": "2026-04-29 03:35:21.288546",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user exploit the `range(1, entityIds.length + 1)` lodash call at line 251 with a very large `entityIds` array to generate a massive `positions` string, causing the `entityQuery` and `signatureQuery` to have hundreds of positional parameters that exceed PostgreSQL's parameter limit (65535), causing a DB error that leaks query structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e2427c2-1589-4c40-9edb-dc4eaa5f892c?mode=deep",
+    "timestamp": "2026-04-29 03:35:34.222859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user supply a `scheduleId` of `0` or `0.0.0` to query the zero entity ID, which may match system records or cause unexpected behavior in `EntityId.parseString` since `isAllZero()` returns `true` for `num === 0` at `entityId.js:84`, potentially returning null or unexpected data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e87a9efc-72aa-4aba-8df4-d5887209b3e4?mode=deep",
+    "timestamp": "2026-04-29 03:35:47.947087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user cause a `SignatureType.getName()` call at line 89 to throw an unhandled exception or return `undefined` if the DB contains an unknown signature type integer, causing `formatScheduleRow` to produce malformed output or crash, leading to a 500 error that leaks internal state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cacb5679-ac86-4d17-bfc7-8d5aaa559787?mode=deep",
+    "timestamp": "2026-04-29 03:36:02.453292",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause the `next` pagination link at line 274 to contain a `null` schedule ID (when `lastScheduleId` is `null`) by triggering an edge case where `schedulesResponse.schedules.length > 0` but the last schedule's `schedule_id` formats to `null` via `EntityId.parse().toString()`, generating a malformed pagination link?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4019080-10c4-4f19-a439-48892331d38f?mode=deep",
+    "timestamp": "2026-04-29 03:36:17.077394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause a response inconsistency by supplying both `account.id` and `schedule.id` filters simultaneously, where the `schedule.id` filter in the main `schedulesQuery` returns a different set than the `entityIds` used in `entityQuery`/`signatureQuery`, leading to mismatched entity/signature data being merged with schedule rows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d064aac-b182-4176-ad1f-3b65269bc9ec?mode=deep",
+    "timestamp": "2026-04-29 03:36:33.534937",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user cause a denial-of-service by repeatedly querying non-expired, non-executed schedules (returning empty `{}` cache headers), forcing downstream caches to never cache responses and always hit the origin server, amplifying load on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c4cbed0-5f3f-481b-b3cb-aa1ac55722b8?mode=deep",
+    "timestamp": "2026-04-29 03:36:50.728293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user cause `utils.nowInNs()` in `getScheduleCacheControlHeader` at line 131 to be called with a clock skew that causes `hasAutoExpired` at line 137 to incorrectly evaluate, serving a `public, max-age=3600` cached response for a schedule that is still active, causing stale data to be served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12ea8eea-b570-49cd-aaf3-866e7387e237?mode=deep",
+    "timestamp": "2026-04-29 03:37:09.034076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user exploit the fact that `buildAndValidateFilters` is called without a custom `filterValidator` at line 236 (using the default `filterValidityChecks`), meaning schedule-specific validation logic is not applied, potentially allowing filter values that pass generic validation but have unexpected semantics in the schedule context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bff72eb-6f40-4c32-93de-10882316f6bf?mode=deep",
+    "timestamp": "2026-04-29 03:37:27.962775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user cause the `filterQuery.limit` to be set to a non-integer value (e.g., `limit=1.5` or `limit=1e10`) that passes `buildAndValidateFilters` but is pushed as a non-integer into `pgSqlParams` at line 198, causing a PostgreSQL type error that leaks query structure in the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8414c163-0962-4307-bc9f-ac8c9b4b7a5a?mode=deep",
+    "timestamp": "2026-04-29 03:37:48.487321",
+    "report_generated": false
   }
 ]
