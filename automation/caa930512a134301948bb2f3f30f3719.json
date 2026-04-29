@@ -142,5 +142,149 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b83aa2c-3601-44a5-a174-cbab40f6e4f9?mode=deep",
     "timestamp": "2026-04-28 15:23:14.852831",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user trigger a scenario where `cachedTokens.get(row.token_id)` returns `undefined` for a valid token (due to cache miss after eviction), causing `row.decimals` to remain `undefined` in the returned `TokenAccount`, and downstream balance calculations to treat the token as having 0 decimals, resulting in incorrect fund amounts being displayed or transferred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ec04324-02c3-49b1-b449-fdd7b20e4ef1?mode=deep",
+    "timestamp": "2026-04-29 01:34:53.151641",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the fact that `getTokenAccounts()` calls `getTokenRelationshipsQuery()` which uses `getLimitQuery(2)` with hardcoded index `2`, meaning the LIMIT clause always references `$2` regardless of how many conditions are added, potentially causing the limit to be applied to the wrong parameter value and returning an unbounded result set that leaks all token balances for an account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5467625f-6455-4bb5-ae8f-fc5cc791d481?mode=deep",
+    "timestamp": "2026-04-29 01:35:05.489189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user send a request that causes `rows` to contain token IDs that are not returned by `getCachedTokens()` (e.g., tokens deleted between the two queries), causing `cachedToken` to be `undefined` and `row.decimals` to be `undefined`, resulting in a `TokenAccount` with missing decimal data that causes incorrect balance representation and potential fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6548bf2-6927-40fd-b34d-c09f546c58af?mode=deep",
+    "timestamp": "2026-04-29 01:35:17.550232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: putTokenCache()] Can an unprivileged external user exploit the `putTokenCache()` method's check `if (tokenCache.has(tokenId)) return` which only prevents overwriting existing cache entries, by being the first caller for a new token ID and supplying a manipulated token object with a falsified `decimals` value, permanently poisoning the cache entry for that token ID for all subsequent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ccf699f6-cbac-4c3f-aa23-58dea3dac5cb?mode=deep",
+    "timestamp": "2026-04-29 01:35:30.116719",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: putTokenCache()] Can an unprivileged external user exploit a race condition in `putTokenCache()` where two concurrent requests for the same new token ID both pass the `tokenCache.has(tokenId)` check before either sets the value, causing both to call `tokenCache.set(tokenId, cachedToken)` with potentially different `CachedToken` objects, resulting in non-deterministic cached decimal/freeze data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f3b3d0c-9e39-46a5-9881-de918fa24cf2?mode=deep",
+    "timestamp": "2026-04-29 01:35:42.865658",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: putTokenCache()] Can an unprivileged external user trigger `putTokenCache()` with a token object where `token.token_id` is of a different type (e.g., string vs BigInt) than what `getCachedTokens()` uses as the cache key, causing cache key mismatches where `tokenCache.has(tokenId)` always returns false and the cache is never hit, leading to repeated DB queries with potentially inconsistent data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7430e226-b5cf-4ed0-85d5-6d921ac7bc6b?mode=deep",
+    "timestamp": "2026-04-29 01:35:56.180713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getCachedTokens()] Can an unprivileged external user exploit the type inconsistency between `tokenIds` (a `Set<BigInt>` per the JSDoc) and the actual `row.token_id` values returned from the DB (which may be numbers or strings), causing `cachedTokens.get(row.token_id)` in `getTokenAccounts()` to always return `undefined` due to type mismatch, bypassing the cache and always returning `TokenAccount` objects with `undefined` decimals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39c056d7-ea02-4eda-8199-8f4213df9cf9?mode=deep",
+    "timestamp": "2026-04-29 01:36:10.751972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `token.id` value that is an object or array (via HTTP parameter pollution) that, when pushed into `tokenIdInParams` and coerced to string via `${tokenIdInParams}`, produces unexpected SQL syntax that alters the query structure, bypassing the `ta.account_id = $1` filter and returning token data for arbitrary accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6a221e2-12f8-48a2-b6bc-dc737a107010?mode=deep",
+    "timestamp": "2026-04-29 01:36:26.826980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user exploit HTTP parameter pollution by sending `token.id[]=1&token.id[]=2` to cause the framework to parse `token.id` as an array, which when processed by `inConditions` and interpolated into `in (${tokenIdInParams})` produces `in (1,2)` without parameterization, enabling injection of additional SQL through array element manipulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b995baa4-7db5-4cd4-9c65-0564aeb86f10?mode=deep",
+    "timestamp": "2026-04-29 01:36:42.384883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user exploit the `order` parameter that is passed to `OrderSpec.from()` without being verified as a parameterized value, injecting SQL through the order direction field (e.g., `asc; DROP TABLE token_account--`) that corrupts the query and causes data loss affecting all users' token balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c34e623-9d36-495e-9629-1c5e5a740d94?mode=deep",
+    "timestamp": "2026-04-29 01:36:59.014988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user send a request with an extremely large `limit` value that overflows the integer type used for `$2` in the SQL query, causing the LIMIT clause to wrap around to a small number or zero, returning no results or truncated results that misrepresent the user's token holdings and lead to incorrect fund transfer decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fa8bee7-7be6-4b2f-9bd3-039901f7e2a6?mode=deep",
+    "timestamp": "2026-04-29 01:37:16.906675",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user exploit the fact that `params = [ownerAccountId, limit]` places `limit` at index 1 (`$2`) and then `getLimitQuery(2)` hardcodes the reference to `$2`, but when `conditions` are added, the `params.push(condition.value)` shifts the effective parameter count, causing the LIMIT to reference a condition value instead of the intended limit, returning an unbounded result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e84a0da-78fc-45e9-9eed-36e7e589c238?mode=deep",
+    "timestamp": "2026-04-29 01:37:36.121462",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getCachedTokens()] Can an unprivileged external user exploit the absence of cache invalidation in `tokenCache` to serve stale `decimals` data after a token's decimal precision is updated on-chain, causing users who query the mirror node to receive incorrect decimal values and make fund transfers with wrong amounts, resulting in permanent loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e829dd83-c715-4176-bc72-bd883eba2c73?mode=deep",
+    "timestamp": "2026-04-29 01:37:54.908787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getCachedTokens()] Can an unprivileged external user exploit the `quickLru` cache's LRU eviction policy by continuously querying unique token IDs to evict a specific high-value token's cache entry, forcing a DB re-fetch at a moment when the DB contains inconsistent data (during a token update), causing incorrect `decimals` or `freeze_status` to be cached and served to the token's holders?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c10f91e5-0a36-4c0b-b87d-9ee5d6b73dc5?mode=deep",
+    "timestamp": "2026-04-29 01:38:14.580582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the two-phase data retrieval in `getTokenAccounts()` (first `getRows(sqlQuery, params)` then `getCachedTokens(tokenIds)`) where a token is deleted between the two queries, causing `getCachedTokens` to return no entry for that token ID, and `row.decimals` to remain as the raw DB value (potentially `undefined`), producing a `TokenAccount` with incorrect decimal data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fd24707-8282-4334-aeab-be8622f49994?mode=deep",
+    "timestamp": "2026-04-29 01:38:34.200714",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user trigger a TOCTOU (time-of-check-time-of-use) vulnerability between the `EntityService.isValidAccount()` check in the controller and the `getTokenAccounts()` call, where an account is deleted between the two operations, causing the service to return token balance data for a deleted account that no longer reflects the true on-chain state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eed93bef-6cdb-4ed9-80dd-2d05b7673e2f?mode=deep",
+    "timestamp": "2026-04-29 01:38:53.843961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `token.id` value containing a closing parenthesis and additional SQL (e.g., `1) OR (1=1`) that breaks out of the IN clause `in (${tokenIdInParams})`, injecting an OR condition that makes the WHERE clause always true and returns all token_account rows for all accounts, leaking complete token balance information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4730f9c1-c7e1-478a-97bc-6ac50ed8f91a?mode=deep",
+    "timestamp": "2026-04-29 01:39:15.175195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user exploit the direct string interpolation `in (${tokenIdInParams})` to inject a subquery like `(SELECT token_id FROM token_account WHERE account_id=<victim>)`, causing the query to return token relationships for a victim account instead of the requested account, leaking the victim's token holdings and enabling targeted fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f910f7ee-3b5d-4261-8384-0836a2086209?mode=deep",
+    "timestamp": "2026-04-29 01:39:37.455209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL payload through `tokenIdInParams` that adds a `RETURNING` clause or triggers a side-effect function call within the IN clause, causing unintended data modification in the `token_account` table that alters balance records and results in direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19622aa5-81cb-4a3c-95cf-040abefbc99a?mode=deep",
+    "timestamp": "2026-04-29 01:39:59.855821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getInClauseSubQuery()] Can an unprivileged external user exploit the fact that `params` is passed by reference to `getInClauseSubQuery()` but the function does NOT push `tokenIdInParams` values into `params`, meaning the SQL IN clause values are unparameterized while the caller's `params` array remains unchanged, creating a systematic SQL injection vulnerability for all `token.id=` equality filters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_588ef435-3a6b-4b16-aca1-d30b13bcde64?mode=deep",
+    "timestamp": "2026-04-29 01:40:22.110780",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that `new CachedToken(row)` is constructed from raw DB row data without validation, and if the DB row contains a `decimals` value of `null` or `NaN`, the `CachedToken` stores this invalid value, which is then unconditionally assigned to `row.decimals` in `getTokenAccounts()`, causing all balance calculations for that token to produce `NaN` or incorrect results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38753d0d-fda5-4bea-aa2f-9c8683310fbc?mode=deep",
+    "timestamp": "2026-04-29 01:40:45.567696",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getCachedTokens()] Can an unprivileged external user exploit the shared `tokenCache` singleton to perform a cache-based side-channel attack, by measuring response time differences between cache hits and cache misses to determine which token IDs are actively being queried by other users, revealing trading patterns and enabling front-running attacks that result in direct fund loss for those users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a0589ad-f84f-463c-bd85-d42396e2bfe7?mode=deep",
+    "timestamp": "2026-04-29 01:41:09.097363",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the `rows.reduce((result, row) => result.add(row.token_id), new Set())` operation where duplicate `token_id` values in `rows` are deduplicated by the Set, but the subsequent `rows.map()` still processes all rows including duplicates, causing `cachedTokens.get(row.token_id)` to return the same cached token for multiple rows and potentially applying incorrect decimals to multiple balance entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a1c5253-f2df-43ba-82ac-214b46e203d4?mode=deep",
+    "timestamp": "2026-04-29 01:41:33.510852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Direct loss of funds'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user exploit the `conditionClause` construction where `conditions.map()` uses `params.push(condition.value)` and returns `$${params.length}`, but if `condition.value` is an object or array, `params.push()` stores a non-scalar value that the DB driver cannot bind to a SQL parameter, causing a query error that leaks internal stack traces useful for further exploitation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82068397-7745-42d0-97c7-88f0155fd445?mode=deep",
+    "timestamp": "2026-04-29 01:41:59.251673",
+    "report_generated": false
   }
 ]
