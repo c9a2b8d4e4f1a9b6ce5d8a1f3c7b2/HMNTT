@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: parseTransactionType()] Can an unprivileged user submit a transaction with an unknown transaction type (DATA_NOT_SET with exactly one unknown field) so that parseTransactionType() logs a warning and returns the unknown field number as the type, causing the importer to skip type-specific validation and process paidStakingRewards without verifying the transaction type is eligible for staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b924c74-217b-4735-8047-d1133e6d7ae3?mode=deep",
+    "timestamp": "2026-04-29 05:18:14.360862",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: parseTransactionType()] Can an unprivileged user craft a TransactionBody with multiple unknown fields so that parseTransactionType() logs an error and returns DATA_NOT_SET (0), causing the transaction to be processed as an unknown type that bypasses type-specific staking reward eligibility checks, allowing reward entries to be persisted for ineligible transaction types?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4927d0a-f59b-44f4-a401-597ff4322798?mode=deep",
+    "timestamp": "2026-04-29 05:18:26.710911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: addEntityId()] Can an unprivileged user craft a RecordItem where entityTransactionPredicate is set to accept all EntityIds, and then trigger insertStakingRewardTransfers() which calls recordItem.addEntityId(accountId) for each reward recipient, causing arbitrary accounts to be registered as entity transaction participants and potentially affecting their staking state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29acad83-a226-4f86-8c5f-5f693eec82d3?mode=deep",
+    "timestamp": "2026-04-29 05:18:39.421814",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: addEntityId()] Can an unprivileged user exploit the lazy initialization of entityTransactions (HashMap created on first access in getEntityTransactions()) combined with concurrent RecordItem processing to cause a race condition where staking reward entity IDs are added to the wrong transaction's entity map, leading to incorrect stake_period_start updates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83d39f4f-47ca-4533-b3e6-cc3f767060c0?mode=deep",
+    "timestamp": "2026-04-29 05:18:53.158975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: setEntityTransactionPredicate()] Can an unprivileged user trigger a code path that calls setEntityTransactionPredicate(null), causing entityTransactionPredicate to be set to REJECT_ALL, which would prevent addEntityId() from registering staking reward recipients and cause their stake_period_start to not be updated after a reward payout, leaving them eligible for double rewards in the next period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6007f3cd-4f00-42ec-8797-eb5efc4a9711?mode=deep",
+    "timestamp": "2026-04-29 05:19:07.913784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: setEntityNftTransactionPredicate()] Can an unprivileged user exploit the fact that setEntityNftTransactionPredicate() adds a filter excluding payerAccountId from NFT entity tracking, and craft a transaction where the payer is also a staking reward recipient, causing the payer's entity transaction to be excluded from NFT tracking but still processed for staking rewards, creating an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23ad5e2c-8046-44b9-83e0-6afd936df7d4?mode=deep",
+    "timestamp": "2026-04-29 05:19:22.863101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionStatus()] Can an unprivileged user craft a TransactionRecord where the receipt status value (getStatusValue()) is a raw integer that does not correspond to any known ResponseCodeEnum, causing getTransactionStatus() to return an unexpected value that downstream entity transaction processing interprets as success, enabling staking reward processing for a failed transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4f87ecf-3048-4397-9232-002246f1e085?mode=deep",
+    "timestamp": "2026-04-29 05:19:38.819775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isInvalidIdError()] Can an unprivileged user submit a transaction that returns INVALID_ACCOUNT_ID status, which isInvalidIdError() returns true for, and exploit the fact that insertStakingRewardTransfers() does not check isInvalidIdError() before processing paidStakingRewards, causing staking reward entries to be persisted even for transactions with invalid account IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33d9043d-75f9-43ec-a074-16db1ea911d5?mode=deep",
+    "timestamp": "2026-04-29 05:19:54.988984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionHash()] Can an unprivileged user craft two different transactions that produce the same 32-byte truncated hash (via Arrays.copyOfRange of the full transaction hash to bytes 0-31), causing getTransactionHash() to return a collision, and exploit this to associate staking reward transfers from one transaction with another transaction's record in downstream processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60aeac7c-3e70-44f2-a3c2-6b61fe0192d6?mode=deep",
+    "timestamp": "2026-04-29 05:20:12.301840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionHash()] Can an unprivileged user submit an EthereumTransaction that sets a custom hash via getEthereumTransaction().getHash(), causing getTransactionHash() to return the Ethereum transaction hash instead of the protobuf transaction hash, and exploit this to link staking reward transfers to a different transaction identity than what was actually executed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06f6ff93-e314-44d1-a999-5cb12a7bdbbf?mode=deep",
+    "timestamp": "2026-04-29 05:20:29.397572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getAndIncrementLogIndex()] Can an unprivileged user trigger a high volume of contract log events within a single transaction to overflow the AtomicInteger logIndex in getAndIncrementLogIndex(), causing log index values to wrap around to negative numbers and corrupt the ordering of staking reward transfer events in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb210e6d-c792-41b0-a2cb-bde2d20205ca?mode=deep",
+    "timestamp": "2026-04-29 05:20:48.831306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: build()] Can an unprivileged user craft a RecordItem where transactionRecordBuilder is set (via transactionRecordBuilder()) instead of transactionRecord, causing build() to call transactionRecordBuilder.build() and produce a TransactionRecord with default/empty paidStakingRewards that overwrites a previously set non-empty list, causing legitimate staking rewards to be dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ef2b88f-d412-4121-bc0a-fe01664af39b?mode=deep",
+    "timestamp": "2026-04-29 05:21:09.116043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: build()] Can an unprivileged user exploit the order of operations in build() — where parseParent() is called before parseSuccess() — to craft a scenario where the parent reference is resolved to a null/wrong parent, and then parseSuccess() incorrectly returns true, causing staking rewards to be processed for a transaction whose true parent failed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e2a9cdb-b9e7-4530-84ab-1e8c6615c53f?mode=deep",
+    "timestamp": "2026-04-29 05:21:29.498031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: addContractTransaction()] Can an unprivileged user set contractTransactionPredicate to accept their account's EntityId, and then trigger a staking reward transfer that calls addEntityId() for the reward recipient, causing the recipient to also be registered as a contract transaction participant and affecting their pending reward calculation via entity_stake updates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_926d4045-b6c9-4536-bf19-bb7ba4679187?mode=deep",
+    "timestamp": "2026-04-29 05:21:50.713248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: populateContractTransactions()] Can an unprivileged user craft a transaction that adds many contract transaction entries via addContractTransaction(), and then exploit populateContractTransactions() setting all contract IDs on each ContractTransaction, to cause a staking reward recipient's account to be incorrectly associated with contract IDs they don't own, affecting their entity stake state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f071fdd-247a-4800-9365-5c9f7553a37c?mode=deep",
+    "timestamp": "2026-04-29 05:22:13.616309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getContractRelatedParent()] Can an unprivileged user craft a transaction where hookParent is non-null (by triggering parsePossiblyHookContractRelatedParent() to find a hook sibling), causing getContractRelatedParent() to return hookParent instead of the real parent, and exploit this to associate staking reward processing with a hook contract context that bypasses normal parent success validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ca0a49f-c73c-403d-a768-45c6bb668b24?mode=deep",
+    "timestamp": "2026-04-29 05:22:36.571686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getContractRelatedParent()] Can an unprivileged user craft a parent transaction that has a ContractCallResult (hasContractResult() returns true) and embed paidStakingRewards in a child transaction, causing getContractRelatedParent() to return the parent with contract result, and exploit this parent-child contract relationship to process staking rewards in a contract execution context that lacks proper reward eligibility checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b52cab9f-291f-4c99-987e-0f67e4bf43ff?mode=deep",
+    "timestamp": "2026-04-29 05:23:00.306852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: parseSuccess()] Can an unprivileged user exploit the fact that parseSuccess() accepts FEE_SCHEDULE_FILE_PART_UPLOADED as a success status to embed paidStakingRewards in a fee schedule file upload transaction, causing staking rewards to be processed for a system-level operation that should not trigger user staking reward payouts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9890fc1a-e79f-4d81-b672-e5b4794246e3?mode=deep",
+    "timestamp": "2026-04-29 05:23:24.644897",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: parseParent()] Can an unprivileged user submit a batch transaction where inner transactions have children, and exploit the grandparent lookup path in parseParent() (previous.parent.parent) to cause a child to be assigned a grandparent as its parent, breaking the two-level parent success check and allowing staking rewards to be processed when the intermediate parent failed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c27ca718-5439-460d-99dd-8f4385ae8fc0?mode=deep",
+    "timestamp": "2026-04-29 05:23:49.967519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isTopLevel()] Can an unprivileged user craft a scheduled transaction (scheduled = true, nonce > 0) that includes paidStakingRewards for accounts that did not participate in the scheduled transaction, and since isTopLevel() returns true for scheduled transactions, cause the importer to process those rewards without verifying the reward recipients were actually involved in the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0f187d4-ff30-45d3-8f7a-797ca0e6a395?mode=deep",
+    "timestamp": "2026-04-29 05:24:15.492669",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: parseTransaction()] Can an unprivileged user submit a Transaction with empty signedTransactionBytes, empty bodyBytes, but a populated deprecated body field (transaction.hasBody()), causing parseTransaction() to use the deprecated path and parse a TransactionBody with a manipulated payerAccountId that redirects staking reward attribution to an attacker-controlled account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_988dde81-9fac-44ba-9eb3-48db0a557b7c?mode=deep",
+    "timestamp": "2026-04-29 05:24:42.094019",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionRecord().getPaidStakingRewardsList()] Can an unprivileged user include a paidStakingRewards entry with amount = Long.MAX_VALUE (or a large negative value) in the TransactionRecord, and since insertStakingRewardTransfers() sets the amount directly from aa.getAmount() without bounds checking, cause an integer overflow or negative reward amount to be stored, corrupting the staking reward accounting for account 0.0.800?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b59a8ca1-f071-4ca9-8536-c8c542462167?mode=deep",
+    "timestamp": "2026-04-29 05:25:08.142893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionRecord().getPaidStakingRewardsList()] Can an unprivileged user include a paidStakingRewards entry with amount = 0 for an account that has a large pending_reward in entity_stake, and since the mirror node records the zero-amount transfer and updates stake_period_start, cause the account's pending reward to be reset to 0 without the account actually receiving any reward, effectively stealing the unpaid reward by preventing its future payout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88d9d07e-b967-4a0a-8fe7-7fb9b3a8d7c7?mode=deep",
+    "timestamp": "2026-04-29 05:25:36.492710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: addEntityId()] Can an unprivileged user craft a transaction where the paidStakingRewards list contains an accountId that resolves to EntityId.EMPTY or an invalid entity, causing addEntityId() to call doAddEntityId() with an invalid EntityId, and exploit the resulting entityTransactionBuilder state to corrupt the entity transaction map for legitimate staking reward recipients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da549a08-77e8-4cec-b5f2-ad405e35e8f4?mode=deep",
+    "timestamp": "2026-04-29 05:26:05.131048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/RecordItem.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: doAddEntityId()] Can an unprivileged user trigger a scenario where entityTransactionBuilder is initialized with one transaction's consensusTimestamp and payerAccountId, and then addEntityId() is called for a staking reward recipient from a different transaction context, causing the entityTransactionBuilder to stamp the wrong timestamp/payer on the entity transaction, corrupting stake_period_start tracking?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eccfcce6-510d-4da2-a6e2-b72c4ca4eca4?mode=deep",
+    "timestamp": "2026-04-29 05:26:35.108066",
+    "report_generated": false
+  }
+]
