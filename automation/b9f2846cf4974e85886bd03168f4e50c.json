@@ -1,0 +1,86 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user exploit the fact that 'pending', 'safe', and 'finalized' all resolve to BlockType.LATEST via BlockType.of(), causing findByBlockType() to call findLatest() for all three aliases, and if the CACHE_MANAGER_RECORD_FILE_LATEST has a short TTL, each alias triggers a separate cache lookup path that may not share the same cache key, causing redundant DB queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b79843df-7777-49af-a462-cbe18d21b332?mode=deep",
+    "timestamp": "2026-04-29 02:40:32.621378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user submit a timestamp value that is between two consecutive block consensusEnd values, causing findByTimestamp() to return the next block (due to '>= timestamp' semantics), and this incorrect block context is then cached in CACHE_MANAGER_RECORD_FILE_TIMESTAMP, causing all subsequent callers with the same timestamp to receive the wrong block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc61f33e-fbb1-4bd1-9e96-f54a23c1107e?mode=deep",
+    "timestamp": "2026-04-29 02:40:44.815820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user submit a block number that is one greater than the current latest block index to findByBlockType(), causing findByIndex() to return empty Optional (block not found), and since the result is null the cache is not populated, meaning every repeated request for that non-existent block always hits the database, enabling sustained DB query amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4d73e5f-1b70-4456-89e5-a811621a35fb?mode=deep",
+    "timestamp": "2026-04-29 02:40:57.536115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user exploit the absence of input validation on the Long timestamp parameter in findByTimestamp() to submit arbitrarily large timestamp values, causing the DB query 'where r.consensusEnd >= very_large_value' to perform a full index scan returning no results, and since null results are not cached, each such request causes a full DB scan?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0998dbea-1d77-4fff-b888-b8df07a01439?mode=deep",
+    "timestamp": "2026-04-29 02:41:10.675760",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user submit a block number equal to the current latest block index + 1 repeatedly, causing findByBlockType() to call findByIndex() for a non-existent block on every request (cache miss since null is not cached), effectively bypassing the cache layer entirely and causing continuous DB queries that degrade performance for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81948206-54af-48ad-b19e-9807d5cbeb89?mode=deep",
+    "timestamp": "2026-04-29 02:41:25.096497",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user submit a timestamp value of Long.MIN_VALUE (if not validated upstream) to findByTimestamp(), causing the query 'where r.consensusEnd >= Long.MIN_VALUE' to return the genesis block, and the @CachePut writes this to the INDEX cache under key=Long.MIN_VALUE, which may cause unexpected behavior in cache key comparison logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a48d4b45-f901-4cd9-a9ce-a10ddc5a2b8c?mode=deep",
+    "timestamp": "2026-04-29 02:41:39.543938",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user submit a block type string that is an empty string to BlockType.of(), which returns BlockType.LATEST, causing findByBlockType() to call findLatest() — and if this is done at high frequency, it amplifies load on the CACHE_MANAGER_RECORD_FILE_LATEST cache and the underlying DB when the cache expires?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99ea817b-b92d-41ce-9afc-213d6aade8a4?mode=deep",
+    "timestamp": "2026-04-29 02:41:55.375528",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user submit a timestamp that is exactly 1 nanosecond before a block's consensusEnd, causing findByTimestamp() to return that block (since consensusEnd >= timestamp), and this result is cached in CACHE_MANAGER_RECORD_FILE_TIMESTAMP, but the @CachePut also writes to CACHE_MANAGER_RECORD_FILE_INDEX under the timestamp key, potentially colliding with a block index of the same numeric value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6012513e-743d-4fdd-96c0-6b2a5448500b?mode=deep",
+    "timestamp": "2026-04-29 02:42:11.470851",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user exploit the fact that findByBlockType() uses reference equality (==) for BlockType.EARLIEST and BlockType.LATEST checks, and if a deserialization bug or reflection creates a new BlockType instance with identical field values, the check fails and findByIndex(Long.MAX_VALUE) is called instead of findLatest(), returning empty Optional and causing all 'latest' block queries to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0769dd38-7238-46cd-94df-61797453e362?mode=deep",
+    "timestamp": "2026-04-29 02:42:28.593685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user submit a series of timestamps that are all slightly above the consensusEnd of the latest block, causing findByTimestamp() to return empty Optional each time, and since null results are not cached, each request triggers a full DB query, enabling sustained database load amplification with no rate limiting on the timestamp parameter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3dc4e67f-3ed7-44b2-b8d3-c0f86dcedeca?mode=deep",
+    "timestamp": "2026-04-29 02:42:46.186616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user submit a block number of 0 via findByBlockType(), which calls findByIndex(0) instead of findEarliest(), and if block index 0 does not exist in the database (e.g., genesis block has a different index), the result is empty Optional, causing incorrect 'block not found' responses for the genesis block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa238971-a994-432d-9661-f5834df99b19?mode=deep",
+    "timestamp": "2026-04-29 02:43:04.538705",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user exploit the @CachePut on CACHE_MANAGER_RECORD_FILE_INDEX in findByTimestamp() to systematically poison the index cache by submitting timestamps whose values match low block indices (1, 2, 3, ...), causing findByBlockType() for those indices to return wrong RecordFile objects, disrupting historical block queries for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7767c2d-fa5b-47e0-a381-6af53c0dc2c9?mode=deep",
+    "timestamp": "2026-04-29 02:43:24.560159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByBlockType(BlockType block)] Can an unprivileged external user submit a hex block number with leading zeros (e.g., '0x0000000000000001') to BlockType.of(), which parses to number=1 but stores the original string as the name, causing the BlockType to not match EARLIEST or LATEST singletons and calling findByIndex(1), potentially bypassing the EARLIEST cache path for block 0?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49beeb2c-555c-464c-a1fc-2f66420a4b12?mode=deep",
+    "timestamp": "2026-04-29 02:43:44.885856",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/RecordFileServiceImpl.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findByTimestamp(Long timestamp)] Can an unprivileged external user submit a timestamp equal to a block's consensusStart (not consensusEnd), causing findByTimestamp() to return that block (since consensusEnd >= consensusStart), but the semantics imply the timestamp is at the start of the block, and the cached result in CACHE_MANAGER_RECORD_FILE_TIMESTAMP may be incorrect for callers expecting the block containing that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fa3eec0-218e-4ea7-89bf-4790bb4577ca?mode=deep",
+    "timestamp": "2026-04-29 02:44:07.735553",
+    "report_generated": false
+  }
+]
