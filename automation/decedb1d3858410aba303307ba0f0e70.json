@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user flood the API with requests that each trigger a DbError (e.g., by exhausting DB connection pool during a network partition) causing handleError() to emit a 503 SERVICE_UNAVAILABLE for every request, resulting in sustained denial-of-service amplified by the error-handling path itself?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e492448-eb95-4c9e-8bf6-c1ebd1c1e2bd?mode=deep",
+    "timestamp": "2026-04-29 06:12:01.686072",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user craft a request that causes a DbError during a network partition, and because shouldReturnMessage() returns false for SERVICE_UNAVAILABLE, observe that the generic statusCode.message is returned — but does the absence of message sanitization allow internal DB topology details embedded in DbError.message to leak through a misconfigured statusCode path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55ab3b87-194b-47d2-9838-ed381aa45be6?mode=deep",
+    "timestamp": "2026-04-29 06:12:13.444135",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition scenario where an HttpError with statusCode 502 (BAD_GATEWAY) is thrown, causing shouldReturnMessage() to return true and err.message to be sent directly to the client, leaking internal upstream service hostnames or connection strings embedded in the HttpError message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3f84f5f-b05b-4e0e-93cc-a0c426e06187?mode=deep",
+    "timestamp": "2026-04-29 06:12:26.263735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldReturnMessage()] Can an unprivileged external user exploit the fact that shouldReturnMessage() returns true when statusCode === httpStatusCodes.BAD_GATEWAY, meaning any HttpError with status 502 will expose err.message verbatim to the client, and during a network partition the upstream error message may contain internal routing or infrastructure details?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63cb20b6-667f-4c89-8743-e4b295b0c503?mode=deep",
+    "timestamp": "2026-04-29 06:12:38.645965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user send a high volume of requests during a network partition to force repeated execution of the async handleError() middleware, and because handleError is declared async but never awaited in Express error handling, cause unhandled promise rejections that bypass handleRejection() logging and silently crash the process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d58d4e69-6298-453a-a81a-aceabf6034a0?mode=deep",
+    "timestamp": "2026-04-29 06:12:51.748234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition that causes a non-RestError, non-DbError, non-HttpError exception (e.g., a raw TypeError from a broken DB driver) to fall through all instanceof checks and be assigned defaultStatusCode (INTERNAL_ERROR), causing err.message to be suppressed but the full stacktrace to be logged via shouldPrintStacktrace(), potentially exposing internal file paths in log aggregation systems accessible to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e29368b3-b44e-4c8f-a8b7-6ec037e0101d?mode=deep",
+    "timestamp": "2026-04-29 06:13:05.710432",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldPrintStacktrace()] Can an unprivileged external user craft a request whose processing causes a DB error with message containing the string 'statement timeout', causing simpleErrors.test(err.message) to return true and suppress stacktrace logging, effectively blinding operators to the true cause of a network partition and delaying incident response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5579552-661e-4df0-96d5-f31e21a33878?mode=deep",
+    "timestamp": "2026-04-29 06:13:20.116871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user exploit the elapsed time calculation (Date.now() - startTime) logged in handleError() to perform a timing side-channel attack, inferring whether a network partition is active by comparing response latency patterns across repeated requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01bdef7b-01d2-43df-b89f-b1efc4642d6c?mode=deep",
+    "timestamp": "2026-04-29 06:13:35.591840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user send requests with a crafted originalUrl containing log-injection characters (e.g., newlines, ANSI escape codes) that get interpolated into the logger.warn/logger.error template strings in handleError(), causing log poisoning that obscures network partition events in the audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc2b5c9e-a6c3-41f9-8a4f-1b3f616aa3e8?mode=deep",
+    "timestamp": "2026-04-29 06:13:51.572285",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user send requests with a spoofed or crafted req.ip (via X-Forwarded-For when trust proxy is enabled) that gets logged in handleError(), causing false attribution of network partition errors to legitimate IPs and poisoning incident response forensics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3be367a6-099f-43d4-a38c-c18ba296e436?mode=deep",
+    "timestamp": "2026-04-29 06:14:08.087046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: errorMessageFormat()] Can an unprivileged external user trigger a network partition error path where err.message is an object (not a string) with a 'detail' property, causing errorMessageFormat() to expose both m.message and m.detail fields in the JSON response, leaking structured internal error details that would otherwise be suppressed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a681ad4f-a205-47f9-a275-e236442ab952?mode=deep",
+    "timestamp": "2026-04-29 06:14:25.092748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: errorMessageFormat()] Can an unprivileged external user trigger an error path where err.message is an object containing a 'data' property, causing errorMessageFormat() to include response['data'] = m.data in the JSON output, leaking arbitrary internal data structures attached to the error during a network partition event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09b0e236-82d0-43c3-aeed-28596d36197f?mode=deep",
+    "timestamp": "2026-04-29 06:14:43.146529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition where a DbError is thrown with a message array (since InvalidArgumentError.forParams() returns array messages), and because handleError() passes err.message directly to errorMessageFormat() which handles arrays, cause multiple internal DB error strings to be serialized and returned in the _status.messages array?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_320128f6-f99f-493b-adcc-1c28bade5741?mode=deep",
+    "timestamp": "2026-04-29 06:15:01.622538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleRejection()] Can an unprivileged external user trigger a network partition that causes a large number of unhandled promise rejections, each logged by handleRejection() with the full promise and reason objects, causing unbounded log growth that exhausts disk space and causes a secondary denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a780349-58a5-45c1-8961-24d8556b3def?mode=deep",
+    "timestamp": "2026-04-29 06:15:19.409151",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleUncaughtException()] Can an unprivileged external user trigger a network partition that causes a non-RestError uncaught exception (e.g., a native Error from a broken TLS socket), causing handleUncaughtException() to re-throw it, crashing the Node.js process and taking down the entire REST API service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad40c8e9-7b93-4089-bce2-9f3c0e04bd21?mode=deep",
+    "timestamp": "2026-04-29 06:15:38.034561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleUncaughtException()] Can an unprivileged external user craft requests that cause a TypeError or ReferenceError during DB connection handling (not a RestError subclass), which when caught by handleUncaughtException() is re-thrown, causing a process crash that is not rate-limited and can be triggered repeatedly to keep the service down?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d4ad02e-94b3-418a-9538-73ec5f41e84b?mode=deep",
+    "timestamp": "2026-04-29 06:15:58.219526",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user exploit the fact that handleError() is async but Express error handlers must be synchronous (4-argument), causing any await inside handleError() that rejects to produce an unhandled promise rejection that bypasses the error handler entirely and leaves the HTTP response hanging?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe8df232-7a47-4b0e-b79c-0cc093b533e6?mode=deep",
+    "timestamp": "2026-04-29 06:16:19.859480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition where res.locals[requestStartTime] is undefined (e.g., if the requestStartTime middleware was skipped), causing elapsed to be 0 and masking the actual duration of the partition in logs, preventing accurate detection of the partition window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb889c4d-fcba-4750-bdef-66a6251a249c?mode=deep",
+    "timestamp": "2026-04-29 06:16:42.353560",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user send requests that cause an HttpError with a custom statusCode not matching any standard code, causing new StatusCode(err.statusCode, err.msg) to create an unexpected StatusCode object, and if StatusCode.isClientError() returns true for that code, expose err.message (which may contain internal routing info) to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b6f1009-83a5-4289-b7eb-5ca49c86f2db?mode=deep",
+    "timestamp": "2026-04-29 06:17:04.876349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user exploit a network partition where the DB driver throws a RangeError (e.g., from integer overflow in connection pool sizing), causing handleError() to classify it as BAD_REQUEST (400) instead of SERVICE_UNAVAILABLE (503), misleading the client and masking the partition from monitoring systems that alert on 5xx rates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c45fafa-c75b-41c3-a998-e59c33d5f50c?mode=deep",
+    "timestamp": "2026-04-29 06:17:27.835670",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: errorMessageFormat()] Can an unprivileged external user trigger an error where err.message is a deeply nested object, causing errorMessageFormat()'s map() to serialize internal object references into the JSON response, leaking memory addresses or internal state during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47206d4b-d89e-4639-97d5-0b9dbfd14de6?mode=deep",
+    "timestamp": "2026-04-29 06:17:51.596940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition that causes res.status(statusCode.code).json() to throw (e.g., if statusCode.code is undefined due to a malformed HttpError), causing an unhandled exception inside the error handler itself that crashes the request handler without sending a response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9baae81-4594-4fb6-9eab-2be229b6578a?mode=deep",
+    "timestamp": "2026-04-29 06:18:15.713578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user send concurrent requests during a network partition, causing multiple calls to res.status().json() on the same response object (if next() is called after handleError() due to async timing), resulting in 'Cannot set headers after they are sent' errors that crash the process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f29519e9-bf47-48a9-a9d8-82e65c8e9d11?mode=deep",
+    "timestamp": "2026-04-29 06:18:40.199960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldReturnMessage()] Can an unprivileged external user exploit the BAD_GATEWAY special case in shouldReturnMessage() — where 502 errors return err.message to the client — to enumerate internal upstream service names by observing which error messages appear in 502 responses during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82f52634-7dc6-4058-906c-7dc31003d6b6?mode=deep",
+    "timestamp": "2026-04-29 06:19:02.887148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/httpErrorHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: handleError()] Can an unprivileged external user trigger a network partition where an HttpError is constructed with a very large err.msg string, causing new StatusCode(err.statusCode, err.msg) to allocate excessive memory, and when shouldReturnMessage() returns true, serialize that large string into the JSON response, causing memory exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fefd1362-a8ae-4fcf-910c-e631f4c90dcb?mode=deep",
+    "timestamp": "2026-04-29 06:19:27.733662",
+    "report_generated": false
+  }
+]
