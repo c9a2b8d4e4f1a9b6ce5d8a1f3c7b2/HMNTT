@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the `coalesce(value_written, value_read)` logic in findStorageByBlockTimestamp() by supplying a blockTimestamp that targets a contract_state_change record where value_written is null (a read-only operation), causing coalesce to return value_read instead of value_written, and if value_read contains a lower fee parameter than value_written, the EVM uses the lower fee value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2629fcec-14e9-453d-8799-b8638a5444de?mode=deep",
+    "timestamp": "2026-04-29 03:01:48.277983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user send requests for a fee-oracle contract with a key that is all zeros (byte[32] of zeros), causing ByteBuffer.wrap(key) to produce a ByteBuffer that equals other zero-padded keys in the cache, leading to incorrect cache hits where the fee slot value is returned for a different slot's lookup, causing fee parameters to be read from the wrong storage location?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e7b3560-6e15-42a4-a434-bf266704255e?mode=deep",
+    "timestamp": "2026-04-29 03:02:00.335406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorage()] Can an unprivileged external user exploit the fact that contractStateCache uses expireAfterWrite=2s (not expireAfterAccess), meaning that even if the fee slot is accessed repeatedly, the cached value expires 2 seconds after it was written, creating a predictable 2-second window during which an attacker can submit multiple fee-sensitive transactions using the same stale fee parameter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc15e8ff-fd09-4e67-99fe-53162efa7e86?mode=deep",
+    "timestamp": "2026-04-29 03:02:12.880029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the ArrayList construction at line 93 (`new ArrayList<byte[]>(cachedSlotKeys.size())`) where cachedSlotKeys is a live concurrent map view, so that the size changes between the ArrayList allocation and the iteration, causing the cachedSlots list to contain more entries than expected and the batch query to fetch fee-unrelated slot values that overwrite the fee slot in contractStateCache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc3fd496-89ca-4978-9904-e758e7977f8f?mode=deep",
+    "timestamp": "2026-04-29 03:02:26.686774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the isKeyEvictedFromCache logic (lines 94-100) by sending a request for a fee slot key, then immediately causing cache eviction before the iteration completes, so that isKeyEvictedFromCache remains true and findStorage() is called as fallback, which uses the @Cacheable contractStateCache that may hold a stale fee value from a previous cache population?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a278dbc5-5ae4-4019-8a7c-e3c27c58ea84?mode=deep",
+    "timestamp": "2026-04-29 03:02:40.909998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractStateCache.put() at line 109 unconditionally overwrites existing cache entries for fee slots, by timing a request so that findStorageBatch() fetches a batch that includes a fee slot whose DB value is momentarily stale (between importer writes), caching the stale value and causing subsequent fee calculations to use the wrong fee parameter for up to 2 seconds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c48f41d7-913d-4ff7-8b6e-ef653bf4758a?mode=deep",
+    "timestamp": "2026-04-29 03:02:55.476395",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorage()] Can an unprivileged external user exploit the dual-cache architecture (contractSlotsCache + contractStateCache) to create a cache inconsistency where the contractSlotsCache contains a fee slot key but the contractStateCache has expired the corresponding value, causing findStorageBatch() to re-query the DB and cache a new value that differs from what was previously used in a fee calculation, leading to inconsistent fee parameters across concurrent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_109c4bff-4bd4-474e-a7ad-da1f0959d16a?mode=deep",
+    "timestamp": "2026-04-29 03:03:10.452040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user send requests with a key array of length != 32 bytes to findStorageBatch(), causing ByteBuffer.wrap(key) to create a ByteBuffer with a non-standard capacity, which fails to match any cached ByteBuffer key in the wrappedKey.equals(slot) check at line 98, always setting isKeyEvictedFromCache=true and falling back to findStorage(), bypassing the batch caching mechanism and potentially returning a different fee value than the batch path would?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a8c38c2-2a07-4729-947f-c39683394bf2?mode=deep",
+    "timestamp": "2026-04-29 03:03:26.602141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user supply a blockTimestamp that is in the future (greater than the current consensus timestamp) to findStorageByBlockTimestamp(), causing the query to return the most recent fee parameter value from contract_state_change, which may be a value that has not yet been finalized or confirmed, allowing the user to preview and exploit upcoming fee changes before they take effect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cba0bb95-2f0b-4f07-8aa0-c14d7fab9bbc?mode=deep",
+    "timestamp": "2026-04-29 03:03:43.794983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that the batch query `findStorageBatch()` does not cache negative results (absent slots), so that repeated requests for a non-existent fee slot always hit the DB, creating a denial-of-service that delays fee parameter lookups and causes the EVM to time out, potentially falling back to a default fee value outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a8040a5-c104-440d-b0e1-2646822d635a?mode=deep",
+    "timestamp": "2026-04-29 03:04:01.437183",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the contractSlotsCache (expireAfterAccess=5m) by accessing a fee-oracle contract's slot keys every 4 minutes to prevent expiration, keeping stale slot keys alive in the cache for an indefinite period, so that the batch query always includes those stale keys and the contractStateCache is continuously repopulated with potentially outdated fee parameter values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db792676-5db7-4209-bca8-95155893ed56?mode=deep",
+    "timestamp": "2026-04-29 03:04:21.076203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorage()] Can an unprivileged external user exploit the fact that findStorage() returns Optional<byte[]> without any validation of the byte array length or content, so that if a fee-oracle contract's storage slot contains a malformed value (e.g., less than 32 bytes), the EVM interprets it as a fee parameter and computes an incorrect fee that is outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17c4c765-32c5-4bc9-9388-e9e6f232d9bb?mode=deep",
+    "timestamp": "2026-04-29 03:04:41.119015",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the CaffeineCache cast at line 86 (`((CaffeineCache) this.contractSlotsCache.get(contractId, () -> ...))`) by sending requests with a contractId that causes cacheManagerSlotsPerContract to return a non-CaffeineCache implementation, triggering a ClassCastException that propagates up and causes the EVM to use a fallback fee value outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca12063c-27b7-4090-82b1-ea0425797172?mode=deep",
+    "timestamp": "2026-04-29 03:05:00.209068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractSlotsCache.putIfAbsent() at line 90 uses the ByteBuffer as a key (which uses position/limit/capacity for equality), so that two ByteBuffers wrapping the same byte array but with different positions are treated as different keys, causing duplicate fee slot entries in the cache and the batch query to fetch the same fee slot twice, potentially caching different values for the same slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e16fff0e-d24c-446d-9ed4-cf9b883277a1?mode=deep",
+    "timestamp": "2026-04-29 03:05:20.918304",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user exploit the absence of caching in findStorageByBlockTimestamp() (no @Cacheable annotation, direct DB call) to perform high-frequency historical fee slot queries that bypass the contractStateCache, reading fee parameter values at arbitrary historical timestamps and identifying the exact block at which a fee parameter was changed, enabling targeted fee manipulation attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6173e962-dbba-47f3-8b19-c043c629c11d?mode=deep",
+    "timestamp": "2026-04-29 03:05:42.322678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that the batch query result is iterated and cached unconditionally at lines 106-113, so that if the DB returns a fee slot value that was written between two concurrent transactions (a dirty read scenario), the stale intermediate value is cached in contractStateCache and used for fee calculations for up to 2 seconds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8858fd4-1c48-423d-b6f9-9cea3811f2db?mode=deep",
+    "timestamp": "2026-04-29 03:06:03.725734",
+    "report_generated": false
+  }
+]
