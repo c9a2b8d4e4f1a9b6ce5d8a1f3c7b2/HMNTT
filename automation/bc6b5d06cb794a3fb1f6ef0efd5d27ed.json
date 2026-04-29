@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user trigger a scenario where the default transactionTimeout of 5 minutes is exceeded during a large balance file parse, causing the account_balance snapshot for account 0.0.800 to never be committed, so that createEntityStateStart() finds no valid balance snapshot and skips the pending_reward calculation entirely, resulting in staking rewards being permanently zeroed for all stakers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35a1eaf0-44db-4341-aeef-ef52a9c65197?mode=deep",
+    "timestamp": "2026-04-29 04:27:32.470622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fact that retry.setMaxAttempts(3) is hardcoded to only 3 retries, by causing repeated transient failures during balance file parsing so that all 3 attempts are exhausted and the balance snapshot for the staking reward account (0.0.800) is never persisted, causing pending_reward to be calculated against a stale or missing balance and resulting in incorrect staking reward payouts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa9b041e-8d7d-401e-b9a9-0c9ade45aaa1?mode=deep",
+    "timestamp": "2026-04-29 04:27:44.346493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the batch.setQueueCapacity(1) setting so that when a balance file is already queued, subsequent balance files are dropped or delayed, causing the staking reward calculation to use an outdated account_balance snapshot that reflects a lower balance for the staking reward account, leading to underpayment of staking rewards to legitimate stakers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ad7f38f-9e7b-482b-8879-4463cc4bf66e?mode=deep",
+    "timestamp": "2026-04-29 04:27:56.701057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user cause the expression batch.setMaxItems(batchSize * 5L) to produce an unexpectedly large maxItems value by observing that batchSize defaults to 200_000, meaning maxItems=1_000_000, and then craft a balance file with exactly 1_000_001 entries to force a mid-batch flush that splits the 0.0.800 staking reward account balance entry across two transactions, causing one to commit with an incorrect balance and corrupting the pending_reward calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70215b3f-a586-40d2-b148-f76ef47b3c22?mode=deep",
+    "timestamp": "2026-04-29 04:28:10.412444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStreamType()] Can an unprivileged external user exploit the fact that getStreamType() returns StreamType.BALANCE to understand that the DateRangeFilter applied in AccountBalanceFileParser.doParse() uses the BALANCE stream type, and then craft a scenario where the balance file's consensusTimestamp falls outside the filter range, causing the entire balance snapshot to be silently skipped and leaving the staking reward calculation with no valid balance data, resulting in zero pending_reward for all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21bab05d-b6e7-4b43-bf8f-0e48d34898df?mode=deep",
+    "timestamp": "2026-04-29 04:28:24.213321",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the frequency = Duration.ofSeconds(1L) polling interval combined with the transactionTimeout of 5 minutes to create a timing window where a balance file is being processed but has not yet committed, and a staking period boundary is crossed during that window, causing the entity_stake calculation to use the previous period's balance snapshot and undercount the staking reward account balance, leading to reduced pending_reward for all stakers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7c99f8a-013c-4609-b1d7-be251c3feca7?mode=deep",
+    "timestamp": "2026-04-29 04:28:38.292357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user cause an OutOfMemoryError during balance file parsing (which is explicitly excluded from retries via excludes = OutOfMemoryError.class in AccountBalanceFileParser) by submitting a balance file with fileBufferSize-sized chunks that exhaust heap memory, causing the balance snapshot to be permanently skipped without any retry, so that the staking reward account balance is never recorded and pending_reward is calculated as zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8793e04a-3296-471c-9e35-bcebdca7b050?mode=deep",
+    "timestamp": "2026-04-29 04:28:52.807664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fact that batchSize defaults to 200_000 and the in-memory List<AccountBalance> grows to batchSize before being flushed, by crafting a balance file where the staking reward account (0.0.800) entry appears at position 200_001 (just after a batch flush), so that if the second batch's transaction times out, the 0.0.800 balance is never persisted and the pending_reward calculation uses a stale balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c563da3f-573c-4ae9-a283-7bb87e59eabb?mode=deep",
+    "timestamp": "2026-04-29 04:29:07.605016",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the transactionTimeout = Duration.ofMinutes(5L) setting by observing that a very large balance file (with entries near the batchSize * 5L = 1_000_000 maxItems limit) takes longer than 5 minutes to process, causing the @Transactional annotation on AccountBalanceFileParser.parse() to roll back the entire transaction, leaving no balance snapshot for the current staking period and causing all pending_reward values to remain at their previous (potentially zero) values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7361834e-c6fc-4310-9f2e-565732b1362c?mode=deep",
+    "timestamp": "2026-04-29 04:29:24.642754",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the retry.setMaxAttempts(3) limit combined with the minBackoff and maxBackoff retry delays to cause a denial-of-service on balance file processing that spans an entire staking period boundary, so that no balance snapshot is available when the entity_stake calculation runs, causing createEntityStateStart() to return empty and skipping the pending_reward update for all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33df9fb1-05e2-46a3-9877-37862fc8f47d?mode=deep",
+    "timestamp": "2026-04-29 04:29:41.062437",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the batch.setQueueCapacity(1) setting to cause balance files to be processed out of order or with gaps, so that the account_balance snapshot used by getMaxConsensusTimestampInRange() in EntityStakeRepositoryCustomImpl falls outside the ONE_MONTH_IN_NS window, causing createEntityStateStart() to return empty and skipping the pending_reward calculation for the entire staking period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fed77806-734e-4f71-8040-d31e678911c0?mode=deep",
+    "timestamp": "2026-04-29 04:29:58.409989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fact that batchSize is an int (not long) and the @Min(1) constraint only prevents zero/negative values, by observing that batchSize = Integer.MAX_VALUE would cause the ArrayList<AccountBalance> initialization with capacity Integer.MAX_VALUE to throw an OutOfMemoryError (excluded from retries), permanently preventing balance snapshot persistence and zeroing out staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c50ead7e-50f6-491d-ac62-68a212c37466?mode=deep",
+    "timestamp": "2026-04-29 04:30:16.875218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fileBufferSize = 200_000 default by crafting a balance file where the staking reward account entry is split across a buffer boundary in CsvBalanceFileReader, causing a partial read that produces an InvalidDatasetException, which is caught and logged but causes the account balance entry to be silently dropped, resulting in the 0.0.800 balance being absent from the snapshot used for pending_reward calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cd0f232-fb39-4d66-aead-6195599af173?mode=deep",
+    "timestamp": "2026-04-29 04:30:34.925953",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStreamType()] Can an unprivileged external user exploit the StreamType.BALANCE return value from getStreamType() to understand that the balance downloader and balance parser share the same DateRangeFilter, and by causing the downloader to set a startDate that filters out the most recent balance file, prevent the staking reward account balance from being updated in the snapshot, causing pending_reward to be calculated against an outdated balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d514e8b-32a9-4d37-8979-230e0527b0f9?mode=deep",
+    "timestamp": "2026-04-29 04:30:53.614972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the frequency = Duration.ofSeconds(1L) polling combined with the synchronized keyword on AccountBalanceFileParser.parse() to cause a thread starvation scenario where the balance parser is perpetually locked processing a malformed file, preventing new balance snapshots from being created and causing the staking reward calculation to use stale balance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56677817-3402-4647-89b7-8687c01fa1d1?mode=deep",
+    "timestamp": "2026-04-29 04:31:13.920619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the transactionTimeout = Duration.ofMinutes(5L) by submitting a balance file that contains exactly batchSize - 1 entries before the 0.0.800 entry, so that the 0.0.800 entry is in the final partial batch that is persisted after the main loop, and if the transaction times out just before that final batchPersister.persist(accountBalances) call, the staking reward account balance is never recorded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d62cf16-a87e-4e71-a7ac-1c0944ccbd08?mode=deep",
+    "timestamp": "2026-04-29 04:31:35.118278",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the batch.setMaxItems(batchSize * 5L) = 1_000_000 limit to cause the BatchStreamFileNotifier to batch multiple balance files together, and if the combined transaction times out, all balance snapshots in the batch are rolled back, leaving a gap in the account_balance table that causes createEntityStateStart() to find no snapshot within the ONE_MONTH_IN_NS window and skip the pending_reward calculation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c89eedfd-4f66-4201-bdb6-c5ed8666ef03?mode=deep",
+    "timestamp": "2026-04-29 04:31:55.120430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the retry.setMaxAttempts(3) setting by observing that after 3 failed attempts the balance file is permanently skipped (not re-queued), and by causing exactly 3 failures during the balance file that contains the staking period boundary snapshot, ensure that the entity_stake calculation runs without a valid balance snapshot, causing pending_reward to be set to 0 for all stakers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dca82168-fb42-4c96-8736-be72d60d127a?mode=deep",
+    "timestamp": "2026-04-29 04:32:17.164087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fact that batchSize * 5L in the constructor uses the default batchSize value (200_000) at construction time, meaning if batchSize is later changed via Spring configuration, maxItems is not updated, causing a mismatch where maxItems is too small relative to the actual batchSize, leading to premature batch flushes that split balance data across multiple transactions and potentially leave the staking reward account balance in an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a7d1691-870c-4be9-a0ea-feb0769a1263?mode=deep",
+    "timestamp": "2026-04-29 04:32:40.029685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the transactionTimeout = Duration.ofMinutes(5L) combined with the @Retryable annotation's SpEL expression #{@balanceParserProperties.getRetry().getMaxAttempts() - 1} to cause a scenario where maxAttempts=3 means maxRetries=2, and by causing 3 consecutive timeouts, permanently prevent the balance snapshot from being persisted, causing the staking reward calculation to use a balance snapshot from a previous period that underestimates the staking reward account balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4076035-8b74-41ca-b222-992934b7f16c?mode=deep",
+    "timestamp": "2026-04-29 04:33:03.629148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fileBufferSize = 200_000 byte buffer used in CsvBalanceFileReader to cause excessive memory allocation by submitting a balance file with very long lines (near 200_000 bytes each), causing the BufferedReader to allocate large buffers and potentially triggering an OutOfMemoryError that is excluded from retries, permanently preventing the balance snapshot from being created?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6f823bd-dc0a-4f9d-82dd-e12681f2aeaf?mode=deep",
+    "timestamp": "2026-04-29 04:33:26.216320",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the batch.setQueueCapacity(1) setting to cause a race condition where a balance file is queued but the parser is busy with a long-running transaction (up to transactionTimeout = 5 minutes), and a new staking period starts during this window, causing the entity_stake calculation to run before the balance snapshot is committed and use an empty or stale entity_state_start, resulting in incorrect pending_reward values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcb20a11-1fad-44e1-8cf1-891812e8356d?mode=deep",
+    "timestamp": "2026-04-29 04:33:51.223478",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the frequency = Duration.ofSeconds(1L) polling interval to observe that balance files are processed every second, and by timing a network disruption to last exactly 3 retry cycles (retry.setMaxAttempts(3)), cause the balance file containing the staking period boundary snapshot to be permanently skipped, resulting in the pending_reward calculation using a balance snapshot from before the staking period that underestimates the staking reward account balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89546713-1428-4849-897d-520b57c6c017?mode=deep",
+    "timestamp": "2026-04-29 04:34:16.977237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the fact that transactionTimeout is set in seconds (Duration.ofMinutes(5L).toSeconds() = 300) via the SpEL expression #{@balanceParserProperties.getTransactionTimeout().toSeconds()}, and by causing a balance file with exactly 300 seconds worth of processing time, trigger a transaction timeout at the boundary where the staking reward account balance entry is being persisted, causing it to be rolled back and leaving the balance snapshot incomplete?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7cfe46d1-74ba-4eae-940f-a59a4e074b3a?mode=deep",
+    "timestamp": "2026-04-29 04:34:42.567135",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/BalanceParserProperties.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BalanceParserProperties()] Can an unprivileged external user exploit the batchSize = 200_000 default to cause a memory pressure scenario where 200_000 AccountBalance objects are held in memory simultaneously, and by triggering garbage collection pauses during this window, cause the transaction to exceed the 5-minute timeout and roll back, leaving the balance snapshot for the staking reward account unpersisted and causing pending_reward to be calculated as zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6242f4cb-cb72-4712-aed2-0a0ab4ccd06f?mode=deep",
+    "timestamp": "2026-04-29 04:35:09.259890",
+    "report_generated": false
+  }
+]
