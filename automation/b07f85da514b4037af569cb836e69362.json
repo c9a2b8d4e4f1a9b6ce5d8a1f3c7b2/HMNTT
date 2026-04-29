@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9079a2fc-fdfd-409b-969c-c19a53afdb0a?mode=deep",
     "timestamp": "2026-04-28 20:26:24.281338",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user trigger a network partition-like divergence by sending concurrent requests that race on the non-thread-safe `states` HashMap (line 56) while `readableStates` ConcurrentHashMap is being populated via `computeIfAbsent`, causing one thread to read a partially-initialized service state map and serve stale or null data to all subsequent callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ade32842-d03c-43be-8c13-31b803fc6a95?mode=deep",
+    "timestamp": "2026-04-29 04:14:20.075293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a partition-equivalent state divergence by flooding concurrent `getWritableStates()` calls for the same `serviceName`, exploiting the fact that `writableStates` ConcurrentHashMap's `computeIfAbsent` lambda reads from the non-thread-safe `states` HashMap (line 93), resulting in multiple threads observing inconsistent snapshots of service state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e367edc-614b-4177-9aba-1111d8a509d2?mode=deep",
+    "timestamp": "2026-04-29 04:14:32.111802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: setHash()] Can an unprivileged external user exploit the no-op `setHash()` implementation (lines 119-121) to cause the mirror node to permanently serve a partitioned (stale) state without any hash-mismatch detection, by triggering state reads immediately after a network disruption before the node has re-synced, leading to incorrect EVM execution results returned to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64323e08-5545-4bb3-82f4-993bbc491985?mode=deep",
+    "timestamp": "2026-04-29 04:14:44.634667",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a permanent partition of readable vs. writable state by triggering the `onCommit` callback `() -> readableStates.remove(serviceName)` (line 114) concurrently with a new `getReadableStates()` call, so that the readable cache is evicted and rebuilt from a stale `states` map while the writable cache still holds the old committed state, creating a split-brain condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04de815e-5f9e-4a68-be92-60817b570d5f?mode=deep",
+    "timestamp": "2026-04-29 04:14:58.309964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: initQueueStates()] Can an unprivileged external user cause a network partition-equivalent corruption of the `TRANSACTION_RECEIPTS_STATE_ID` queue by concurrently accessing the `LinkedList` (line 171) through `getReadableStates()` and `getWritableStates()` for `RecordCacheService.NAME`, since `LinkedList` is not thread-safe and concurrent structural modifications can corrupt the queue, causing transaction receipt lookups to return wrong or missing data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da0d39fd-27bd-44db-ae62-35deec3630c4?mode=deep",
+    "timestamp": "2026-04-29 04:15:11.529903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user trigger a deadlock or livelock simulating a network partition by causing `getWritableStates()` to call `getReadableStates(serviceName)` (line 109) while another thread is inside `getReadableStates()` calling `computeIfAbsent` on the same key, since ConcurrentHashMap's `computeIfAbsent` does not allow recursive updates on the same key, causing the node to hang and become unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81da5ecd-0c77-4f67-889e-f820dde567a9?mode=deep",
+    "timestamp": "2026-04-29 04:15:26.039234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a partition-like state inconsistency by submitting a crafted `serviceName` that matches a service whose `states` entry was partially initialized (due to a race in `initKVStates()` or `initSingletonStates()`), causing `getReadableStates()` to cache an incomplete `MapReadableStates` object that permanently serves null for certain state IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01dfe0d3-ecab-457f-a9f5-3d364f896b66?mode=deep",
+    "timestamp": "2026-04-29 04:15:40.996191",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user exploit the asymmetry between `readableStates` cache invalidation (removed on commit via `onCommit`) and `writableStates` cache (never invalidated, line 92) to cause a persistent partition where writable state reflects pre-partition data while readable state is refreshed, leading to EVM contract calls reading one version of state while writes target another?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e796db91-71fd-48f2-a71f-24be1a45f86e?mode=deep",
+    "timestamp": "2026-04-29 04:15:57.601326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a network partition-equivalent scenario by sending a high volume of concurrent requests for different `serviceName` values, exhausting the `ConcurrentHashMap` segment locks on `readableStates` and causing threads to block indefinitely while the `states` HashMap is being read without synchronization, effectively partitioning the node from serving any state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caf24436-6989-4e11-96f6-27b5d1a1ded0?mode=deep",
+    "timestamp": "2026-04-29 04:16:13.264345",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: initKVStates()] Can an unprivileged external user trigger a partition-like state divergence by exploiting the fact that `defaultKvImplementations` (lines 159-164) are backed by empty `HashMap` instances, so that after a network partition and reconnect, EVM hook states (`EVM_HOOK_STORAGE_STATE_ID`, `EVM_HOOK_STATES_STATE_ID`) always return empty data instead of the actual post-partition state, causing smart contract executions to behave as if storage is empty?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47840919-d579-428e-ac3e-215b35724d49?mode=deep",
+    "timestamp": "2026-04-29 04:16:30.608538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a partition-equivalent state split by racing two concurrent `getWritableStates()` calls for the same service, where both pass the `computeIfAbsent` check simultaneously (before either completes), resulting in two different `MapWritableStates` instances being created with different snapshots of the underlying `states` map, and one being discarded while the other is cached with stale data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8b99ed2-4cdb-4774-bd3e-5cb4f0f646ad?mode=deep",
+    "timestamp": "2026-04-29 04:16:48.556441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a permanent partition of the `TokenService` state by triggering `getReadableStates(TokenService.NAME)` before `initSingletonStates()` has finished adding `STAKING_NETWORK_REWARDS_STATE_ID` and `NODE_REWARDS_STATE_ID` (lines 149-150), caching an incomplete `MapReadableStates` that permanently omits these singletons for all future callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_610faa4e-8e8b-47a0-8005-923bd79af455?mode=deep",
+    "timestamp": "2026-04-29 04:17:07.249450",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a network partition-equivalent integrity failure by exploiting the fact that `MapWritableKVState` is constructed with a reference to `getReadableStates(serviceName).get(stateId)` (lines 106-109), so that if the readable state is evicted and rebuilt (via `onCommit`) between the writable state creation and its use, the writable state operates on a dangling reference to the old readable state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2020f967-17dd-4d19-96cc-7c1275fc4c1e?mode=deep",
+    "timestamp": "2026-04-29 04:17:27.482059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: equals()] Can an unprivileged external user exploit the `equals()` method (lines 124-135) which compares mutable cache maps (`readableStates`, `writableStates`) to cause incorrect state reconciliation after a network partition, where two `MirrorNodeState` instances that should be considered divergent are incorrectly deemed equal because their caches happen to match even though the underlying `states` data has diverged?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f3fb7be-80c8-453a-93ce-6bbe7f696599?mode=deep",
+    "timestamp": "2026-04-29 04:17:47.603375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getStates()] Can an unprivileged external user (via a test/debug endpoint that exposes `getStates()`) exploit the fact that `Collections.unmodifiableMap(states)` (line 144) only makes the outer map unmodifiable while inner `Map<Integer, Object>` values remain mutable, allowing modification of service state entries that causes a partition-like divergence between the cached `readableStates` and the underlying `states` data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba4afb72-4ce7-494a-9219-7efa5cce5a09?mode=deep",
+    "timestamp": "2026-04-29 04:18:08.325782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: initSingletonStates()] Can an unprivileged external user cause a partition-equivalent state corruption by triggering concurrent bean initialization that calls `initSingletonStates()` while another thread is calling `getReadableStates()`, since `states` is a non-thread-safe `HashMap` and concurrent `computeIfAbsent` + `put` operations on it can cause infinite loops or data loss in Java's HashMap implementation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25613d9a-310b-4794-bb08-ab419cef36df?mode=deep",
+    "timestamp": "2026-04-29 04:18:29.522208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a network partition-equivalent scenario where `EntityIdService` state (`HIGHEST_NODE_ID_STATE_ID`) is permanently cached with a stale value by triggering `getReadableStates(EntityIdService.NAME)` during a partition window, so that all subsequent node ID lookups return the pre-partition highest node ID, causing incorrect routing or entity ID assignment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_469c5417-bd8b-49e6-b34d-5f5f7668ab04?mode=deep",
+    "timestamp": "2026-04-29 04:18:51.486926",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a partition-like state freeze by triggering `getWritableStates()` for `RecordCacheService.NAME` which wraps the shared `LinkedList` (line 171) in a `ListWritableQueueState`, then concurrently modifying the queue through both readable and writable state wrappers, causing the `LinkedList` to enter a corrupted state where `size()` is inconsistent with actual elements?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02d4dee0-9187-4714-ab6d-0814e73f1533?mode=deep",
+    "timestamp": "2026-04-29 04:19:14.531352",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a partition-equivalent memory exhaustion by sending requests that force `getReadableStates()` to cache a `MapReadableStates` for every unique `serviceName` string they supply, since there is no bound on the `readableStates` ConcurrentHashMap size, eventually causing OOM that partitions the node from the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be5274ee-c32c-4a01-a37a-3640f87e0eae?mode=deep",
+    "timestamp": "2026-04-29 04:19:38.116230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a partition-equivalent memory exhaustion by sending requests that force `getWritableStates()` to cache a `MapWritableStates` for every unique `serviceName` string, since `writableStates` ConcurrentHashMap has no eviction policy and no size bound, eventually causing OOM that takes the node offline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1e5d80a-3cd5-4043-928f-e800d2955ef8?mode=deep",
+    "timestamp": "2026-04-29 04:20:00.815283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user cause a partition-like state divergence by exploiting the fact that `getReadableStates()` returns `new MapReadableStates(new HashMap<>())` for unknown service names (line 71) without caching this empty result, causing repeated calls to always return empty state for unknown services while valid services return cached (potentially stale) state, creating an inconsistent view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a26de542-0a98-496c-b65f-890bd961d693?mode=deep",
+    "timestamp": "2026-04-29 04:20:25.606379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a partition-equivalent state inconsistency by exploiting the fact that `getWritableStates()` returns `new EmptyWritableStates()` for unknown service names (line 95) without caching, so concurrent calls for the same unknown service each get a different `EmptyWritableStates` instance, and any writes to these instances are silently discarded, causing data loss that mimics a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a56927c-eb5c-4031-9a4a-2391b5932246?mode=deep",
+    "timestamp": "2026-04-29 04:20:50.606271",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getReadableStates()] Can an unprivileged external user trigger a partition-equivalent scenario where `ScheduleService` state becomes permanently inconsistent by racing `getReadableStates(ScheduleService.NAME)` with `initKVStates()` adding `SCHEDULE_ID_BY_EQUALITY_STATE_ID`, `SCHEDULED_COUNTS_STATE_ID`, and `SCHEDULED_USAGES_STATE_ID` (lines 162-164), caching a `MapReadableStates` that is missing these state IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23cee037-93eb-46a0-96ff-ec748b2e1cc6?mode=deep",
+    "timestamp": "2026-04-29 04:21:16.890811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getWritableStates()] Can an unprivileged external user cause a network partition-equivalent scenario by exploiting the recursive call from `getWritableStates()` to `getReadableStates()` (line 109) where both use `computeIfAbsent` on their respective ConcurrentHashMaps for the same `serviceName`, potentially causing a thread to block waiting for the other `computeIfAbsent` to complete, simulating a deadlock-induced partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1537573-e40c-4e9a-a5bb-41ca4c99f0ec?mode=deep",
+    "timestamp": "2026-04-29 04:21:43.087309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: initKVStates()] Can an unprivileged external user cause a partition-equivalent state divergence by exploiting the fact that `ContractService` EVM hook states (`EVM_HOOK_STORAGE_STATE_ID`, `EVM_HOOK_STATES_STATE_ID`) are initialized with empty `MapReadableKVState` backed by empty `HashMap` (line 175), so after a network partition these states never reflect actual on-chain EVM hook data, causing all EVM hook-dependent contract calls to execute against empty storage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35afda2a-1f90-48da-943b-86fc53576005?mode=deep",
+    "timestamp": "2026-04-29 04:22:10.423272",
+    "report_generated": false
   }
 ]
