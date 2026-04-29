@@ -1,0 +1,86 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user exploit the fact that `writableStates` is never cleared (only `readableStates` is cleared by `onCommit`), causing a stale `MapWritableStates` to be returned from cache for subsequent requests, where the stale writable state still holds in-memory modifications from a previous EVM execution, leading to phantom balance reads that enable double-spending?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7de2cf34-7cb4-40f1-a745-ccc4c09b894c?mode=deep",
+    "timestamp": "2026-04-29 02:40:48.646081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: initSingletonStates()] Can an unprivileged user trigger an EVM execution that calls a staking precompile which reads `STAKING_NETWORK_REWARDS_STATE_ID` via `FunctionReadableSingletonState`, where the `DefaultSingleton` (AtomicReference) holds a null value because no initialization has set it, causing the precompile to compute staking rewards based on null total stake and return an inflated per-token reward, leading to over-distribution of staking funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ef108cc-39a1-4a75-bb6d-caff3e0b8bfb?mode=deep",
+    "timestamp": "2026-04-29 02:41:00.580893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user exploit the interaction between `MapWritableKVState.putIntoDataSource()` calling `put(key, value)` (which writes to the writable layer's internal map) and `readFromDataSource()` delegating to `readableBackingStore.get(key)` (which reads from the original readable state), creating a split-brain where within a single EVM frame a write is visible but across frames the write is invisible, enabling a contract to manipulate its own balance check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c92d0b8-969a-4048-bac5-5048625c5f7d?mode=deep",
+    "timestamp": "2026-04-29 02:41:13.371012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getReadableStates()] Can an unprivileged user submit requests that cause `getReadableStates()` to build a `MapReadableStates` where the `STAKING_NETWORK_REWARDS_STATE_ID` entry is a `FunctionReadableSingletonState` wrapping a `DefaultSingleton` with a null `AtomicReference` value, and then trigger a staking reward calculation that divides total rewards by the null-derived zero stake amount, causing an arithmetic exception that is caught and treated as zero rewards, resulting in staking funds being permanently locked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_affdd63a-52e8-49d5-abcb-9b9b36f0ce7c?mode=deep",
+    "timestamp": "2026-04-29 02:41:26.384426",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user trigger a concurrent scenario where thread A calls `getWritableStates(TokenService.NAME)` and caches a `MapWritableStates`, then thread B calls `commit()` on that same cached instance (via `onCommit` removing the readable cache), and then thread A uses the now-committed writable state for a second EVM operation, causing the second operation to read from a rebuilt empty readable state and compute incorrect post-transfer balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36815b18-3306-4c39-8320-70fc7c76f3ab?mode=deep",
+    "timestamp": "2026-04-29 02:41:40.190370",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: initKVStates()] Can an unprivileged user exploit the fact that `defaultKvImplementations` uses `Map.of()` which has undefined iteration order, and `states.computeIfAbsent()` with a `HashMap` (not thread-safe) is called in `forEach()`, causing a race condition during initialization where two threads simultaneously register default KV states and one thread's `computeIfAbsent` sees a partially-constructed service map, leading to missing token state entries and zero-balance reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_294dfb81-2fdf-48f6-9936-d9286edf94b1?mode=deep",
+    "timestamp": "2026-04-29 02:41:54.205660",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user craft a sequence of eth_call requests that causes `MapWritableStates.commit()` to be called multiple times on the same instance (since `writableStates` cache is never cleared), where each `commit()` call invokes `onCommit.run()` which removes the readable state cache, causing repeated cache invalidation that forces repeated rebuilds from the empty `createMapReadableStateForId()` backing stores, leading to persistent zero-balance reads for EVM hook states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aceb761a-5b71-4276-abaa-ac77de1a74d1?mode=deep",
+    "timestamp": "2026-04-29 02:42:09.508610",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getReadableStates()] Can an unprivileged user exploit the type-dispatch logic in `getReadableStates()` where `state instanceof ReadableKVState<?, ?> kvState` causes the raw `AbstractReadableKVState` to be stored directly (not wrapped), while `state instanceof SingletonState<?>` wraps it in `FunctionReadableSingletonState`, creating an inconsistency where the singleton's `get()` method returns a different value than expected by the EVM, causing incorrect staking reward state reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e802e56-62d2-4c84-a2c3-3a4b062be913?mode=deep",
+    "timestamp": "2026-04-29 02:42:26.184457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user trigger a path where `getWritableStates(ScheduleService.NAME)` wraps `SCHEDULED_COUNTS_STATE_ID` in a `MapWritableKVState` backed by the empty `MapReadableKVState` from `createMapReadableStateForId()`, causing all scheduled transaction count reads to return null/zero, allowing an attacker to bypass scheduled transaction throttling and submit unlimited scheduled fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f414c48d-0431-41f8-98df-ce7145ca7596?mode=deep",
+    "timestamp": "2026-04-29 02:42:42.714077",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getReadableStates()] Can an unprivileged user exploit the `computeIfAbsent` on `readableStates` (ConcurrentHashMap) where the lambda body iterates the non-thread-safe `states` HashMap, and a concurrent `initKVStates()` or `initSingletonStates()` call modifies `states` during iteration, causing a `ConcurrentModificationException` that is propagated to the EVM execution context and treated as a failed state read, resulting in the EVM using default zero values for token balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_798e4f17-2c3b-466b-bb09-3606890ba0d5?mode=deep",
+    "timestamp": "2026-04-29 02:43:00.727623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user exploit the fact that `getWritableStates()` calls `getReadableStates(serviceName)` inside the `writableStates.computeIfAbsent()` lambda, and `getReadableStates()` itself calls `readableStates.computeIfAbsent()`, creating a nested `computeIfAbsent` on the same `ConcurrentHashMap` which in Java 8+ can cause a deadlock or infinite loop, resulting in a denial of service that prevents all fund transfer state reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b553c279-00e8-47dc-b645-4eb7b03b5f27?mode=deep",
+    "timestamp": "2026-04-29 02:43:19.020586",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: initSingletonStates()] Can an unprivileged user trigger an EVM execution that modifies `NODE_REWARDS_STATE_ID` via `FunctionWritableSingletonState.putIntoDataSource()`, which is a no-op, causing the node reward state to remain at its initial null/default value regardless of EVM writes, and then a subsequent reward distribution calculation reads this stale null value and distributes zero rewards to node operators, effectively stealing their earned rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9734d4ca-e919-4483-80de-9e2511ff44f8?mode=deep",
+    "timestamp": "2026-04-29 02:43:37.798584",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getWritableStates()] Can an unprivileged user submit a contract call that triggers `MapWritableStates.commit()` which calls `kv.commit()` on a `MapWritableKVState` that has pending writes, and simultaneously another thread calls `getReadableStates()` which rebuilds from the `states` HashMap (after `onCommit` cleared the cache), causing the readable state to be rebuilt before the writable commit's changes are reflected in the underlying `AbstractReadableKVState`, leading to lost fund transfer state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23c98e19-f716-474b-a813-9d365bba013d?mode=deep",
+    "timestamp": "2026-04-29 02:43:57.569025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/MirrorNodeState.java -> Scope: Critical: Direct loss of funds'] [Function: getReadableStates()] Can an unprivileged user exploit the fact that when `getReadableStates()` rebuilds after cache eviction, it wraps `Queue<?>` instances in `ListReadableQueueState` and `SingletonState<?>` in `FunctionReadableSingletonState`, but `ReadableKVState<?,?>` instances are stored directly without wrapping, causing the `MapReadableStates` to contain mixed wrapped/unwrapped types that behave differently under concurrent access, leading to inconsistent token balance reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5029ed0f-63bf-4b0a-a446-b84ceae14b64?mode=deep",
+    "timestamp": "2026-04-29 02:44:17.996424",
+    "report_generated": false
+  }
+]
