@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the gorm.Config only sets a Logger and no other security-relevant options (e.g., PrepareStmt, DisableForeignKeyConstraintWhenMigrating), leaving the application exposed to GORM default behaviors that may be insecure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1e3c9c9-6c68-4718-a3ab-87eef05bdcd3?mode=deep",
+    "timestamp": "2026-04-29 01:47:29.719044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the absence of PrepareStmt: true in gorm.Config to prevent prepared statement caching, causing GORM to re-parse SQL on every query and potentially exposing the application to timing-based SQL injection if any dynamic query construction exists downstream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c47a3c2-d010-4662-9a15-0ba6ea505e74?mode=deep",
+    "timestamp": "2026-04-29 01:47:41.522171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() uses time.Duration(d.statementTimeout)*time.Second (line 36) and if statementTimeout is a very large integer, the duration overflows, resulting in a negative timeout that causes context.WithTimeout() to immediately cancel the context, denying all DB access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec12a999-cbaa-4014-85e5-1bfa02e63017?mode=deep",
+    "timestamp": "2026-04-29 01:47:53.898584",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the immediate context cancellation caused by a negative computed timeout (from integer overflow of statementTimeout) to cause all DB queries to fail with context.DeadlineExceeded, effectively denying service to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b1b3009-0495-418d-8b7d-4f1e3f09cb80?mode=deep",
+    "timestamp": "2026-04-29 01:48:06.885989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not check whether the parent ctx is already cancelled before creating a child context, wasting resources creating child contexts that are immediately cancelled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f2420a4-4787-40aa-a513-b7d90ddc4c20?mode=deep",
+    "timestamp": "2026-04-29 01:48:21.884516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that the CancelFunc returned by GetDbWithContext() is not always called by all callers (no enforcement), causing context goroutine leaks that accumulate over time and degrade performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_feaaf468-76dd-4bf6-849f-887f09266ca5?mode=deep",
+    "timestamp": "2026-04-29 01:48:36.058019",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that when statementTimeout <= 0 and ctx is non-nil, GetDbWithContext() returns db.WithContext(ctx) (line 26-28) with no timeout, allowing the caller's context deadline to be the only limit, which may be very long or absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08f965be-2f97-4c79-8880-657da7fb7918?mode=deep",
+    "timestamp": "2026-04-29 01:48:50.636282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the DB password is stored in plaintext in the config.Db struct and passed to GetDsn(), and if the process memory is dumped (e.g., via /proc/self/mem on Linux), the password is recoverable in plaintext?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bbf52a92-bc1d-447f-8323-ca248a8b6612?mode=deep",
+    "timestamp": "2026-04-29 01:49:07.188877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the DSN string constructed by GetDsn() is passed to postgres.Open() and may be retained in GORM's internal state, making the password recoverable via heap dumps or core dumps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_447cbc2d-2194-48ad-9eb1-ff2b73b121ba?mode=deep",
+    "timestamp": "2026-04-29 01:49:23.043314",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that sslmode=disable is hardcoded in GetDsn() and cannot be overridden by configuration, preventing operators from enabling TLS even if they want to, and permanently exposing the DB connection to network eavesdropping?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5943f473-2a99-4c14-834a-81abd2720d10?mode=deep",
+    "timestamp": "2026-04-29 01:49:39.551058",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not set sqlDb.SetConnMaxIdleTime(), allowing idle connections to remain open indefinitely and accumulate, consuming DB server resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e82aa71-4d02-4b10-8f05-adf739c357ff?mode=deep",
+    "timestamp": "2026-04-29 01:49:58.514033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the absence of sqlDb.SetConnMaxIdleTime() to keep idle connections alive past the DB server's idle timeout, causing the server to forcibly close them and the application to receive unexpected connection errors on the next use?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bcfd0db-bd29-4b2a-b908-57995aee1eec?mode=deep",
+    "timestamp": "2026-04-29 01:50:15.833792",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not validate that dbConfig.Pool.MaxIdleConnections <= dbConfig.Pool.MaxOpenConnections, and if MaxIdleConnections > MaxOpenConnections, the sql.DB package silently reduces MaxIdleConnections, potentially causing unexpected pool behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e94b94a-bf50-49ce-81b1-04c104c1c12b?mode=deep",
+    "timestamp": "2026-04-29 01:50:35.072045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the gorm-logrus logger (gormlogrus.New()) logs all SQL errors at the WARN or ERROR level, potentially exposing internal SQL error messages that reveal table names, column names, or constraint names to an attacker monitoring logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82703842-dce6-4661-82cf-62e1f1bd171d?mode=deep",
+    "timestamp": "2026-04-29 01:50:53.324098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not enforce a minimum value for StatementTimeout, allowing it to be set to 1 millisecond, causing all queries to time out immediately and denying service to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3a5d7ff-c427-4a90-a74b-9655f36fe036?mode=deep",
+    "timestamp": "2026-04-29 01:51:13.561632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not enforce a maximum value for StatementTimeout, allowing it to be set to a very large value that effectively disables the timeout, enabling long-running query DoS attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7928bdd-c8fe-46ab-8aa9-718fc13b9e57?mode=deep",
+    "timestamp": "2026-04-29 01:51:33.915115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the DB connection is established once at startup and shared across all requests, so a single connection pool exhaustion event (caused by many concurrent requests) denies service to all subsequent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3638164c-b577-4bc8-a3c9-b88c78edd9b9?mode=deep",
+    "timestamp": "2026-04-29 01:51:55.083488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not implement exponential backoff or circuit breaking, so repeated failed connection attempts (e.g., during a DB outage) cause the application to log errors at high frequency, filling disk with log data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7045df52-2375-4a5c-aa24-75790ebbc64d?mode=deep",
+    "timestamp": "2026-04-29 01:52:16.365365",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the gorm.Open() call in ConnectToDb() does not specify a connection timeout in the DSN (e.g., connect_timeout=N), allowing the TCP connection attempt to block for the OS default timeout (often minutes)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a9dac21-d94f-456b-aa46-ef04473c672d?mode=deep",
+    "timestamp": "2026-04-29 01:52:39.565237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the DSN does not include application_name, making it impossible to distinguish Rosetta DB connections from other clients in pg_stat_activity, hindering incident response and connection attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38796739-58a8-4928-bd48-207af6cb992b?mode=deep",
+    "timestamp": "2026-04-29 01:53:02.290170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not set a statement_timeout at the PostgreSQL session level (only at the application level via context), so if GetDb() is used instead of GetDbWithContext(), there is no server-side query timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb708ab9-be11-4143-9abf-f98ea5f56f2f?mode=deep",
+    "timestamp": "2026-04-29 01:53:25.623507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that the statement timeout is enforced only via context cancellation (client-side), not via a PostgreSQL SET statement_timeout command, so if the context is not propagated correctly by GORM, the timeout is silently bypassed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15526122-a113-429a-bcc3-d86828f9d24f?mode=deep",
+    "timestamp": "2026-04-29 01:53:50.179137",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that context cancellation via context.WithTimeout() cancels the Go-side context but does not necessarily cancel the in-flight PostgreSQL query on the server side, allowing long-running queries to continue consuming DB resources after the client has given up?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_997dea74-f128-4d9b-b192-7af698aaf79d?mode=deep",
+    "timestamp": "2026-04-29 01:54:15.203975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that the Pool.MaxLifetime is specified in minutes (time.Duration(dbConfig.Pool.MaxLifetime) * time.Minute), and if MaxLifetime is 0, connections are never recycled, accumulating stale connections that may hold locks or consume DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_362219e5-28c7-4172-b8da-bcadfe04d5a2?mode=deep",
+    "timestamp": "2026-04-29 01:54:40.820663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: '] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that ConnectToDb() does not validate that dbConfig.Host is a valid hostname or IP address, allowing a crafted host value to cause DNS resolution delays that block the connection attempt and stall application startup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26ab6e10-b498-498e-9bce-ac875f19e87c?mode=deep",
+    "timestamp": "2026-04-29 01:55:06.804020",
+    "report_generated": false
+  }
+]
