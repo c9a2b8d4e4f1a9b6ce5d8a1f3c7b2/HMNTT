@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by hash (isTransactionHash=true) where the getTransactionsByIdOrHashCacheControlHeader() returns {} (no override), causing the default cache headers to serve a long-cached response with missing staking_reward_transfers to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73388cdd-714a-4906-a334-c2847715546d?mode=deep",
+    "timestamp": "2026-04-29 03:16:18.762978",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a transaction hash of exactly Transaction.BASE64_HASH_SIZE characters that decodes to a buffer matching multiple transactions in the DB (hash collision scenario), causing getTransactionHash() to return multiple rows and the staking reward lookup to use only the first row's payer_account_id, potentially attributing staking rewards to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_827e77f6-affb-4e54-8954-32ea07070162?mode=deep",
+    "timestamp": "2026-04-29 03:16:31.253083",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a transaction hash with the '0x' prefix (HEX_HASH_WITH_PREFIX_SIZE) that after substring(2) matches a valid hash, but the encoding detection logic incorrectly selects 'base64url' instead of 'hex', causing Buffer.from() to decode to a different byte sequence and returning wrong transaction rows with incorrect staking reward data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37f1b455-7136-4f1d-ba02-5a55a2d400f6?mode=deep",
+    "timestamp": "2026-04-29 03:16:43.765406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionByIdQueryParamConditions()] Can an unprivileged external user supply a nonce=0 filter to getTransactionByIdQueryParamConditions() that, when combined with the main transaction query, filters out child transactions that carry staking reward transfers, causing those rewards to be omitted from the staking_reward_transfers field in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1317d8c-08c1-4677-9a00-468bcbfb0367?mode=deep",
+    "timestamp": "2026-04-29 03:16:56.837329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionByIdQueryParamConditions()] Can an unprivileged external user supply scheduled=true to getTransactionByIdQueryParamConditions() for a transaction that is not actually scheduled, causing the query to return zero rows and throwing a NotFoundError, while the actual transaction with its staking rewards is never returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd1094af-04d3-4134-b2d8-092aac0f16f0?mode=deep",
+    "timestamp": "2026-04-29 03:17:11.231753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID where the payer account ID is 0 or null, causing the `if (payer)` check in getTransactionsByTransactionIdsSql() to evaluate to false and the query to use only the timestamp condition without payer_account_id, potentially returning a different transaction's staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4ee226f-a57e-4fbf-a892-529d6e18d1da?mode=deep",
+    "timestamp": "2026-04-29 03:17:25.621546",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID with a valid_start_ns that is at the maximum BigInt boundary, causing arithmetic overflow in `minTimestamp - config.query.maxValidStartTimestampDriftNs` and wrapping to a negative value, resulting in a consensus timestamp range that spans the entire table and returns unrelated staking reward transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f47a0f4e-925c-49c2-bc22-d9aaa35675ef?mode=deep",
+    "timestamp": "2026-04-29 03:17:40.345014",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an account_id filter that causes the nftTransfersUnion subquery to be included in getTransactionTimestampsQuery(), where the EntityTransaction table contains entries for the staking reward account (800), causing those entries to be included in the timestamp results and triggering a spurious staking reward lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22c451d3-38da-4e42-bb73-9619e426f315?mode=deep",
+    "timestamp": "2026-04-29 03:17:56.838511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: buildWhereClause()] Can an unprivileged external user craft filter parameters such that buildWhereClause() produces an empty WHERE clause (all conditions are empty strings), causing the transaction query to return all transactions in the DB and the staking reward lookup to process an unbounded set of timestamps, leading to incorrect reward attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51596086-5979-433d-8e1c-9b2ca66119d1?mode=deep",
+    "timestamp": "2026-04-29 03:18:14.098496",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStakingRewardTimestamps()] Can an unprivileged external user trigger a scenario where a transaction's crypto_transfer_list contains multiple entries with entity_id equal to the staking reward account (800), causing getStakingRewardTimestamps() to include the same consensus_timestamp multiple times in the returned array, leading to duplicate DB queries and potentially incorrect reward amounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6f7d026-1149-46de-9a12-84c6d3ef7d73?mode=deep",
+    "timestamp": "2026-04-29 03:18:32.010503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: createStakingRewardTransferList()] Can an unprivileged external user trigger a scenario where getStakingRewardTimestamps() returns timestamps for transactions that are in the cache (served from cache.get()) but the staking reward DB lookup happens against the live DB, creating a TOCTOU window where the cached transaction has staking_reward_transfers: [] but the DB has actual rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_316f4d41-ce2b-4845-aa19-e0083d0ad3e2?mode=deep",
+    "timestamp": "2026-04-29 03:18:49.404429",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: doGetTransactions()] Can an unprivileged external user exploit the cache.get() mechanism in doGetTransactions() by first querying a transaction before its staking reward is written to the DB (populating the cache with staking_reward_transfers: []), then the staking reward is written, but subsequent queries return the cached empty reward list, effectively hiding the unpaid staking reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07f884cd-56ae-44bc-b4d7-dbc6f519e3df?mode=deep",
+    "timestamp": "2026-04-29 03:19:08.084558",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: formatTransactionRows()] Can an unprivileged external user trigger a scenario where createStakingRewardTransferList() is called with an empty transactions array (e.g., all rows filtered out), causing the stakingRewardMap to be empty, and then if rows are somehow added back, all staking_reward_transfers would be [] due to the empty map?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57443229-f60d-46bf-91bb-86c1bb454781?mode=deep",
+    "timestamp": "2026-04-29 03:19:27.981747",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by ID that has inner_transactions, where the inner transaction rows are fetched with getTransactionsByTransactionIdsSql() using Transaction.VALID_START_NS as the timestamp field, causing the consensus timestamp range to be computed differently and potentially missing staking reward transfers for those inner transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c79b949d-1e51-44a3-8fb5-def208e8a212?mode=deep",
+    "timestamp": "2026-04-29 03:19:48.699354",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by hash where rows[0].payer_account_id is used as the payer for all rows in the hash lookup, but if the hash matches transactions from different payers, the staking reward lookup uses only the first payer's account ID, causing staking rewards for other payers to be missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9957076f-7b50-4d90-8714-add697c86037?mode=deep",
+    "timestamp": "2026-04-29 03:20:10.337556",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionTimestamps()] Can an unprivileged external user supply a timestamp range where bindTimestampRange() returns a range that excludes the exact nanosecond of a staking reward transaction, causing that transaction to be absent from the timestamp results and its staking_reward_transfers to never be populated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21b4d587-2f37-41ef-b750-6115a3603eb8?mode=deep",
+    "timestamp": "2026-04-29 03:20:29.876972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply both an account_id filter and a credit/debit filter, causing the full outer join path in getTransactionTimestampsQuery() to be taken, where a staking reward transaction that only appears in the transaction table (not in crypto_transfer or token_transfer) is excluded from the result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c52eec2-e83e-424d-aff4-c7310ab479c2?mode=deep",
+    "timestamp": "2026-04-29 03:20:52.665900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply a debit filter (type=debit) that causes creditDebitQuery to be `ctl.amount < 0`, filtering out the positive credit from staking reward account 800 (which is a debit from account 800's perspective), causing staking reward transactions to be excluded from the timestamp results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a1840f9-1d30-46eb-bb7e-e671f5569b7f?mode=deep",
+    "timestamp": "2026-04-29 03:21:14.880649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply a credit filter (type=credit) that causes creditDebitQuery to be `ctl.amount > 0`, and if the staking reward transfer to the recipient account is the only credit in the transaction, the transaction is included, but the staking_reward_transfers field is populated from a separate lookup that may return a different account's rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b07912f0-afbc-4881-bba6-79b9a52248f4?mode=deep",
+    "timestamp": "2026-04-29 03:21:38.533477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: convertStakingRewardTransfers()] Can an unprivileged external user trigger a scenario where EntityId.parse(transfer.account) in convertStakingRewardTransfers() throws an error for an invalid account ID stored in the DB, causing the entire staking reward map construction to fail and all staking_reward_transfers to be returned as [] for all transactions in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cbb9eda-123e-4cfa-bdf7-fe99c491f864?mode=deep",
+    "timestamp": "2026-04-29 03:22:02.843895",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStakingRewardTransferList()] Can an unprivileged external user trigger a scenario where the json_agg in getStakingRewardTransferList() returns staking reward transfers in a non-deterministic order, and if the client relies on the order of staking_reward_transfers to match transfers to accounts, the wrong reward amount could be attributed to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18b7aae2-e589-47cd-9c6c-6a3c07d594e2?mode=deep",
+    "timestamp": "2026-04-29 03:22:28.773056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user query a transaction by ID with scheduled=undefined (no scheduled filter), causing mayMissLongTermScheduledTransaction() to check if a SCHEDULECREATE transaction exists in the results, and if the attacker can craft a scenario where a non-scheduled transaction appears to be a SCHEDULECREATE (type === scheduleCreateProtoId), trigger a second query that returns a different transaction's staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2b81c9e-866e-4aff-aec3-773cbd7d889e?mode=deep",
+    "timestamp": "2026-04-29 03:22:54.942577",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user exploit the cache control logic where `transaction.type === scheduleCreateProtoId && SUCCESS_PROTO_IDS.includes(transaction.result)` is checked against the raw DB row (not the formatted transaction), causing a type mismatch that incorrectly sets or skips the SHORTER_CACHE_CONTROL_HEADER, leading to stale staking reward data being served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7ef42bd-46d9-4517-bee0-2f62efab9aeb?mode=deep",
+    "timestamp": "2026-04-29 03:23:21.100329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: formatTransactionRows()] Can an unprivileged external user trigger a scenario where createStakingRewardTransferList() is awaited but the pool.queryQuietly() inside getStakingRewardTransferList() times out or returns an error, causing the entire formatTransactionRows() to fail and the API to return a 500 error instead of the transaction data with staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd9bdf94-340b-4ab4-a678-2a4e223f4a2f?mode=deep",
+    "timestamp": "2026-04-29 03:23:48.413418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an account_id filter that causes the transactionAccountQuery to include the transactionByPayerExcludeSyntheticCondition, which excludes transactions with nonce != 0 and no parent_consensus_timestamp, potentially filtering out child transactions that carry staking reward transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3578aa9-f041-4a97-a893-8ceafdb847e0?mode=deep",
+    "timestamp": "2026-04-29 03:24:16.448051",
+    "report_generated": false
+  }
+]
