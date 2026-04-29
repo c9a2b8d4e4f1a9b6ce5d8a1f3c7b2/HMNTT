@@ -1,0 +1,68 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the topic table backfill migration (V1.103.2) converts empty-length key bytes to null (case when length(key) = 0 then null), causing topics that had empty admin keys or submit keys to have null values in the topic table, while the entity table retains the original empty byte array, creating an inconsistency in the API response that could mislead users about whether a topic has access controls and whether custom fees can be modified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bed343a-3538-47a9-a4e0-0973cca98ced?mode=deep",
+    "timestamp": "2026-04-29 02:22:26.517010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the EntityId encoding for shard=0, realm=0 is a special case (returns num directly without bit-shifting), while for shard=0, realm=1 the encoding is (1 << 38) | num, causing a topic with ID 0.0.X to have the same encoded long as a topic with ID 0.0.X but different shard/realm combinations to collide in the database, returning the wrong topic's fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14f1b79b-bb47-4b99-9144-36527589ff27?mode=deep",
+    "timestamp": "2026-04-29 02:22:38.509877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that topicRepository is a Spring Data CrudRepository with no custom query, meaning findById() uses the JPA default which may not account for the timestamp_range (current vs historical), causing the API to return the current topic row even if the topic has been updated multiple times, and potentially returning a fee schedule that is inconsistent with the entity table's current state, leading to fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c749fe9-1b47-4e17-b86d-f35c28205200?mode=deep",
+    "timestamp": "2026-04-29 02:22:50.898497",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit a timing window between when a ConsensusUpdateTopic transaction is processed by the importer (updating the topic table) and when the custom_fee table is updated, causing a GET /api/v1/topics/{id} request during this window to return the new topic metadata (e.g., new feeScheduleKey) but the old custom fee schedule, misleading users about the current fee structure and causing fund loss when they submit messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca6f606c-645b-4072-9f9e-1c074fe9e70b?mode=deep",
+    "timestamp": "2026-04-29 02:23:04.378015",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the custom_fee table uses entity_id as its primary key (renamed from token_id), and that the same entity_id value could theoretically exist in both the token custom fee context and the topic custom fee context after the migration, causing customFeeService.findById() to return a token's fee schedule (with royalty fees or fractional fees) instead of a topic's fixed fee schedule, misleading users about the actual cost of submitting messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_51a5651c-64c3-47d5-a630-e29f3e4b6ac7?mode=deep",
+    "timestamp": "2026-04-29 02:23:18.811621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the feeExemptKeyList is stored as serialized protobuf bytes in the database, and that the TopicMapper deserializes these bytes to produce the fee_exempt_key_list in the API response, causing a malformed or truncated protobuf byte sequence (due to a bug in ConsensusUpdateTopicTransactionHandler) to be deserialized as an empty list, making users believe they are fee-exempt when they are not, resulting in unexpected custom fee charges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88fa1cec-eb09-458c-a388-cb07ca0f96a9?mode=deep",
+    "timestamp": "2026-04-29 02:23:33.530800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that EntityIdNumParameter allows a single-number format (just num, no shard or realm), and that the default shard/realm from CommonProperties is used, causing users on a non-standard shard/realm configuration to query topic IDs that resolve to different encoded longs than expected, receiving fee schedule data for a different topic and submitting messages with incorrect fee expectations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a8e690d-173a-4ce3-b127-06747225ad9a?mode=deep",
+    "timestamp": "2026-04-29 02:23:48.681003",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that TopicServiceImpl.findById() does not validate that the returned Topic object's id field matches the requested EntityId, causing a scenario where a database-level ID collision or migration error results in a different topic's data being returned, and users submitting messages to the queried topic ID but paying fees defined for a different topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33161b4a-10cf-4b33-84de-c8845ff13233?mode=deep",
+    "timestamp": "2026-04-29 02:24:04.733066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the topic table is a distributed table (colocated with entity) in the v2 schema, and that distributed table queries may return results from a specific shard of the distributed database, causing a scenario where a topic's fee schedule is only partially replicated across shards, and some users receive stale fee data while others receive current data, leading to inconsistent fee expectations and fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baccd9ef-1dd9-463e-8f9b-a821f24542e7?mode=deep",
+    "timestamp": "2026-04-29 02:24:21.611849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that the API response includes both fee_exempt_key_list and custom_fees fields, but there is no validation that the keys in fee_exempt_key_list are actually valid public keys, causing a scenario where a malformed key in the list appears to grant fee exemption to a user's key when it does not, leading users to submit messages believing they are exempt from fees and incurring unexpected charges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a257f3d8-d813-4640-b4f2-ec1a627d0e57?mode=deep",
+    "timestamp": "2026-04-29 02:24:38.491272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/TopicService.java -> Scope: Critical: Direct loss of funds'] [Function: findById(EntityId id)] Can an unprivileged external user exploit the fact that TopicController.getTopic() calls topicService.findById() first and throws EntityNotFoundException if the topic is not found, but does not throw if customFeeService.findById() returns empty, causing the API to return a topic response with null custom_fees for a topic that has fees defined on-chain but not yet ingested by the importer, misleading users into thinking the topic is free?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa6cea6d-f83f-40d9-a475-f7bce558655e?mode=deep",
+    "timestamp": "2026-04-29 02:24:57.403301",
+    "report_generated": false
+  }
+]
