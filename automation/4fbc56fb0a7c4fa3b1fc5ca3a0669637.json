@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user trigger an infinite CPU-exhausting retry loop by causing the gRPC server to return any non-INVALID_ARGUMENT error repeatedly, since retry.setMaxAttempts(Long.MAX_VALUE) is set by default in GrpcSubscriberProperties and shouldRetry() only blocks INVALID_ARGUMENT, causing the monitor process to spin indefinitely and starve all other threads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fffddf0-1263-432a-a868-0e711bec6543?mode=deep",
+    "timestamp": "2026-04-29 05:32:03.628302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: shouldRetry()] Can an unprivileged external user cause a non-network-based DoS by making the gRPC endpoint return Status.UNKNOWN or Status.UNAVAILABLE errors, which pass the shouldRetry() filter unconditionally, resulting in Long.MAX_VALUE retry attempts that permanently consume CPU and scheduler threads without any circuit-breaker or total-time limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91c4be04-bcf9-43db-a4c0-d00096e093ca?mode=deep",
+    "timestamp": "2026-04-29 05:32:15.653941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user exhaust the JVM heap by triggering repeated retry attempts where each Retry.backoff() attempt allocates new Flux chain objects, Retry state objects, and log strings, and since maxAttempts is Long.MAX_VALUE, these allocations accumulate faster than GC can reclaim them, causing OutOfMemoryError and crashing the monitor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91eeaf4d-9b43-490e-839f-f8584dd9d35c?mode=deep",
+    "timestamp": "2026-04-29 05:32:28.286743",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause log-flooding DoS by triggering repeated retries that invoke the doBeforeRetry lambda which calls log.warn() with r.totalRetries()+1 and r.failure().getMessage() on every single retry attempt, and since maxAttempts is Long.MAX_VALUE, this generates unbounded log output that fills disk storage and degrades I/O performance across the entire monitor service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f195c5c1-63e5-4c92-8f2a-9b445306bf0a?mode=deep",
+    "timestamp": "2026-04-29 05:32:41.257938",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause memory exhaustion by configuring a large number of GrpcSubscriberProperties entries each with subscribers set to 1024 (the maximum allowed by @Max(1024)), causing createSubscriptions() to allocate up to 1024 GrpcSubscription objects per scenario and cache them all in the Flux.defer().cache() operator, exhausting heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6bab8b1-4bed-4536-aa9f-e92d7d08f451?mode=deep",
+    "timestamp": "2026-04-29 05:32:56.688187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: subscribe()] Can an unprivileged external user cause thread pool exhaustion by triggering subscribe() which calls subscriptions.flatMap(this::clientSubscribe) with unbounded concurrency (no concurrency limit passed to flatMap), so that each of the 1024 possible GrpcSubscription objects spawns its own reactive chain on Schedulers.parallel(), exhausting the parallel thread pool and blocking all other reactive operations in the JVM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1cb4d19-8a5e-41c7-b974-798da6894053?mode=deep",
+    "timestamp": "2026-04-29 05:33:11.001067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getStatusCode()] Can an unprivileged external user cause a non-network-based DoS by making the gRPC server throw a non-StatusRuntimeException (e.g., RuntimeException or NullPointerException), which causes getStatusCode() to return Status.Code.UNKNOWN, which in turn causes shouldRetry() to return true, triggering infinite retries with Long.MAX_VALUE attempts and permanently consuming CPU resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ca16539-6ea3-455f-8d61-6dd5383cc32a?mode=deep",
+    "timestamp": "2026-04-29 05:33:26.109174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a NullPointerException-based crash by making the gRPC server return an exception whose getMessage() returns null, which is then passed to StringUtils.substringBefore(r.failure().getMessage(), '\\n') inside doBeforeRetry, potentially causing an NPE that disrupts the retry chain and crashes the subscription in an unrecoverable state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a563679b-1502-42d3-a4c4-ceebfe660257?mode=deep",
+    "timestamp": "2026-04-29 05:33:42.821003",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause a non-network-based DoS by injecting a malformed or computationally expensive expression into properties.getTopicId() that causes expressionConverter.convert() to enter an infinite loop or consume excessive CPU during the createSubscriptions() call, blocking the Flux initialization and preventing any subscriptions from being established?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c0aac61-4bad-48fe-bb28-406cd6a40e34?mode=deep",
+    "timestamp": "2026-04-29 05:33:59.945656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: subscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the fact that subscriptions is a cached Flux (Flux.defer(this::createSubscriptions).cache()), so that once a poisoned or resource-exhausting subscription set is cached, every subsequent call to subscribe() or getSubscriptions() replays the same exhausting state without any possibility of recovery or reset?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6faf7b20-c996-4fe5-8c75-f76871225654?mode=deep",
+    "timestamp": "2026-04-29 05:34:16.936527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause scheduler starvation by triggering a scenario where all Retry.backoff() timers for Long.MAX_VALUE attempts are scheduled simultaneously on the default parallel scheduler, consuming all available scheduler slots and preventing legitimate reactive operations from executing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61bbab39-5bfa-4930-acf5-1682db81a4a4?mode=deep",
+    "timestamp": "2026-04-29 05:34:37.772451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause a non-network-based DoS by setting properties.getSubscribers() to 1024 across multiple GrpcSubscriberProperties entries, causing createSubscriptions() to create thousands of GrpcSubscription objects in a single ArrayList, each of which then gets a separate clientSubscribe() call via flatMap, overwhelming the reactive scheduler with thousands of concurrent subscription chains?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e06cf2a-efc9-4f2e-a49e-7cca03c8ece2?mode=deep",
+    "timestamp": "2026-04-29 05:34:57.790773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause GC pressure leading to stop-the-world pauses by triggering rapid retry cycles where each retry creates new Flux.defer() wrappers, Retry.RetrySignal objects, and log message strings, generating millions of short-lived objects per second that overwhelm the garbage collector and cause the monitor service to become unresponsive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8724da56-987a-4c7b-a649-c37535b8c9de?mode=deep",
+    "timestamp": "2026-04-29 05:35:18.319732",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: shouldRetry()] Can an unprivileged external user exploit the binary retry decision in shouldRetry() — which only checks for INVALID_ARGUMENT and retries on ALL other status codes including RESOURCE_EXHAUSTED, INTERNAL, and DATA_LOSS — to cause the monitor to endlessly retry against a server that is intentionally returning resource-exhaustion signals, amplifying the DoS impact on both client and server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32eed7aa-33c0-40a0-a093-53fe002d3b2b?mode=deep",
+    "timestamp": "2026-04-29 05:35:39.305763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the absence of a timeout on the Retry.backoff() chain in clientSubscribe(), meaning that even with maxBackoff of 8 seconds, a subscription that perpetually fails will never terminate and will hold reactive resources (subscriptions, schedulers, memory) indefinitely for Long.MAX_VALUE retry cycles?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6e8f098-2132-4cad-9e5b-1093fb78f5e7?mode=deep",
+    "timestamp": "2026-04-29 05:36:01.241816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause a non-network-based DoS by providing a topicId expression that resolves to an extremely long string via expressionConverter.convert(), which is then stored via properties.setTopicId(topicId) and replicated across all GrpcSubscription objects, causing excessive memory consumption proportional to the number of subscribers times the string length?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_444994db-a2ca-4471-be4c-355700cecac9?mode=deep",
+    "timestamp": "2026-04-29 05:36:23.931037",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: subscribe()] Can an unprivileged external user cause a non-network-based DoS by repeatedly calling subscribe() in a tight loop, and since subscriptions is a cached Flux, each call to flatMap(this::clientSubscribe) creates a new set of reactive chains on top of the same cached subscriptions, multiplying the number of active subscriptions and exhausting thread pool and memory resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_199a2128-25d0-4bbc-aa7b-61617cea0310?mode=deep",
+    "timestamp": "2026-04-29 05:36:47.434791",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the fact that doOnError only logs the error but does not terminate the retry chain, meaning that even after logging 'Error subscribing', the Retry.backoff() with Long.MAX_VALUE attempts continues indefinitely, consuming resources without any operator to cap total execution time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4f3679d-46dc-4c46-94a0-29661d1617a1?mode=deep",
+    "timestamp": "2026-04-29 05:37:11.736806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getStatusCode()] Can an unprivileged external user cause a non-network-based DoS by crafting a custom Throwable subclass that throws an exception inside its getMessage() method, which is called by StringUtils.substringBefore(r.failure().getMessage(), '\\n') in doBeforeRetry, causing an unexpected exception inside the retry handler that corrupts the reactive chain state and prevents proper cleanup of resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d79814b-a297-474c-8ada-5bb5d9b5a304?mode=deep",
+    "timestamp": "2026-04-29 05:37:36.609909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause a non-network-based DoS by injecting a large number of GrpcSubscriberProperties entries into subscribeProperties.getGrpc(), causing the for-each loop in createSubscriptions() to iterate over thousands of entries and create thousands of GrpcSubscription objects, each consuming memory and eventually causing OutOfMemoryError when the ArrayList grows beyond heap capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10278967-daae-4f83-a8a3-7db743bc6146?mode=deep",
+    "timestamp": "2026-04-29 05:38:01.089315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the minBackoff of 500ms and maxBackoff of 8s in the retry configuration, where with Long.MAX_VALUE attempts the total retry duration approaches infinity, permanently tying up a reactive subscription slot and preventing the monitor from detecting or recovering from the degraded state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ee40d99-ca26-4ada-a22e-aa1d1ac6685d?mode=deep",
+    "timestamp": "2026-04-29 05:38:27.342821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: subscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the unbounded flatMap in subscribe() which has no maxConcurrency parameter, so that when subscriptions contains 1024 entries (maximum subscribers), all 1024 clientSubscribe() chains are started simultaneously, each with their own retry loop, overwhelming the JVM with concurrent reactive chains?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8162848-f81e-4116-bfbb-ce75d0894456?mode=deep",
+    "timestamp": "2026-04-29 05:38:55.050291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a non-network-based DoS by making the gRPC server return Status.DEADLINE_EXCEEDED errors, which are not INVALID_ARGUMENT and therefore pass shouldRetry(), causing the monitor to retry indefinitely with Long.MAX_VALUE attempts while each retry attempt itself may also time out, creating a cascading resource consumption pattern?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_742e1f7f-45fb-47dd-8cb0-362d27326508?mode=deep",
+    "timestamp": "2026-04-29 05:39:22.481340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: createSubscriptions()] Can an unprivileged external user cause a non-network-based DoS by providing a topicId expression that causes expressionConverter.convert() to throw an unchecked exception, which propagates through createSubscriptions() and corrupts the cached Flux state, making all subsequent calls to subscribe() and getSubscriptions() fail permanently without any recovery mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9c69ab9-6ca0-4fa7-b64d-b9ea4a3dc088?mode=deep",
+    "timestamp": "2026-04-29 05:39:49.983889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: clientSubscribe()] Can an unprivileged external user cause a non-network-based DoS by exploiting the fact that Retry.backoff() schedules retry delays on a timer thread, and with Long.MAX_VALUE attempts across 1024 concurrent subscriptions, the number of pending timer tasks in the scheduler queue grows unboundedly, exhausting the timer thread pool and causing all time-based operations in the JVM to stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ae4667a-c516-4d12-928a-29ff080c1301?mode=deep",
+    "timestamp": "2026-04-29 05:40:18.994897",
+    "report_generated": false
+  }
+]
