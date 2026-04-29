@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user supply a crafted `orderDirection` string value (e.g., `'ASC'; DROP TABLE address_book;--`) via the public `/api/v1/network/nodes` endpoint, exploiting the fact that `:orderDirection` is interpolated as a raw string in the native SQL `CASE WHEN :orderDirection = 'ASC'` expression, causing SQL injection that corrupts or deletes Hashgraph address book history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5402b8d-7535-44f3-aaf8-59e20a03ce70?mode=deep",
+    "timestamp": "2026-04-28 23:55:01.308021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass an unsanitized `orderDirection` value containing SQL comment sequences or UNION clauses through the public REST API, bypassing the `CASE WHEN :orderDirection = 'ASC'` check in the native query, to exfiltrate or manipulate `start_consensus_timestamp` values in the `address_book` table, thereby misrepresenting Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b2b4b9d-903d-47ca-b358-d971c8729ed9?mode=deep",
+    "timestamp": "2026-04-28 23:55:13.076930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user supply a negative or zero `limit` value to `findNetworkNodes()` via the public API, bypassing the `getEffectiveLimit()` cap in `NetworkNodeRequest`, causing the native SQL `LIMIT :limit` clause to return an unbounded result set that exhausts database resources and prevents legitimate queries from reading current Hashgraph address book state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10811e88-0749-458c-bf91-fe25b44126d8?mode=deep",
+    "timestamp": "2026-04-28 23:55:24.821351",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass `minNodeId` greater than `maxNodeId` to `findNetworkNodes()`, causing the `WHERE abe.node_id >= :minNodeId AND abe.node_id <= :maxNodeId` clause to always return an empty result set, making the mirror node falsely report that no network nodes exist in the Hashgraph address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2003f117-524d-4cdb-9f91-e08e803dcc73?mode=deep",
+    "timestamp": "2026-04-28 23:55:36.958373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user supply `Long.MAX_VALUE` as both `minNodeId` and `maxNodeId` to `findNetworkNodes()`, causing the range filter `abe.node_id >= :minNodeId AND abe.node_id <= :maxNodeId` to produce an empty result, effectively hiding all real Hashgraph consensus nodes from API consumers who rely on this endpoint for network topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d55806e-1df4-45db-add1-6f9a7eaffa6f?mode=deep",
+    "timestamp": "2026-04-28 23:55:51.056471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass a very large `nodeIds` array to `findNetworkNodes()`, exploiting the `abe.node_id = any(:nodeIds)` clause in the native query to cause a PostgreSQL array expansion that results in excessive query plan time, denying legitimate access to the current Hashgraph address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f6cbf2b-f6d0-4802-b8cf-1039ed8ea43e?mode=deep",
+    "timestamp": "2026-04-28 23:56:04.475183",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass a `fileId` of `0` or a negative value to `findNetworkNodes()`, causing the `WHERE file_id = :fileId` clause in the `latest_address_book` CTE to match no rows, making the join return an empty result and hiding the entire current Hashgraph network topology from API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d930ce5-001e-4285-91a3-aa4a6bfdddc5?mode=deep",
+    "timestamp": "2026-04-28 23:56:18.214084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user enumerate valid `fileId` values (e.g., 101 vs 102) via the public `/api/v1/network/nodes?file.id=X` endpoint, exploiting the `WHERE file_id = :fileId` filter in `latest_address_book` CTE to access address book snapshots from different Hashgraph file IDs, leaking historical network topology that should not be publicly enumerable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c833b05d-6988-491d-9205-ac9f4b7f1821?mode=deep",
+    "timestamp": "2026-04-28 23:56:33.673190",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `latest_address_book` CTE's `ORDER BY start_consensus_timestamp DESC LIMIT 1` logic by observing that if two address book entries share the same `start_consensus_timestamp`, the result is non-deterministic, allowing a race-condition-style attack to cause the mirror node to serve inconsistent Hashgraph history to different clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1402d76a-38ed-4b14-b13d-c9a77d472a0a?mode=deep",
+    "timestamp": "2026-04-28 23:56:49.536120",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user trigger the `latest_node_stake` CTE's correlated subquery `WHERE consensus_timestamp = (SELECT MAX(consensus_timestamp) FROM node_stake)` to return stale stake data by flooding the `node_stake` table with future-dated entries via any writable API path, causing the mirror node to report incorrect staking weights for Hashgraph consensus nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_072d1d11-1700-467e-88ee-32e8c2e317d6?mode=deep",
+    "timestamp": "2026-04-28 23:57:05.513925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `LEFT JOIN latest_node_stake ns ON abe.node_id = ns.node_id` in `findNetworkNodes()` to observe which node IDs have no stake data (NULL `rewardRateStart`, `stake`, etc.), leaking information about which Hashgraph consensus nodes are newly added or have been removed from the staking system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c66ed9ca-ea0b-4b09-bc94-095b19bfca3d?mode=deep",
+    "timestamp": "2026-04-28 23:57:22.398134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `LEFT JOIN node_info n ON abe.node_id = n.node_id` in `findNetworkNodes()` to observe which nodes have NULL `adminKey` and `declineReward` fields, leaking information about which Hashgraph consensus nodes lack governance key material in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe9eacb3-242c-4415-8486-8eb5642f2f4c?mode=deep",
+    "timestamp": "2026-04-28 23:57:39.721418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user retrieve the raw `adminKey` bytes for all Hashgraph consensus nodes via the public `/api/v1/network/nodes` endpoint, since `n.admin_key AS adminKey` is selected without any masking in `findNetworkNodes()`, enabling an attacker to analyze cryptographic key material that governs node administration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0076c0e2-50aa-4809-b6db-ee8fa3696eed?mode=deep",
+    "timestamp": "2026-04-28 23:57:56.651153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user retrieve `nodeCertHash` values for all Hashgraph consensus nodes via the public API, since the `CASE` expression in `findNetworkNodes()` always returns a non-null hex-encoded value (defaulting to `'0x'`), enabling certificate fingerprint enumeration that could be used to forge or spoof node identity in the Hashgraph network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d45931d8-57ab-42e3-8fc7-64a763f3038c?mode=deep",
+    "timestamp": "2026-04-28 23:58:14.964201",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user retrieve `publicKey` values for all Hashgraph consensus nodes via the public API, since the `CASE` expression in `findNetworkNodes()` always returns a hex-encoded public key (defaulting to `'0x'`), enabling an attacker to enumerate all node signing keys and potentially target specific nodes for cryptographic attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_508997cc-b441-42ca-a8dd-3632ff1ac216?mode=deep",
+    "timestamp": "2026-04-28 23:58:33.907280",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `CONVERT_FROM(abe.node_cert_hash, 'UTF8')` call in the `nodeCertHash` CASE expression to trigger a PostgreSQL encoding error if the stored `node_cert_hash` bytes are not valid UTF-8, causing an unhandled exception that crashes the query and denies access to the Hashgraph address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c80d3688-4578-48ef-a3a2-21d7560d58d2?mode=deep",
+    "timestamp": "2026-04-28 23:58:53.402178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user craft a request that causes the `CONVERT_FROM(abe.node_cert_hash, 'UTF8')` expression to return a string containing SQL metacharacters or injection payloads, which are then reflected in the `nodeCertHash` field of `NetworkNodeDto`, potentially causing downstream processing to misinterpret Hashgraph node certificate data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6124a54d-5be9-4e33-a3b2-e4be47127b3e?mode=deep",
+    "timestamp": "2026-04-28 23:59:13.419339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `COALESCE(n.account_id, abe.node_account_id) AS nodeAccountId` expression in `findNetworkNodes()` to observe discrepancies between the `node` table and `address_book_entry` table account IDs, leaking information about Hashgraph node account reassignments that have not yet been reflected in the address book history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5571b45-7283-48ae-a7d7-aafa2890662f?mode=deep",
+    "timestamp": "2026-04-28 23:59:33.171451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `JSONB_BUILD_OBJECT` construction for `grpcProxyEndpointJson` in `findNetworkNodes()` to observe that the `(n.grpc_proxy_endpoint->>'port')::INTEGER` cast will throw a PostgreSQL exception if the stored port value is non-numeric, causing a denial of service that prevents reading current Hashgraph node endpoint data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc4e1ec6-5096-4dcc-b8f9-e783bc1f5dfa?mode=deep",
+    "timestamp": "2026-04-28 23:59:54.925314",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `serviceEndpointsJson` subquery `SELECT JSONB_AGG(...) FROM address_book_service_endpoint abse WHERE abse.consensus_timestamp = abe.consensus_timestamp AND abse.node_id = abe.node_id` to perform a timing side-channel attack, inferring the number of service endpoints per Hashgraph node and mapping the network topology without authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d90a961f-966c-40eb-85e8-181202f28ff1?mode=deep",
+    "timestamp": "2026-04-29 00:00:16.287940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass `nodeIds` containing duplicate values to `findNetworkNodes()`, exploiting the `abe.node_id = ANY(:nodeIds)` clause to cause PostgreSQL to perform redundant index scans, amplifying query cost and causing a denial of service that prevents legitimate reads of Hashgraph address book history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3c9a5b9-0ad4-4945-930d-77f5c4da2a2e?mode=deep",
+    "timestamp": "2026-04-29 00:00:40.678690",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user pass `nodeIds` as a null array to `findNetworkNodes()`, causing the `COALESCE(ARRAY_LENGTH(:nodeIds, 1), 0) = 0` condition to evaluate to true and bypass the node ID filter entirely, returning all nodes from the Hashgraph address book regardless of intended access scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cadd08a-dece-4899-a118-47c9ea134406?mode=deep",
+    "timestamp": "2026-04-29 00:01:03.041409",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `NULLIF(ns.max_stake, -1) AS maxStake` and `NULLIF(ns.min_stake, -1) AS minStake` expressions in `findNetworkNodes()` to infer that a node has a sentinel value of `-1` stored in the `node_stake` table, leaking information about improperly initialized or corrupted Hashgraph staking records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4eb1e8f3-d65d-482a-b18c-6111766350e9?mode=deep",
+    "timestamp": "2026-04-29 00:01:26.610201",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `NULLIF(ns.stake_not_rewarded, -1) AS stakeNotRewarded` sentinel check in `findNetworkNodes()` to distinguish between nodes with zero unrewarded stake versus nodes with the sentinel `-1` value, leaking internal database state about Hashgraph staking reward history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f5d653f-88e2-4f8b-9742-28891ff61712?mode=deep",
+    "timestamp": "2026-04-29 00:01:50.542599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkNodeRepository.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: findNetworkNodes()] Can an unprivileged external user exploit the `n.associated_registered_nodes AS associatedRegisteredNodes` field returned by `findNetworkNodes()` to enumerate the full set of registered node associations for each Hashgraph consensus node, leaking governance relationships that could be used to target specific nodes for social engineering or network partition attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c787743-9fd5-43db-a8e7-f37f6aed1406?mode=deep",
+    "timestamp": "2026-04-29 00:02:14.623313",
+    "report_generated": false
+  }
+]
