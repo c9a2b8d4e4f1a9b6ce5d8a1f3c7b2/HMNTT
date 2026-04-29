@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: fallbackRetry()] Can an unprivileged external user cause `new resultConstructor(row)` (e.g., `new ExchangeRate(row)`) to throw repeatedly by ensuring the DB contains a sequence of 10 consecutive corrupted `file_data` blobs for entity 112, exhausting all retry attempts and causing `getExchangeRate` to return null, making the exchange rate permanently missing from the mirror node export for that period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0475b51-0ebe-4f7c-88d6-d556f562d5e2?mode=deep",
+    "timestamp": "2026-04-29 05:51:25.703925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` of `0` or a negative encoded entity ID, causing the parameterized query `$1` to match no rows (or match unexpected rows due to type coercion in PostgreSQL), returning null and making the file record missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d995655-00e0-49ff-be08-3224160716e5?mode=deep",
+    "timestamp": "2026-04-29 05:51:37.736260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `join latest_create l on f.consensus_timestamp >= l.consensus_timestamp` condition so that, if `l.consensus_timestamp` is the minimum possible value (e.g., 0), all file_data rows for the entity are included in the aggregation regardless of their transaction type, producing an incorrect concatenated file content in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3b1bc3f-bfb6-49d4-baa0-07553f195333?mode=deep",
+    "timestamp": "2026-04-29 05:51:50.526470",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user observe that the outer query filters `transaction_type in (16, 17, 19)` but the inner CTE only anchors on types 17 and 19, so a sequence of FileAppend (type 16) records before any FileCreate (type 17) are included in the aggregation if the CTE finds a very old anchor, causing the mirror node to export incorrect file content that includes pre-creation append data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55548a3e-0ec4-47f3-b9c3-8a282cf56c65?mode=deep",
+    "timestamp": "2026-04-29 05:52:03.900385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a `filterQueries` with an empty `whereQuery` array, causing `buildWhereSqlStatement` to return an empty WHERE clause, so the `latestFileContentsQuery` CTE selects the maximum `consensus_timestamp` across ALL transaction types 17/19 for the given entity without any time bound, potentially returning a future or incorrect state in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_161c4e8f-ee68-4318-9223-a5a43425ac7a?mode=deep",
+    "timestamp": "2026-04-29 05:52:17.683299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `min(f.consensus_timestamp) as first_consensus_timestamp` in the outer SELECT to obtain the timestamp of the earliest chunk in the current file version, and then use this value in a subsequent request to anchor a query that skips the most recent file version, causing the mirror node to export a stale/incorrect file record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b09bbad-14fb-48d5-81be-463647c927b9?mode=deep",
+    "timestamp": "2026-04-29 05:52:32.281735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: fallbackRetry()] Can an unprivileged external user cause the `fallbackRetry` loop to silently swallow all errors via the `catch (error)` block and only log a warning, so that a systematic data corruption in the `file_data` table (e.g., all rows for entity 112 have invalid protobuf) results in `getExchangeRate` returning null with no HTTP error, causing the mirror node to silently export missing exchange rate records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf59590f-21f6-4ede-8c0e-46fe057f6a16?mode=deep",
+    "timestamp": "2026-04-29 05:52:47.260522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFileData()] Can an unprivileged external user supply a `timestamp` that is exactly equal to a `consensus_timestamp` of a FileDelete (transaction type 18) record, causing the inner subquery to find no valid anchor (since type 18 is excluded), returning null and making the file appear missing from the mirror node export even though the file existed just before that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fd81119-c5cf-45f1-8837-f02d863c8d5b?mode=deep",
+    "timestamp": "2026-04-29 05:53:04.450516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `string_agg(f.file_data, '' order by f.consensus_timestamp)` aggregation so that if a FileAppend (type 16) record has a null `file_data` value, `string_agg` silently skips it, producing an incomplete/incorrect file content that is exported by the mirror node without any error indication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6015534b-15a3-49fd-a0f4-c1ae4a94ea6b?mode=deep",
+    "timestamp": "2026-04-29 05:53:20.891468",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user craft a timestamp filter that, when applied to the inner CTE, selects a `latest_create` timestamp that is in the future relative to the outer query's filter, causing the `join` condition `f.consensus_timestamp >= l.consensus_timestamp` to match no rows and the file to appear missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33aebd49-c885-489c-bafa-304d9d448231?mode=deep",
+    "timestamp": "2026-04-29 05:53:39.208738",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the fact that `filterOuterPlaceholder` is replaced using `.replace()` (single replacement) while `filterInnerPlaceholder` is also replaced using `.replace()`, so if either placeholder string appears more than once in `latestFileContentsQuery`, the second occurrence remains as a literal string, causing a SQL syntax error that drops the file record from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c39b5c69-fef1-46ee-aaeb-f9f4975c1f11?mode=deep",
+    "timestamp": "2026-04-29 05:53:58.779381",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getExchangeRate()] Can an unprivileged external user trigger concurrent requests to `getExchangeRate()` with different timestamp filters, causing a race condition in `fallbackRetry` where the shared `filters.whereQuery` array is mutated across concurrent async calls, leading to incorrect timestamp bounds being applied and wrong exchange rate records being exported by the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60047878-abda-4370-a849-5e57de810cf7?mode=deep",
+    "timestamp": "2026-04-29 05:54:18.943532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: fallbackRetry()] Can an unprivileged external user exploit the fact that `fallbackRetry` uses `const whereQuery = filterQueries.whereQuery ?? []` and then spreads it into each retry's filter, so that if `filterQueries.whereQuery` is a reference to a shared mutable array, concurrent requests could corrupt each other's filter state, causing incorrect records to be returned in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7aa4acc6-1c91-4dbb-8554-157a35ecb4f5?mode=deep",
+    "timestamp": "2026-04-29 05:54:38.391781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` that is a valid entity ID but corresponds to a non-file entity (e.g., an account), causing the `getFileDataQuery` to return rows from the `file_data` table that were written for that entity ID by a different transaction type, producing incorrect file content in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a138e08-9df1-49ef-9500-92909acfa1b7?mode=deep",
+    "timestamp": "2026-04-29 05:55:00.603781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` with a `param` that is an array (triggering the `Array.isArray(current.param)` branch in `buildWhereSqlStatement`), causing the positional parameter indices `$N` in the generated SQL to be misaligned with the actual params array, producing incorrect query results and wrong file records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8798d33-71a8-40e3-a86b-4113dee15fcc?mode=deep",
+    "timestamp": "2026-04-29 05:55:21.594415",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `group by f.entity_id` in the outer query of `latestFileContentsQuery` to cause the aggregation to include file chunks from multiple file versions (if the CTE anchor is too old), producing a concatenated blob that mixes content from different file versions and is exported as incorrect data by the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25a961a6-34e3-4fd8-97c3-16f1b545bdd8?mode=deep",
+    "timestamp": "2026-04-29 05:55:43.880474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFileData()] Can an unprivileged external user supply a very large `timestamp` value (e.g., max int64) that overflows PostgreSQL's bigint comparison, causing the inner subquery to behave unexpectedly and return an incorrect anchor timestamp, leading to wrong file content being aggregated and exported by the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_534b1522-48c3-4705-81b9-3489b3dbc84a?mode=deep",
+    "timestamp": "2026-04-29 05:56:07.152126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the `max(f.consensus_timestamp) as consensus_timestamp` in the outer SELECT so that the returned `consensus_timestamp` represents the latest append, not the create/update anchor, causing downstream consumers to use this timestamp as a reference point and miss earlier records in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cfe4a2f-4afd-43be-a01e-a5882dfd93fa?mode=deep",
+    "timestamp": "2026-04-29 05:56:31.027715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: fallbackRetry()] Can an unprivileged external user cause `fallbackRetry` to return null after 10 attempts by ensuring that each `row.first_consensus_timestamp` is identical across iterations (e.g., all file versions have the same first chunk timestamp), causing the appended `consensus_timestamp < X` filter to always exclude the same set of rows and never converge to a valid result, making the file permanently missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cff3ab2-9e31-446a-a68b-2f144aeccdfd?mode=deep",
+    "timestamp": "2026-04-29 05:56:55.179904",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user craft a `whereQuery` that adds a filter on `file_data` column content (e.g., `file_data = ''`), causing the CTE to find a `latest_create` with empty content and the outer aggregation to return an empty string, making the mirror node export an empty/incorrect file record instead of the actual content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e37cd590-e12b-4252-a7a9-c941884b141c?mode=deep",
+    "timestamp": "2026-04-29 05:57:21.388059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFileData()] Can an unprivileged external user supply a `fileId` and `timestamp` combination where the inner subquery returns a `consensus_timestamp` that is the same as a FileDelete operation, causing the outer query to include the delete record's empty `file_data` in the `string_agg`, producing incorrect (truncated or empty) file content in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3423addc-71ab-4d40-9757-56911b4cdded?mode=deep",
+    "timestamp": "2026-04-29 05:57:49.035745",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user exploit the absence of a LIMIT clause in `latestFileContentsQuery` to cause the database to scan the entire `file_data` table for a high-volume entity, resulting in a resource exhaustion attack that delays the mirror node's ability to export records for other entities?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc58f8e3-cf52-405b-aa24-a84088a72be3?mode=deep",
+    "timestamp": "2026-04-29 05:58:16.480558",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a `whereQuery` that filters on `transaction_type` to exclude type 17 (FileCreate) but include type 19 (FileUpdate), causing the CTE to anchor on a FileUpdate record that references a partial file state, and the outer aggregation to miss the initial FileCreate content, producing incorrect/incomplete file data in the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_996028f0-530a-49c9-82b0-d5de561bd35c?mode=deep",
+    "timestamp": "2026-04-29 05:58:43.883071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getExchangeRate()] Can an unprivileged external user trigger `getExchangeRate()` at a timestamp where the exchange rate file (entity 112) has only FileAppend records and no FileCreate/FileUpdate, causing the CTE in `latestFileContentsQuery` to return no rows and `getExchangeRate` to return null, making the exchange rate missing from the mirror node export for that time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5dd6643-b5ef-4592-a624-86a8a6e018de?mode=deep",
+    "timestamp": "2026-04-29 05:59:12.820790",
+    "report_generated": false
+  }
+]
