@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: backoff()] Can an unprivileged external user cause integer overflow in `backoff()` by supplying a large `attempt` value (e.g., attempt=64 making `1<<(attempt-1)` overflow int64), resulting in a near-zero or negative sleep duration that causes the retry loop in `submitWithRetry()` to spin at maximum speed and flood the network with transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab947210-2b68-404c-9acc-84135ea56d90?mode=deep",
+    "timestamp": "2026-04-29 01:41:34.908681",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.maxRetries` to `math.MaxInt` via the `HIERO_MIRROR_PINGER_MAX_RETRIES` environment variable, causing `attempts := cfg.maxRetries + 1` to overflow to a negative number and the retry loop `for i := 1; i <= attempts` to never execute, silently disabling all transfer activity and causing the pinger to appear alive but never submit transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0b199c4-a347-4ea4-9224-686b4df7e51a?mode=deep",
+    "timestamp": "2026-04-29 01:41:46.983418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.maxRetries` to a very large value (e.g., 1,000,000) via `HIERO_MIRROR_PINGER_MAX_RETRIES`, causing `submitWithRetry()` to loop for an extremely long time on a failing network, blocking the ticker goroutine and preventing any new transfer attempts from being scheduled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10bf53c4-8a44-4ade-8ec0-95ce19ef000e?mode=deep",
+    "timestamp": "2026-04-29 01:41:59.447222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: backoff()] Can an unprivileged external user set `cfg.baseBackoff` to a very large duration (e.g., `2562047h`) via `HIERO_MIRROR_PINGER_BASE_BACKOFF`, causing `backoff(cfg.baseBackoff, i)` to overflow `time.Duration` (int64 nanoseconds) and produce a negative sleep value, bypassing the `min(d, 30*time.Second)` cap and causing the timer to fire immediately, resulting in a tight retry loop that floods the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_481be940-ee64-421d-83b3-138ce8d9538d?mode=deep",
+    "timestamp": "2026-04-29 01:42:12.269791",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.interval` to `1ns` via `HIERO_MIRROR_PINGER_INTERVAL`, causing the ticker in `main.go` to fire at nanosecond frequency and spawn concurrent `submitWithRetry()` calls that flood the Hiero network with transactions, causing griefing of the network's transaction processing capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d962f1df-0546-4666-8081-aee2956e1288?mode=deep",
+    "timestamp": "2026-04-29 01:42:25.253707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.amountTinybar` to `math.MinInt64` via `HIERO_MIRROR_PINGER_AMOUNT_TINYBAR`, causing `hiero.HbarFromTinybar(-cfg.amountTinybar)` to overflow (negating MinInt64 is still MinInt64 in two's complement), resulting in a malformed transfer transaction that is repeatedly submitted and rejected, causing log spam and network griefing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b926407-7ea1-446d-8039-b177a1b3f4c2?mode=deep",
+    "timestamp": "2026-04-29 01:42:39.338303",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.toAccountID` to a syntactically valid but non-existent account ID (e.g., `0.0.999999999999`) via `HIERO_MIRROR_PINGER_TO_ACCOUNT_ID`, causing `hiero.AccountIDFromString(cfg.toAccountID)` to succeed but every `cryptoTransfer.Execute(client)` to fail with INVALID_ACCOUNT_ID, triggering the full retry loop on every tick and causing sustained log spam and network transaction flooding?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_157d51ab-1baa-418b-858f-d09a694163c2?mode=deep",
+    "timestamp": "2026-04-29 01:42:54.478816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.toAccountID` to the same account as the operator (`cfg.operatorID`) via `HIERO_MIRROR_PINGER_TO_ACCOUNT_ID`, causing `submitWithRetry()` to submit self-transfer transactions on every tick that are accepted by the network but serve no purpose, causing unnecessary network load and griefing the transaction throughput of the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae24c1ce-98b7-4ef4-bd5c-9b8d75d90cc2?mode=deep",
+    "timestamp": "2026-04-29 01:43:10.088230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.maxRetries` to 0 and `cfg.interval` to `1ns` via environment variables, causing `submitWithRetry()` to make exactly one attempt per nanosecond tick, flooding the network with single-attempt transactions at maximum rate without any backoff throttling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_807da4e6-77ce-460e-b1e2-e74181f0c072?mode=deep",
+    "timestamp": "2026-04-29 01:43:27.142816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: backoff()] Can an unprivileged external user set `cfg.baseBackoff` to `0` (bypassing the `<= 0` check by providing exactly `1ns`) via `HIERO_MIRROR_PINGER_BASE_BACKOFF`, causing `backoff()` to return `1ns * 1<<(attempt-1)` which is effectively zero for the first attempt, resulting in no delay between the first and second retry and causing rapid-fire transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59266834-4ee8-4eeb-acdd-4c1d072ae719?mode=deep",
+    "timestamp": "2026-04-29 01:43:43.596746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the `time.NewTimer(sleep)` in `submitWithRetry()` to never be garbage collected by triggering context cancellation at the exact moment the timer fires, causing a goroutine leak where the timer's channel is never drained and the timer object is never stopped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1792c6df-5994-4727-8aef-7c94bb55f9ab?mode=deep",
+    "timestamp": "2026-04-29 01:44:00.863856",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.maxRetries` to a large value and `cfg.baseBackoff` to `1ns` via environment variables, causing `submitWithRetry()` to exhaust all retries in rapid succession without meaningful backoff, submitting hundreds of failing transactions per tick and causing sustained griefing of the network's transaction queue?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbbc3f2b-f114-41b1-ba4d-1ddb6635a0a7?mode=deep",
+    "timestamp": "2026-04-29 01:44:18.380641",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause `resp.GetReceipt(client)` to block indefinitely by pointing the pinger at a network node that accepts transactions but never returns receipts, causing `submitWithRetry()` to hang forever, blocking the ticker goroutine and preventing the liveness heartbeat from being updated, ultimately causing the Kubernetes liveness probe to kill the pod?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed34b8d8-5b43-449e-9232-e031998e0584?mode=deep",
+    "timestamp": "2026-04-29 01:44:35.340174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger's liveness probe (`/tmp/alive`) to become stale by setting `cfg.maxRetries` to a very large value and `cfg.baseBackoff` to `30s`, causing `submitWithRetry()` to block for up to `maxRetries * 30s` per tick, preventing the heartbeat goroutine from writing to `/tmp/alive` and causing the liveness probe to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00ec6658-0ef8-445f-a967-727e4b99bbdd?mode=deep",
+    "timestamp": "2026-04-29 01:44:55.379510",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause unbounded log growth by setting `cfg.maxRetries` to a large value and pointing the pinger at an invalid `cfg.toAccountID`, causing `log.Printf(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20bea25a-f488-4831-a39a-9ab112e6b97f?mode=deep",
+    "timestamp": "2026-04-29 01:45:14.402427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user set `cfg.amountTinybar` to a negative value (e.g., `-1`) via `HIERO_MIRROR_PINGER_AMOUNT_TINYBAR`, bypassing the `amountTinybar == 0` check in `loadConfig()`, causing `AddHbarTransfer(client.GetOperatorAccountID(), hiero.HbarFromTinybar(-cfg.amountTinybar))` to add a positive amount to the operator and `AddHbarTransfer(toID, hiero.HbarFromTinybar(cfg.amountTinybar))` to subtract from `toID`, reversing the transfer direction and causing repeated failed or reversed transactions that grieve the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_659ee095-22ed-49bc-9d41-5c47cd72e270?mode=deep",
+    "timestamp": "2026-04-29 01:45:35.542597",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to submit duplicate transactions by setting `cfg.interval` shorter than the time it takes for `cryptoTransfer.Execute(client)` to return, causing multiple concurrent `submitWithRetry()` invocations to run simultaneously and submit overlapping transactions to the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e7ed4c3-12a6-4cbb-96c7-9d8eb95f6561?mode=deep",
+    "timestamp": "2026-04-29 01:45:57.254357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: backoff()] Can an unprivileged external user cause `backoff()` to return a duration larger than `time.Duration` max by setting `cfg.baseBackoff` to a value where `base * time.Duration(1<<(attempt-1))` overflows int64, causing `min(d, 30*time.Second)` to compare a negative overflow value against 30s and return the negative value, resulting in `time.NewTimer` receiving a negative duration and firing immediately?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9ee45da-817a-417f-a6cd-1e07e92472ad?mode=deep",
+    "timestamp": "2026-04-29 01:46:18.733950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to exhaust all available gRPC connections by setting `cfg.interval` to `1ms` and `cfg.maxRetries` to 100, causing hundreds of concurrent `cryptoTransfer.Execute(client)` calls to hold open gRPC connections simultaneously, exhausting the connection pool and causing all subsequent network operations to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aae65628-0070-487d-8286-b24839364588?mode=deep",
+    "timestamp": "2026-04-29 01:46:40.415655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to submit transactions with a zero-value transfer by setting `cfg.amountTinybar` to a value that causes `hiero.HbarFromTinybar(0)` after some internal truncation, causing the network to process zero-value transactions on every tick and wasting network transaction capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b23d1284-9d35-465d-b501-64dc47b0b9da?mode=deep",
+    "timestamp": "2026-04-29 01:47:03.493960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger's context cancellation to be silently swallowed by setting up a scenario where `ctx.Err()` returns non-nil but the error is not `context.Canceled` (e.g., `context.DeadlineExceeded`), causing `submitWithRetry()` to return the deadline error which is not caught by the `errors.Is(err, context.Canceled)` check in `main.go`, resulting in the error being logged and the pinger continuing to run in a degraded state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b411b307-de04-449f-a9e1-f9d3c8351fd1?mode=deep",
+    "timestamp": "2026-04-29 01:47:27.693850",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to enter an infinite effective retry loop by setting `cfg.maxRetries` to `math.MaxInt - 1` via `HIERO_MIRROR_PINGER_MAX_RETRIES`, causing `attempts := cfg.maxRetries + 1` to equal `math.MaxInt`, and the loop `for i := 1; i <= attempts` to run for an astronomically long time, permanently blocking the pinger's transfer goroutine?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b612e191-810b-436a-ba00-b61442079cab?mode=deep",
+    "timestamp": "2026-04-29 01:47:51.864636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to submit transactions to a deleted or frozen account by setting `cfg.toAccountID` to a known-deleted account ID, causing every `cryptoTransfer.Execute(client)` to fail with ACCOUNT_DELETED, triggering the full retry loop on every tick and causing sustained unnecessary transaction submissions to the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_902ef9ca-5a83-4f04-a0a4-dab64d4715f8?mode=deep",
+    "timestamp": "2026-04-29 01:48:15.245891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to waste CPU resources by setting `cfg.baseBackoff` to `1ns` and `cfg.maxRetries` to 1000, causing `backoff()` to return near-zero durations for all retries, making the retry loop spin at near-CPU-maximum speed and consuming excessive CPU on the host?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_161c2d92-d993-43c2-936d-237ae263a0e0?mode=deep",
+    "timestamp": "2026-04-29 01:48:40.689908",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: submitWithRetry()] Can an unprivileged external user cause the pinger to emit misleading success logs by setting `cfg.toAccountID` to an account that accepts transactions but is controlled by the attacker, causing `receipt.Status.String()` to return SUCCESS and `log.Printf(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d09de467-cb2a-4dd4-bb0b-8e6a5ee0ab26?mode=deep",
+    "timestamp": "2026-04-29 01:49:07.974451",
+    "report_generated": false
+  }
+]
