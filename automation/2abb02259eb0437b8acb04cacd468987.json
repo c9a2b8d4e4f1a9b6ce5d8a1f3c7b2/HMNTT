@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged external user trigger or influence the `prune()` JPQL delete (`delete from Transaction where consensusTimestamp <= ?1`) to erase active fund-transfer transaction records before downstream balance reconciliation completes, causing permanent loss of on-chain transfer evidence and incorrect account balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ffb01dd1-f0ed-47d2-a123-84553eeef249?mode=deep",
+    "timestamp": "2026-04-29 05:44:30.623159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the inclusive `<=` boundary in `delete from Transaction where consensusTimestamp <= ?1` to cause boundary-off-by-one deletion of a transaction at exactly the cutoff timestamp, permanently removing a crypto-transfer record and making the associated fund movement unverifiable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c67245eb-18cd-40e0-97e1-c463aec6956c?mode=deep",
+    "timestamp": "2026-04-29 05:44:42.737410",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user craft a scenario where `prune()` is called with a `consensusTimestamp` that coincides with an unconfirmed or in-flight fund transfer, causing the `Transaction` row to be deleted before the corresponding `CryptoTransfer` or `TokenTransfer` rows are pruned, resulting in orphaned transfer records and incorrect fund accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5045188-1f88-48ca-9d98-00d539f6bf9e?mode=deep",
+    "timestamp": "2026-04-29 05:44:55.188865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged external user supply an extremely wide timestamp range (e.g., `startInclusive=0`, `endInclusive=Long.MAX_VALUE`) combined with a large `Pageable` page size to exhaust database memory and cause the importer to crash mid-processing, leaving partially-written fund transfer transactions in an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0d65816-026c-4edf-abc7-542027a69560?mode=deep",
+    "timestamp": "2026-04-29 05:45:08.338378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged user trigger repeated large-range `findByConsensusTimestampBetween()` queries to cause a denial-of-service on the database, preventing the importer from writing new fund-transfer `Transaction` records and causing a gap in the transaction ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0dd21f15-f238-4d05-bc47-26070b96c2b9?mode=deep",
+    "timestamp": "2026-04-29 05:45:21.854852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user exploit the fact that `Transaction.isNew()` always returns `true` to force duplicate inserts of a `Transaction` with the same `consensusTimestamp` (primary key), causing a constraint violation that rolls back a legitimate fund-transfer write and results in a missing transaction record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc811311-6d44-46b7-97a4-c478446f4b1a?mode=deep",
+    "timestamp": "2026-04-29 05:45:36.306510",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user exploit `Transaction.isNew()` always returning `true` (bypassing Hibernate's pre-insert SELECT) to race-condition insert a `Transaction` with a manipulated `chargedTxFee` value, causing the mirror node to record an incorrect fee deduction and misrepresent the payer's fund balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01591fff-ae7d-4160-9065-01321f5b6949?mode=deep",
+    "timestamp": "2026-04-29 05:45:51.193869",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit a race condition between `RetentionJob.prune()` and an ongoing `findByConsensusTimestampBetween()` read to observe a partially-pruned transaction window where some fund-transfer transactions are deleted but their associated `itemizedTransfer` JSON data has not yet been removed, leading to incorrect balance calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dfba1ec0-bcfd-4929-9edc-b3566d71b200?mode=deep",
+    "timestamp": "2026-04-29 05:46:07.355691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user cause the `@Transactional` boundary on `prune()` (inherited from `RetentionRepository`) to be violated by triggering a database connection failure mid-delete, leaving the `Transaction` table in a state where some records are deleted but the corresponding `CryptoTransfer` rows remain, causing phantom fund transfers to appear in balance queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b58af399-3772-484e-bf48-4adbdd4c3d1f?mode=deep",
+    "timestamp": "2026-04-29 05:46:23.812802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findById(Long id) (inherited from CrudRepository)] Can an unprivileged user exploit the `consensusTimestamp`-as-primary-key design to enumerate all transaction IDs by iterating nanosecond timestamps, then correlate `chargedTxFee` and `payerAccountId` fields to reconstruct fund flows that should be private, enabling targeted fund-theft attacks against identified high-value accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35230e10-0bb7-4ca0-87f4-fbfd68a60bee?mode=deep",
+    "timestamp": "2026-04-29 05:46:42.057265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the absence of a lower-bound check in `delete from Transaction where consensusTimestamp <= ?1` to trigger deletion of ALL transaction records (by passing `Long.MAX_VALUE`) if the `RetentionJob` configuration is misconfigured, permanently destroying the entire fund-transfer audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c6dc51c-4ccd-476c-ac53-85d55f7f2f4c?mode=deep",
+    "timestamp": "2026-04-29 05:46:59.174572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit the fact that `prune()` is annotated `@Modifying` without `clearAutomatically=true` to cause stale Hibernate first-level cache entries for `Transaction` objects to persist after deletion, leading downstream services to read deleted fund-transfer records and report incorrect balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87e4f0d6-e9da-4c6b-955e-ac06b3e2cc3f?mode=deep",
+    "timestamp": "2026-04-29 05:47:17.161103",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged user pass `startInclusive > endInclusive` to `findByConsensusTimestampBetween()` to trigger undefined Spring Data JPA behavior (empty result or exception), causing the caller to incorrectly assume no transactions exist in a range and skip fund-transfer processing for that window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52902fac-8747-4242-ae0a-6453d8f3781b?mode=deep",
+    "timestamp": "2026-04-29 05:47:36.528991",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` record with a crafted `initialBalance` value (e.g., negative or zero) for a `CRYPTOCREATEACCOUNT` transaction type, causing the mirror node to record an incorrect initial fund allocation for a newly created account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15dd4ddf-f58f-40f7-92d0-8305e0ff3ee5?mode=deep",
+    "timestamp": "2026-04-29 05:47:56.263833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a manipulated `result` field (e.g., setting a failed transaction as `SUCCESS`) to cause the mirror node to incorrectly report a fund transfer as successful when it was rejected by consensus, leading users to believe funds were received when they were not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f88acb7e-92d4-4589-be33-fa1e59844fdb?mode=deep",
+    "timestamp": "2026-04-29 05:48:16.678845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a manipulated `payerAccountId` (pointing to a victim account) to falsely attribute a fund-draining transaction to that victim, causing incorrect fee deductions to be recorded against the victim's balance in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e87ddf4-0783-4ed8-9bad-183c48d7e050?mode=deep",
+    "timestamp": "2026-04-29 05:48:38.404911",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a crafted `maxCustomFees` (byte[][]) field containing malformed protobuf data to cause deserialization errors in downstream fee-calculation services, preventing correct custom fee accounting and leading to fund loss for token transfer participants?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6af7b9c-877d-42a2-9110-2d97e2fcb1e6?mode=deep",
+    "timestamp": "2026-04-29 05:49:00.319971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a crafted `itemizedTransfer` JSON field containing incorrect account IDs and amounts to cause the mirror node to report wrong fund movements, misleading users about their actual balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5156323f-12f4-4266-a41e-f4f61ecee468?mode=deep",
+    "timestamp": "2026-04-29 05:49:22.482316",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a manipulated `nftTransfer` JSON field (e.g., wrong sender/receiver account IDs) to cause the mirror node to misreport NFT ownership transfers, enabling fraudulent claims of NFT ownership and associated fund value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c118554-5fa7-416a-80d7-601ac80b3fb6?mode=deep",
+    "timestamp": "2026-04-29 05:49:45.110065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a crafted `errata` field set to `ErrataType.DELETE` to cause the mirror node to treat a legitimate fund-transfer transaction as erroneous and exclude it from balance calculations, effectively hiding a real fund movement?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48dcbd59-bbfc-43f5-8585-616f37e77a05?mode=deep",
+    "timestamp": "2026-04-29 05:50:08.839867",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with `scheduled=true` and a manipulated `parentConsensusTimestamp` to cause the mirror node to incorrectly link a scheduled fund transfer to a different parent transaction, corrupting the scheduled payment audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01d97b6c-0a65-44f8-92c2-0653d881007f?mode=deep",
+    "timestamp": "2026-04-29 05:50:33.267195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with a crafted `transactionHash` (byte[]) that collides with an existing legitimate transaction hash to cause hash-based lookups to return the wrong transaction, enabling fund-transfer replay or misdirection attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba7c2ea8-5b3e-4b82-853a-ee0b0b08e0a8?mode=deep",
+    "timestamp": "2026-04-29 05:50:58.285481",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: save(Transaction entity) (inherited from CrudRepository)] Can an unprivileged user inject a `Transaction` with `innerTransactions` containing crafted `payerAccountId`/`validStartNs` pairs for an `ATOMIC_BATCH` transaction type to cause the mirror node to misreport which accounts participated in a batch fund transfer, enabling incorrect balance attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbd8fc39-0e96-473f-8626-7d0761cfc8a8?mode=deep",
+    "timestamp": "2026-04-29 05:51:23.796887",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: prune(long consensusTimestamp)] Can an unprivileged user exploit a timing attack where `prune()` deletes `Transaction` records while a concurrent REST API query is reading `findByConsensusTimestampBetween()` results, causing the API to return an incomplete list of fund transfers and mislead a user into believing fewer funds were moved than actually occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5239320-fea0-4a57-b8b6-78cd6da3275f?mode=deep",
+    "timestamp": "2026-04-29 05:51:50.613656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/TransactionRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findByConsensusTimestampBetween(long startInclusive, long endInclusive, Pageable pageable)] Can an unprivileged user exploit the lack of explicit sort-order enforcement in `findByConsensusTimestampBetween()` to cause non-deterministic ordering of returned `Transaction` records, leading downstream balance-calculation logic to process fund transfers out of order and compute incorrect running balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b579d27-e124-4c31-9543-91f2960985aa?mode=deep",
+    "timestamp": "2026-04-29 05:52:17.755831",
+    "report_generated": false
+  }
+]
