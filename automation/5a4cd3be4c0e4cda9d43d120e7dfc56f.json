@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: buildAndValidateFilters()] Can an unprivileged external user bypass the acceptedRewardsParameters whitelist by supplying unknown query parameters that are silently ignored rather than rejected, because buildAndValidateFilters() throws on unknown params but the error handling in the middleware may swallow certain parameter combinations, causing unintended filter behavior in the downstream query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea09a429-8229-4426-a683-0f26b6f0e35b?mode=deep",
+    "timestamp": "2026-04-29 03:51:20.613026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extractStakingRewardsQuery()] Can an unprivileged external user supply timestamp=lte:0 to force the consensus_timestamp condition to filter for timestamps <= 0, which in nanoseconds represents the epoch, causing the query to return no results and masking the existence of rewards, or alternatively timestamp=gte:0 to return all rewards ever, enabling full history extraction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a403b3e5-b7c7-4d5e-9ee8-f3cb2261a896?mode=deep",
+    "timestamp": "2026-04-29 03:51:32.672102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply order=asc combined with timestamp=gte:0 and limit=<max> to extract the maximum number of reward records in a single request, because the limit is capped at a configured maximum but that maximum may be large enough to return the entire reward history in one response, enabling bulk extraction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49f2839b-b9db-4b6c-a560-8db43e54f386?mode=deep",
+    "timestamp": "2026-04-29 03:51:45.942709",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getRewardsQuery()] Can an unprivileged external user cause the SQL query built by getRewardsQuery() to omit the account_id = $1 filter by manipulating the conditions array to override the base WHERE clause, because the base query ends with `where srt.account_id = $1` and additional conditions are appended with `and`, but if conditions contains a fragment that short-circuits the WHERE clause, all reward records could be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27d92134-b8f7-4d7d-802e-4509544e8537?mode=deep",
+    "timestamp": "2026-04-29 03:51:59.038769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: updateConditionsAndParamsWithInValues()] Can an unprivileged external user supply multiple timestamp=eq: parameters to force updateConditionsAndParamsWithInValues() to accumulate values in timestampInValues, and then updateQueryFiltersWithInValues() builds an IN clause at position startPosition + params.length, causing a parameter index collision with the accountId at $1 or limit at $2, resulting in wrong account data being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d86ea9e7-a58a-4928-b7e5-e97edaa3fb3d?mode=deep",
+    "timestamp": "2026-04-29 03:52:13.782392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user observe the total lifetime staking rewards for any account by summing the amount fields across all paginated responses from GET /api/v1/accounts/<id>/rewards, because the endpoint returns the full historical record with no data minimization, enabling precise financial profiling of any account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4d160ae-3a32-4926-b3af-a1072a9c567e?mode=deep",
+    "timestamp": "2026-04-29 03:52:28.738522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: processRow()] Can an unprivileged external user observe a discrepancy between the pending_reward field in GET /api/v1/accounts/<id> and the sum of amounts in GET /api/v1/accounts/<id>/rewards, because pending_reward is calculated from entity_stake.pending_reward with a CASE expression while the rewards endpoint queries staking_reward_transfer directly, and this discrepancy could be exploited to identify accounts with unclaimed rewards not yet reflected in the transfer table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_521d6084-3b35-436f-9180-4412b89e6764?mode=deep",
+    "timestamp": "2026-04-29 03:52:44.446986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply a realm.alias format (e.g., 0.KGNABD5L3ZGSRVUCSPDR7TONZSRY3D5OMEBKQMVTD2AC6JL72HMQ) in the path parameter to resolve an account via getAccountIdFromAlias(), and since the alias lookup queries entity table with no type restriction, receive rewards for a contract that happens to have an alias, disclosing contract staking data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00c681cf-e100-4e57-812b-851f17227ca4?mode=deep",
+    "timestamp": "2026-04-29 03:53:01.046239",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEncodedId()] Can an unprivileged external user supply a shard.realm.evmAddress format where shard and realm are non-default values, causing parseFromString() to throw an InvalidArgumentError that is caught and re-thrown as InvalidArgumentError.forParams(), but the error message leaks the internal parameter name filterKeys.ID_OR_ALIAS_OR_EVM_ADDRESS, enabling fingerprinting of the API implementation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9aa9393c-b5da-4c1d-b910-bdf4b222137b?mode=deep",
+    "timestamp": "2026-04-29 03:53:17.512246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user exploit the fact that the staking_reward_transfer table stores payer_account_id but the listStakingRewardsByAccountIdQuery only selects account_id, amount, and consensus_timestamp, to infer that the payer information is hidden, and then use the timestamp to cross-reference with other public APIs to reconstruct the full transaction context including the payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4fbe5f8-1fb6-4b30-b2e9-a6b9d9d6accd?mode=deep",
+    "timestamp": "2026-04-29 03:53:35.123926",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extractStakingRewardsQuery()] Can an unprivileged external user supply timestamp=ne:<value> and observe that extractStakingRewardsQuery() throws an InvalidArgumentError with the message 'Not equals (ne) operator is not supported for timestamp', because this error message confirms the internal filterKeys.TIMESTAMP constant value, enabling API implementation fingerprinting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f31acf04-01c0-4292-8842-a87f6cfe47d6?mode=deep",
+    "timestamp": "2026-04-29 03:53:54.042511",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply a very large limit value (e.g., limit=9999999) to cause the query to attempt to fetch an unbounded number of rows from staking_reward_transfer, because formatComparator() caps limit at getEffectiveMaxLimit() but if that maximum is misconfigured or bypassed, the DB query could return millions of rows, causing memory exhaustion and DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd5186c8-e77a-4bc1-9b27-2177c6f70d51?mode=deep",
+    "timestamp": "2026-04-29 03:54:12.515189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getRewardsQuery()] Can an unprivileged external user cause getLimitQuery(2) to use the wrong positional parameter by supplying a limit value that conflicts with the $2 binding, because getLimitQuery hardcodes position 2 and query.params.unshift(accountId, query.limit) inserts limit at index 1 (position $2), but if the params array already has entries before unshift, the positional binding could be off by one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_323e3e2f-ca01-475d-beec-9133da320624?mode=deep",
+    "timestamp": "2026-04-29 03:54:32.502562",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply a numeric account ID that is a valid encoded entity ID but corresponds to a treasury account (0.0.2) or fee collection account (0.0.802), because isValidAccount() does not exclude system accounts, causing the attacker to read staking reward history for system accounts and infer protocol-level financial flows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cc71d50-3039-4317-968a-51a8578b556c?mode=deep",
+    "timestamp": "2026-04-29 03:54:53.513623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: StakingRewardTransferViewModel()] Can an unprivileged external user observe that nsToSecNs(stakingRewardTransferModel.consensusTimestamp) in the StakingRewardTransferViewModel constructor converts nanosecond timestamps to seconds.nanoseconds format with full precision, enabling the attacker to correlate reward payouts with specific consensus timestamps and cross-reference with transaction records to reconstruct account activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30f7e23f-5031-42d8-b49d-fcdc69bac409?mode=deep",
+    "timestamp": "2026-04-29 03:55:14.775305",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user use the rewards endpoint to determine whether an account is currently staking by observing whether any reward transfers exist, because the presence of entries in staking_reward_transfer implies the account has staked at some point, enabling inference of staking status without needing the account info endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d49c3116-864c-4862-b963-12ffdad2f8a5?mode=deep",
+    "timestamp": "2026-04-29 03:55:36.190532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: processRow()] Can an unprivileged external user observe a non-zero pending_reward for an account that has been deleted, because the CASE expression in entityFields does not check the deleted flag before returning es.pending_reward, and a deleted account's entity_stake row may still contain a non-zero pending_reward value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_514555c2-8f42-4c1e-acca-2c882e9bb3af?mode=deep",
+    "timestamp": "2026-04-29 03:55:59.019138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEntityStakeQuery()] Can an unprivileged external user force getEntityStakeQuery() to use the historical union (entity_stake UNION entity_stake_history) by supplying a timestamp parameter to GET /api/v1/accounts/<id>, causing the pending_reward from a historical period to be returned, which may be higher than the current value if the account recently declined rewards, disclosing a reward amount that should no longer be visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f26bd89-09c4-4c68-a76f-f3caa3961e55?mode=deep",
+    "timestamp": "2026-04-29 03:56:21.769793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply timestamp=gte:<future_timestamp> to cause the query to return an empty rewards array, and then use the empty response to infer that no rewards have been paid after a certain time, enabling inference of when an account stopped staking or changed its staking configuration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48f9ac0f-3e88-42df-bee2-4ef648499a78?mode=deep",
+    "timestamp": "2026-04-29 03:56:44.088538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extractStakingRewardsQuery()] Can an unprivileged external user supply both timestamp=gte:<T1> and timestamp=lte:<T2> where T1 > T2 to create an impossible range, and observe whether the API returns an empty result or an error, because extractStakingRewardsQuery() does not validate that range bounds are logically consistent, potentially causing unexpected DB behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f52ca755-d31e-4cf6-9951-c6af8ba37911?mode=deep",
+    "timestamp": "2026-04-29 03:57:07.803539",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user exploit the lack of authentication on the rewards route to perform bulk account profiling by scripting thousands of requests to GET /api/v1/accounts/<id>/rewards for sequential account IDs, because there is no rate limiting enforced at the route level, enabling large-scale financial reconnaissance of the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8eaf259-7c3a-42ca-b547-2e4ef83bae4b?mode=deep",
+    "timestamp": "2026-04-29 03:57:31.487548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getEncodedId()] Can an unprivileged external user supply an encoded entity ID string (a large integer) directly as the path parameter, because isValidEntityId() accepts encodedEntityIdRegex (/^-?\\\\d{1,19}$/) and getEncodedId() will return it directly without a DB lookup, bypassing the alias/EVM resolution path and potentially resolving to an account the attacker should not be able to identify by numeric ID alone?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8026cae2-b945-4161-8cc9-65c24c41ddba?mode=deep",
+    "timestamp": "2026-04-29 03:57:57.124588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/accountRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: listStakingRewardsByAccountId()] Can an unprivileged external user supply a negative encoded entity ID (e.g., -1) as the path parameter, because encodedEntityIdRegex allows negative integers and getEncodedId() would return it, causing isValidAccount() to query the entity table with a negative ID which may match unexpected rows or cause a DB error that leaks schema information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd5554ea-8785-4262-bdb0-1b285da648d4?mode=deep",
+    "timestamp": "2026-04-29 03:58:24.525589",
+    "report_generated": false
+  }
+]
