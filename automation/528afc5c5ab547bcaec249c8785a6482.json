@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user submit a `limit` value of exactly `MAX_LIMIT` (100) combined with crafted `receiver.id` range parameters to force the DB query to scan the maximum allowed rows per page, effectively amplifying read cost beyond the intended per-request fee budget, causing resource exhaustion on the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8632d533-4ffd-48fc-9d7e-2fcd8399ae4c?mode=deep",
+    "timestamp": "2026-04-29 02:34:28.390778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user bypass the `@Max(MAX_LIMIT)` constraint on `limit` by sending a floating-point string (e.g., `100.9`) that Spring's type conversion truncates to 100, or a value just above 100 that passes validation due to type coercion, causing queries to return more rows than the design fee model accounts for?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_164e0b3b-106c-4033-9da4-8834d5a847d0?mode=deep",
+    "timestamp": "2026-04-29 02:34:40.556887",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getPendingAirdrops()] Can an unprivileged external user send `limit=0` to bypass the `@Positive` constraint via a crafted HTTP request that skips Spring validation (e.g., through a proxy that strips validation headers), causing `processRequest()` to build a `PageRequest.of(0, 0, sort)` that triggers undefined behavior in `linkFactory.create()` and returns data outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a52860b1-ec78-4ea8-80d1-de6ad9c96bcc?mode=deep",
+    "timestamp": "2026-04-29 02:34:53.465328",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user supply exactly two `receiver.id` parameters both using the `gte` operator (e.g., `receiver.id=gte:1&receiver.id=gte:2`) to the `getOutstandingAirdrops()` endpoint, causing `Bound` to set `lower` twice and silently overwrite the first value, resulting in a query range outside the intended design parameters without triggering any validation error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a55b63f-1c86-4c0a-bca0-d42d532f50bd?mode=deep",
+    "timestamp": "2026-04-29 02:35:07.167705",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user supply two `token.id` parameters both using the `lte` operator (e.g., `token.id=lte:100&token.id=lte:200`) to cause `Bound` to set `upper` twice, silently overwriting the first upper bound, so the effective query range is wider than the user-visible parameters suggest, returning more airdrop records than the fee model intends?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7fecdf1c-1844-43d4-a57a-fa96ef509a76?mode=deep",
+    "timestamp": "2026-04-29 02:35:21.160701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `serialnumber=gt:9223372036854775806` (Long.MAX_VALUE - 1) to trigger an integer overflow in `Bound.getAdjustedLowerRangeValue()` where `lowerBound++` wraps to `Long.MIN_VALUE`, causing the effective lower bound to become negative and the query to return all airdrop records regardless of serial number, bypassing the intended fee-per-range design?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95bf2a4a-95c2-4c38-9766-ebabf8a7c69e?mode=deep",
+    "timestamp": "2026-04-29 02:35:35.619810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `serialnumber=lt:0` to trigger an integer underflow in `Bound.adjustUpperBound()` where `upperBound--` wraps to `Long.MAX_VALUE` when the input is 0, causing the effective upper bound to become `Long.MAX_VALUE` and the query to scan all serial numbers, returning far more records than the design fee model permits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45734d22-3b1e-4763-94f4-5ed338417597?mode=deep",
+    "timestamp": "2026-04-29 02:35:50.555968",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=ne:1000` using the `NE` (not-equal) `RangeOperator` to `getOutstandingAirdrops()`, which is accepted by `RangeOperator.of()` as a valid operator, but causes `Bound` to set neither `lower` nor `upper` (since `hasLowerBound()`/`hasUpperBound()` may not handle NE), resulting in an unbounded query that returns all airdrop records outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53be4e07-75ea-4216-817e-5a00a7d2283d?mode=deep",
+    "timestamp": "2026-04-29 02:36:07.968604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `receiver.id=ne:0` to cause `TokenAirdropRepositoryCustomImpl.findAll()` to generate a SQL `WHERE receiver_account_id != 0` condition that effectively returns all non-zero receiver records, bypassing the intended scoped query design and returning data volumes outside the fee model?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d17c7fd4-8b0e-4563-bc45-7c4dd957a73d?mode=deep",
+    "timestamp": "2026-04-29 02:36:24.809537",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user exploit the `@Size(max = 2)` constraint on `receiverIds` by sending exactly 2 `receiver.id` parameters with the same `eq` operator (e.g., `receiver.id=eq:100&receiver.id=eq:200`), causing `Bound` to overwrite `lower` with the second value while `cardinality` records 2 EQ operators, creating an inconsistent state that bypasses the `verifyEqualOrRange()` check and returns unexpected query results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e255e38f-4a04-4adb-9c4d-208725bfbeb2?mode=deep",
+    "timestamp": "2026-04-29 02:36:42.527874",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send more than 2 `receiver.id` query parameters (e.g., `receiver.id=1&receiver.id=2&receiver.id=3`) to test whether Spring MVC's array binding silently truncates to 2 or throws an error, and if truncation occurs without error, whether the resulting `Bound` silently drops the third constraint, widening the query range beyond design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c3f4eba-bb23-4ac7-88c2-e170eb3d1408?mode=deep",
+    "timestamp": "2026-04-29 02:37:01.314330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `token.id=gt:0` as the only filter parameter to `getOutstandingAirdrops()`, causing `TokenAirdropRequest.getBounds()` to return only `tokenIds` as the primary bound (since `entityIds` is empty), which then drives the DB query with only a token ID lower bound and no upper bound, returning all airdrops for the account above token ID 0 — far more data than the fee model intends for a single request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d19b4a8f-9656-4239-a8a9-9fdf87ba74d9?mode=deep",
+    "timestamp": "2026-04-29 02:37:18.429894",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user exploit the `getBounds()` priority logic in `TokenAirdropRequest` — where `entityIds` takes priority over `tokenIds` which takes priority over `serialNumbers` — by sending only `serialnumber=gte:0` with no other filters, causing `getBounds()` to return `List.of(serialNumbers)` as the sole bound, which results in a query with only a serial number filter and no receiver/token scoping, returning all PENDING airdrops for the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10acc627-6d84-45a8-acf3-fcbcb50786ba?mode=deep",
+    "timestamp": "2026-04-29 02:37:39.443770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSort()] Can an unprivileged external user craft a response scenario where `getSort()` compares `lastSerial == DEFAULT_SERIAL_VALUE` using Java's `==` operator on a `Long` object (autoboxed from `getSerialNumber()`), and for values outside the Integer cache range (> 127), this reference comparison returns `false` even when the value is 0, causing the sort to incorrectly include `SERIAL_NUMBER` in the sort key and generating a malformed pagination `next` link that skips records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41445383-68f8-439e-81ef-90c0c753126c?mode=deep",
+    "timestamp": "2026-04-29 02:38:00.693313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=gte:0&receiver.id=lte:9223372036854775807` (full Long range) to `getOutstandingAirdrops()` to create a `Bound` with the maximum possible range, causing the DB query to scan all receiver IDs for the given sender account, returning up to `MAX_LIMIT` records but with a query cost far exceeding the design fee model for a single API call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c362eb8-96f0-4e3e-823c-77d65922c4f7?mode=deep",
+    "timestamp": "2026-04-29 02:38:22.645102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `limit=100&receiver.id=gte:0&token.id=gte:0&serialnumber=gte:0` to force `getBounds()` to return all three bounds (`entityIds`, `tokenIds`, `serialNumbers`) simultaneously, causing `TokenAirdropRepositoryCustomImpl.findAll()` to execute a complex multi-condition query that scans the maximum number of rows, with a computational cost outside the design fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4f4f925-8dda-41cd-bae7-318bdbc59193?mode=deep",
+    "timestamp": "2026-04-29 02:38:45.699191",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user exploit the `EXTRACTOR` lambda's use of `DEFAULT_SERIAL_NUMBER = \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0f16625-b391-4b8d-8256-ce2a962cfab1?mode=deep",
+    "timestamp": "2026-04-29 02:39:09.233876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `order=DESC` (uppercase) vs `order=desc` (lowercase) to test whether `Sort.Direction` parsing is case-sensitive, and if Spring rejects uppercase, whether the error message leaks internal class names or stack traces that reveal the fee/query architecture?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79c61a6b-c148-42fd-80eb-c0e59e69a0fb?mode=deep",
+    "timestamp": "2026-04-29 02:39:33.088353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send a path variable `id` as `0.0.0` (the zero entity ID) to `getOutstandingAirdrops()`, causing `EntityService.lookup()` to resolve to `EntityId.EMPTY` (ID=0), and then `getBaseCondition()` to query `WHERE sender_account_id = 0`, potentially returning system-level airdrop records that should not be accessible to unprivileged users, outside the design parameters for fee-bearing accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_481c7e7e-6f6b-4516-81a8-31aa80109541?mode=deep",
+    "timestamp": "2026-04-29 02:39:57.596874",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=gt:0&receiver.id=lt:1` to create a `Bound` where `adjustedLower` (1) equals `adjustedUpper` (0) after adjustment, triggering the `IllegalArgumentException` for invalid range in the `Bound` constructor, and use the resulting error response to enumerate valid receiver ID ranges through binary search, mapping the fee-bearing account topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20789348-56f2-41bd-810b-523792f15f74?mode=deep",
+    "timestamp": "2026-04-29 02:40:24.116806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `receiver.id=gte:1&receiver.id=lte:0` to trigger the `IllegalArgumentException(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d86dec9f-c252-4aa9-8053-cfd41a1d946a?mode=deep",
+    "timestamp": "2026-04-29 02:40:51.858834",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `token.id=gte:1&token.id=lte:0` to trigger the range validation in `Bound` for a non-primary sort field (where `primarySortField=false`), and since the check `if (primarySortField && adjustedLower > adjustedUpper)` only fires for primary fields, the invalid range silently passes for `tokenIds`, causing the DB query to use an impossible range condition that returns zero results without error, masking a logic flaw?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19df791c-b0d2-47f0-97f8-22a2bb6d9804?mode=deep",
+    "timestamp": "2026-04-29 02:41:20.684207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `serialnumber=gte:1&serialnumber=lte:0` to create an impossible serial number range in `Bound` (since `primarySortField=false` for serial numbers), causing the DB query to execute with a contradictory `WHERE serial_number >= 1 AND serial_number <= 0` condition that returns zero results, consuming server resources for a query that will always be empty, outside the design fee model?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2d53e86-8cd2-4aeb-b7d1-27db34885f7f?mode=deep",
+    "timestamp": "2026-04-29 02:41:48.990122",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send an EVM address as the `{id}` path variable (e.g., `0x1234567890abcdef1234567890abcdef12345678`) to `getOutstandingAirdrops()`, causing `EntityIdEvmAddressParameter.valueOfNullable()` to parse it and `EntityService.lookup()` to perform an additional DB lookup by EVM address, doubling the query cost per request and exceeding the design fee model for a single API call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b61fe04a-94ce-402f-a2c0-0df2684c844d?mode=deep",
+    "timestamp": "2026-04-29 02:42:17.497033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send a base32-encoded alias as the `{id}` path variable to `getOutstandingAirdrops()`, causing `EntityIdAliasParameter.valueOfNullable()` to parse it and `EntityService.lookup()` to perform an alias-based DB lookup, and by sending many requests with different invalid aliases, enumerate valid account aliases through timing differences in the error responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_667c7884-e8d9-4626-83c2-7d89e41c46bb?mode=deep",
+    "timestamp": "2026-04-29 02:42:46.956623",
+    "report_generated": false
+  }
+]
