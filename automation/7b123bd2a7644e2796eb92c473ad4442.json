@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user supply a crafted `hiero.mirror.importer.topicRunningHashV2AddedTimestamp` value via an externally-reachable configuration endpoint (e.g., Spring Boot Actuator /env) to override the hardcoded timestamp, causing the Flyway placeholder `topicRunningHashV2AddedTimestamp` to be set to an attacker-chosen nanosecond epoch, so that the V1.23.1 migration assigns wrong `running_hash_version` values to all `topic_message` rows, effectively reorganizing the visible running-hash history for every HCS topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6d564fa-e352-4403-88d0-0028cc7c7a0b?mode=deep",
+    "timestamp": "2026-04-29 01:53:30.085862",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user set `hiero.mirror.importer.network` to a value that is neither 'mainnet' nor any recognized network (e.g., 'MAINNET ' with trailing space) so that `ImporterProperties.HederaNetwork.MAINNET.equalsIgnoreCase(importerProperties.getNetwork())` returns false, causing the non-mainnet fallback timestamp `1588706343553042000L` to be injected into the Flyway placeholder instead of the correct mainnet value `1592499600000000000L`, resulting in all mainnet topic messages between those two timestamps being assigned `running_hash_version=2` instead of `1`, reorganizing the hash-version history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a366e9d8-22a5-4c45-a5b8-17025936abc3?mode=deep",
+    "timestamp": "2026-04-29 01:53:41.991096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user inject a negative or zero value for `topicRunningHashV2AddedTimestamp` (e.g., `0` or `-1`) through an exposed configuration surface, causing the Flyway migration V1.23.1 to set `running_hash_version=2` for ALL `topic_message` rows (since every `consensus_timestamp` is greater than 0), thereby rewriting the entire topic message running-hash version history and making historical hash verification fail for all pre-V2 messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62a67aca-62e7-42ed-91ca-be1edfda485f?mode=deep",
+    "timestamp": "2026-04-29 01:53:54.546199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user set `topicRunningHashV2AddedTimestamp` to `Long.MAX_VALUE` (9223372036854775807) through a configuration property injection, causing the Flyway migration to assign `running_hash_version=1` to every single `topic_message` row regardless of actual consensus timestamp, effectively erasing all V2 hash version assignments and reorganizing the entire post-upgrade topic message history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62acf718-394d-4b71-8258-b8668663ade7?mode=deep",
+    "timestamp": "2026-04-29 01:54:07.285513",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that `configuration.getPlaceholders()` returns a mutable map to inject additional Flyway SQL placeholders (e.g., `partitionStartDate`, `hashShardCount`) alongside `topicRunningHashV2AddedTimestamp`, causing subsequent Flyway migrations that depend on those placeholders to execute with attacker-controlled values, reorganizing partition boundaries and thus the temporal ordering of transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73641192-2f69-4b4a-861b-2c5ce68ca222?mode=deep",
+    "timestamp": "2026-04-29 01:54:20.662040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `JdbcConnectionDetails` provider override (lines 58-60) — where `connectionDetails.getJdbcUrl()` replaces `dataSourceProperties.determineUrl()` — by influencing the `JdbcConnectionDetails` bean (e.g., via a misconfigured service-binding or environment variable injection) to point the Flyway owner-credential data source at a different database, causing Flyway migrations to run against an unintended schema and reorganize transaction history in that target?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f5adeb9-36d9-4474-8a0c-9fd19e77ab9c?mode=deep",
+    "timestamp": "2026-04-29 01:54:34.766966",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user craft a JDBC URL containing attacker-controlled PostgreSQL connection parameters (e.g., `options=-c search_path=attacker_schema`) injected through an environment variable that feeds `dataSourceProperties.determineUrl()`, causing the Flyway owner-privileged connection to execute migrations against a different schema, reorganizing the `topic_message` and `transaction` table structures in that schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_649700ca-ae2e-4470-90da-f3dd8a6a3884?mode=deep",
+    "timestamp": "2026-04-29 01:54:48.498279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `hikariConfig.copyStateTo(flywayHikariConfig)` call (line 54) — which copies all HikariCP settings including `connectionInitSql` from `DBProperties` — to inject a SQL statement via `hiero.mirror.importer.db.connectionInitSql` that runs as the database owner on every Flyway connection, allowing arbitrary DDL/DML execution that reorganizes transaction history tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fe7865d-a0e5-4b4c-9a66-8a42f34a8299?mode=deep",
+    "timestamp": "2026-04-29 01:55:04.755764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user set `hiero.mirror.importer.db.maximumPoolSize` or related HikariCP properties to force the Flyway connection pool into a state where concurrent migration steps execute out of order, causing Flyway versioned migrations to apply in a non-sequential order and reorganize the transaction history schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1303b116-c6d0-4943-a8b4-b7791a91b767?mode=deep",
+    "timestamp": "2026-04-29 01:55:21.616235",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user set `flywayHikariConfig.setInitializationFailTimeout(-1)` (line 69) — which means the pool never fails on startup — to keep the importer running with a poisoned or redirected JDBC URL indefinitely without triggering a startup failure, allowing silent migration execution against a wrong database that reorganizes transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_912df467-bf13-49ff-b991-7a76097dbb53?mode=deep",
+    "timestamp": "2026-04-29 01:55:38.581583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: init()] Can an unprivileged external user set both `hiero.mirror.importer.block.enabled=false` and `hiero.mirror.importer.downloader.record.enabled=false` simultaneously to bypass the `init()` guard (line 93), causing the importer to start with no active data source, leaving the transaction history in a partially-migrated or stale state that misrepresents the true ordering of transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8575ddae-c0ae-46c7-a609-42ebdd1cc8c3?mode=deep",
+    "timestamp": "2026-04-29 01:55:56.938865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: init()] Can an unprivileged external user exploit the fact that `init()` only throws `IllegalStateException` when BOTH sources are enabled — but does NOT validate that at least one is enabled — to run the importer with zero active downloaders, causing it to stop ingesting new transactions while Flyway migrations still execute, creating a gap in transaction history that makes the ledger appear reorganized from the perspective of downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_893876af-77d6-493e-a339-64060f963808?mode=deep",
+    "timestamp": "2026-04-29 01:56:14.705144",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: SchedulingConfiguration] Can an unprivileged external user set `spring.task.scheduling.enabled=false` through an exposed configuration surface (e.g., environment variable, config map) to disable the `@EnableScheduling` inner class `SchedulingConfiguration`, halting all scheduled importer tasks (record/block downloaders, parsers) while Flyway migrations still run, causing the transaction history to freeze at a specific point and appear reorganized relative to the live ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fb47dbb-0e68-4fa4-bb47-ebaf1a8c9cc3?mode=deep",
+    "timestamp": "2026-04-29 01:56:33.426104",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: SchedulingConfiguration] Can an unprivileged external user toggle `spring.task.scheduling.enabled` from `false` to `true` at runtime (via Actuator or config reload) to restart scheduling after a deliberate pause, causing the importer to re-process or skip a window of transactions and produce a reorganized view of transaction history with gaps or duplicates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_596f25d8-0b76-45cc-a7a5-29a68827e56f?mode=deep",
+    "timestamp": "2026-04-29 01:56:52.488248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the absence of input validation on `importerProperties.getTopicRunningHashV2AddedTimestamp()` — there is no `@Min`, `@Max`, or `@Positive` constraint on this field in `ImporterProperties` (line 72) — to supply a timestamp of `1` nanosecond, causing the migration to classify all historical topic messages as V2, reorganizing the running hash version history for the entire topic message table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e03bd81a-7caa-4128-8cc5-b1415f875d8f?mode=deep",
+    "timestamp": "2026-04-29 01:57:12.517597",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the string-based placeholder injection (`configuration.getPlaceholders().put(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_586c1c28-6168-4d90-8ab7-9eb284f544cc?mode=deep",
+    "timestamp": "2026-04-29 01:57:30.996220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `setMaximumPoolSize(10)` (line 65) on the Flyway owner pool to exhaust database owner connections through repeated application restarts or health-check probes, causing Flyway migrations to time out mid-execution and leave the `topic_message` or `transaction` schema in a partially-migrated state that reorganizes visible transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb81a58c-7b73-406e-a6fb-3112e937e9b0?mode=deep",
+    "timestamp": "2026-04-29 01:57:50.988731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `setIdleTimeout(60000)` (line 63) — 60-second idle timeout on the Flyway pool — combined with a long-running migration to force connection recycling mid-migration, causing the Flyway owner connection to drop and the migration to partially apply, leaving transaction history tables in an inconsistent reorganized state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f52543bf-4961-4fc4-a37b-9c01e62605d6?mode=deep",
+    "timestamp": "2026-04-29 01:58:12.951210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `setMinimumIdle(0)` (line 64) setting on the Flyway pool — meaning no connections are kept alive — to introduce a race condition where the Flyway pool is fully idle when a migration starts, causing connection establishment delays that interleave with the application's regular data source operations and produce out-of-order transaction writes that reorganize history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de84b9f8-3058-4274-92b7-18033e7851a5?mode=deep",
+    "timestamp": "2026-04-29 01:58:34.980730",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the network string comparison `ImporterProperties.HederaNetwork.MAINNET.equalsIgnoreCase(importerProperties.getNetwork())` — where `getNetwork()` strips a prefix delimiter — to craft a network value like `mainnet-attacker` that `getNetwork()` normalizes to `mainnet`, causing the mainnet timestamp `1592499600000000000L` to be used on a non-mainnet deployment, misclassifying topic message hash versions and reorganizing the running hash history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa1e2517-3b63-4162-b266-d1231367a0a0?mode=deep",
+    "timestamp": "2026-04-29 01:58:57.580625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the network prefix stripping in `ImporterProperties.getNetwork()` (which calls `StringUtils.substringBefore(this.network, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43a07b18-7d8a-4979-816e-b04dbe2a0e7c?mode=deep",
+    "timestamp": "2026-04-29 01:59:20.278177",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `@AutoConfigureBefore(FlywayAutoConfiguration.class)` ordering guarantee to register a competing `FlywayConfigurationCustomizer` bean with higher precedence (e.g., via a Spring Boot auto-configuration on the classpath) that overrides the `topicRunningHashV2AddedTimestamp` placeholder set by `ImporterConfiguration`, causing Flyway to use an attacker-controlled timestamp and reorganize topic message hash version history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fc9677c-84c7-4466-a622-293df77fe5dc?mode=deep",
+    "timestamp": "2026-04-29 01:59:44.016220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the fact that `flywayDataSource` is annotated `@Bean(defaultCandidate = false)` — meaning it is not the primary DataSource — to cause the application to fall back to the regular (non-owner) DataSource for Flyway migrations if the `@FlywayDataSource` qualifier is not properly resolved, running migrations with reduced privileges that may silently skip DDL steps and leave transaction history partially reorganized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81c6532e-aa28-4763-9a7f-ba06e15a774d?mode=deep",
+    "timestamp": "2026-04-29 02:00:07.677273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `dbWaiter.waitForDatabase(jdbcUrl, dbProperties.getOwner(), dbProperties.getOwnerPassword())` call (line 71) — which uses owner credentials for the liveness check — to perform a timing attack that infers the owner username and password by observing connection retry behavior through a side channel (e.g., response timing on a health endpoint), then use those credentials to directly manipulate the transaction history database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30fb698b-70f3-44c2-ba8b-0f7be81cd70b?mode=deep",
+    "timestamp": "2026-04-29 02:00:32.694668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DatabaseWaiter.waitForDatabase()` retry loop — which retries indefinitely until `properties.getTimeout()` — to cause a denial-of-service by keeping the database unreachable long enough to exhaust the timeout, forcing the importer to throw `IllegalStateException` and restart, and during the restart window inject a modified `topicRunningHashV2AddedTimestamp` that reorganizes transaction history on the next Flyway run?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a0e0153-09d6-4c1d-a01c-17e0ebff913e?mode=deep",
+    "timestamp": "2026-04-29 02:00:58.113851",
+    "report_generated": false
+  }
+]
