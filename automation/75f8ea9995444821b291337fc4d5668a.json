@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokensRequest()] Can an unprivileged external user flood GET /tokens with the maximum allowed `limit` value combined with a wildcard `name` ILIKE filter (e.g., `name=%`) to trigger full-table sequential scans on the token and entity tables, exhausting DB CPU and connection pool slots so no new transaction confirmations can be processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c3449b7-fa74-420c-9095-11e284fbcc0a?mode=deep",
+    "timestamp": "2026-04-29 04:33:41.863016",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user submit repeated GET /tokens requests with many repeated `token.id=eq:X` values to grow the `inClause` array unboundedly, causing `params.push(inClause)` to pass a massive array to PostgreSQL's `= any($N)` operator, resulting in query plan explosion and DB thread exhaustion that prevents transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0af93786-982b-49af-af3e-a3f1498ec672?mode=deep",
+    "timestamp": "2026-04-29 04:33:53.928859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenInfoRequest()] Can an unprivileged external user send thousands of concurrent GET /tokens/:tokenId requests with a valid `timestamp=lte:X` filter to force `buildHistoryQuery()` to execute expensive UNION ALL queries across both `token`, `token_history`, `entity`, `entity_history`, `custom_fee`, and `custom_fee_history` tables simultaneously, saturating the DB connection pool and halting transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdd8163f-f053-439e-a83f-a18152a3dcf4?mode=deep",
+    "timestamp": "2026-04-29 04:34:06.631045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: buildHistoryQuery()] Can an unprivileged external user craft a timestamp filter that causes `buildHistoryQuery()` to generate a UNION ALL subquery with `order by modified_timestamp desc limit 1` on both the live and history tables, and by sending this concurrently at high rate, exhaust PostgreSQL worker processes so that the ingestion pipeline cannot write new consensus transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01407470-9cef-4d93-bd11-e56a5bb8bc49?mode=deep",
+    "timestamp": "2026-04-29 04:34:19.740544",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /tokens/:tokenId/balances with a `timestamp=eq:X` filter to trigger `balances.getAccountBalanceTimestampRange()` as an additional async DB call before the main query, doubling DB connection consumption per request, and by flooding this endpoint exhaust the connection pool causing total service unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae028b09-89d5-4619-992f-8fa5c0b58708?mode=deep",
+    "timestamp": "2026-04-29 04:34:33.615141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user send GET /tokens/:tokenId/nfts/:serialNumber/transactions with no timestamp filter to trigger a two-phase DB query (first `extractSqlFromNftTransferHistoryRequest()` then `nftTransactionHistoryDetailsQuery`), consuming two DB connections per request, and by flooding this endpoint at scale exhaust the pool and prevent transaction confirmation queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d7111fe-900b-4de9-b9a8-830f20683df9?mode=deep",
+    "timestamp": "2026-04-29 04:34:48.154963",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user send GET /tokens/:tokenId/nfts/:serialNumber/transactions with `limit=<max>` to force the UNION ALL query across `nft`, `nft_history`, and `entity` tables with a large limit, causing expensive multi-table scans that hold DB connections open for extended periods and starve the transaction ingestion pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5f14e66-6760-4f7c-8afe-5d457529096d?mode=deep",
+    "timestamp": "2026-04-29 04:35:04.314637",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user trigger the `jsonb_path_query_array()` call inside `nftTransactionHistoryDetailsQuery` with a large `timestamps` array (via `rows.map((r) => r.timestamp)`) by choosing a token/serial with many history entries, causing a CPU-intensive JSONB path evaluation on the DB server that blocks other queries including transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baebabd2-e4d6-478d-ace3-1e68c8921d8e?mode=deep",
+    "timestamp": "2026-04-29 04:35:21.484002",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokensRequest()] Can an unprivileged external user send GET /tokens with `name=<3-char-string>` (minimum valid length per `isByteRange(val, 3, 100)`) and `limit=<max>` to trigger an ILIKE full-table scan on the token table with no index support, and by sending this concurrently at high rate exhaust DB CPU and prevent new transaction confirmations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf1b6a8c-4047-45d5-90d3-3681a447ed53?mode=deep",
+    "timestamp": "2026-04-29 04:35:38.059018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user send GET /tokens with a `publickey=<valid-64-char-hex>` filter that matches no index on `e.public_key`, causing a sequential scan on the entity table joined with the token table, and by flooding this endpoint exhaust DB I/O bandwidth so that transaction ingestion is starved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73098868-fb8c-4f40-a20f-c8ea01b5ed01?mode=deep",
+    "timestamp": "2026-04-29 04:35:56.548455",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenBalances()] Can an unprivileged external user send GET /tokens/:tokenId/balances with `account.balance=gte:0` and `limit=<max>` to force a full scan of the `token_account` table with a balance filter applied post-retrieval via the CTE, causing large intermediate result sets that exhaust DB memory and prevent transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a37f96d2-d269-4a56-a7ca-ba5dbcad2749?mode=deep",
+    "timestamp": "2026-04-29 04:36:15.764053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /tokens/:tokenId/balances with both a `timestamp` filter and an `account.publickey` filter to force a JOIN between `token_balance` and `entity` tables with a timestamp range subquery, creating a multi-table join with no efficient index path that holds DB connections open and starves the ingestion pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc5b476d-b3d2-4fe7-9ff5-512ccb34b60f?mode=deep",
+    "timestamp": "2026-04-29 04:36:35.750744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokensRequest()] Can an unprivileged external user send GET /tokens with `account.id=<valid-id>` to trigger the `tokenAccountCte` prepended to the query, causing a CTE scan on `token_account` filtered by `account_id` joined with `token` and `entity`, and by flooding this endpoint exhaust DB connection pool slots preventing transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c303bf0-809c-452d-b29b-cf0225f22612?mode=deep",
+    "timestamp": "2026-04-29 04:36:56.554899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTokensRequest()] Can an unprivileged external user send GET /tokens/:tokenId/nfts with `limit=<max>` and `account.id=<valid-id>` to trigger a large scan of the `nft` table joined with `entity` via `entityNftsJoinQuery`, returning a massive result set that exhausts Node.js heap memory when mapped through `new NftViewModel(nftModel)`, causing OOM crashes that take down the REST API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1960655-4dff-4efe-953c-6a20bcd7c41f?mode=deep",
+    "timestamp": "2026-04-29 04:37:17.409329",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokensRequest()] Can an unprivileged external user send GET /tokens with `limit=<max>` and no other filters to trigger a full scan of the `token` table joined with `entity`, and by mapping all rows through `TokenService.putTokenCache(r)` exhaust the in-memory token cache, causing heap growth that degrades or crashes the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77254a7d-ac05-4b55-87b8-40dea3e7e753?mode=deep",
+    "timestamp": "2026-04-29 04:37:40.588638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: TokenService.putTokenCache()] Can an unprivileged external user repeatedly call GET /tokens with `limit=<max>` to continuously populate `TokenService.putTokenCache()` with new token entries, causing unbounded in-memory cache growth that eventually triggers Node.js OOM and crashes the REST API server, preventing all transaction confirmations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f984227d-c14b-4f33-9978-36f92312448d?mode=deep",
+    "timestamp": "2026-04-29 04:38:03.360858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenInfoRequest()] Can an unprivileged external user send GET /tokens/:tokenId with `timestamp=lte:<very-old-timestamp>` to force `extractSqlFromTokenInfoRequest()` to query deep history tables (`token_history`, `entity_history`, `custom_fee_history`) with expensive `order by lower(timestamp_range) desc limit 1` subqueries, and by flooding this endpoint exhaust DB resources preventing transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67b84bef-9202-48b9-bf2f-e3235dcc4daf?mode=deep",
+    "timestamp": "2026-04-29 04:38:27.243847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user send GET /tokens/:tokenId with `timestamp=eq:<timestamp>` to trigger `transformTimestampFilterOp()` converting `eq` to `lte`, causing the history query to scan all records up to that timestamp in `token_history` and `entity_history`, and by sending this at high concurrency exhaust DB I/O and prevent transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60ab0355-2881-4843-9d98-de01b6f4a20e?mode=deep",
+    "timestamp": "2026-04-29 04:38:52.026401",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTokenInfoRequest()] Can an unprivileged external user send thousands of concurrent GET /tokens/:tokenId/nfts/:serialNumber requests for non-existent token/serial combinations to trigger `pool.queryQuietly()` for each, exhausting DB connection pool slots with queries that return empty results, preventing the ingestion pipeline from acquiring connections to write new transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2d45418-dbe8-41f2-bcf7-62d96940abaf?mode=deep",
+    "timestamp": "2026-04-29 04:39:18.128941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenBalances()] Can an unprivileged external user send GET /tokens/:tokenId/balances with `timestamp=eq:<timestamp>` to trigger `balances.getAccountBalanceTimestampRange()` which performs an additional async DB query, and then the main `distinct on (ti.account_id)` query on `token_balance`, consuming two DB connections per request and by flooding this endpoint cause connection pool exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2bbc734-666a-4ec6-ab85-22f5dc7c06c3?mode=deep",
+    "timestamp": "2026-04-29 04:39:43.374138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send GET /tokens/:tokenId/balances with multiple `timestamp` filters (e.g., `timestamp=gte:X&timestamp=lte:Y`) to accumulate multiple entries in `tsConditions` array, causing `balances.getAccountBalanceTimestampRange()` to receive a complex multi-condition query that performs expensive range scans on the balance table, exhausting DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7259914e-0db4-4dec-baea-542d0582c6c8?mode=deep",
+    "timestamp": "2026-04-29 04:40:09.854890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokensRequest()] Can an unprivileged external user send GET /tokens with `name=<100-char-string>` (maximum valid length) to trigger an ILIKE scan with a long pattern string, and by sending thousands of concurrent requests exhaust DB CPU cycles allocated to pattern matching, preventing transaction confirmation queries from being scheduled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d67ce64-6fc6-4b08-936c-72712e90d8f3?mode=deep",
+    "timestamp": "2026-04-29 04:40:38.722672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user send GET /tokens/:tokenId/nfts/:serialNumber/transactions with multiple `timestamp` filters to push multiple entries into `nftConditions` and `tokenDeleteConditions` arrays, generating a complex WHERE clause that forces full scans of `nft`, `nft_history`, and `entity` tables simultaneously, exhausting DB I/O?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52b7e4e6-0438-43e9-aea5-1b5249d741c9?mode=deep",
+    "timestamp": "2026-04-29 04:41:06.788966",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user send GET /tokens/:tokenId/nfts/:serialNumber/transactions for a token with a very large number of NFT history entries, causing `rows.map((r) => r.timestamp)` to produce a large `timestamps` array passed as `$4` to `nftTransactionHistoryDetailsQuery` via `= any($4)`, triggering an expensive IN-list scan on the transaction table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08f04ba1-4254-4491-b7fe-59f0c4e39eca?mode=deep",
+    "timestamp": "2026-04-29 04:41:37.157130",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user exploit the fact that `getNftTransferHistoryRequest()` calls `NftService.getNft()` after the main query to perform a third DB query per request, meaning each request consumes up to three sequential DB connections, and by flooding this endpoint at scale exhaust the connection pool and halt transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cacc5dc-dc43-4bb6-a5ec-b38d0f04a096?mode=deep",
+    "timestamp": "2026-04-29 04:42:06.553051",
+    "report_generated": false
+  }
+]
