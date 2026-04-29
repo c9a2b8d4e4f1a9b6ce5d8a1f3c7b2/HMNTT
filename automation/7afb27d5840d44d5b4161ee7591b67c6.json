@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user call getNft(tokenId, serialNumber) for any arbitrary tokenId and serialNumber without being the NFT owner, because nftByIdQuery performs no account_id ownership check, causing full exposure of the spender and delegating_spender fields that reveal who is authorized to transfer the NFT?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1aefc683-8817-4900-b729-dc62c91f2e03?mode=deep",
+    "timestamp": "2026-04-29 00:06:10.393450",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user enumerate all NFT spender approvals across the entire network by iterating tokenId and serialNumber values in getNft(), since nftByIdQuery uses select * with no caller-identity or ownership gate, leaking the full spender authorization state of every NFT?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6759a395-6a94-42a2-a771-fa94304f6f3a?mode=deep",
+    "timestamp": "2026-04-29 00:06:22.324095",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user discover the delegating_spender of any NFT by calling getNft() with a known tokenId and serialNumber, since the nftByIdQuery returns delegating_spender without verifying the requester is the owner or an authorized party, exposing the delegation chain of NFT transfer approvals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fca7aeb0-36d1-4606-bd4f-e5cbbbd6e446?mode=deep",
+    "timestamp": "2026-04-29 00:06:35.072657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNfts()] Can an unprivileged external user retrieve all NFTs owned by any arbitrary account by supplying any ownerAccountId in the query object passed to getNfts(), since getQuery() places ownerAccountId directly into params[0] as the account_id = $1 condition with no verification that the HTTP caller is that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05b8dcbf-41c8-42e0-8429-1e9fd849ab49?mode=deep",
+    "timestamp": "2026-04-29 00:06:48.674524",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getQuery()] Can an unprivileged external user bypass the account_id = $1 ownership condition in getQuery() by supplying a crafted ownerAccountId value of 0 or null, causing the SQL condition account_id = $1 to match no rows or behave unexpectedly, and then use spenderIdInFilters to enumerate NFTs approved to a target spender across all accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3bd4720d-8283-4fc3-916e-6a54656a3074?mode=deep",
+    "timestamp": "2026-04-29 00:07:02.276209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user exploit the spenderIdInFilters IN clause in getSubQuery() to enumerate which accounts have been granted spender approval for NFTs owned by a victim account, by supplying a list of candidate spender IDs and observing which ones return results, effectively mapping the full approval graph without being the owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acb4f41f-be99-44b9-81ee-29678bb59673?mode=deep",
+    "timestamp": "2026-04-29 00:07:16.520615",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user exploit the fact that filters.push(...spenderIdFilters) mutates the lower/inner/upper filter arrays in getSubQuery(), causing spenderIdFilters to be applied multiple times across UNION ALL subqueries, resulting in incorrect SQL conditions that may omit the account_id ownership check in one of the union branches?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d5165ee-5458-44f7-8f1b-cc05c6cce86a?mode=deep",
+    "timestamp": "2026-04-29 00:07:31.898490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user craft a request where spenderIdFilters contains a filter with an unsanitized operator string that, when interpolated into the SQL as column${filter.operator}$N, injects additional SQL clauses that remove or bypass the account_id = $1 ownership condition, authorizing access to NFTs they do not own?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d171a330-d729-457e-82ae-159a31ea4046?mode=deep",
+    "timestamp": "2026-04-29 00:07:47.341880",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user supply a filter.key not present in NftService.columns (TOKEN_ID, SERIAL_NUMBER, SPENDER_ID), causing the column lookup to return undefined, and then have the resulting SQL string undefined${operator}$N interpreted by the database in an unexpected way that bypasses the account_id ownership condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe7976c1-5af4-4293-8945-aaf92eccde88?mode=deep",
+    "timestamp": "2026-04-29 00:08:04.090635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getQuery()] Can an unprivileged external user exploit the shared params array passed to multiple getSubQuery() calls in getQuery(), where spenderIdInFilters values are pushed into params once per subquery call, causing parameter index misalignment in the UNION ALL query that shifts the account_id binding away from $1, effectively nullifying the ownership check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2bb5b39f-831d-45ed-8320-ad2cde682921?mode=deep",
+    "timestamp": "2026-04-29 00:08:21.976404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNfts()] Can an unprivileged external user retrieve the spender field of all NFTs belonging to a victim account by calling getNfts() with the victim's ownerAccountId, since there is no authentication check in getNfts() or getQuery() verifying the caller's identity matches the ownerAccountId, exposing who is approved to transfer each NFT?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1df089d0-fbf6-48e0-98cd-2d03e480eb1a?mode=deep",
+    "timestamp": "2026-04-29 00:08:39.834061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNfts()] Can an unprivileged external user retrieve the delegating_spender field for all NFTs of a victim account via getNfts(), since the nftQuery SELECT includes delegating_spender without any caller-identity gate, revealing the full approved-for-all delegation chain that governs NFT transfer authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6627353f-f68d-44ab-a182-35c18c260b9e?mode=deep",
+    "timestamp": "2026-04-29 00:08:59.531946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user supply an empty spenderIdFilters and empty spenderIdInFilters alongside empty lower/inner/upper arrays, causing getQuery() to fall into the subQueries.length === 0 branch and execute getSubQuery() with no token or serial filters, returning all NFTs for the target account including their full spender authorization state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67434810-f57f-4ce7-ac2b-8492491acc6d?mode=deep",
+    "timestamp": "2026-04-29 00:09:20.297729",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getQuery()] Can an unprivileged external user set ownerAccountId to a victim's account ID and use spenderIdInFilters with their own account ID to confirm whether they have been granted spender approval on any NFT owned by the victim, effectively probing the authorization state without the victim's knowledge?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56c396fa-1a64-481d-b2e0-9753cc27a2c5?mode=deep",
+    "timestamp": "2026-04-29 00:09:41.732666",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user use getNft() to determine whether a specific NFT (tokenId, serialNumber) has a non-null spender field, confirming that a transfer approval exists for that NFT, and then use that information to front-run or interfere with the approved transfer without being the owner or approved spender?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25db8256-4bfa-4528-9a54-aa84b481578b?mode=deep",
+    "timestamp": "2026-04-29 00:10:02.959806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user supply a spenderIdInFilters array with a large number of spender IDs, causing the SQL IN clause spender in ($5,$6,...$N) to grow unboundedly, and use the presence or absence of results to binary-search which spender IDs have been granted NFT transfer approval by the victim account owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1f488b8-f5a9-4f3c-b201-ce5faf2642e4?mode=deep",
+    "timestamp": "2026-04-29 00:10:25.355739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user exploit the fact that spenderIdFilters are pushed into the filters array via filters.push(...spenderIdFilters) before the conditions are built, meaning spenderIdFilters are treated identically to token/serial filters, and craft a spenderIdFilter with operator = that duplicates the spender = $N condition alongside the account_id = $1 condition, potentially creating a logical OR bypass if the DB query planner interprets the duplicate differently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7beed4c8-9854-46b4-88b0-ff2b9a7b90f7?mode=deep",
+    "timestamp": "2026-04-29 00:10:47.877904",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user call getNft() with a tokenId and serialNumber of a deleted NFT (where deleted=true in the nft table), and still receive the spender and delegating_spender fields, since nftByIdQuery uses select * with no deleted filter, exposing historical authorization data for NFTs that should no longer be accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58ce6024-db89-4aa4-852b-dc94454356cb?mode=deep",
+    "timestamp": "2026-04-29 00:11:12.736659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getQuery()] Can an unprivileged external user set the limit parameter to an extremely large value in the query object passed to getQuery(), since getLimitQuery(2) only positions the limit at $2 without enforcing a maximum, causing getNfts() to return an unbounded number of NFT records including all spender and delegating_spender authorization fields for a victim account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a1b1a89-0512-4158-9ed6-8c0f94f94ce0?mode=deep",
+    "timestamp": "2026-04-29 00:11:37.506825",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user craft a request where the lower, inner, and upper filter arrays each contain spenderIdFilters pushed into them via filters.push(...spenderIdFilters), causing the UNION ALL query to have three subqueries each with the spender condition, effectively tripling the spender filter application and potentially returning NFT authorization data that should be filtered out by the account_id condition in one branch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_018f836b-e298-415b-bea3-07a52bb511e8?mode=deep",
+    "timestamp": "2026-04-29 00:12:01.381700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNfts()] Can an unprivileged external user enumerate the complete spender approval graph for any account by iterating over all possible ownerAccountId values in getNfts(), since there is no rate limiting or authentication in the service layer, and each response includes the spender field revealing who is authorized to transfer each NFT?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_392a26ed-a095-421c-8118-e5f2c92d3442?mode=deep",
+    "timestamp": "2026-04-29 00:12:25.594938",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user supply a spenderIdFilter with operator gte and value 0, causing the SQL condition spender >= $N to match all NFTs with any spender set, effectively bypassing the intended spender-specific filter and returning all NFTs with any approval regardless of the specific spender identity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4e030ee-6aaf-435f-8c04-35f38272658c?mode=deep",
+    "timestamp": "2026-04-29 00:12:53.028713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getQuery()] Can an unprivileged external user exploit the fact that accountIdCondition is always the string account_id = $1 and is never re-evaluated per subquery, meaning if ownerAccountId is a type that coerces to a truthy SQL value matching multiple accounts (e.g., a wildcard or special value), all NFT authorization data across multiple accounts could be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c3097db-62df-49ed-9c53-ac49516d5328?mode=deep",
+    "timestamp": "2026-04-29 00:13:20.347137",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getNft()] Can an unprivileged external user call getNft() with a tokenId and serialNumber belonging to a high-value NFT, receive the spender field identifying the approved transferor, and use that information to impersonate or collude with the spender to execute an unauthorized transfer, since the approval data is exposed without any caller authorization check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9dca4567-39e0-4667-bbc0-6430bd2cad7f?mode=deep",
+    "timestamp": "2026-04-29 00:13:48.273134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/nftService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSubQuery()] Can an unprivileged external user supply both spenderIdInFilters and spenderIdFilters simultaneously, causing getSubQuery() to append both a spender in ($N,...) condition and a spender${operator}$M condition to the WHERE clause, creating a logical AND that could be exploited to narrow results to a specific spender range and confirm the existence of specific approvals without being the owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31e9787c-067e-454a-a8da-d0975cdae4bf?mode=deep",
+    "timestamp": "2026-04-29 00:14:16.888311",
+    "report_generated": false
+  }
+]
