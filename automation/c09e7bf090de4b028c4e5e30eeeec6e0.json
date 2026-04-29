@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user send a ContractCallRequest with gas=21000 (minimum allowed by @Min(21_000)) to exploit the scaleGas() dead-zone (gas <= GAS_SCALE_FACTOR=10_000 returns 0 tokens) and, since 21000/10000=2 tokens, repeatedly call staking reward precompile addresses at near-zero throttle cost, causing the gasLimitBucket to be drained far slower than intended and allowing theft of unpaid staking rewards via excessive precompile queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c34f7b98-ae33-46be-a0d8-cbe8309ceae6?mode=deep",
+    "timestamp": "2026-04-29 03:13:50.131564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the sequential check order in throttle() — where rateLimitBucket.tryConsume(1) is checked before gasLimitBucket.tryConsume() — by sending requests that pass the rate check but fail the gas check, consuming rate tokens without consuming gas tokens, thereby starving legitimate staking reward queries from other users while the attacker's own staking reward interactions proceed unimpeded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3183a948-8e04-4216-9378-8478bcb41084?mode=deep",
+    "timestamp": "2026-04-29 03:14:02.199434",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user craft a ContractCallRequest targeting a staking reward precompile that intentionally reverts, causing restoreGasToBucket() to call restore(gasLimitToRestoreBaseline) with gasLimitRefundPercent=100, effectively returning all consumed gas tokens and allowing the attacker to make unlimited staking reward precompile calls without ever depleting the gasLimitBucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe59c89e-07fe-4e34-a2c6-8bd6c2781291?mode=deep",
+    "timestamp": "2026-04-29 03:14:14.750025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user repeatedly send requests to the staking reward precompile that fail with MirrorEvmTransactionException (triggering the result==null branch in restoreGasToBucket), causing restore(gasLimitToRestoreBaseline) to be called each time and continuously refilling the gasLimitBucket, effectively bypassing the gas-per-second throttle and enabling mass enumeration of pending reward balances across all staking accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58618808-0193-4717-ac3d-462812397178?mode=deep",
+    "timestamp": "2026-04-29 03:14:28.613848",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user bypass request-filter REJECT actions in action() by crafting a ContractCallRequest whose fields (from, to, data, block) do not match any configured RequestFilter expression, allowing the attacker to call staking reward precompile addresses that would otherwise be blocked, and thereby query or manipulate unpaid staking reward state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe4290ca-fcf7-4aea-9aec-f80ea5f00c7b?mode=deep",
+    "timestamp": "2026-04-29 03:14:43.194340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: action()] Can an unprivileged external user exploit the fact that action() is only invoked when requestFilter.test(request) returns true, and that filters.isEmpty() returns true when no filters are configured, to send staking reward precompile calls that match an empty-filter LOG rule (which only logs, never blocks), effectively leaking the attacker's staking reward query pattern while still executing the call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d979a254-6088-43a2-bedd-182022206cfe?mode=deep",
+    "timestamp": "2026-04-29 03:14:57.708820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user set estimate=true in ContractCallRequest to invoke the estimateGas path in ContractExecutionService, which skips restoreGasToBucket() (guarded by if (!estimate)), and then use the gas estimate result to precisely calibrate a minimum-gas staking reward precompile call that consumes the fewest possible tokens from gasLimitBucket, maximizing the number of reward queries per second?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_49bdebd6-56b8-4a01-864d-024ccaa4c3bf?mode=deep",
+    "timestamp": "2026-04-29 03:15:13.508134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the fact that throttle() consumes a rate token from rateLimitBucket before checking gasLimitBucket, so that when gasLimitBucket.tryConsume() throws ThrottleException(GAS_PER_SECOND_LIMIT_EXCEEDED), the rate token is permanently consumed, allowing the attacker to exhaust the rateLimitBucket for other users while the attacker's own staking reward calls (with low gas) proceed freely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_034e636b-046a-426b-8543-0f6b5aedcd61?mode=deep",
+    "timestamp": "2026-04-29 03:15:29.695288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user exploit the gasLimitBucket.addTokens(tokens) call in restore() — which in bucket4j adds tokens up to the bucket capacity — by triggering many rapid failed staking reward precompile calls in parallel, causing concurrent restore() calls to race and temporarily overflow the effective token count before the bucket caps it, allowing a burst of staking reward queries beyond the configured gasPerSecond limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd540dda-cb61-4b53-b6ff-ab46f463652d?mode=deep",
+    "timestamp": "2026-04-29 03:15:46.021085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user send a ContractCallRequest with gas set to exactly GAS_SCALE_FACTOR+1 (10,001), causing scaleGas() to return Math.floorDiv(10001, 10000)=1 token, and by sending 500 such requests per second (the requestsPerSecond default), drain the gasLimitBucket at only 500 tokens/sec instead of the intended rate, enabling sustained staking reward precompile enumeration at a fraction of the intended cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5acc0bdb-ee23-4498-9897-c3aa1aba5ba1?mode=deep",
+    "timestamp": "2026-04-29 03:16:04.311475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the shared global gasLimitBucket (not per-IP or per-account) by flooding the /api/v1/contracts/call endpoint with high-gas requests targeting non-staking contracts, exhausting the gasLimitBucket for all users, and then immediately sending low-gas staking reward precompile calls that consume only 1-2 tokens, effectively prioritizing their own staking reward queries while blocking legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fb5edf7-0cd8-416a-aa40-7731d32e3eb7?mode=deep",
+    "timestamp": "2026-04-29 03:16:22.238475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttleOpcodeRequest()] Can an unprivileged external user call the opcodes endpoint (throttled by opcodeRateLimitBucket at 1 req/sec) to trace execution of a staking reward precompile call, extracting the exact EVM opcodes and storage slots used to compute pending_reward values, and use this information to craft optimized calls that steal or front-run unpaid staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83ac6d34-dbe9-4475-acec-41847cc42a14?mode=deep",
+    "timestamp": "2026-04-29 03:16:41.530024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user exploit the fact that restore() calls throttleProperties.scaleGas(gas) and if the result is 0 (gas <= 10,000), no tokens are added back, meaning that failed calls with very low gas never restore tokens, causing the gasLimitBucket to be permanently drained by low-gas staking reward precompile calls that always fail, creating a denial-of-service that prevents legitimate reward collection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd362a8a-b6f1-4f5b-825c-ea38e8b79ff1?mode=deep",
+    "timestamp": "2026-04-29 03:16:59.593110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the absence of per-caller identity in throttle() — the rateLimitBucket and gasLimitBucket are global singletons with no IP/account binding — to use multiple source IPs or connections to multiply their effective request rate beyond requestsPerSecond=500, enabling mass parallel staking reward precompile calls that enumerate all accounts' pending rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4302ec4-90ee-4543-aba5-32c909ab4467?mode=deep",
+    "timestamp": "2026-04-29 03:17:20.533253",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: action()] Can an unprivileged external user exploit the THROTTLE action's per-filter bucket (created with capacity=rate in RequestProperties.createBucket()) being separate from the global gasLimitBucket, so that a request matching a THROTTLE filter consumes from both the filter bucket and the global gas bucket, but a request NOT matching any filter only consumes from the global buckets, allowing the attacker to avoid per-filter throttling on staking reward precompile calls by crafting requests that bypass all filter expressions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4842c1a2-1750-4d6b-b815-7f90da7174eb?mode=deep",
+    "timestamp": "2026-04-29 03:17:42.329972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user send ContractCallRequest with value=0 and from=null (which passes the hasFrom() validation since value<=0) to call the staking reward precompile anonymously, bypassing any from-address-based request filters configured in throttleProperties.getRequest(), and thereby query or manipulate pending staking rewards without being identified or throttled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0081b97-ca3c-455d-ae0e-40fd1e1bc378?mode=deep",
+    "timestamp": "2026-04-29 03:18:04.587175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user exploit the restoreGasToBucket() logic in ContractCallService where Math.min(gasRemaining, gasLimitToRestoreBaseline) is restored on success, by sending staking reward precompile calls with the maximum gas (15,000,000) that use very little actual gas, causing nearly all 15,000,000 gas tokens to be restored after each call, effectively making high-gas staking reward calls free from a throttle perspective?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c529afe-9dcf-43e6-a05d-e00945ae394d?mode=deep",
+    "timestamp": "2026-04-29 03:18:28.516066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the fact that the ContractController only calls throttleManager.restore(request.getGas()) on InvalidParametersException but NOT on ThrottleException, meaning that if a request passes throttle() but later throws InvalidParametersException (e.g., gas > maxGasLimit), the gas tokens are restored, allowing the attacker to probe the staking reward precompile with oversized gas values at zero net cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f7a293c-4842-4697-bca0-2c1068b18676?mode=deep",
+    "timestamp": "2026-04-29 03:18:52.332795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the integer truncation in scaleGas() — Math.floorDiv(gas, 10_000) — by sending requests with gas values just below multiples of 10,000 (e.g., gas=29,999 costs 2 tokens instead of 3), effectively getting ~33% more staking reward precompile calls per second than the throttle intends?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a1deb44-0478-4b80-ac51-a27a90177815?mode=deep",
+    "timestamp": "2026-04-29 03:19:16.142962",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the fact that throttle() processes all requestFilter entries in a for-loop and throws ThrottleException on the first matching REJECT filter, but if a request matches a LOG filter first and a REJECT filter second, the LOG action executes (leaking request data) before the REJECT is evaluated, allowing the attacker to infer which staking reward precompile call patterns are monitored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e09a6ce6-566d-46ef-9c1f-178c63d99912?mode=deep",
+    "timestamp": "2026-04-29 03:19:40.411056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user trigger a race condition between concurrent throttle() and restore() calls on the gasLimitBucket — where gasLimitBucket uses SynchronizationStrategy.SYNCHRONIZED but rateLimitBucket does not — by sending parallel requests where one thread's restore() call races with another thread's tryConsume(), allowing more staking reward precompile calls to proceed than the gasPerSecond limit allows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b691dbf-4890-457c-8be4-635582081dd3?mode=deep",
+    "timestamp": "2026-04-29 03:20:05.304030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the fact that the rateLimitBucket is built without SynchronizationStrategy.SYNCHRONIZED (unlike gasLimitBucket), making it potentially unsafe under concurrent access, by sending a burst of concurrent staking reward precompile calls that race on rateLimitBucket.tryConsume(1) and all succeed simultaneously, bypassing the requestsPerSecond=500 limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cced5327-74c9-4978-acc8-c79e4066ede1?mode=deep",
+    "timestamp": "2026-04-29 03:20:31.378019",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user set the block field in ContractCallRequest to a historical block number to invoke historical staking reward state queries, which may bypass request filters configured only for BlockType.LATEST, and thereby enumerate historical pending_reward values for all accounts to identify high-value targets for staking reward theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_423dad52-5f16-4a20-959d-3d27c75c22a1?mode=deep",
+    "timestamp": "2026-04-29 03:20:59.578038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: throttle()] Can an unprivileged external user exploit the fact that throttle() does not validate the 'to' address against a blocklist of sensitive precompile addresses (e.g., the staking reward precompile at 0x167), allowing unrestricted calls to staking reward precompiles as long as the global rate and gas limits are not exceeded, enabling systematic enumeration of all accounts' pending rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb663296-97e9-4b40-a418-7a336da6d943?mode=deep",
+    "timestamp": "2026-04-29 03:21:26.435155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: restore()] Can an unprivileged external user exploit the gasLimitRefundPercent=100 default in ThrottleProperties, which causes restore() to return 100% of the gas limit on failed transactions, by deliberately crafting staking reward precompile calls that always revert (e.g., with invalid calldata), getting all gas tokens refunded after each call and effectively making the gasLimitBucket a no-op for failed staking reward queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3c91efd-1666-4dcc-9e0c-0054c1d59967?mode=deep",
+    "timestamp": "2026-04-29 03:21:54.117011",
+    "report_generated": false
+  }
+]
