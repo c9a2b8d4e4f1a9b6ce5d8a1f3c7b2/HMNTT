@@ -1,0 +1,104 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: recordMetrics(RecordItem)] Can an unprivileged external user cause a metric registry memory exhaustion during a network partition by submitting transactions with unknown TransactionType values, where sizeMetrics.getOrDefault(recordItem.getTransactionType(), unknownSizeMetric) falls back to unknownSizeMetric for every item, and during a partition-induced retry storm with Integer.MAX_VALUE retries, the Micrometer DistributionSummary accumulates unbounded histogram data in memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48b8e339-8821-4d64-8dcf-cd2e087a3384?mode=deep",
+    "timestamp": "2026-04-29 02:52:12.174370",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user exploit the @Retryable and @Transactional annotation ordering on parse(RecordFile) during a network partition, where Spring AOP applies @Transactional inside @Retryable (or vice versa depending on proxy order), causing each retry to start a new transaction that reads a different snapshot of the database state, leading to non-deterministic parsing outcomes where the same record file produces different results on different retry attempts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ffd7539-9a9a-4b7b-8e94-6921b72b6dcc?mode=deep",
+    "timestamp": "2026-04-29 02:52:24.308238",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: updateIndex(RecordFile)] Can an unprivileged external user cause the updateIndex() to be called multiple times for the same version transition during a network partition retry, where the first call to repository.updateIndex(offset) partially executes before the partition, and on retry the same offset is applied again to already-updated rows, resulting in a double-offset corruption of all block indices in the record_file table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb7a4776-5715-47cc-9674-9e2cecd8e4f9?mode=deep",
+    "timestamp": "2026-04-29 02:52:36.898209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: doParse(RecordFile)] Can an unprivileged external user cause a consensus timestamp ordering violation during a network partition by submitting record files where the dateRangeFilter.filter(recordItem.getConsensusTimestamp()) passes items out of the expected range due to the stale cached DateRangeFilter, and after partition recovery the filter is never refreshed, causing items from before the partition to be re-ingested with incorrect timestamps that violate the consensus ordering invariant?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c08e95d3-44b9-4f08-bf46-c5027103798f?mode=deep",
+    "timestamp": "2026-04-29 02:52:49.781689",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user cause a livelock during a network partition by submitting record files that consistently fail at the DB flush stage (streamFileListener.onEnd()), where @Retryable retries indefinitely with exponential backoff capped at maxBackoff 30s, and the synchronized lock is held during each backoff sleep, preventing health check threads from acquiring the lock to report the node as unhealthy, masking the partition from monitoring systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ec2d54d-4ef8-45b4-aaa5-00bbaaf7556a?mode=deep",
+    "timestamp": "2026-04-29 02:53:03.343603",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RecordItemAggregator.update(RecordFile)] Can an unprivileged external user cause a logsBloom unsafe array exposure during a network partition by submitting contract transactions that populate the bloom filter, where logsBloom.toArrayUnsafe() returns a direct reference to the internal byte array, and if a network partition causes the RecordFile object to be retained in parserContext after a failed flush, a subsequent retry could mutate the same underlying array via logsBloom.or() while another thread reads it, causing a data race?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c7a3a0f-09a1-4d2e-923c-71e177434042?mode=deep",
+    "timestamp": "2026-04-29 02:53:17.556707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user cause a Spring transaction synchronization failure during a network partition by exploiting the @TransactionalEventListener on RecordFileParsedEvent, where the event is published inside the @Transactional parse() method but the transaction is rolled back due to the partition, causing the AFTER_COMMIT listener to never fire while the AFTER_ROLLBACK listener in FileDataServiceImpl.onRecordFileParsingRolledBack() clears uncommitted state, creating an inconsistency between the event publication and the actual DB state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_224476d4-d4e9-42c7-946a-6821d757d8fc?mode=deep",
+    "timestamp": "2026-04-29 02:53:32.537356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: doParse(RecordFile)] Can an unprivileged external user cause a thread-safety violation in ParserContext during a network partition by exploiting the fact that parserContext uses a ConcurrentSkipListMap for state but ArrayList for inserts (non-thread-safe), where a network partition causes an async event handler (HistoricalBalanceService.onRecordFileParsed annotated @Async) to read from parserContext while the main parse thread is still writing to it, causing a ConcurrentModificationException or data corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_510e04bd-2a96-4f43-98cd-b3627fa8f555?mode=deep",
+    "timestamp": "2026-04-29 02:53:48.890350",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user cause a connection pool exhaustion during a network partition by exploiting the @Retryable with Integer.MAX_VALUE attempts, where each retry attempt acquires a new DB connection from the pool for the @Transactional context, and if the partition causes connections to hang rather than fail fast, the connection pool is exhausted within a few retry attempts, causing all other DB operations in the mirror node to fail with connection timeout errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ad140d7-a131-44dd-b3d6-787eea6d761c?mode=deep",
+    "timestamp": "2026-04-29 02:54:05.116950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: updateIndex(RecordFile)] Can an unprivileged external user cause the repository.updateIndex(offset) call to execute in a REQUIRES_NEW transaction that commits independently of the outer @Transactional parse() transaction during a network partition, such that the index update commits but the record file data does not, leaving the record_file table with updated indices but missing the actual record file row that justified the index correction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b63ed166-f855-4cc4-8af2-c95500d351ac?mode=deep",
+    "timestamp": "2026-04-29 02:54:22.662857",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: doParse(RecordFile)] Can an unprivileged external user cause a silent data truncation during a network partition by submitting a record file where recordFile.getItems() returns a lazy-loaded stream that partially fails mid-iteration due to the partition, causing the forEach() loop to terminate early without throwing an exception, resulting in only a subset of items being processed and count.get() reflecting the partial count, which is then persisted as the authoritative transaction count for the block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48a1735b-5bcf-489b-a276-80ce4429ff52?mode=deep",
+    "timestamp": "2026-04-29 02:54:39.986811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user cause a monitor starvation attack during a network partition by submitting a continuous stream of record files that each trigger the @Retryable retry loop, where the synchronized keyword on parse(RecordFile) means only one retry loop runs at a time, and the exponential backoff (up to 30s per retry) combined with Integer.MAX_VALUE retries means the parse queue grows without bound, eventually causing an OutOfMemoryError that is excluded from @Retryable and crashes the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4002fb13-9893-4109-8e62-75a041f3db7c?mode=deep",
+    "timestamp": "2026-04-29 02:54:58.954507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: doParse(RecordFile)] Can an unprivileged external user cause a RecordFileParsedEvent with a stale consensusEnd to be published during a network partition, where recordFile.getConsensusEnd() returns a value from a file that was never committed, and the HistoricalBalanceService.onRecordFileParsed() uses this consensusEnd to trigger balance snapshot generation against a non-existent consensus state, corrupting the historical balance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66dc7239-c670-423d-a9f7-1055175177aa?mode=deep",
+    "timestamp": "2026-04-29 02:55:18.062407",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<RecordFile>)] Can an unprivileged external user cause a batch size amplification attack during a network partition by submitting batches that consistently fail at the last file, where each @Retryable retry re-processes all files in the list, and the parserContext accumulates state from each successful doParse() call before the final failure, causing memory usage to grow proportionally to batchSize * retryCount before the finally block clears it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_139420ec-6494-4c77-9faf-96c20165c7eb?mode=deep",
+    "timestamp": "2026-04-29 02:55:38.794961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: updateIndex(RecordFile)] Can an unprivileged external user cause a race condition between updateIndex() and concurrent read queries during a network partition, where repository.updateIndex(offset) executes 'UPDATE record_file SET index = index + ?1' with a 2-hour timeout in a REQUIRES_NEW transaction, and during the partition the long-running update holds row-level locks that block all read queries to the record_file table, causing the REST API and web3 API to return errors for all block-number-based queries for up to 2 hours?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c11c1676-f7b0-451e-8f54-34999b832f9c?mode=deep",
+    "timestamp": "2026-04-29 02:55:59.929889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: doParse(RecordFile)] Can an unprivileged external user cause a logIndex gap in the database during a network partition by submitting a record file where some items pass dateRangeFilter.filter() and some do not, where recordItem.setLogIndex(logIndex) is called only for filtered items, and a network partition mid-iteration causes a partial commit where some items have logIndex set and others do not, creating gaps in the log index sequence that break EVM log query ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b133f2e6-01f0-44d7-9491-008920672a67?mode=deep",
+    "timestamp": "2026-04-29 02:56:21.668856",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(RecordFile)] Can an unprivileged external user cause a Spring @Retryable annotation to silently swallow a network partition exception that should halt processing, by submitting a record file that triggers a SocketTimeoutException during DB write, which @Retryable treats as a retryable exception and retries indefinitely, preventing the importer from detecting that it is operating in a degraded network state and triggering appropriate failover procedures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a9a752a-5146-491e-93d7-e6761d992165?mode=deep",
+    "timestamp": "2026-04-29 02:56:43.530798",
+    "report_generated": false
+  }
+]
