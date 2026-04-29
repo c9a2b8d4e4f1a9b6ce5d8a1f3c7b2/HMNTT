@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: isNew()] Can an unprivileged external user exploit the hardcoded `return true` in `isNew()` to bypass Hibernate's duplicate-check query, causing a duplicate `consensusTimestamp` insert that corrupts the contract result ledger and silently overwrites or collides with an existing record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2cd216d-5f7b-45c7-9efe-dbedd86d5812?mode=deep",
+    "timestamp": "2026-04-29 00:53:20.561851",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: isNew()] Can an unprivileged external user submit two contract transactions that race to produce the same `consensusTimestamp` value, and because `isNew()` always returns `true` skipping the SELECT-before-INSERT, trigger a primary key constraint violation that crashes the ingestion pipeline and causes a denial-of-service for all subsequent contract result processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f72d2620-958b-4b29-a523-9ce58d43a052?mode=deep",
+    "timestamp": "2026-04-29 00:53:32.506117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: toContractTransactionHash()] Can an unprivileged external user craft a contract transaction where `payerAccountId` is `null`, causing `toContractTransactionHash()` to throw a `NullPointerException` at `payerAccountId.getId()` (line 102), crashing the ingestion thread and halting all downstream contract transaction hash persistence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8467cc91-c526-4fc6-ae53-cb2d511b5689?mode=deep",
+    "timestamp": "2026-04-29 00:53:44.645822",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: toContractTransactionHash()] Can an unprivileged external user submit a contract call with a `null` `transactionHash`, causing `toContractTransactionHash()` to build a `ContractTransactionHash` with a `null` `hash` field that is used as the `@Id`, leading to a null primary key insert that corrupts the `contract_transaction_hash` table or causes an unhandled exception?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21c42363-b893-42de-8e6b-243c711ded00?mode=deep",
+    "timestamp": "2026-04-29 00:53:57.647619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: toContractTransactionHash()] Can an unprivileged external user submit two distinct contract transactions with identical `transactionHash` byte arrays, and because `isNew()` always returns `true` in `ContractTransactionHash`, trigger a duplicate primary key insert that silently drops one record or raises an unhandled constraint violation, causing integrity loss in the hash-to-result mapping?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71032703-2ebc-48aa-984a-d52e0d56f700?mode=deep",
+    "timestamp": "2026-04-29 00:54:11.381529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: setBloom(byte[])] Can an unprivileged external user supply a `bloom` byte array of exactly 256 zero bytes that equals `EMPTY_BLOOM`, causing `setBloom()` to store `ArrayUtils.EMPTY_BYTE_ARRAY` instead of the actual bloom filter, silently discarding valid bloom data and breaking downstream log-filter queries that rely on the bloom field?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fe6a5a2-15a4-4aab-959c-746c5bee5242?mode=deep",
+    "timestamp": "2026-04-29 00:54:25.089488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: setBloom(byte[])] Can an unprivileged external user supply a `bloom` byte array shorter or longer than 256 bytes, bypassing the `Arrays.equals(bloom, EMPTY_BLOOM)` check (which requires exact length match), causing an oversized or malformed bloom value to be persisted without any size validation, leading to storage bloat or downstream parsing failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29f7f50b-e40c-417b-8f00-3ea9d1d5e7da?mode=deep",
+    "timestamp": "2026-04-29 00:54:39.393896",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: setBloom(byte[])] Can an unprivileged external user supply a `null` value for `bloom`, causing `Arrays.equals(null, EMPTY_BLOOM)` to return `false` and storing `null` in the `bloom` field, which may then cause a `NullPointerException` in downstream code that assumes `bloom` is always a non-null byte array?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbd8e094-caea-41b4-98b6-f5d0b13f8680?mode=deep",
+    "timestamp": "2026-04-29 00:54:53.929377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: setBloom(byte[])] Can an unprivileged external user submit an extremely large `bloom` byte array (e.g., tens of megabytes), which passes the `Arrays.equals` check (since it differs from the 256-byte `EMPTY_BLOOM`) and is stored without any upper-bound validation, causing memory exhaustion or database column overflow during persistence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a947aa96-757f-4b75-b16a-bdfeefaea227?mode=deep",
+    "timestamp": "2026-04-29 00:55:10.187992",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Function: getId()] Can an unprivileged external user craft a contract transaction with a `null` `consensusTimestamp`, causing `getId()` to return `null` and Hibernate to attempt an insert with a null primary key, resulting in a constraint violation that crashes the persistence layer and blocks all subsequent ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79c3bae3-1d7e-44e0-9a0a-2c1600a58fdb?mode=deep",
+    "timestamp": "2026-04-29 00:55:27.025763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: consensusTimestamp] Can an unprivileged external user submit a contract transaction with a negative or zero `consensusTimestamp`, which passes no validation in `ContractResult`, is accepted as the `@Id`, and corrupts the ordering invariant of the contract result table, breaking time-based queries and pagination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d66b02d7-c63a-4cbd-ad8b-d00dbb40a702?mode=deep",
+    "timestamp": "2026-04-29 00:55:44.007645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: consensusTimestamp] Can an unprivileged external user submit a contract transaction with a `consensusTimestamp` of `Long.MAX_VALUE`, causing arithmetic overflow in downstream code that computes time deltas or ranges based on this field, leading to incorrect query results or index corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4bcc915-5ba9-4441-9129-3ce847b45d5b?mode=deep",
+    "timestamp": "2026-04-29 00:56:02.261847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: errorMessage] Can an unprivileged external user trigger a contract execution that produces an arbitrarily long `errorMessage` string (e.g., megabytes of data), which is stored without any length validation in `ContractResult`, causing unbounded memory allocation and potential out-of-memory conditions in the ingestion service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdbd81af-ab36-472e-a517-3cd844f17bf6?mode=deep",
+    "timestamp": "2026-04-29 00:56:22.028021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: errorMessage] Can an unprivileged external user craft a contract that returns an `errorMessage` containing SQL injection payloads or special characters, which, if the field is later interpolated into a dynamic query without sanitization, leads to unauthorized data access or modification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03f5e0be-fe32-415d-974b-23e43e2f5fac?mode=deep",
+    "timestamp": "2026-04-29 00:56:41.687504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: errorMessage] Can an unprivileged external user craft a contract that returns an `errorMessage` containing JSON special characters or escape sequences, which, when serialized by Jackson and consumed by a downstream REST client, causes JSON injection or response splitting attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b32202d-5a7d-41ca-877e-65cf9a2f68b6?mode=deep",
+    "timestamp": "2026-04-29 00:56:59.648607",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: functionParameters] Can an unprivileged external user submit a contract call with an extremely large `functionParameters` byte array (e.g., hundreds of megabytes), which is stored without any size cap in `ContractResult`, causing heap exhaustion in the ingestion JVM and a denial-of-service affecting all contract result processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b667491-a535-43ed-804d-ee05acd45e5a?mode=deep",
+    "timestamp": "2026-04-29 00:57:19.853516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: callResult] Can an unprivileged external user trigger a contract execution that returns an arbitrarily large `callResult` byte array, which is accepted and stored without size validation, leading to database column overflow or out-of-memory errors during serialization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e05ae38-2738-45d6-883e-49d3232c355d?mode=deep",
+    "timestamp": "2026-04-29 00:57:39.950551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: failedInitcode] Can an unprivileged external user deploy a contract with an extremely large `failedInitcode` byte array that intentionally fails, causing the oversized initcode to be stored in `ContractResult` without size validation and exhausting database storage or JVM heap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef277cf6-e224-4190-bfa4-d6cb78579cd8?mode=deep",
+    "timestamp": "2026-04-29 00:58:01.288737",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: functionResult] Can an unprivileged external user exploit the comment `// Temporary field until we can confirm the migration captured everything` on `functionResult` to submit data that populates this field inconsistently with `callResult`, causing a split-brain state where two fields represent the same result with different values, breaking integrity checks in consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fcda343-60e1-4bd1-ba08-904e3e2c91fa?mode=deep",
+    "timestamp": "2026-04-29 00:58:22.962026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: functionResult] Can an unprivileged external user submit a contract result where both `functionResult` and `callResult` are populated with conflicting data, and because no deduplication or consistency check exists between these two fields, cause downstream consumers to read stale or incorrect result data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72336e21-5f47-4d0e-972f-cc5c9862b881?mode=deep",
+    "timestamp": "2026-04-29 00:58:45.447667",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: createdContractIds] Can an unprivileged external user trigger a contract execution that creates an extremely large number of sub-contracts, populating `createdContractIds` with thousands of entries, causing `ListToStringSerializer` to produce a massive serialized string that exhausts memory or exceeds database column limits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc0c153c-c41a-43cb-8dd7-54a18bd838ea?mode=deep",
+    "timestamp": "2026-04-29 00:59:08.772244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: createdContractIds] Can an unprivileged external user craft a contract that returns `createdContractIds` containing negative or zero `Long` values, which pass no validation in `ContractResult`, are serialized as `{-1,0,...}` by `ListToStringSerializer`, and corrupt downstream contract ID lookups that assume all IDs are positive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1d3c0ff-b307-41bf-8796-0f9628da6831?mode=deep",
+    "timestamp": "2026-04-29 00:59:32.761454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: createdContractIds] Can an unprivileged external user exploit the `ListToStringSerializer` serialization of `createdContractIds` (format `{id1,id2}`) by injecting values containing `{`, `}`, or `,` characters through crafted Long values (e.g., via overflow), producing a malformed serialized string that breaks downstream parsers expecting the `{...}` format?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a72dd20-35dc-483e-bca0-7ea39fb55f86?mode=deep",
+    "timestamp": "2026-04-29 00:59:56.408148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: createdContractIds] Can an unprivileged external user submit a `ContractResult` where `createdContractIds` is `null` (bypassing the `@Builder.Default` via direct setter), causing a `NullPointerException` in `ListToStringSerializer.serialize()` or downstream list iteration, crashing the serialization pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_944cd9aa-5f65-4d7a-b3a7-577726ef3946?mode=deep",
+    "timestamp": "2026-04-29 01:00:20.700296",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/contract/ContractResult.java -> Scope: '] [Field: gasConsumed] Can an unprivileged external user submit a contract result with `gasConsumed` greater than `gasLimit`, which passes no cross-field validation in `ContractResult`, causing downstream gas accounting logic to compute negative remaining gas or incorrect fee calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75940da0-16ab-45a2-9423-5bfb7966e90c?mode=deep",
+    "timestamp": "2026-04-29 01:00:45.760754",
+    "report_generated": false
+  }
+]
