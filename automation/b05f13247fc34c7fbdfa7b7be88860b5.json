@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user submit a TopicMessageFilter with limit set to Long.MAX_VALUE causing the cast `(int) (filter.getLimit() - context.getTotal().get())` at line 69 to overflow to a negative integer, resulting in Math.min returning a negative pageSize that causes the DB query to return zero rows, silently skipping staking-reward-related topic messages and leaving pending rewards uncollected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e130ebbf-08a6-4ea4-9d32-46106f394c97?mode=deep",
+    "timestamp": "2026-04-29 02:47:50.741956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user craft a TopicMessageFilter where limit equals exactly Integer.MAX_VALUE + 1 so that the narrowing cast `(int)(filter.getLimit() - context.getTotal().get())` at line 69 wraps to a negative value, causing Math.min(limit, maxPageSize) to return a negative page size, making findByFilter return no staking-reward messages and causing the subscriber to miss reward-triggering events?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90abdd68-f0aa-4789-8235-20eb3bd89a0d?mode=deep",
+    "timestamp": "2026-04-29 02:48:03.028149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isComplete()] Can an unprivileged external user exploit the race condition between `context.getPageSize().set(0L)` in poll() at line 73 and `pageSize.incrementAndGet()` in onNext() at line 134, where concurrent emission resets the counter mid-flight, causing isComplete() at line 125 to evaluate `pageSize.get() < maxPageSize` as true prematurely, terminating the stream before all staking-reward topic messages are delivered and leaving rewards unclaimed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e8fa41d-0270-43c2-8b2f-4ebadaa7d379?mode=deep",
+    "timestamp": "2026-04-29 02:48:16.161446",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onNext(TopicMessage)] Can an unprivileged external user trigger a scenario where `last.set(topicMessage)`, `total.incrementAndGet()`, and `pageSize.incrementAndGet()` at lines 132-134 are not executed atomically, allowing a concurrent poll() invocation to read a stale `last` reference and re-query from an earlier consensus timestamp, causing duplicate delivery of staking-reward messages that inflates reward accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_554daec9-93ff-4ba0-a7e4-70d624f8cbc9?mode=deep",
+    "timestamp": "2026-04-29 02:48:29.104267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user open an unlimited number of concurrent gRPC subscriptions with throttled=true and numRepeats=Long.MAX_VALUE at line 99, exhausting the boundedElastic scheduler thread pool, starving legitimate staking-reward message delivery and causing pending rewards to remain uncollected indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67eab62f-ae7b-43fe-8eb4-60f5b2ac8711?mode=deep",
+    "timestamp": "2026-04-29 02:48:43.043413",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user exploit `Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))` at line 58 by triggering repeated transient DB errors through crafted filter parameters, causing the retriever to loop indefinitely and hold scheduler threads, preventing staking-reward topic messages from being processed by other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfbe4d29-4b5b-4359-847d-b904bd0d3508?mode=deep",
+    "timestamp": "2026-04-29 02:48:57.530745",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user set startTime to a value such that `last.getConsensusTimestamp() + 1` at line 72 overflows Long.MAX_VALUE to Long.MIN_VALUE, causing the next poll to query from the beginning of time and re-deliver all historical staking-reward messages, leading to double-counting of rewards in downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29918b2d-ab54-4559-87d8-bbc634c631e4?mode=deep",
+    "timestamp": "2026-04-29 02:49:12.738467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isComplete()] Can an unprivileged external user in unthrottled mode (throttled=false) exploit the fact that isComplete() at line 128 only checks limitHit and never checks pageSize, causing the retriever to keep polling up to numRepeats=unthrottled.getMaxPolls() times even after all staking-reward messages are consumed, generating excessive DB load that delays reward processing for other accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c19860f-1281-407f-9d3d-f3e135e64e67?mode=deep",
+    "timestamp": "2026-04-29 02:49:29.861067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: PollingContext(TopicMessageFilter, boolean)] Can an unprivileged external user pass throttled=false to retrieve() to select the unthrottled code path at line 103, obtaining a higher maxPageSize and lower pollingFrequency than the throttled path, effectively bypassing rate limiting and bulk-reading staking-reward topic messages faster than the system intends to expose them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2e2fe57-4507-4733-8851-4aac5c540840?mode=deep",
+    "timestamp": "2026-04-29 02:49:47.646614",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user set the TopicMessageFilter with no limit (limit=0, hasLimit()=false) so that poll() at line 68 sets limit=Integer.MAX_VALUE, causing the retriever to fetch the entire staking-reward message history in one page, leaking all historical reward-related topic messages without any pagination guard?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e47c654-dccc-49f7-8461-4b04aea2cf4f?mode=deep",
+    "timestamp": "2026-04-29 02:50:04.949138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user set startTime=0 in TopicMessageFilter so that the first poll at line 72 queries from the epoch origin, retrieving all staking-reward topic messages ever recorded, allowing the attacker to reconstruct the full reward history and identify accounts with large unclaimed pending rewards to target?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bd67b3e-aa34-4814-bf15-f8dcea971ede?mode=deep",
+    "timestamp": "2026-04-29 02:50:24.627436",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isComplete()] Can an unprivileged external user exploit the throttled isComplete() check `pageSize.get() < retrieverProperties.getMaxPageSize()` at line 125 by ensuring exactly maxPageSize messages are returned per poll, keeping isComplete() always false and causing the subscription to run indefinitely, consuming scheduler resources and blocking staking-reward delivery to other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f628838d-fb33-497b-85c4-3d14be62226c?mode=deep",
+    "timestamp": "2026-04-29 02:50:45.039357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user exploit the `.timeout(retrieverProperties.getTimeout(), scheduler)` at line 59 by crafting a filter that causes each poll to take just under the timeout threshold, keeping the subscription alive indefinitely while continuously reading staking-reward messages without triggering the timeout termination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcd8e140-0826-4bf5-b473-6273351d590f?mode=deep",
+    "timestamp": "2026-04-29 02:51:05.208043",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onComplete()] Can an unprivileged external user observe the log output of onComplete() at lines 140-145 which logs subscriberId, total message count, elapsed time, and rate, and use this timing side-channel to infer when large batches of staking-reward messages are being processed, timing their own reward-claiming transactions to front-run legitimate reward distributions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63ab4768-ea7c-4c80-aa57-eaf6ba673725?mode=deep",
+    "timestamp": "2026-04-29 02:51:25.886550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user set a TopicMessageFilter with a very small limit (e.g., limit=1) and startTime just before a known staking-reward message, causing poll() to build a newFilter at line 75 that fetches exactly one reward message per poll cycle, allowing the attacker to enumerate reward messages one-by-one while evading rate-limit detection based on page size?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d0b41fe-57f7-4153-bf0d-6d4f340e10d2?mode=deep",
+    "timestamp": "2026-04-29 02:51:47.261445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: PollingContext(TopicMessageFilter, boolean)] Can an unprivileged external user in throttled mode exploit `numRepeats = Long.MAX_VALUE` at line 99 combined with a filter that always returns exactly maxPageSize messages, causing the RepeatSpec at line 52 to never terminate, holding a scheduler thread and a DB connection open indefinitely while continuously reading staking-reward data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f88e3ac-a54a-42ac-a81d-318ef17131c8?mode=deep",
+    "timestamp": "2026-04-29 02:52:09.141179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user open thousands of concurrent subscriptions each with throttled=true and no limit, causing the boundedElastic scheduler at line 41 to queue tasks indefinitely, creating a denial-of-service that prevents staking-reward topic messages from being delivered to legitimate reward-monitoring services?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17cda474-aa41-4dc0-ad76-14bd2e431fad?mode=deep",
+    "timestamp": "2026-04-29 02:52:31.731565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user exploit the fact that `filter.toBuilder().limit(pageSize).startTime(startTime).build()` at line 75 creates a new filter without preserving the original endTime, causing the poll to query beyond the intended time window and retrieve staking-reward messages that should not yet be visible to the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c723207-d53f-40be-9030-3c3d9a9b061e?mode=deep",
+    "timestamp": "2026-04-29 02:52:55.048488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isComplete()] Can an unprivileged external user exploit the non-atomic read of `total.get()` in isComplete() at line 122 and `total.incrementAndGet()` in onNext() at line 133, where a concurrent thread reads total just before increment, causing isComplete() to return false one extra time and triggering one additional poll that re-fetches already-counted staking-reward messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_899eec87-47c4-496b-b14e-56d5e2743934?mode=deep",
+    "timestamp": "2026-04-29 02:53:19.530676",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user exploit the `.doOnCancel(context::onComplete)` at line 60 by rapidly subscribing and cancelling gRPC streams, causing onComplete() to log misleading completion metrics that mask the fact that staking-reward messages were only partially delivered, leading operators to believe reward processing is complete when it is not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd02d1a8-f28a-4a32-ae11-7032e27d6c2e?mode=deep",
+    "timestamp": "2026-04-29 02:53:44.030119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user set limit=Long.MAX_VALUE in TopicMessageFilter so that `filter.getLimit() - context.getTotal().get()` at line 69 produces a value larger than Integer.MAX_VALUE, and the narrowing cast to int silently truncates it to a small positive number, causing the retriever to fetch far fewer staking-reward messages per page than expected and miss reward events?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4d4944c-da66-4132-9021-a49826418047?mode=deep",
+    "timestamp": "2026-04-29 02:54:10.989680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: PollingContext.isComplete()] Can an unprivileged external user in throttled mode craft a scenario where pageSize is reset to 0 at line 73 just after isComplete() reads it as maxPageSize-1, causing isComplete() to return true and terminate the stream before the last page of staking-reward messages is delivered, leaving those rewards permanently uncollected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3f76092-5ebd-47ff-9b36-6f6314a079e1?mode=deep",
+    "timestamp": "2026-04-29 02:54:37.750693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user exploit the jitter parameter `.jitter(0.1)` at line 53 in the RepeatSpec to cause polling intervals to vary unpredictably, creating timing windows where staking-reward messages written to the DB between polls are consistently missed because the poll fires before the DB write commits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96196682-c89e-476e-820e-70eff08f0829?mode=deep",
+    "timestamp": "2026-04-29 02:55:05.671590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: poll(PollingContext)] Can an unprivileged external user set startTime to the maximum nanosecond timestamp value (Long.MAX_VALUE) so that `last.getConsensusTimestamp() + 1` at line 72 overflows to Long.MIN_VALUE on the next poll, causing the retriever to wrap around and re-deliver all staking-reward messages from the beginning of the ledger history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a16ad67-5547-478f-aa1e-f566d6756185?mode=deep",
+    "timestamp": "2026-04-29 02:55:33.035569",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/PollingTopicMessageRetriever.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user exploit the absence of any authentication or authorization check in retrieve() at line 45 to subscribe to any topicId including system topics that carry staking-reward distribution announcements, gaining real-time intelligence about pending reward payouts before they are processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7321d58-bd88-4bca-96ce-c170f0f26e1d?mode=deep",
+    "timestamp": "2026-04-29 02:56:01.564133",
+    "report_generated": false
+  }
+]
