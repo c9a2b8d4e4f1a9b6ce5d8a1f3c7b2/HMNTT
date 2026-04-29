@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: toOpenApiPath()] Can an unprivileged external user send a request to a smart contract endpoint where `req.baseUrl` is an empty string and `req.route.path` starts with `/`, so that `(req.baseUrl ?? '') + req.route?.path` produces a path that does not start with `apiPrefix`, causing `toOpenApiPath` to prepend `apiPrefix + '/'` and create a double-prefixed path like `/api/v1//api/v1/contracts/{id}` as a Prometheus label, splitting metrics across two label values for the same route?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_843873c5-1b5a-4c7b-b050-c2dff41db961?mode=deep",
+    "timestamp": "2026-04-29 01:44:15.587204",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: toOpenApiPath()] Can an unprivileged external user send a request to a smart contract endpoint with a path containing multiple consecutive colons (e.g., `/:id::version`) so that the regex `/:([^/]+)/g` matches `:id:` (including the second colon) and produces `{id:}` as the OpenAPI parameter name, creating an invalid label value that corrupts Prometheus metrics for smart contract routes using compound parameter patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5dc8345-5206-417c-8539-a9dc8bf2e5d5?mode=deep",
+    "timestamp": "2026-04-29 01:44:28.139507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to a smart contract endpoint and then abruptly close the connection before the response is sent, so that the `finish` event never fires, `inFlightCounter.add(-1)` is never called, and the per-route metrics (`requestTotalCounter`, `durationHistogram`, etc.) are never recorded, causing the metrics to undercount smart contract requests and mislead operators about actual traffic volume?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3125e248-73cd-4c1f-8f65-16f162ede563?mode=deep",
+    "timestamp": "2026-04-29 01:44:40.561187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user exploit the fact that `allRequestCounter.add(1)` is called in the `finish` event handler (not at request start) so that if the server crashes or restarts between request receipt and response finish, the request is counted in `inFlightCounter` but never in `allRequestCounter`, causing a permanent discrepancy between in-flight and total request counts that masks smart contract request processing failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_705afd87-2ef3-403a-8a82-a71e444d04cf?mode=deep",
+    "timestamp": "2026-04-29 01:44:54.130196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to a smart contract endpoint that results in a `3xx` redirect response so that `res.statusCode` is in the 300-399 range, which is not handled by any of the `if/else if` branches in the `finish` handler, causing the request to be counted in `allRequestCounter` but not in `allSuccessCounter`, `allClientErrorCounter`, or `allServerErrorCounter`, creating a silent gap in smart contract redirect tracking?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ce87c09-2746-4856-9f0e-0c191d4028e1?mode=deep",
+    "timestamp": "2026-04-29 01:45:07.583853",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request that causes a `1xx` informational response (e.g., `100 Continue`) so that `res.statusCode` is below 200, which falls outside all counter branches, causing the request to be silently uncounted in success/error metrics while still incrementing `allRequestCounter`, creating a discrepancy that could mask smart contract protocol-level issues?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ea7a8e2-0c8f-4289-90cd-af8e9feab48a?mode=deep",
+    "timestamp": "2026-04-29 01:45:21.630199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: exporter.collect()] Can an unprivileged external user send a large number of concurrent requests to the metrics endpoint (assuming authentication is disabled) so that multiple `exporter.collect()` promises are in flight simultaneously, causing race conditions in the Prometheus exporter's internal state and producing inconsistent or partially-collected smart contract metrics snapshots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_586dd701-7b5e-4d56-9aa3-edbc391d47f5?mode=deep",
+    "timestamp": "2026-04-29 01:45:36.779461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsHandler()] Can an unprivileged external user exploit the fact that `initMetrics()` is called synchronously inside `metricsHandler()` (which is called at server startup) so that if `config.metrics.config` is missing required properties (e.g., `durationBuckets`), the destructuring with defaults silently uses `[25, 100, 250, 500]`, causing smart contract duration metrics to be bucketed with hardcoded boundaries that may not reflect actual SLA requirements?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7567687-fb56-41ed-b8ab-9b6e72025d77?mode=deep",
+    "timestamp": "2026-04-29 01:45:52.466881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: nodejs_process_cpu_usage_percentage gauge] Can an unprivileged external user flood the server with CPU-intensive smart contract query requests so that the `nodejs_process_cpu_usage_percentage` observable gauge reports values exceeding 100% (since `cpuUs / elapsedUs * 100` can exceed 100 on multi-core systems), causing monitoring systems to misinterpret CPU saturation and fail to trigger appropriate alerts for smart contract processing overload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c102b3ad-0a4c-4927-9e82-372a01e3b05e?mode=deep",
+    "timestamp": "2026-04-29 01:46:08.534313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: nodejs_process_cpu_usage_percentage gauge] Can an unprivileged external user trigger a scenario where `elapsedUs` is 0 (e.g., if `process.hrtime.bigint()` returns the same value in two consecutive calls due to clock resolution) so that the gauge callback returns 0 instead of the actual CPU usage, causing smart contract processing load to be invisible in metrics during that scrape interval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1293e1e7-78c0-43e7-85cf-59e09d377e24?mode=deep",
+    "timestamp": "2026-04-29 01:46:25.433246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a `req.url` containing a null byte (e.g., `/api/v1/contracts/0x1%00`) so that `new URL(req.url, 'http://localhost')` throws a `TypeError`, causing the `metricsMiddleware` to crash with an unhandled exception and taking down the entire metrics instrumentation layer, making all subsequent smart contract requests unmonitored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe4ecec5-cf57-45fc-b9f4-0ee6874a3a0b?mode=deep",
+    "timestamp": "2026-04-29 01:46:42.753559",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a malformed `req.url` (e.g., an empty string or `://invalid`) so that `new URL(req.url, 'http://localhost')` throws a `TypeError` that is not caught within `metricsMiddleware`, propagating as an unhandled exception that bypasses `next()` and causes the request to hang without a response, effectively creating a denial-of-service for smart contract API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9417bd78-3fa2-458e-8c8d-5e2e58092c1a?mode=deep",
+    "timestamp": "2026-04-29 01:47:01.485464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: toOpenApiPath()] Can an unprivileged external user send a request to a smart contract endpoint where `res.locals[requestPathLabel]` is set to an empty string (falsy), `req.route` is defined, and `req.route.path` is also an empty string, so that `toOpenApiPath` returns `apiPrefix + '/' + ''` = `/api/v1/`, causing all such requests to be bucketed under the root path label and polluting smart contract route-level metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0f7fffe-2915-4088-ab70-f98f22e17c86?mode=deep",
+    "timestamp": "2026-04-29 01:47:20.591637",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to a smart contract endpoint that triggers an exception in a downstream middleware after `metricsMiddleware` has already monkey-patched `res.write` and `res.end`, so that the error handler calls `res.end` with an error body, causing `responseSize` to include the error response body size and `responseSizeHistogram` to record inflated sizes for smart contract error responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af1b55f4-2ae7-48a3-924a-4696f85848b8?mode=deep",
+    "timestamp": "2026-04-29 01:47:40.170276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: res.write monkey-patch] Can an unprivileged external user trigger a scenario where another middleware also monkey-patches `res.write` after `metricsHandler` has done so, causing the `originalWrite` reference captured by `metricsHandler` to point to the intermediate patched version, and when the chain is called, `responseSize` is double-counted, causing `responseSizeHistogram` to record twice the actual smart contract response size?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06c00ac3-45c0-4156-81f6-4c3eb245b1f1?mode=deep",
+    "timestamp": "2026-04-29 01:47:59.923223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to the metrics endpoint path with a different HTTP method (e.g., `POST /swagger/metrics/`) so that `normalizedPath === metricsPath` is true and the authentication check is triggered, but the `exporter.collect()` response is sent regardless of the HTTP method, potentially allowing POST requests to retrieve Prometheus metrics and bypass method-based access controls on smart contract metric data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9f55d95-9895-4ed2-aac5-ae9cb32359e6?mode=deep",
+    "timestamp": "2026-04-29 01:48:20.424085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: authenticate()] Can an unprivileged external user send a request to the metrics endpoint with credentials where `credentials.name` or `credentials.pass` is an extremely long string (e.g., 1MB), causing `tsscmp` to perform a constant-time comparison over a very large input and significantly delay the response, creating a CPU-based denial-of-service that starves smart contract API request processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68ae7cbb-7bb9-4c82-8e68-7a711d53ec13?mode=deep",
+    "timestamp": "2026-04-29 01:48:42.479004",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: metricsMiddleware()] Can an unprivileged external user send a request to a smart contract endpoint with a `Content-Length` header set to `0x10` (hexadecimal) so that `parseInt('0x10', 10)` returns 0 (since parseInt with radix 10 stops at `x`), causing `requestSizeHistogram` to record 0 bytes for a request that actually has a 16-byte body, skewing smart contract request size metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0b9f40c-8f40-4d21-95a3-26f66906269a?mode=deep",
+    "timestamp": "2026-04-29 01:49:05.129340",
+    "report_generated": false
+  }
+]
