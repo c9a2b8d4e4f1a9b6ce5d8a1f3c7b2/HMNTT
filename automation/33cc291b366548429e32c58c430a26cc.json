@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a far-future consensus timestamp to `recordFileBlockDetailsFromTimestampQuery` (WHERE consensus_end >= $1) so that no record file is found, causing the API to return null and making all transactions at that timestamp appear permanently unconfirmed, effectively simulating a block delay exceeding 500% of the 24-hour average block time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4794a8e1-5b61-4255-842d-622caded9aaf?mode=deep",
+    "timestamp": "2026-04-29 05:07:48.198093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array where all values are set to a far-future nanosecond value, causing `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` to produce an upper bound so far in the future that the DB scans the entire partitioned record_file table, exhausting DB connection pool resources and freezing block-time reporting for all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b01349e-84b3-49ca-b017-1d3807ebb15a?mode=deep",
+    "timestamp": "2026-04-29 05:08:00.391599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getTimestampArrayContext()] Can an unprivileged external user pass a timestamps array where only the first and last elements satisfy first > last (DESC order) but intermediate elements are unsorted, causing `getTimestampArrayContext` to derive an incorrect order, which then causes the inner loop break condition `timestamp < consensusStart` to fire prematurely, silently dropping block associations for intermediate timestamps and making those transactions appear to belong to no block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f633413a-5191-4b45-adda-00e44f9a1448?mode=deep",
+    "timestamp": "2026-04-29 05:08:13.202684",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user send a very large timestamps array (e.g., 10,000 entries) to trigger the `unnest($1::bigint[])` expansion inside `recordFileBlockDetailsFromTimestampArrayQuery`, causing a correlated subquery to execute once per timestamp against the record_file partition table, saturating DB CPU and delaying block-time responses by multiples of the normal block interval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b155afd-0670-466e-bd19-9e1d9e2c10a1?mode=deep",
+    "timestamp": "2026-04-29 05:08:26.281555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getBlocks()] Can an unprivileged external user craft a `filters.whereQuery` with a timestamp filter set to a value far in the past (e.g., consensus_end < 1) so that `getBlocks` returns an empty result set, causing block-listing clients to believe no blocks exist and the network has been frozen since genesis?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f83613ce-3886-4ffc-b2ca-add73bf356e1?mode=deep",
+    "timestamp": "2026-04-29 05:08:39.839553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a single-character hash prefix to `getByHashOrNumber` so that `hash like $1` (e.g., `a%`) matches a large number of rows before the `limit 1` is applied at the DB level, causing a full index scan on the hash column and delaying block resolution responses beyond the expected block time threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a166b102-b266-4233-991e-2cb49ef89a92?mode=deep",
+    "timestamp": "2026-04-29 05:08:53.833606",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user pass a minimal hash prefix (e.g., a single hex character) to `getRecordFileBlockDetailsFromHash` so that `HASH like $1` (expanded to `x%`) forces a broad LIKE scan across the record_file table, causing query latency that makes block-time lookups appear delayed by 500% or more of the average block time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0069a8d8-c59c-410e-af4b-49b3dd56b487?mode=deep",
+    "timestamp": "2026-04-29 05:09:08.614706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array where all entries are identical (e.g., [T, T, T, ...] repeated thousands of times), causing `unnest($1::bigint[])` to expand to thousands of identical rows and the correlated subquery to execute redundantly for each, amplifying DB load and delaying block-time responses well beyond the 500% threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52ba951a-5c3c-421e-b2ac-8a3d9d9a4450?mode=deep",
+    "timestamp": "2026-04-29 05:09:24.660900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a timestamp of `0` (epoch) to `getRecordFileBlockDetailsFromTimestamp`, causing `consensus_end >= 0` to match the very first record file and return stale genesis-era block data to clients querying current transaction status, making recent transactions appear to belong to a block from the distant past?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20fce4cd-0c30-4725-b35b-03fdb73ed054?mode=deep",
+    "timestamp": "2026-04-29 05:09:41.740439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user pass a two-element timestamps array [MAX_BIGINT, 0] to `getTimestampArrayContext`, causing `maxTimestamp = MAX_BIGINT` and then `BigInt(MAX_BIGINT) + config.query.maxRecordFileCloseIntervalNs` to overflow JavaScript BigInt arithmetic, producing an incorrect upper bound ($3) that causes the DB query to return no rows, making all transactions in the array appear to have no associated block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3101ee48-18e0-411a-9c16-b9b206c2fe43?mode=deep",
+    "timestamp": "2026-04-29 05:09:59.959829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getBlocks()] Can an unprivileged external user set `filters.limit` to the maximum allowed value (100) and `filters.orderBy` to `consensus_end` with a timestamp filter spanning the entire history, causing `getBlocks` to execute a full table scan across all record_file partitions, consuming DB resources and delaying block-time responses for other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecedc679-db32-406c-a4c6-74cadb1285dc?mode=deep",
+    "timestamp": "2026-04-29 05:10:18.273799",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: buildWhereSqlStatement()] Can an unprivileged external user supply a `whereQuery` array with a very large number of filter conditions to `buildWhereSqlStatement`, causing the generated WHERE clause to be extremely long and force the DB query planner to spend excessive time on plan generation, delaying block query responses beyond the 500% block time threshold?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95fd9c32-9a62-4deb-933b-a1c94ebd0a0f?mode=deep",
+    "timestamp": "2026-04-29 05:10:37.307458",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array with alternating very large and very small values (e.g., [MAX, 0, MAX, 0, ...]) so that `getTimestampArrayContext` derives ASC order (since last > first is false when first=MAX), but the DB query uses minTimestamp=0 and maxTimestamp=MAX+interval, causing a full table scan across all record_file partitions and exhausting DB statement timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b8fb6dd-5bf1-4d1e-ac57-c27ff092f0c8?mode=deep",
+    "timestamp": "2026-04-29 05:10:57.691766",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a negative block index to `getRecordFileBlockDetailsFromIndex` (WHERE index = $1) to probe for record files with negative index values that may exist due to migration offsets (see `updateIndex` in RecordFileRepository), potentially returning a block with a consensus_end far in the past and making the transaction appear to belong to a historically delayed block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68a54acd-e1cf-43fa-8a5d-bbe1d7938e70?mode=deep",
+    "timestamp": "2026-04-29 05:11:18.197554",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user send a single-element timestamps array with a value just below the consensus_start of the latest block, causing the correlated subquery `WHERE consensus_end >= timestamp AND consensus_end >= $2 AND consensus_end <= $3` to scan forward through all future partitions up to `maxTimestamp + maxRecordFileCloseIntervalNs`, simulating a block that has not yet closed and making the transaction appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_956a5832-9e20-4b8e-8fd4-103cf2ede4d5?mode=deep",
+    "timestamp": "2026-04-29 05:11:38.500610",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getBlocks()] Can an unprivileged external user repeatedly issue concurrent requests to `getBlocks` with a timestamp filter set to `consensus_end > <current_tip>` (a future timestamp), causing each request to scan forward through all future partitions of the partitioned record_file table, exhausting the DB connection pool (max 10 connections) and freezing block-time responses for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c4e4ac9-761f-4622-abd8-97b99c8e6167?mode=deep",
+    "timestamp": "2026-04-29 05:12:00.569567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user exploit the fact that `getTimestampArrayContext` only checks `timestamps[0]` and `timestamps[timestamps.length - 1]` to determine sort order, by submitting a DESC-appearing array (first > last) where intermediate values are actually ascending, causing the inner loop to incorrectly skip record files and return an incomplete map that omits block associations for some transactions, making them appear unconfirmed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72ada5af-ad70-41db-af38-cbb1f9712b93?mode=deep",
+    "timestamp": "2026-04-29 05:12:22.860545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getByHashOrNumber()] Can an unprivileged external user send a hash prefix of all zeros (e.g., `0x0000`) to `getByHashOrNumber`, causing `hash like '0000%'` to match the genesis block or a block with a very old consensus_end, and then use the returned stale block data to falsely claim that a recent transaction belongs to a block from 500%+ of the average block time ago?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0ca25f3-2577-4555-89fc-8796cb28cd88?mode=deep",
+    "timestamp": "2026-04-29 05:12:47.036785",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array where `timestamps[0] === timestamps[timestamps.length - 1]` (all equal), causing `getTimestampArrayContext` to return ASC order with `minTimestamp === maxTimestamp`, and then `BigInt(maxTimestamp) + maxRecordFileCloseIntervalNs` to define a narrow window that may exclude the correct record file if the block close interval exceeds `maxRecordFileCloseIntervalNs`, making the transaction appear to have no block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23b587d9-b63a-4cb8-a1d2-d66bdf58733d?mode=deep",
+    "timestamp": "2026-04-29 05:13:11.419374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user flood the API with concurrent calls to `getRecordFileBlockDetailsFromTimestamp` using timestamps just above the current chain tip, causing each query to scan forward through all future record_file partitions (since `consensus_end >= $1` with no upper bound), exhausting the DB statement timeout (20s) and causing block-time lookups to appear delayed by multiples of the average block time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_863015d4-f0b9-48ba-babd-33283fb5e1c2?mode=deep",
+    "timestamp": "2026-04-29 05:13:34.808885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getBlocks()] Can an unprivileged external user supply a `whereQuery` with a `consensus_end` filter using a very large timestamp value (e.g., `consensus_end > 9999999999999999999`) to `buildWhereSqlStatement`, causing the DB to scan all partitions looking for blocks beyond the current chain tip, consuming DB resources and delaying responses for legitimate block-time queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e7afb10-7716-48c8-bb91-12cefc1fd45e?mode=deep",
+    "timestamp": "2026-04-29 05:14:01.019600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user exploit the absence of an upper limit on the timestamps array length in `getRecordFileBlockDetailsFromTimestampArray` to send an array of 100,000 timestamps, causing the `unnest($1::bigint[])` expansion to generate a massive temporary table and the correlated subquery to execute 100,000 times, causing the DB statement to exceed the 20-second timeout and blocking all block-time queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06fb0a45-61a6-4064-a514-1ae70e44ff59?mode=deep",
+    "timestamp": "2026-04-29 05:14:27.175640",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user pass an empty string hash to `getRecordFileBlockDetailsFromHash`, causing the query to execute `WHERE hash LIKE '%'` (matching all rows), and while `limit 1` caps the result, the full index scan required to find the first matching row could be exploited in a concurrent flood to saturate DB I/O and delay block-time responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eef0cab2-10fe-4f71-9294-74fe48db6b21?mode=deep",
+    "timestamp": "2026-04-29 05:14:53.753840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a timestamps array where the first element is `Number.MAX_SAFE_INTEGER` and the last is `0`, causing `getTimestampArrayContext` to set `maxTimestamp = Number.MAX_SAFE_INTEGER` and then `BigInt(Number.MAX_SAFE_INTEGER) + maxRecordFileCloseIntervalNs` to produce a valid but astronomically large upper bound, causing the DB to scan all record_file partitions and time out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df5418dc-fd0a-4747-9918-99177eb414d0?mode=deep",
+    "timestamp": "2026-04-29 05:15:22.492688",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Temporary freezing of network transactions by delaying one block by 500% or more of the average block time of the preceding 24 hours beyond standard difficulty adjustments'] [Function: getBlocks()] Can an unprivileged external user issue repeated requests to `getBlocks` with `limit=100` and no filters, causing the DB to return the 100 most recent blocks on every request, and by flooding with concurrent requests exhaust the DB connection pool (maxConnections=10), causing block-time queries from legitimate users to queue and appear delayed by 500%+ of the average block time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fc78cc2-e913-44c9-862f-5bf2895cfe06?mode=deep",
+    "timestamp": "2026-04-29 05:15:50.603610",
+    "report_generated": false
+  }
+]
