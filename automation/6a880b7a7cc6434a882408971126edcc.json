@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged external user set `isEstimate=true` in `ContractExecutionParameters` to route execution through `estimateGas()` instead of `callContract()`, thereby bypassing the `restoreGasToBucket()` call in `doProcessCall()` (which only fires when `!estimate`) and causing the throttle bucket to never be debited for actual gas consumed, effectively paying zero throttle cost for real contract execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a997fe37-af07-4534-925f-21eb0fc16f2b?mode=deep",
+    "timestamp": "2026-04-29 02:46:14.236311",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user craft a contract call where `gasUsedByInitialCall` is exactly 0 (e.g., a no-op or precompile that reports zero gas), causing `binaryGasEstimator.search()` to be invoked with `lo=0` and `hi=params.getGas()`, which then returns an inflated gas estimate far above actual cost, allowing the user to obtain an overestimated fee quote that misrepresents the true transaction cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c596afa6-a207-4e2c-bd07-02ab901accf6?mode=deep",
+    "timestamp": "2026-04-29 02:46:26.188815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user trigger the short-circuit path `if (gasUsedByInitialCall >= params.getGas())` by supplying the minimum allowed `gas=21000` and crafting a call that consumes exactly 21000 gas, causing `estimateGas()` to return `Bytes.ofUnsignedLong(gasUsedByInitialCall)` directly without the binary search refinement, bypassing the `estimateGasIterationThresholdPercent` tolerance and returning a raw unrefined fee estimate outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c757442d-016a-416c-b475-cdc6a440baab?mode=deep",
+    "timestamp": "2026-04-29 02:46:39.176890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user set `gasPrice=0` in `ContractExecutionParameters` (allowed by `@Min(0)` on `ContractCallRequest.gasPrice`) while sending a non-zero `value` transfer, causing the transaction to execute with zero fee cost per gas unit, effectively modifying the effective transaction fee to zero outside of design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73a391e8-6b65-4628-a751-55d1e90be17b?mode=deep",
+    "timestamp": "2026-04-29 02:46:52.019490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user exploit the fact that `estimateGas()` calls `callContract(params, context)` first and then passes the same `params` (with the original user-supplied `gas` as upper bound) to `binaryGasEstimator.search()`, allowing them to supply `gas=15_000_000` to force the binary search to explore the full range and return an estimate anchored at the maximum gas limit, inflating the reported fee beyond what the contract actually requires?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03a43820-a3f8-43c2-a0d6-7f0e400a9b93?mode=deep",
+    "timestamp": "2026-04-29 02:47:06.802055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: doProcessCall()] Can an unprivileged user cause `doProcessCall()` to be invoked with `estimate=true` (via the lambda `gas -> doProcessCall(params, gas, true)` in `estimateGas()`), which skips both `validateResult()` and `restoreGasToBucket()`, meaning a failed sub-call during binary search never restores gas to the throttle bucket, allowing the attacker to drain the gas throttle bucket without paying the corresponding fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b56b1277-e071-4f59-8f99-4b326cc3b2ef?mode=deep",
+    "timestamp": "2026-04-29 02:47:20.955752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user repeatedly call `processCall()` with `isEstimate=true` and a gas value of 15,000,000, causing up to `maxGasEstimateRetriesCount=20` iterations of `doProcessCall()` per request, each consuming EVM resources without triggering `restoreGasToBucket()`, effectively multiplying the fee-free EVM invocations by 20x per API call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_473be489-ed0d-46cb-935f-274755b59d1d?mode=deep",
+    "timestamp": "2026-04-29 02:47:36.057241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user craft a contract that always reverts during the binary search phase (causing `safeCall()` to return null), forcing `BinaryGasEstimator.search()` to always take the `lo = mid` branch and return `hi` (the user-supplied gas limit) as the estimate, resulting in a gas estimate equal to the maximum gas limit regardless of actual execution cost, misrepresenting the true transaction fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cf451b2-f2b4-4615-be04-d3950b2cdd30?mode=deep",
+    "timestamp": "2026-04-29 02:47:52.010070",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user exploit the `safeCall()` exception-swallowing behavior in `BinaryGasEstimator` (which catches all exceptions and returns null) to cause the binary search to converge on an artificially high gas estimate, since every failed mid-point call sets `lo = mid` and pushes the result toward `hi`, allowing the user to obtain an inflated fee estimate that exceeds the actual execution cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6aa4a0ee-ee30-4fa1-86bc-8e1aae9f7b67?mode=deep",
+    "timestamp": "2026-04-29 02:48:09.186293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user set `isEstimate=false` but supply a `gas` value of exactly 21,000 (the minimum allowed by `@Min(21_000)`) for a contract call that actually requires more gas, causing the EVM to report `gasUsed == gasLimit` on failure, and then observe that `restoreGasToBucket()` restores `gasLimitRefundPercent` (default 100%) of the gas limit back to the bucket, effectively paying no net throttle cost for the failed call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b44c70d4-c08c-414f-9246-a85f174429b8?mode=deep",
+    "timestamp": "2026-04-29 02:48:26.905819",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: doProcessCall()] Can an unprivileged user trigger the condition `result == null || (!result.isSuccessful() && gasLimit == result.gasUsed())` in `restoreGasToBucket()` by crafting a call that fails with gasUsed equal to gasLimit, causing `throttleManager.restore(gasLimitToRestoreBaseline)` to restore up to 100% of the submitted gas limit back to the bucket, meaning the attacker pays zero net gas throttle cost for the failed transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c09af358-b014-46f5-b4f4-514db686cd7c?mode=deep",
+    "timestamp": "2026-04-29 02:48:43.695995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: doProcessCall()] Can an unprivileged user craft a transaction that succeeds but reports `gasUsed` very close to `gasLimit`, causing `gasRemaining = gasLimit - result.gasUsed()` to be near zero, and then `Math.min(gasRemaining, gasLimitToRestoreBaseline)` restores nearly nothing to the throttle bucket, effectively consuming the full gas limit from the throttle at a fee cost disproportionate to actual execution, modifying the effective fee rate outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e753f66-d1bc-41f4-af2c-647187935969?mode=deep",
+    "timestamp": "2026-04-29 02:49:03.688044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user exploit the fact that `estimateGas()` invokes `callContract(params, context)` with the full user-supplied gas as the initial call, and this initial call is NOT counted in the `restoreGasToBucket()` logic (since `estimate=true` skips it), meaning the gas consumed by the initial probe call is never accounted for in the throttle, allowing the user to execute a full 15M gas call for free as part of the estimation flow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a86a2430-c2ad-46b4-95c6-5bdb30de35d5?mode=deep",
+    "timestamp": "2026-04-29 02:49:23.564221",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user supply a `block` parameter pointing to a historical block with a different EVM version (e.g., EVM_VERSION_0_30 on mainnet before block 44029066) where gas pricing opcodes behave differently, causing `estimateGas()` to return a fee estimate based on outdated gas schedules that do not reflect current design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d5923e7-0a6f-4b4d-8b89-7526e0dc091d?mode=deep",
+    "timestamp": "2026-04-29 02:49:44.214344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user craft a contract call where the initial `callContract()` in `estimateGas()` succeeds and reports a very low `gasUsedByInitialCall` (e.g., 21001), setting the binary search lower bound to 21001, but the contract's actual minimum gas requirement is much higher, causing the binary search to converge on an underestimated gas value that is below the true execution cost, producing a fee estimate outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bd45edb-f938-4033-87bf-d48527aca0f2?mode=deep",
+    "timestamp": "2026-04-29 02:50:05.468358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user set `value > 0` with a zero-address `sender` (Address.ZERO), bypassing the `hasFrom()` validation in `ContractCallRequest` by not going through the REST controller, and cause `TransactionExecutionService.getSenderAccountID()` to use the treasury account as sender, effectively executing a value transfer with fees charged to the treasury rather than the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53892d1a-3810-4fdd-b976-21c130d84898?mode=deep",
+    "timestamp": "2026-04-29 02:50:27.190227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user exploit the `estimateGasIterationThresholdPercent=0.10` early-exit condition in `BinaryGasEstimator.search()` (where `Math.abs(prevGasLimit - mid) < estimateIterationThreshold` causes `lo = hi`) to force premature convergence of the binary search at a gas value that is 10% higher than the actual minimum, causing the returned fee estimate to systematically exceed the true cost by up to 10%?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6f52fbf-325b-4d35-9e5b-7d6399b7e098?mode=deep",
+    "timestamp": "2026-04-29 02:50:49.983192",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user set `isEstimate=true` and `gas=15_000_000` to trigger the full binary search with 20 iterations, where each iteration calls `doProcessCall()` with `estimate=true` (skipping `restoreGasToBucket()`), consuming up to 20 * 15M = 300M gas units of EVM computation without any throttle restoration, effectively executing at a fee rate 20x below the design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_821f0e06-d602-457e-9fb2-4d94da176e39?mode=deep",
+    "timestamp": "2026-04-29 02:51:14.391961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: doProcessCall()] Can an unprivileged user cause `transactionExecutionService.execute()` to throw an `IllegalStateException` or `IllegalArgumentException`, which is caught and re-thrown as `MirrorEvmTransactionException`, and observe that in this path `result` remains null, causing `restoreGasToBucket(null, gasLimit)` to restore `gasLimitRefundPercent * gasLimit` back to the throttle bucket, effectively paying zero net throttle cost for the failed call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b0093dd-329b-4937-8457-616eb5a51970?mode=deep",
+    "timestamp": "2026-04-29 02:51:39.075973",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user set `gasPrice` to `Long.MAX_VALUE` (no upper bound validation exists on `ContractCallRequest.gasPrice` beyond `@Min(0)`) and observe whether this causes integer overflow in any downstream fee calculation within `TransactionExecutionService`, potentially resulting in a negative or zero effective fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fff8729-3278-4782-aead-4255e69a0a89?mode=deep",
+    "timestamp": "2026-04-29 02:52:05.042340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user craft a contract that consumes exactly `gasUsedByInitialCall = params.getGas() - 1` gas in the initial probe call, causing the binary search to run with `lo = params.getGas() - 1` and `hi = params.getGas()`, which immediately satisfies `lo + 1 < hi` as false and returns `hi = params.getGas()` as the estimate, producing a fee estimate equal to the maximum gas limit regardless of actual cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0841741-a1b7-4178-902a-eb32dd18d97a?mode=deep",
+    "timestamp": "2026-04-29 02:52:31.518089",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user toggle `isEstimate` between `true` and `false` across rapid successive calls to `processCall()` to exploit the asymmetry in throttle accounting — estimate calls skip `restoreGasToBucket()` while non-estimate calls restore gas — allowing the user to manipulate the throttle bucket state and execute more calls than the design parameters allow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41890e56-6e08-47d5-8ca5-accc81db15bd?mode=deep",
+    "timestamp": "2026-04-29 02:52:57.152816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user exploit the fact that `ContractCallContext.reset()` is called at the start of each binary search iteration in `BinaryGasEstimator.search()`, which may reset fee-related state accumulated from previous iterations, causing the gas estimation to be computed in an inconsistent context that does not reflect the cumulative fee state of a real transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b21747aa-e685-446b-9337-6fdaa70b63af?mode=deep",
+    "timestamp": "2026-04-29 02:53:25.025232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processCall()] Can an unprivileged user supply `callData` containing a crafted ABI-encoded call to a precompile contract (e.g., HTS precompile) that has a different gas schedule than regular EVM opcodes, causing `estimateGas()` to return a fee estimate that underestimates the actual precompile execution cost, since the comment in `BinaryGasEstimator` acknowledges precompile calls have higher gas consumption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d05069d-94e3-4588-88d2-714abe61b4ff?mode=deep",
+    "timestamp": "2026-04-29 02:53:53.842227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractExecutionService.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: estimateGas()] Can an unprivileged user craft a stateful contract where gas consumption varies between the initial probe call and subsequent binary search iterations (e.g., due to storage slot warming), causing `gasUsedByInitialCall` to be lower than the gas used in binary search iterations, resulting in a binary search lower bound that is too low and a final estimate that does not accurately reflect the true transaction fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e1729bb-bfdd-44fb-9fd4-b519450e1e2d?mode=deep",
+    "timestamp": "2026-04-29 02:54:21.874180",
+    "report_generated": false
+  }
+]
