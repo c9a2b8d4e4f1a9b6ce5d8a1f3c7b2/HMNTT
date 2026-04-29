@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29c010b3-4b17-4d65-80a0-fd08c2b470ae?mode=deep",
     "timestamp": "2026-04-28 18:33:23.145638",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send a POST /api/v1/contracts/call request with gas set to exactly 21000 (the @Min boundary) so that scaleGas() returns 0 and gasLimitBucket.tryConsume(0) always succeeds, allowing unlimited gas-weighted requests to be gossiped without ever depleting the gas throttle bucket?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_646f7145-d0d8-4dc9-bdad-92875857d2b9?mode=deep",
+    "timestamp": "2026-04-29 03:54:30.787356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send requests with gas values at or below GAS_SCALE_FACTOR (10,000) to cause scaleGas() to return 0, effectively bypassing the gasLimitBucket throttle entirely and flooding the node with gossip-triggering contract calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58e1d1f8-7bab-46c1-ac06-00a39316408a?mode=deep",
+    "timestamp": "2026-04-29 03:54:42.860548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the catch block that calls throttleManager.restore(request.getGas()) after an InvalidParametersException to artificially re-inflate the gasLimitBucket, then immediately submit new requests that consume those restored tokens, effectively doubling their allowed gossip throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4f8a2a5-15bd-4d3e-a0a0-1928746675a8?mode=deep",
+    "timestamp": "2026-04-29 03:54:55.445192",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user deliberately craft a request that passes throttle() but fails validateContractMaxGasLimit(), causing restore() to add back the full gas tokens, and then race a second concurrent request against the restored bucket to gossip more transactions than the throttle was designed to allow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0473b609-13af-45d3-9f6d-500c4b444541?mode=deep",
+    "timestamp": "2026-04-29 03:55:08.878681",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user set estimate=true to trigger the binary search in estimateGas() which internally calls doProcessCall() up to maxGasEstimateRetriesCount (20) times per single HTTP request, multiplying the effective gossip transaction rate by 20x while only consuming one rateLimitBucket token?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_def76605-b859-470d-8302-9bb97074d9bd?mode=deep",
+    "timestamp": "2026-04-29 03:55:22.532885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send concurrent POST /api/v1/contracts/call requests in parallel threads to exhaust the rateLimitBucket faster than the refill rate, causing legitimate users to be throttled while the attacker's burst of gossip-triggering transactions has already been submitted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5e5165d-6bca-430b-8bcf-921ca3cca57e?mode=deep",
+    "timestamp": "2026-04-29 03:55:36.791891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user supply a null 'to' field combined with a crafted 'data' field that passes isValidInitBytecode() check, causing the receiver to be set to Address.ZERO and triggering a contract-creation-like execution path that gossips a transaction to the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09040b52-8eb0-4395-9c25-1c03384cfe50?mode=deep",
+    "timestamp": "2026-04-29 03:55:51.797655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user pass an extremely large hex-encoded 'data' field (megabytes of calldata) that passes @Hex validation but causes hexToBytes() to allocate a massive byte array, leading to memory exhaustion that disrupts the throttle mechanism and allows subsequent gossip-triggering requests to slip through?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96e0bdc1-0fa9-4291-864e-bdea445b6360?mode=deep",
+    "timestamp": "2026-04-29 03:56:08.293421",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the fact that isStaticCall is hardcoded to false in constructServiceParameters(), meaning every call is treated as a state-modifying call, to ensure that all submitted requests are treated as gossip-worthy transactions rather than read-only queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35f36964-2d90-43ab-97f2-36834abbf18a?mode=deep",
+    "timestamp": "2026-04-29 03:56:25.545960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: validateContractMaxGasLimit()] Can an unprivileged external user submit requests with gas exactly equal to evmProperties.getMaxGasLimit() (15,000,000) to maximize the computational cost per gossip transaction while staying within the validation boundary, effectively maximizing network load per allowed request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_870e88a2-269e-4d30-94cd-17c4011fbe88?mode=deep",
+    "timestamp": "2026-04-29 03:56:44.086209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the ordering of throttle() before validateContractMaxGasLimit() so that a request with gas > maxGasLimit consumes a rateLimitBucket token before being rejected, allowing the attacker to deplete the rate limit bucket for legitimate users without ever gossiping a transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca9c7159-ceb2-425f-8254-4b7a7971abf5?mode=deep",
+    "timestamp": "2026-04-29 03:57:03.675780",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send requests with gas just above GAS_SCALE_FACTOR (10,001) so that scaleGas() returns 1, consuming only 1 gas token per request regardless of actual gas value, allowing them to gossip high-gas transactions at a rate far exceeding the intended gas-per-second throttle?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1377d5e2-ed23-4b76-8d2e-b76845cadce7?mode=deep",
+    "timestamp": "2026-04-29 03:57:23.489724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: throttle()] Can an unprivileged external user craft requests that match no requestFilter in throttleProperties.getRequest() (empty filter list by default), bypassing all per-request filter throttling and relying only on the global rate and gas buckets, which may be insufficient to prevent gossip flooding?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b466822-49f0-4f51-8b46-c50e2817a725?mode=deep",
+    "timestamp": "2026-04-29 03:57:43.588493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the fact that restore() adds tokens back to gasLimitBucket without checking whether the bucket is already full, causing token overflow that allows subsequent requests to bypass gas throttling and gossip more transactions than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c57e5d66-c28a-4fa5-ba48-7c1842c44b1d?mode=deep",
+    "timestamp": "2026-04-29 03:58:03.891841",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user supply a 'from' address of Address.ZERO (by omitting the 'from' field) combined with a non-zero 'value' field to bypass the hasFrom() validation check, causing the system to process a value-transfer gossip transaction without a valid sender?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecffe943-d903-46b4-bb3a-8b28fb6de99d?mode=deep",
+    "timestamp": "2026-04-29 03:58:25.758230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send a high volume of estimate=true requests, each triggering up to 20 internal doProcessCall() iterations via binaryGasEstimator.search(), to amplify their effective gossip transaction rate by 20x while consuming only one rateLimitBucket token per HTTP request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29e3387a-f3d7-413a-8ca8-8aab33e2ec06?mode=deep",
+    "timestamp": "2026-04-29 03:58:47.726470",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user supply a crafted 'block' parameter via BlockTypeDeserializer that resolves to a very old historical block, causing expensive database lookups that slow down request processing and allow more gossip transactions to be queued before throttle enforcement catches up?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d56ba59b-12b1-43a3-a9a6-27ca2d3c7d2b?mode=deep",
+    "timestamp": "2026-04-29 03:59:10.972795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the lack of IP-based or session-based rate limiting in the throttle() method (which uses only global bucket4j buckets) to send requests from multiple source IPs simultaneously, each consuming from the same shared bucket and collectively exhausting it to prevent legitimate gossip transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0313e338-8ef6-4bcc-88a3-a013a15f4164?mode=deep",
+    "timestamp": "2026-04-29 03:59:35.491494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send a request where 'data' is null (causing constructServiceParameters() to set data = HEX_PREFIX = '0x') and 'to' is a valid contract address, resulting in a minimal-cost gossip transaction that bypasses gas-based throttling due to near-zero calldata processing cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c652975-3cc5-4cc8-87bf-248e421db5ef?mode=deep",
+    "timestamp": "2026-04-29 04:00:00.119636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user supply a 'to' field that is an empty string (allowEmpty=true in @Hex annotation) to cause receiver to be set to Address.ZERO, triggering a contract-creation execution path that gossips a transaction to the network without a valid target contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ebfa110e-5ac3-40cc-93db-5d1c1282c0de?mode=deep",
+    "timestamp": "2026-04-29 04:00:25.127219",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the fact that throttleManager.throttle() consumes rateLimitBucket tokens before any business logic validation, so that sending requests with invalid JSON bodies that fail @Valid deserialization still consume throttle tokens, enabling a denial-of-service against the rate limiter itself?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dbf3d553-4092-4582-b005-ec986555fffe?mode=deep",
+    "timestamp": "2026-04-29 04:00:51.716096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send requests with estimate=true and a very low gas value (e.g., 21,000) so that gasUsedByInitialCall >= params.getGas() in estimateGas(), causing the binary search to be skipped and returning immediately, effectively making each estimate request cost only one rateLimitBucket token while still triggering a gossip-worthy execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c66bd7ee-2a5f-45fb-b190-65e0515fe47f?mode=deep",
+    "timestamp": "2026-04-29 04:01:18.151859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: constructServiceParameters()] Can an unprivileged external user craft a 'data' field containing valid init bytecode pattern (matching INIT_BYTECODE_PATTERN) to make isValidInitBytecode() return true, bypassing the hasTo() validation that would otherwise require a 'to' address, and triggering a contract-creation gossip transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6619f10-65ec-424e-a7b4-7342c9454fae?mode=deep",
+    "timestamp": "2026-04-29 04:01:46.363276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user exploit the fact that the gasLimitBucket and rateLimitBucket are shared global state (not per-user or per-IP) to perform a coordinated attack from multiple clients, where each client sends requests just below the throttle threshold, collectively exceeding the intended gossip transaction rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9258c29-836f-4016-9996-71ce89b169e7?mode=deep",
+    "timestamp": "2026-04-29 04:02:15.053948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/controller/ContractController.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: call()] Can an unprivileged external user send a burst of requests with gas=15,000,000 (maxGasLimit) to rapidly deplete the gasLimitBucket, then immediately send requests with gas<=10,000 (scaleGas returns 0) that bypass gas throttling entirely, gossiping additional transactions after the gas bucket is exhausted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_630a6ca2-49db-4e0f-b2ed-2466d6602841?mode=deep",
+    "timestamp": "2026-04-29 04:02:44.183598",
+    "report_generated": false
   }
 ]
