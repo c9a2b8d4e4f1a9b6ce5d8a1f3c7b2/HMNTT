@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user cause the monitor to enter an infinite HBAR-draining retry loop by making the gRPC endpoint return a non-INVALID_ARGUMENT status code (e.g., UNAVAILABLE), given that retry.getMaxAttempts() defaults to Long.MAX_VALUE in GrpcSubscriberProperties, causing the operator account to continuously spend HBAR on reconnection-triggered transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d518a060-d4df-498e-95a0-df5211d862fe?mode=deep",
+    "timestamp": "2026-04-29 00:52:08.458187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: shouldRetry()] Can an unprivileged external user exploit the fact that shouldRetry() only blocks retries for INVALID_ARGUMENT, by controlling a rogue or MITM gRPC endpoint that returns INTERNAL, UNAVAILABLE, or RESOURCE_EXHAUSTED status codes, causing the monitor to retry indefinitely and drain operator HBAR through repeated subscription-triggered on-chain transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0eef6ba3-2f22-4ab4-8f14-5c82f8d647a6?mode=deep",
+    "timestamp": "2026-04-29 00:52:20.790041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: getStatusCode()] Can an unprivileged external user cause getStatusCode() to return Status.Code.UNKNOWN for any non-StatusRuntimeException throwable, thereby bypassing the INVALID_ARGUMENT retry filter in shouldRetry() and triggering infinite retries that drain operator HBAR through repeated on-chain operations initiated by the monitor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39070e4b-107d-4bc8-91aa-8f4b6ade76dc?mode=deep",
+    "timestamp": "2026-04-29 00:52:33.244080",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user trigger repeated calls to expressionConverter.convert(properties.getTopicId()) by forcing subscription re-creation, where each convert() call may create a new on-chain topic via CONSENSUS_CREATE_TOPIC transaction costing HBAR, leading to direct loss of operator funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac3c97eb-54b6-46b8-83b3-9f3ce1945b5f?mode=deep",
+    "timestamp": "2026-04-29 00:52:46.343574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the mutable shared state in properties.setTopicId(topicId) within createSubscriptions(), where the GrpcSubscriberProperties object is mutated in-place and shared across all GrpcSubscription instances, causing a race condition that redirects subscriptions to an attacker-controlled topic and silently drops fund-transfer confirmation messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b24c82a-e2f6-4fbf-9f41-fd0d9dfb799d?mode=deep",
+    "timestamp": "2026-04-29 00:53:00.979700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: subscribe()] Can an unprivileged external user exploit the Flux.defer(this::createSubscriptions).cache() pattern in subscribe() to cause the cached subscriptions to hold stale or attacker-influenced topicId values after properties mutation, leading the monitor to subscribe to a wrong topic and miss fund-movement alerts, resulting in undetected loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f12c28c-844b-4a18-9830-b19376daf5fd?mode=deep",
+    "timestamp": "2026-04-29 00:53:15.345262",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user who controls a network path to the gRPC endpoint cause clientSubscribe() to trigger Retry.backoff() with Long.MAX_VALUE maxAttempts and minBackoff of 500ms, creating a sustained resource exhaustion that prevents legitimate fund-transfer topic messages from being received and verified, causing undetected financial loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99e40700-299b-4f20-b50b-fab27b65b787?mode=deep",
+    "timestamp": "2026-04-29 00:53:30.684336",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the absence of a circuit breaker in clientSubscribe()'s Retry.backoff() configuration, where all non-INVALID_ARGUMENT errors retry indefinitely, to keep the monitor in a perpetual retry state that prevents it from detecting missing or fraudulent fund transfers on the monitored topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0baa9ca5-c23d-468c-9b4a-ce848d2c08a6?mode=deep",
+    "timestamp": "2026-04-29 00:53:46.534882",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user who can influence the topicId configuration (e.g., via injection into the expression ${topic.X}) cause expressionConverter.convert() to create a new on-chain topic entity for each unique expression key, with each creation costing HBAR from the operator account, leading to direct fund drain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02e8a03d-f5ee-46b1-a609-3244a5e03a3f?mode=deep",
+    "timestamp": "2026-04-29 00:54:03.060381",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user cause the doOnError() handler in clientSubscribe() to silently swallow errors after retries are exhausted, preventing the operator from being alerted to a subscription failure that results in missed fund-transfer messages and undetected financial loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4245f60e-20b3-46be-809d-66810437007d?mode=deep",
+    "timestamp": "2026-04-29 00:54:19.776223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: shouldRetry()] Can an unprivileged external user exploit the fact that shouldRetry() treats all RuntimeExceptions (non-StatusRuntimeException) as retryable by returning UNKNOWN, causing the monitor to retry on application-level errors like NullPointerException or OutOfMemoryError, wasting HBAR on futile reconnection attempts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95ac8e85-83fd-4d96-9ff0-fb126cd57db8?mode=deep",
+    "timestamp": "2026-04-29 00:54:37.644539",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the fact that createSubscriptions() iterates over subscribeProperties.getGrpc().values() and calls properties.setTopicId(topicId) mutating the shared GrpcSubscriberProperties, so that if the Flux cache is invalidated and createSubscriptions() is called again, the expression converter re-runs and creates duplicate on-chain topics, each costing HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_978d04a5-add2-4e3d-bc75-addfb53e070d?mode=deep",
+    "timestamp": "2026-04-29 00:54:56.125420",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user who controls the gRPC mirror node endpoint cause clientSubscribe() to receive a stream of rapid error responses (e.g., DEADLINE_EXCEEDED), triggering the Retry.backoff() loop at maximum frequency and causing the monitor to exhaust its connection pool, preventing legitimate fund-transfer confirmations from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_793332ff-32f9-41ef-8d23-7a304b84b8bd?mode=deep",
+    "timestamp": "2026-04-29 00:55:14.307408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: subscribe()] Can an unprivileged external user exploit the subscriptions.flatMap(this::clientSubscribe) call in subscribe() to cause unbounded concurrency, where all GrpcSubscription instances simultaneously retry on failure, multiplying the HBAR cost of any expression-conversion-triggered on-chain transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cefd1602-57e9-486a-b61c-e192d5a2a141?mode=deep",
+    "timestamp": "2026-04-29 00:55:33.194845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: getStatusCode()] Can an unprivileged external user craft a gRPC response that wraps a StatusRuntimeException inside another exception type (e.g., RuntimeException wrapping StatusRuntimeException), causing getStatusCode() to return UNKNOWN instead of the actual code, bypassing the INVALID_ARGUMENT non-retry guard and triggering infinite retries that drain HBAR?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de23a02a-89a1-48f4-8b05-9a17014b18ec?mode=deep",
+    "timestamp": "2026-04-29 00:55:52.739478",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the lack of synchronization in createSubscriptions() when properties.setTopicId(topicId) is called on a shared GrpcSubscriberProperties object, causing a data race where multiple threads see different topicId values, leading to subscriptions to wrong topics and missed fund-transfer event detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7222a27-10be-49dc-9e18-f0ebcb2f7d22?mode=deep",
+    "timestamp": "2026-04-29 00:56:13.329439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the doBeforeRetry() log.warn() call in clientSubscribe() by injecting newline characters into gRPC error messages, causing log injection that obscures retry activity and hides evidence of ongoing fund-drain attacks from the operator?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ea27984-7a85-4c11-980c-5840567110ba?mode=deep",
+    "timestamp": "2026-04-29 00:56:34.912544",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user cause StringUtils.substringBefore(r.failure().getMessage(), \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21b68cdb-15d9-4e0f-8e99-2e76b6180341?mode=deep",
+    "timestamp": "2026-04-29 00:56:56.928413",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user who can influence the topicId expression value cause expressionConverter.convert() to be called with a crafted expression like ${topic.X} that triggers ExpressionConverterImpl.doConvert() to publish a CONSENSUS_CREATE_TOPIC transaction, spending HBAR from the operator account without the operator's awareness?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a93511e-6a11-428b-b1b3-435b385d50c1?mode=deep",
+    "timestamp": "2026-04-29 00:57:19.863645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: subscribe()] Can an unprivileged external user exploit the Flux.defer().cache() pattern to cause the subscriptions Flux to cache a failed or partial state, preventing the monitor from ever successfully subscribing to the fund-transfer topic and leaving financial transactions unmonitored indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_debff352-34c3-4e3e-ac27-7bf3b59c5e87?mode=deep",
+    "timestamp": "2026-04-29 00:57:43.458456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user exploit the fact that retry.getMaxAttempts() is Long.MAX_VALUE (set in GrpcSubscriberProperties constructor) and the retry filter only excludes INVALID_ARGUMENT, to cause the monitor to retry a subscription to an attacker-controlled topic indefinitely, consuming HBAR on each reconnection-triggered expression conversion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31baff82-281d-485a-b221-d0baf726c37d?mode=deep",
+    "timestamp": "2026-04-29 00:58:06.770422",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the fact that properties.setTopicId(topicId) permanently mutates the GrpcSubscriberProperties object in createSubscriptions(), so that if the expression converter returns an attacker-influenced topic ID (e.g., via a compromised mirror node receipt), all subsequent subscriptions monitor the wrong topic and miss legitimate fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a0dc656-7031-4179-bb9d-4eec7994b2f8?mode=deep",
+    "timestamp": "2026-04-29 00:58:31.322418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: clientSubscribe()] Can an unprivileged external user cause the Retry.backoff() in clientSubscribe() to consume all available threads in the reactive scheduler by triggering rapid successive failures, starving legitimate subscription processing and causing fund-transfer messages to be dropped or delayed beyond their validity window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39b4f7e8-823c-45da-90ce-ac1cba9a5b40?mode=deep",
+    "timestamp": "2026-04-29 00:58:56.205315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: getSubscriptions()] Can an unprivileged external user exploit getSubscriptions() returning the cached subscriptions Flux to observe the topicId values being monitored, enabling them to target those specific topics with fraudulent transactions knowing the monitor is subscribed and may be manipulated into misreporting sequence numbers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e771ffd-95bb-4408-9045-62ed8b792598?mode=deep",
+    "timestamp": "2026-04-29 00:59:22.633535",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: monitor/src/main/java/org/hiero/mirror/monitor/subscribe/grpc/GrpcSubscriber.java -> Scope: Critical: Direct loss of funds'] [Function: createSubscriptions()] Can an unprivileged external user exploit the loop `for (int i = 1; i <= properties.getSubscribers(); ++i)` in createSubscriptions() where a large subscribers count causes the monitor to open many concurrent gRPC connections, each triggering expression conversion and potentially creating multiple on-chain topics, multiplying HBAR costs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2d2da38-dcca-4534-b1cc-42befcb22eff?mode=deep",
+    "timestamp": "2026-04-29 00:59:48.401903",
+    "report_generated": false
+  }
+]
