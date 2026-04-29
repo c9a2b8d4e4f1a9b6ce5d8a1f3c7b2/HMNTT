@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user repeatedly submit requests with a zero receiver address (triggering `isContractCreate = true`) and arbitrarily large `callData` via `params.getCallData()` to force the node into expensive `buildContractCreateTransactionBody()` execution paths, causing CPU/memory resource exhaustion that degrades service availability for all other users without any economic cost to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d1bc099-08c1-42ca-83d5-6f47fa762a0d?mode=deep",
+    "timestamp": "2026-04-29 00:34:15.490073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildEthereumTransactionBody()] Can an unprivileged external user submit a `ContractDebugParameters` request with `ethereumData` set to a maximally-sized byte array, causing `Bytes.wrap(params.getEthereumData())` to allocate a large buffer and `maxGasAllowance(Long.MAX_VALUE)` to be set, resulting in disproportionate resource consumption in the executor and griefing other concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7167d996-a53c-4fa1-b9a3-2059ebdd51ae?mode=deep",
+    "timestamp": "2026-04-29 00:34:27.674906",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: patchSenderNonce()] Can an unprivileged external user craft a `ContractDebugParameters` with a valid sender address and an `ethereumData` payload whose decoded nonce (via `populateEthTxData(params.getEthereumData()).nonce()`) differs from the stored `account.ethereumNonce()`, causing `writableCache.put()` to silently overwrite the in-memory nonce state for that account and disrupting subsequent transaction replay for other users sharing the same context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7de2d76-d71d-4feb-a234-4251e11a057b?mode=deep",
+    "timestamp": "2026-04-29 00:34:40.113709",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSenderAccountID()] Can an unprivileged external user submit a request with a sender address that resolves to a hollow account (one where `!account.hasKey() || account.key().equals(IMMUTABILITY_SENTINEL_KEY)`), causing `getSenderAccountID()` to unconditionally write `DEFAULT_KEY` into the `writableAccountCache` via `ContractCallContext.get().getWriteCacheState(AccountReadableKVState.STATE_ID)`, potentially polluting the write cache and causing unexpected behavior for other operations in the same context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f29ea9ba-4544-40d2-a0c1-2ced63862485?mode=deep",
+    "timestamp": "2026-04-29 00:34:53.147872",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildSuccessResult()] Can an unprivileged external user trigger a contract call that produces a large number of failed child transactions, causing `populateChildTransactionErrors()` to collect many error strings and `buildSuccessResult()` to emit a `log.warn()` with a large `childTransactionErrors` collection, resulting in excessive log spam that degrades observability and fills log storage for operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f3ee388-6753-4d66-87b3-036578864061?mode=deep",
+    "timestamp": "2026-04-29 00:35:06.755013",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: handleFailedResult()] Can an unprivileged external user exploit the opcode context branch in `handleFailedResult()` — where `ContractCallContext.get().getOpcodeContext() != null` causes a failed result to be returned instead of throwing `MirrorEvmTransactionException` — to suppress error propagation and cause callers to silently receive a failed `EvmTransactionResult` without any exception, leading to incorrect downstream behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa7276ff-9a5e-4e72-b8a5-978c62005370?mode=deep",
+    "timestamp": "2026-04-29 00:35:20.809265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user send a request where `params instanceof ContractDebugParameters` is true and `debugParams.getEthereumData()` is a non-empty byte array that is malformed (not valid RLP), causing `populateEthTxData()` inside `patchSenderNonce()` to throw an unchecked exception that propagates up through `execute()` and results in an unhandled 500 error, disrupting service for the requesting user?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_721ed94b-2286-4ce2-9cd6-acf63d30e57c?mode=deep",
+    "timestamp": "2026-04-29 00:35:35.527067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: defaultTransactionBodyBuilder()] Can an unprivileged external user exploit the fact that `transactionValidStart` is set to `Instant.now().getEpochSecond()` with nanoseconds hardcoded to 0, combined with the fixed `TRANSACTION_DURATION = new Duration(15)`, to craft timing-based requests that consistently land at the boundary of the 15-second validity window and cause the executor to reject transactions as expired, griefing the service's reliability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_716f1c5c-dc53-4d87-92da-275a31dd0e2b?mode=deep",
+    "timestamp": "2026-04-29 00:35:51.858786",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSenderAccountIDAsNum()] Can an unprivileged external user submit a request with a non-long-zero sender address that does not exist in `aliasesReadableKVState`, causing `aliasesReadableKVState.get(convertAddressToProtoBytes(senderAddress))` to return null and `throwPayerAccountNotFoundException()` to be called, generating a `MirrorEvmTransactionException(PAYER_ACCOUNT_NOT_FOUND, ...)` that is surfaced to the caller — and by doing this at high frequency, can the attacker flood the error-handling pipeline and degrade response quality for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_805db6ff-2509-4b15-9a60-87cb4c1c9731?mode=deep",
+    "timestamp": "2026-04-29 00:36:08.293272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildContractCallTransactionBody()] Can an unprivileged external user supply a `params.getCallData()` byte array of maximum allowed size to `Bytes.wrap(params.getCallData())` inside `buildContractCallTransactionBody()`, causing the `functionParameters` field of the `ContractCallTransactionBody` to be set to a very large value and forcing the executor to process an oversized transaction body, consuming disproportionate CPU and memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bac8af86-9f53-4050-a416-abc610a2e54a?mode=deep",
+    "timestamp": "2026-04-29 00:36:25.667551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: populateChildTransactionErrors()] Can an unprivileged external user trigger a transaction that produces an unbounded number of child transaction records, causing `populateChildTransactionErrors()` to iterate all of them via `singleTransactionRecords.listIterator(1)` and accumulate an arbitrarily large `LinkedHashSet<String>`, leading to excessive heap allocation and potential out-of-memory conditions that affect all users of the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efe1c672-ca64-4984-9b1f-ab030fe43533?mode=deep",
+    "timestamp": "2026-04-29 00:36:43.470843",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user send a request where `params.getReceiver().isZero()` is true (triggering contract create path) but `params.getCallData()` is empty or null, causing `buildContractCreateTransactionBody()` to wrap an empty/null byte array via `Bytes.wrap(params.getCallData())` and submit a malformed `initcode` to the executor, resulting in a confusing error response that misleads the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62576903-38b5-4f10-99f5-83cd6b992636?mode=deep",
+    "timestamp": "2026-04-29 00:37:02.736586",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getOperationTracers()] Can an unprivileged external user manipulate the `ContractCallContext` opcode context (by triggering the opcode trace path) to cause `getOperationTracers()` to return `opcodeActionTracer` instead of `mirrorOperationActionTracer`, thereby changing the tracing behavior for their request and potentially causing the `opcodeActionTracer` to record unexpected state that interferes with other concurrent opcode trace requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_622d2532-1941-4be0-9131-947cc2cf721c?mode=deep",
+    "timestamp": "2026-04-29 00:37:21.763175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: patchSenderNonce()] Can an unprivileged external user craft a `ContractDebugParameters` where `params.getSender().isZero()` is false and `params.getValue() == 0L` is false, but `ContractCallContext.isInitialized()` returns false, causing `patchSenderNonce()` to return early without patching — and by doing so, can the attacker force nonce mismatch failures in the executor that cause the transaction replay to fail, griefing the debug trace functionality?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6bfc546-791e-4cd0-bce6-ba687f5be690?mode=deep",
+    "timestamp": "2026-04-29 00:37:41.260937",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildEthereumTransactionBody()] Can an unprivileged external user submit a `ContractDebugParameters` with `ethereumData` containing a crafted RLP-encoded Ethereum transaction where the embedded nonce is set to `Long.MAX_VALUE`, causing `patchSenderNonce()` to write `account.copyBuilder().ethereumNonce(Long.MAX_VALUE).build()` into the writable cache and permanently corrupting the in-memory nonce for that account within the current context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f28a27c8-c95a-4bdc-9580-de2bcd6f232c?mode=deep",
+    "timestamp": "2026-04-29 00:38:02.010521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSenderAccountID()] Can an unprivileged external user send a request with a sender address that resolves to a `smartContract()` account, causing `getSenderAccountID()` to silently substitute the treasury account (`EntityIdUtils.toAccountId(systemEntity.treasuryAccount())`) as the payer, and by doing so, cause the transaction to be attributed to the treasury account in the transaction body, potentially causing misleading audit trails or unexpected executor behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7078428e-88e0-4c0e-bc3d-43084df31014?mode=deep",
+    "timestamp": "2026-04-29 00:38:23.466781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user repeatedly call `execute()` with parameters that cause `transactionExecutorFactory.get()` to be invoked on every request, and if the factory has any shared mutable state or limited pool, can the attacker exhaust the executor pool and cause subsequent legitimate requests to block or fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aac59d5b-f229-4b5c-bfef-070ab8ec65e6?mode=deep",
+    "timestamp": "2026-04-29 00:38:46.478952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: handleFailedResult()] Can an unprivileged external user craft a request that causes `parentTransactionRecord.contractCallResult()` (or `contractCreateResult()`) to return null, triggering the `if (result == null)` branch in `handleFailedResult()` which throws `new MirrorEvmTransactionException(status, StringUtils.EMPTY, StringUtils.EMPTY)` with empty detail and data, causing the caller to receive an uninformative error response that makes debugging impossible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8aa7992-bae9-4650-b4ba-67403249d1f6?mode=deep",
+    "timestamp": "2026-04-29 00:39:09.713604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildContractCreateTransactionBody()] Can an unprivileged external user exploit the hardcoded `CONTRACT_CREATE_TX_FEES = 1_000_000_000L` in `buildContractCreateTransactionBody()` by submitting many contract create requests, causing the executor to process transactions with a fixed fee that may not reflect actual resource usage, potentially allowing the attacker to trigger expensive EVM operations at a predictable and exploitable cost model?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a9fc823-ad1e-45b2-a22c-1ccfa0c2c216?mode=deep",
+    "timestamp": "2026-04-29 00:39:33.063703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user send a `ContractDebugParameters` with `ethereumData` of length exactly 1 (non-empty but too short to be valid RLP), bypassing the `debugParams.getEthereumData().length > 0` check in `execute()` and causing `buildEthereumTransactionBody()` to wrap a 1-byte array into `Bytes.wrap()`, which then causes `populateEthTxData()` in `patchSenderNonce()` to throw a parsing exception?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8f19e4d-6353-456f-bc84-1075197453f0?mode=deep",
+    "timestamp": "2026-04-29 00:39:57.441145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: getSenderAccountIDAsNum()] Can an unprivileged external user submit a long-zero address (where `ConversionUtils.isLongZero(senderAddress)` is true) that encodes an account number that does not exist in the state, causing `accountReadableKVState.get(accountIDNum)` to return null in `getSenderAccountID()` and triggering `throwPayerAccountNotFoundException()`, and by doing this repeatedly with different non-existent account numbers, can the attacker cause excessive database lookups that degrade performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_479156fc-9da4-493d-8129-753fe5e68f58?mode=deep",
+    "timestamp": "2026-04-29 00:40:21.722427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: buildSuccessResult()] Can an unprivileged external user trigger a successful parent transaction that has many child transactions with non-SUCCESS/non-REVERTED_SUCCESS statuses, causing `buildSuccessResult()` to call `log.warn()` with a `childTransactionErrors` collection containing many entries, and by doing this repeatedly, can the attacker flood the warning log with noise that obscures legitimate operational alerts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_336dcd73-2393-48e8-b060-05e79b23cbe8?mode=deep",
+    "timestamp": "2026-04-29 00:40:47.491454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: patchSenderNonce()] Can an unprivileged external user craft a `ContractDebugParameters` where the sender is a valid non-zero address with value > 0, and the `ethereumData` encodes a nonce of 0 while the stored `account.ethereumNonce()` is also 0, causing `patchSenderNonce()` to skip the cache write (since `account.ethereumNonce() != nonce` is false), but then the executor still fails due to other nonce-related checks, resulting in a confusing error that misleads the user about the actual failure cause?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f081eb5-8188-4eea-ae08-1e44dbb1c6f5?mode=deep",
+    "timestamp": "2026-04-29 00:41:14.524071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: execute()] Can an unprivileged external user send a request where `params.getReceiver()` returns an address that is not zero but `params.getCallData()` is a maximally large byte array, causing `buildContractCallTransactionBody()` to set `functionParameters` to a huge `Bytes` object and the executor to spend excessive time processing the oversized call, effectively performing a denial-of-service on the EVM execution thread?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_347aa29f-e966-4f3f-b13a-b030f899948c?mode=deep",
+    "timestamp": "2026-04-29 00:41:42.413819",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/TransactionExecutionService.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: handleFailedResult()] Can an unprivileged external user exploit the fact that `maybeDecodeSolidityErrorStringToReadableMessage(errorMessageHex)` is called on attacker-controlled `errorMessageHex` data (derived from `processingResult.getErrorMessage()`) to inject a crafted hex string that causes the decoder to perform expensive computation or produce a misleading human-readable error message that confuses operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04364483-0301-4456-9411-e9504bb9856f?mode=deep",
+    "timestamp": "2026-04-29 00:42:10.135365",
+    "report_generated": false
+  }
+]
