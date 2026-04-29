@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_359d88f3-c7e6-4615-8c6b-5f684b854a31?mode=deep",
     "timestamp": "2026-04-28 13:49:06.551351",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user supply a crafted start/end timestamp range that causes the batchSize=2000 pagination cursor (start = transactionsBatch[len(transactionsBatch)-1].ConsensusTimestamp + 1) to skip transactions at exact batch boundaries, causing the Rosetta API to silently omit legitimate Hashgraph transactions from block history and present an incomplete ledger to downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1969999b-19e7-444d-9c67-9047b0a0cd9c?mode=deep",
+    "timestamp": "2026-04-29 03:32:00.498016",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user trigger an infinite loop in FindBetween() by causing the database to return exactly batchSize=2000 rows repeatedly with the same maximum ConsensusTimestamp, so that start never advances past end, exhausting server resources and making Hashgraph history permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb217d82-cd6f-47e8-8955-bf8e065174cb?mode=deep",
+    "timestamp": "2026-04-29 03:32:12.809378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindByHashInBlock()] Can an unprivileged external user submit a transaction hash string with a crafted hex prefix (e.g., '0x' vs no prefix) that, after tools.SafeRemoveHexPrefix() and hex.DecodeString(), resolves to a different byte sequence than the canonical hash stored in the DB, causing FindByHashInBlock() to return ErrTransactionNotFound for a valid transaction and effectively erasing it from the visible Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_981bf3a6-bf27-4615-a045-bff75c4956b3?mode=deep",
+    "timestamp": "2026-04-29 03:32:25.447010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause constructTransaction() to misclassify a failed transaction as successful by exploiting the allFailed flag logic, where a single row with result=22 (transactionResultSuccess) among multiple sameHashTransactions rows forces result.EntityId to be set, making a partially-failed multi-part transaction appear fully successful in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc81a842-d566-4232-9017-3f21f846ae2c?mode=deep",
+    "timestamp": "2026-04-29 03:32:39.313720",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: IsTransactionResultSuccessful()] Can an unprivileged external user exploit the fact that IsTransactionResultSuccessful() accepts result code 220 (transactionResultSuccessButMissingExpectedOperation) as successful, causing constructTransaction() to set result.EntityId and suppress the zero-amount failure indicator operation, thereby hiding from Hashgraph history that an expected operation was missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30f39464-48bb-4243-9f4d-528def5a5bbd?mode=deep",
+    "timestamp": "2026-04-29 03:32:52.986473",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: IsTransactionResultSuccessful()] Can an unprivileged external user exploit the fact that IsTransactionResultSuccessful() accepts result code 104 (transactionResultFeeScheduleFilePartUploaded) as a success condition, causing constructTransaction() to treat a fee-schedule file upload as a fully successful transaction and suppress the allFailed zero-amount operation, misrepresenting Hashgraph history to Rosetta clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d3dfbf75-b11a-4f3b-a344-ab0e4effbac3?mode=deep",
+    "timestamp": "2026-04-29 03:33:07.731501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause categorizeHbarTransfers() to include an itemized transfer for the staking reward account (stackingRewardEntityId) even when that account is not present in the crypto_transfer list, by ensuring stakingRewardPayouts is non-empty, thereby injecting a phantom debit/credit operation into Hashgraph history that never occurred on-ledger?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b690e8e-075a-46b4-a40b-561f741f7667?mode=deep",
+    "timestamp": "2026-04-29 03:33:22.877668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: aggregateHbarTransfers()] Can an unprivileged external user trigger int64 overflow in aggregateHbarTransfers() by causing the DB to return itemized transfers and staking reward transfers for the same entity whose amounts sum beyond math.MaxInt64, producing a negative or wrapped aggregated amount that corrupts the fee calculation in getFeeHbarTransfers() and misrepresents transfer amounts in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_282b3b59-c76f-40d1-b890-313d51259ad1?mode=deep",
+    "timestamp": "2026-04-29 03:33:39.457038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFeeHbarTransfers()] Can an unprivileged external user cause getFeeHbarTransfers() to produce a negative fee transfer amount by supplying itemizedTransferMap values larger than the corresponding cryptoTransfer amounts (amount = aggregated.Amount - itemizedTransferMap[accountId]), making the Rosetta API report that a fee payer received funds rather than paid fees, corrupting the financial history of Hashgraph transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ffa41cc-2671-44e7-88c5-0251823cae37?mode=deep",
+    "timestamp": "2026-04-29 03:33:57.477210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause rewardPayoutTotal int64 overflow in categorizeHbarTransfers() by triggering a transaction with an extremely large number of staking reward payouts whose amounts sum beyond math.MinInt64 (since rewardPayoutTotal -= stakingRewardPayout.Amount), producing a wrapped positive debit from account 0.0.800 that falsifies staking reward history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_528454fd-79f2-4bec-b15b-05a1ea612d00?mode=deep",
+    "timestamp": "2026-04-29 03:34:16.522048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user cause FindBetween() to group transactions from different Hashgraph transactions under the same hash key in sameHashMap by exploiting hash collisions or the hex normalization in getHashString() (tools.SafeAddHexPrefix + hex.EncodeToString), causing constructTransaction() to merge unrelated transactions into a single Rosetta transaction and falsify Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08e5d613-6302-4657-aed2-ae86a626158b?mode=deep",
+    "timestamp": "2026-04-29 03:34:35.227026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause constructTransaction() to use the wrong transaction type for all operations by exploiting the fact that transactionType is derived only from firstTransaction.Type (sameHashTransactions[0]), so if the first DB row has a different type than subsequent rows for the same hash, all operations are labeled with the wrong type, misrepresenting Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d73bd70-7afc-41a2-b8c7-a8615d42421f?mode=deep",
+    "timestamp": "2026-04-29 03:34:55.138149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause constructTransaction() to use the wrong Memo by exploiting the fact that result.Memo is set only from firstTransaction.Memo (sameHashTransactions[0]), so if the DB returns rows in a different order than expected, the wrong memo is attached to the Rosetta transaction, corrupting the metadata of Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6a302e2-cb73-4b7b-a6b4-87640e1c3e17?mode=deep",
+    "timestamp": "2026-04-29 03:35:15.409062",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user cause FindBetween() to return transactions in a non-deterministic order by exploiting the fact that selectTransactionsInTimestampRangeOrdered only orders by consensus_timestamp but not by a secondary key, so transactions with the same timestamp are returned in arbitrary DB order, causing sameHashMap grouping to assign the wrong firstTransaction and corrupt Hashgraph history representation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4128458d-54c9-4f8d-8d7b-28116be5454a?mode=deep",
+    "timestamp": "2026-04-29 03:35:35.099700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: categorizeHbarTransfers()] Can an unprivileged external user cause categorizeHbarTransfers() to silently drop itemized transfers whose EntityId.EncodedId is not present in the crypto_transfer list (entityIds map), even when those transfers represent legitimate on-ledger movements, causing the Rosetta API to underreport transfer operations and present an incomplete Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88bb9c84-0609-49eb-9b2b-9a43f62d78b3?mode=deep",
+    "timestamp": "2026-04-29 03:35:56.028345",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause the allFailed zero-amount indicator operation to be suppressed by ensuring at least one row in sameHashTransactions has result=22, even if that row represents a scheduled child transaction rather than the parent, making a failed parent transaction appear successful in Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a353070-61d5-4cdd-8827-1870f4d89d07?mode=deep",
+    "timestamp": "2026-04-29 03:36:18.050551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: appendTransferOperations()] Can an unprivileged external user cause appendTransferOperations() to assign incorrect sequential Index values (int64(len(operations))) to operations by triggering a large number of transfers that cause the operations slice to grow beyond expected bounds, producing operation indices that conflict with Rosetta's reconciliation logic and misrepresent the order of Hashgraph history operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_386403ff-4073-449e-b861-d50346914147?mode=deep",
+    "timestamp": "2026-04-29 03:36:41.818090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindByHashInBlock()] Can an unprivileged external user supply a transaction hash that decodes to an empty byte slice (e.g., empty hex string after prefix removal), causing the SQL query selectTransactionsByHashInTimestampRange to match against a zero-length hash and return unintended transactions, allowing the attacker to retrieve and potentially expose transaction data outside the intended block range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09b5d91a-e234-4d13-8cb4-46171ed3ffea?mode=deep",
+    "timestamp": "2026-04-29 03:37:05.487076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause json.Unmarshal of transaction.CryptoTransfers to silently accept a JSON payload with extra fields or type coercions (e.g., amount as string instead of int64), causing hbarTransfer.Amount to be zero-initialized and producing phantom zero-amount operations that pollute Hashgraph history without error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84f1d37c-9bae-4b68-bf4b-96b4d3b7609a?mode=deep",
+    "timestamp": "2026-04-29 03:37:28.134048",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause json.Unmarshal of transaction.StakingRewardPayouts to silently accept a malformed JSON array where individual entries have negative amounts, causing rewardPayoutTotal in categorizeHbarTransfers() to wrap or produce an incorrect debit from the staking reward account (0.0.800), falsifying staking reward history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e936bb3b-e016-46a7-81bf-347efc7248b2?mode=deep",
+    "timestamp": "2026-04-29 03:37:53.973116",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: categorizeHbarTransfers()] Can an unprivileged external user exploit the errata filter (errata <> 'DELETE') in the selectTransactionsInTimestampRange SQL query being applied only to crypto_transfer but NOT to staking_reward_transfer, causing deleted staking reward transfers to still appear in Hashgraph history via the StakingRewardPayouts JSON aggregation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f4f72eb-afbf-4679-9282-1c6e0a9c630c?mode=deep",
+    "timestamp": "2026-04-29 03:38:19.388630",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user cause FindBetween() to silently truncate Hashgraph history by supplying a timestamp range where the last batch returns exactly batchSize=2000 rows but there are no more rows beyond that, causing the loop to break correctly, but if the DB has exactly a multiple of 2000 transactions the final break condition (len(transactionsBatch) < batchSize) never triggers and the loop exits only after an empty batch, potentially missing the last page?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_595aa9f0-656e-4ea2-84b2-455b2414c74d?mode=deep",
+    "timestamp": "2026-04-29 03:38:45.690966",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getFeeHbarTransfers()] Can an unprivileged external user cause getFeeHbarTransfers() to produce duplicate fee transfer entries for the same account by exploiting the fact that cryptoTransferMap accumulates amounts but accountIds slice is only appended when the account is first seen, while a DB returning the same account multiple times in cryptoTransfers would aggregate correctly — but if the itemizedTransferMap has a zero entry for that account, a non-zero fee appears that misrepresents Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc108e01-546b-467c-a0f7-6a81f9b0b388?mode=deep",
+    "timestamp": "2026-04-29 03:39:12.133351",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: constructTransaction()] Can an unprivileged external user cause constructTransaction() to produce operations with Status set to an unrecognized transaction result string by supplying a result code not covered by types.GetTransactionResult(), causing Rosetta clients to misinterpret the success/failure state of Hashgraph transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_726cb0f4-d6d8-4905-9ce4-b90b7a960fcf?mode=deep",
+    "timestamp": "2026-04-29 03:39:40.368894",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/transaction.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: FindBetween()] Can an unprivileged external user cause a denial-of-service by requesting FindBetween() with a timestamp range spanning billions of nanoseconds, forcing the server to execute thousands of batchSize=2000 DB queries in a tight loop, exhausting DB connection pool resources and making Hashgraph history unavailable to all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0852cb87-7044-4331-9fc9-147c105ae89d?mode=deep",
+    "timestamp": "2026-04-29 03:40:07.002099",
+    "report_generated": false
   }
 ]
