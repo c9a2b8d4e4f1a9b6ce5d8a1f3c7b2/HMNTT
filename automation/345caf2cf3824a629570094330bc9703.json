@@ -22,5 +22,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f53d21f-007b-4cb9-aa29-1e97491d931e?mode=deep",
     "timestamp": "2026-04-28 23:51:41.401380",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessageTimestampRange()] Can an unprivileged external user supply a sequenceNumber that exists in `topic_message` but not in `topic_message_lookup` (when `config.query.topicMessageLookup` is enabled), causing `getTopicMessageTimestampRange` to throw NotFoundError even though the submitted transaction message exists, effectively hiding valid submitted data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb99aaff-763d-48f9-9673-32243172e2c9?mode=deep",
+    "timestamp": "2026-04-29 03:22:11.941447",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessage()] Can an unprivileged external user craft a request where the query returns more than one row (rows.length !== 1) due to a data integrity issue in the `topic_message` table, causing `getMessage` to throw NotFoundError instead of returning the submitted transaction message, and by doing so confirm to the attacker that duplicate submitted transactions exist in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2af10e24-68cd-4003-b1fa-f82a3ac73340?mode=deep",
+    "timestamp": "2026-04-29 03:22:23.915774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessages()] Can an unprivileged external user supply a `limit` value of 1 to suppress the `zeroRandomPageCostQueryHint` (since `limit !== 1` is false), causing PostgreSQL to use the primary key index instead of the `(topic_id, consensus_timestamp)` index, and by doing so cause the query to return submitted messages in a different order than expected, leading to incorrect pagination of transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d12b909-379d-45a1-9fd3-e0ac808f688d?mode=deep",
+    "timestamp": "2026-04-29 03:22:36.268206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user supply a `limit` parameter at the maximum allowed value to cause `getMessages` to return the maximum number of submitted transaction messages, and by combining with `order=desc` and a `timestamp` filter, reconstruct the full submission history of a topic without pagination tokens, bypassing any intended rate limiting on data access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bab3ae01-f4aa-4ffe-af48-bf13dd819144?mode=deep",
+    "timestamp": "2026-04-29 03:22:49.278966",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user exploit the `getPaginationLink` function receiving `lastTimeStamp` derived from the last message's `TopicMessage.CONSENSUS_TIMESTAMP` field to craft a next-page link that skips submitted transaction messages at the boundary, causing pagination to silently omit messages at timestamp boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb294643-110e-4aad-9d60-32a701e945ca?mode=deep",
+    "timestamp": "2026-04-29 03:23:02.526401",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply duplicate filter keys (e.g., `timestamp=gt:100&timestamp=gt:200`) that are both added to `timestampFilters` and both pushed as conditions via `conditions.push`, causing the SQL WHERE clause to have redundant conditions that interact with the `topicMessageLookup` range computation in an unexpected way, returning submitted transactions outside the intended range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ceac1956-7a60-4a48-8bd1-41b3f5a19de5?mode=deep",
+    "timestamp": "2026-04-29 03:23:17.045484",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply a `sequencenumber=eq:X` filter where X is a valid sequence number, causing `getRangeFromFilters` to set both lower and upper to X, and when `sequenceNumberRange.upper - sequenceNumberRange.lower + 1n = 1 <= limit`, use the simple lookup path that returns a single timestamp range, but if the lookup table is stale, return the wrong submitted transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bcb0a41-8677-4c73-a143-b3bd7f5341ae?mode=deep",
+    "timestamp": "2026-04-29 03:23:31.682893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user supply an `encoding` value not in `constants.characterEncoding` (e.g., 'hex', 'ascii') that is passed directly to `TopicMessageViewModel`, causing the message content of submitted transactions to be decoded/encoded incorrectly and presenting tampered-looking data to API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ed4f543-0bce-41e3-a233-a38603a93bba?mode=deep",
+    "timestamp": "2026-04-29 03:23:47.289957",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user supply a consensusTimestamp that matches a transaction with `result = 22` and `type = 27` but where the corresponding `topic_message` row has been deleted, causing the first query to succeed but the second query to return 0 rows, throwing NotFoundError and allowing the attacker to confirm that a submitted transaction's message data has been removed from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_365c068b-ad1a-4ded-878c-d40dfe94fa05?mode=deep",
+    "timestamp": "2026-04-29 03:24:04.241712",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user exploit the fact that `rows[0].entity_id` from the transaction table is used directly as `topic_id` in the second query without re-validation, and if the transaction table's entity_id has been tampered with to point to a different topic, cause the endpoint to return a message from the wrong topic as if it were the submitted transaction's message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a3ff424-7ea5-40a7-b461-7619b0b04adb?mode=deep",
+    "timestamp": "2026-04-29 03:24:21.042571",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user supply a consensusTimestamp in the format 'seconds' (without nanoseconds) that passes `validateConsensusTimestampParam` but after `parseTimestampParam` resolves to a nanosecond value that matches multiple transactions, causing the first query to return more than one row and throwing NotFoundError, hiding valid submitted transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9809f13-b27c-4ab8-bdd3-9eb8d6ed19b1?mode=deep",
+    "timestamp": "2026-04-29 03:24:38.502096",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: validateGetSequenceMessageParams()] Can an unprivileged external user supply a sequenceNumber of '0' that fails `utils.isPositiveLong` (since allowZero defaults to false), receiving an InvalidArgumentError, but by doing so confirm that sequence numbers start at 1, aiding in enumerating all submitted transactions for a topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4c1b7e2-e305-4db6-b5cf-b4f9c6d5a09a?mode=deep",
+    "timestamp": "2026-04-29 03:24:56.967549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: validateGetTopicMessagesParams()] Can an unprivileged external user supply a topicId as an EVM address (40 hex chars) that passes `EntityId.isValidEntityId(topicId, false)` — wait, `allowEvmAddress=false` is passed, so EVM addresses are rejected — but supply a realm.num format that resolves to a system entity topic, causing the query to return submitted messages from a privileged system topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f829189-d25a-423a-b8d2-6124e984748c?mode=deep",
+    "timestamp": "2026-04-29 03:25:16.022021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user supply a topicId in `realm.num` shorthand format (e.g., '0.1234') that resolves to a different encoded ID than `shard.realm.num` format (e.g., '0.0.1234') due to the system shard/realm defaults in `EntityId.parseString`, causing the query to target a different topic's submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fffb2daa-55b6-44ed-88a6-8ff79f76d415?mode=deep",
+    "timestamp": "2026-04-29 03:25:35.847016",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply a `timestamp` filter with a value of '0' that passes filter validation but causes `getRangeFromFilters` to set `range.lower = 0n` (defaultLower=0n for timestamps), causing the query to include all submitted transactions from the beginning of time for a topic, bypassing any intended time-based access restriction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf834d1f-37a3-4cb4-88ee-c62d3e28c05d?mode=deep",
+    "timestamp": "2026-04-29 03:25:55.749076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a `limit` of 1 combined with `order=asc` and a wide sequence number range to trigger the CTE path where `rangeExpression` expands the upper bound by `least($4, 9223372036854775807::bigint - upper(range))`, and by crafting the sequence number range to span a lookup boundary, cause the expanded range to include submitted transactions from the next lookup partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e4cd1aa-237a-4b6d-b6f8-2fac71f0dd97?mode=deep",
+    "timestamp": "2026-04-29 03:26:17.069902",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a `sequencenumber=gte:1` filter that sets `range.lower = 1n` (same as default), combined with a very large `limit`, to cause the CTE query to expand the sequence number range by `limit-1` in DESC order, potentially covering the entire `topic_message_lookup` table and returning timestamp ranges for all submitted transactions ever made to a topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7df831f5-6c1b-41d4-a2d0-7685e3a2eef6?mode=deep",
+    "timestamp": "2026-04-29 03:26:37.504763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessages()] Can an unprivileged external user exploit the `preQueryHint` parameter ('set local random_page_cost = 0') being injected as a raw SQL string before the main query to cause a session-level configuration change that persists beyond the current query if connection pooling reuses the database connection, affecting subsequent queries for other users' submitted transaction lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f553cc74-83fa-4c9c-b313-4bf8227e5d01?mode=deep",
+    "timestamp": "2026-04-29 03:26:59.629881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user supply both `sequencenumber` and `timestamp` filters to `getTopicMessages`, causing both to be added to `conditions` array AND to `filtersMap` when `topicMessageLookup` is enabled, resulting in double-filtering where the SQL WHERE clause has both direct column conditions and timestamp range conditions that may be inconsistent, returning submitted transactions that satisfy one condition but not the other?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d51ca67e-5946-44b0-86ba-9b3a5a4fe105?mode=deep",
+    "timestamp": "2026-04-29 03:27:21.202087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply a filter key not in `columnMap` (e.g., an unknown parameter) that falls through to the `default` case with `break`, causing it to be silently ignored rather than rejected, and by doing so bypass intended filter restrictions to retrieve submitted transactions without proper constraints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4580dad1-70ac-4eeb-a29f-2bc96f64b79b?mode=deep",
+    "timestamp": "2026-04-29 03:27:44.476155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user supply `limit=0` (if allowed by `buildAndValidateFilters`) to cause `getTopicMessages` to return an empty messages array with a `next` pagination link pointing to `timestamp=null`, causing downstream consumers to believe no submitted transactions exist for the topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f4c3d28-0e31-429a-afd0-fad7e94dffa5?mode=deep",
+    "timestamp": "2026-04-29 03:28:06.955754",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessages()] Can an unprivileged external user exploit the `topicMessagesResponse.links.next` being set to null when `topicMessagesResponse.messages.length !== limit` is false (i.e., exactly `limit` messages returned), causing pagination to stop prematurely and hide additional submitted transactions that exist beyond the current page?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bec0213-de22-4faa-9cb2-72abbfbb440f?mode=deep",
+    "timestamp": "2026-04-29 03:28:30.521724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getMessageByTopicAndSequenceRequest()] Can an unprivileged external user supply a topicId as a negative encoded integer (e.g., '-1') that passes `EntityId.isValidEntityId` via `encodedEntityIdRegex` and is then used in the `topic_message` query, causing the query to target a topic with a negative encoded ID that may correspond to a system or privileged topic's submitted messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32bb60bf-c354-4813-972d-11b337b2b469?mode=deep",
+    "timestamp": "2026-04-29 03:28:54.898853",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a `timestamp=lte:X` filter where X equals `constants.MAX_LONG - 1n`, causing `getRangeFromFilters` to set `range.upper = MAX_LONG - 1n` (same as default), effectively making the timestamp filter a no-op and returning all submitted transactions regardless of timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e689232-68b7-4877-9b38-a6cdac3c5ef1?mode=deep",
+    "timestamp": "2026-04-29 03:29:21.001035",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getRangeFromFilters()] Can an unprivileged external user supply a `sequencenumber=lte:9223372036854775806` filter (MAX_LONG - 1) that sets `range.upper = MAX_LONG - 1n` (same as default), making the filter effectively a no-op and causing all submitted transactions to be returned regardless of sequence number, bypassing the intended filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9d4d46e-2cbc-4b11-a1df-861f541d9d2a?mode=deep",
+    "timestamp": "2026-04-29 03:29:45.902047",
+    "report_generated": false
   }
 ]
