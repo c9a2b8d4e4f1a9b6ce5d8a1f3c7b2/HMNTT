@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field] Can an unprivileged external user, by operating a malicious block node that repeatedly returns SubscribeStreamResponse.Code.NOT_AVAILABLE, exhaust the maxSubscribeAttempts=3 counter on every configured block node simultaneously, causing all nodes to be marked inactive via onError(), halting all block ingestion and permanently preventing token unfreeze transactions from being processed by the mirror node, leaving user token accounts in a frozen state indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33ccb2c7-752c-43ca-8beb-76df6c48894c?mode=deep",
+    "timestamp": "2026-04-29 01:40:24.573467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: readmitDelay field] Can an unprivileged external user, given that readmitDelay has a @DurationMin(seconds=10) lower bound and defaults to 1 minute, exploit the window between all block nodes being marked inactive and their readmission to ensure that token unfreeze transactions submitted on-chain during that window are never ingested by the mirror node, causing the mirror node to permanently report a frozen status for affected token accounts even after the on-chain state has changed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_989e77e4-5b00-4341-94cd-3ba84c796ee7?mode=deep",
+    "timestamp": "2026-04-29 01:40:37.090221",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxBlockItems field] Can an unprivileged external user who controls a block node send a stream of BlockItemSets whose cumulative pendingCount exceeds maxBlockItems=800000, triggering a BlockStreamException in BlockAssembler.append(), which calls onError() and increments the error counter, and by repeating this pattern maxSubscribeAttempts times, permanently deactivate the node and stall block ingestion, preventing token freeze/unfreeze transactions from being reflected in the mirror node state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0c36a08-b20b-4518-8860-a5a7c8037c1b?mode=deep",
+    "timestamp": "2026-04-29 01:40:49.917121",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: responseTimeout field] Can an unprivileged external user, by introducing artificial latency (e.g., via a slow block node or network interposition) that exceeds the responseTimeout=400ms deadline used in BlockNode.getBlockRange(), cause getBlockRange() to return EMPTY_BLOCK_RANGE for all nodes, making BlockNodeSubscriber.getNode() unable to find any node with the required block, throwing BlockStreamException and halting block ingestion, thereby freezing the mirror node's view of token account states permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d41d8b5f-8f09-443b-a571-dcafa479f9e7?mode=deep",
+    "timestamp": "2026-04-29 01:41:03.018438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxStreamResponseSize field] Can an unprivileged external user exploit the integer cast (int) streamProperties.getMaxStreamResponseSize().toBytes() in BlockNode constructor, by configuring maxStreamResponseSize to a value exceeding Integer.MAX_VALUE (~2.1GB), causing integer overflow that sets maxInboundMessageSize to a negative or near-zero value, causing all gRPC messages to be rejected, triggering repeated onError() calls, deactivating all block nodes, and permanently halting token transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a86f1e4f-1b8f-41c5-95e1-78540a177583?mode=deep",
+    "timestamp": "2026-04-29 01:41:16.793456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field / onError()] Can an unprivileged external user, by controlling a block node that sends a valid BLOCK_HEADER followed immediately by a second BLOCK_HEADER before an END_OF_BLOCK, trigger the BlockStreamException 'Received block items of a new block while the previous block is still pending' in BlockAssembler.append(), which calls onError() and after maxSubscribeAttempts=3 repetitions marks the node inactive, stalling block ingestion and preventing token unfreeze transactions from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ea2275d-51d5-4fb0-b004-6cdc19a2613a?mode=deep",
+    "timestamp": "2026-04-29 01:41:31.525563",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: readmitDelay field / tryReadmit()] Can an unprivileged external user, by continuously triggering errors on all block nodes at a rate faster than readmitDelay (minimum 10 seconds), maintain all nodes in an inactive state indefinitely through a sustained attack loop, ensuring that token freeze/unfreeze transactions are never ingested and the mirror node permanently reports stale frozen token account states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2964272-1fbc-4177-a6fc-6455407adfda?mode=deep",
+    "timestamp": "2026-04-29 01:41:46.645549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field] Can an unprivileged external user set maxSubscribeAttempts to its minimum value of 1 (via environment variable or config injection if misconfigured), so that a single gRPC error immediately deactivates a block node, and by causing one error per readmitDelay cycle across all nodes, keep the mirror node perpetually unable to ingest blocks, permanently freezing the token state visible through the mirror node API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d5d0509-c00f-497e-879b-b7e6d944f73e?mode=deep",
+    "timestamp": "2026-04-29 01:42:02.773939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: responseTimeout field] Can an unprivileged external user, by operating a block node that deliberately delays its ServerStatus gRPC response beyond responseTimeout=400ms, cause getBlockRange() to catch the deadline exception and return EMPTY_BLOCK_RANGE, making the node appear to have no blocks, so BlockNodeSubscriber.getNode() skips it and eventually throws BlockStreamException when no node can serve the required block, halting ingestion of token unfreeze transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25e0512c-4b1b-4a17-b7c8-1697e543a187?mode=deep",
+    "timestamp": "2026-04-29 01:42:19.607082",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxBlockItems field] Can an unprivileged external user who controls a block node craft a stream where each BlockItemSet contains exactly maxBlockItems/maxSubscribeAttempts items, and by sending multiple such sets before END_OF_BLOCK, push pendingCount just over maxBlockItems=800000, triggering BlockStreamException in append(), calling onError() repeatedly until the node is deactivated, and if this is the only block node, permanently halting block ingestion and freezing the mirror node's token state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdbf7bd4-2120-4494-8abe-06aa026a293a?mode=deep",
+    "timestamp": "2026-04-29 01:42:37.301181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: readmitDelay field] Can an unprivileged external user exploit the fact that readmitDelay defaults to Duration.ofMinutes(1) and has a minimum of 10 seconds, by timing a coordinated attack to deactivate all block nodes just before a batch of token unfreeze transactions is submitted on-chain, ensuring the 1-minute readmit window causes those transactions to be missed if the block node's available block range advances past them during the inactive period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8f97466-c021-4ba9-abf8-a48c7e2f9c62?mode=deep",
+    "timestamp": "2026-04-29 01:42:56.207671",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxStreamResponseSize field] Can an unprivileged external user, by operating a block node that sends gRPC responses larger than maxStreamResponseSize=36MB, cause the gRPC channel to reject the message with a resource exhausted error, which is caught by the catch(Exception ex) block in streamBlocks(), calls onError(), and after maxSubscribeAttempts failures marks the node inactive, halting block ingestion and preventing token state updates from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f0dd5a9-c255-4853-8a87-c20cd7680385?mode=deep",
+    "timestamp": "2026-04-29 01:43:16.591815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field / errors AtomicInteger] Can an unprivileged external user exploit a race condition between errors.set(0) (called on each successful response in streamBlocks()) and errors.incrementAndGet() (called in onError()), where concurrent error and success events cause the error counter to be reset just before reaching maxSubscribeAttempts, allowing the attacker to sustain a partially-degraded state where blocks are intermittently processed, causing inconsistent token freeze status in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ccf75b4d-06ab-4ba1-9f8a-e508b1018ba6?mode=deep",
+    "timestamp": "2026-04-29 01:43:37.280110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: responseTimeout field] Can an unprivileged external user, by flooding the network with traffic that causes the block node's gRPC status endpoint to respond slower than responseTimeout=400ms, make getBlockRange() consistently return EMPTY_BLOCK_RANGE, causing BlockNodeSubscriber.hasBlock() to return false for all nodes, throwing BlockStreamException('No block node can provide block N'), and permanently stalling the ingestion of token freeze/unfreeze transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3df9897-3113-4107-a563-5cdf4794993c?mode=deep",
+    "timestamp": "2026-04-29 01:43:56.277889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxBlockItems field] Can an unprivileged external user who controls a block node send a block with exactly maxBlockItems+1=800001 items by splitting them across multiple BlockItemSets, bypassing any per-set size check, so that pendingCount exceeds maxBlockItems only after the final set is appended, triggering BlockStreamException in append(), calling onError(), and after maxSubscribeAttempts exhaustion deactivating the node and halting token transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac24026a-f436-4a3a-a809-756b9c8932a2?mode=deep",
+    "timestamp": "2026-04-29 01:44:17.922697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: readmitDelay field / tryReadmit()] Can an unprivileged external user, by causing all block nodes to be deactivated simultaneously and then ensuring each node fails again immediately upon readmission (within the readmitDelay window), create a perpetual cycle where nodes are deactivated, readmitted after readmitDelay, immediately fail again, and are re-deactivated, permanently preventing token unfreeze transactions from being ingested by the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67755033-ab3f-4913-9ae6-16f77bb76658?mode=deep",
+    "timestamp": "2026-04-29 01:44:39.661388",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxStreamResponseSize field] Can an unprivileged external user exploit the fact that maxStreamResponseSize is validated as @NotNull but has no upper bound constraint, and if an operator misconfigures it to a value that causes integer overflow in the (int) cast in BlockNode constructor (line 75), the resulting negative maxInboundMessageSize passed to gRPC causes all inbound messages to be rejected, triggering repeated onError() calls and permanent deactivation of all block nodes, halting token state ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7513b82-889f-4cad-bfa5-1b2cadc980f1?mode=deep",
+    "timestamp": "2026-04-29 01:45:01.886124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field] Can an unprivileged external user, by operating a block node that sends an unknown SubscribeStreamResponse case (triggering the 'Unknown response case' BlockStreamException in streamBlocks()), cause onError() to be called, and by repeating this maxSubscribeAttempts=3 times, deactivate the node, and if this is the sole block node, permanently halt block ingestion and freeze the mirror node's token account state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd4407b4-d8a0-4b57-b438-3b2894fd77f2?mode=deep",
+    "timestamp": "2026-04-29 01:45:25.337152",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: responseTimeout field] Can an unprivileged external user, by registering as a block node (if auto-discovery is enabled) and responding to ServerStatus requests with artificial delays just above responseTimeout=400ms, ensure that getBlockRange() always returns EMPTY_BLOCK_RANGE for their node, while simultaneously causing legitimate nodes to be deactivated via other error injection, resulting in no available block nodes and permanent halting of token transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57a9b9e4-096d-4028-80fa-5379542f8c5d?mode=deep",
+    "timestamp": "2026-04-29 01:45:50.071249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxBlockItems field / BlockAssembler.append()] Can an unprivileged external user who controls a block node send a stream where the first BlockItemSet has a non-BLOCK_HEADER first item, triggering the BlockStreamException 'Incorrect first block item case' in append(), which calls onError(), and by repeating this maxSubscribeAttempts times, deactivate the node and halt ingestion of token freeze/unfreeze transactions, causing the mirror node to permanently report stale token account freeze states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45a505ee-3c19-48d9-9fe6-ace2f145096a?mode=deep",
+    "timestamp": "2026-04-29 01:46:14.398106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: readmitDelay field] Can an unprivileged external user exploit the fact that readmitDelay is applied per-node (not globally), and by timing attacks to deactivate nodes in a rolling fashion (deactivating node A, then B before A is readmitted, then C before B is readmitted), maintain a state where at least one node is always inactive and the remaining active nodes cannot serve the required block, permanently stalling token transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e94401d4-107b-46fe-b47f-e14141d0b959?mode=deep",
+    "timestamp": "2026-04-29 01:46:39.908179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxStreamResponseSize field] Can an unprivileged external user, by operating a block node that sends responses of exactly maxStreamResponseSize=36MB, test whether the gRPC channel's maxInboundMessageSize enforcement is inclusive or exclusive of the boundary, and if the boundary check is off-by-one, cause legitimate large blocks to be rejected, triggering onError() and eventual node deactivation, halting ingestion of token unfreeze transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7014ccd3-7eb8-407b-be1a-01a4bf847391?mode=deep",
+    "timestamp": "2026-04-29 01:47:04.632022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxSubscribeAttempts field / onError()] Can an unprivileged external user, by controlling a block node that sends a valid stream followed by a gRPC channel-level error (not a BlockStreamException), trigger the catch(Exception ex) block in streamBlocks() which calls onError(), and by repeating this pattern exactly maxSubscribeAttempts=3 times, deactivate the node, and if all nodes are deactivated, permanently halt block ingestion and freeze the mirror node's token state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_409ff5be-38bb-40dd-96da-8eef0d1ac2bb?mode=deep",
+    "timestamp": "2026-04-29 01:47:32.467148",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: responseTimeout field] Can an unprivileged external user exploit the fact that responseTimeout=400ms is used only for the ServerStatus gRPC call (getBlockRange()), not for the streaming call itself, and by making the ServerStatus endpoint respond slowly while the streaming endpoint works normally, cause getBlockRange() to return EMPTY_BLOCK_RANGE, making BlockNodeSubscriber.hasBlock() return false and preventing the node from being selected, halting block ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15cda588-2a3f-4d7b-9560-f05f3fe95bce?mode=deep",
+    "timestamp": "2026-04-29 01:48:00.367413",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: maxBlockItems field] Can an unprivileged external user who controls a block node exploit the fact that maxBlockItems=800000 is checked against pendingCount (total items across all pending BlockItemSets) rather than per-set, by sending many small sets that individually pass validation but collectively exceed the limit, triggering BlockStreamException in append(), calling onError(), and after maxSubscribeAttempts exhaustion permanently deactivating the node and halting token transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eec5c917-6d13-4311-b086-13411fc685eb?mode=deep",
+    "timestamp": "2026-04-29 01:48:28.631301",
+    "report_generated": false
+  }
+]
