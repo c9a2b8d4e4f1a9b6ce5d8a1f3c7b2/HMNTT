@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the sequential composition of historical.concatWith(live) in subscribeTopic() where if the historical retrieval is extremely slow (due to large date range), the live stream buffers messages in memory without bound, causing an OutOfMemoryError that crashes the service and drops all buffered fund-transfer messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61708d6d-3991-4f76-9919-01f0ca27222a?mode=deep",
+    "timestamp": "2026-04-29 04:29:31.249203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: topicExists()] Can an unprivileged external user enumerate valid topic IDs by observing the difference in error responses between EntityNotFoundException (topic not found) and 'Not a valid topic' (wrong entity type), using this oracle to map out which entity IDs are financial topics and then target them for subscription-based attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55fdb303-6097-422b-8863-6461bf10b44e?mode=deep",
+    "timestamp": "2026-04-29 04:29:43.182461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a topic with startTime=0 and no limit, forcing the historical retrieval phase to scan all messages ever recorded for that topic, and by doing this across many topics simultaneously, cause a database connection pool exhaustion that prevents fund-transfer messages from being persisted or retrieved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85a95988-3cac-476d-afbc-92de32282f1c?mode=deep",
+    "timestamp": "2026-04-29 04:29:55.726113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: TopicContext.onNext()] Can an unprivileged external user cause the AtomicReference<TopicMessage> last in TopicContext to be set to a crafted TopicMessage with a manipulated sequenceNumber, by exploiting a race between the filter check (t.getSequenceNumber() > last.getSequenceNumber()) and the onNext() update, causing subsequent legitimate fund messages to be filtered out as 'already seen'?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08080283-1ba6-4e36-9130-98aee441e90b?mode=deep",
+    "timestamp": "2026-04-29 04:30:09.401162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: incomingMessages()] Can an unprivileged external user exploit the Flux.defer(() -> incomingMessages(topicContext)) lazy evaluation in subscribeTopic() to create a subscription where the live stream starts before the historical stream completes, and due to the sequence number filter (t.getSequenceNumber() > last.getSequenceNumber()), messages published during the historical retrieval window are silently dropped, causing fund-transfer message loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_019140c0-f249-4b31-a8f8-d7d03fd3cf54?mode=deep",
+    "timestamp": "2026-04-29 04:30:23.248273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the doFinally(s -> subscriberCount.decrementAndGet()) hook in subscribeTopic() by rapidly subscribing and unsubscribing to drive subscriberCount negative (if decrements race with increments), corrupting the Gauge metric and causing operators to believe there are fewer active subscribers than reality, masking a fund-critical service overload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d011b91-da57-41b8-a5b8-9028a24f0530?mode=deep",
+    "timestamp": "2026-04-29 04:30:37.854578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: missingMessages()] Can an unprivileged external user craft a scenario where last.getConsensusTimestamp() + 1 in missingMessages() overflows (when consensusTimestamp = Long.MAX_VALUE), causing the gap recovery filter's startTime to wrap to Long.MIN_VALUE, resulting in retrieval of all historical messages from the beginning of the ledger and flooding the client with irrelevant data that obscures fund-transfer messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bd23813-6608-43ac-bce0-880f69cb0127?mode=deep",
+    "timestamp": "2026-04-29 04:30:52.715357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: TopicContext.isComplete()] Can an unprivileged external user exploit the Instant.ofEpochSecond(0, filter.getEndTime()) call in isComplete() by providing an endTime value that causes an ArithmeticException (nanosecond overflow), crashing the isComplete() check and causing pastEndTime() to never terminate the subscription, holding resources indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d098c0a-6eda-4860-8281-c516fa2bbb28?mode=deep",
+    "timestamp": "2026-04-29 04:31:08.594260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the takeWhile(t -> t.getConsensusTimestamp() < filter.getEndTime()) in subscribeTopic() where endTime is a Long and consensusTimestamp is a long, and if endTime is null but the null check at line 79 is bypassed via a concurrent filter modification, cause a NullPointerException that terminates the subscription and drops fund messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4137d0f6-9214-4fdc-bff4-3ed7e6d0c09b?mode=deep",
+    "timestamp": "2026-04-29 04:31:25.977755",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a topic with a startTime far in the past and a very large limit, causing the historical retrieval to return millions of messages that overwhelm the gRPC flow control buffer, causing backpressure that stalls the live stream and delays fund-critical real-time messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_423b1ae8-776b-4eaf-9fcf-d5504725239b?mode=deep",
+    "timestamp": "2026-04-29 04:31:43.000767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: TopicContext()] Can an unprivileged external user exploit the DomainUtils.now() call in TopicContext constructor (startTime = DomainUtils.now()) racing with the isValidStartTime() validation (also calls DomainUtils.now()), where a time difference between the two calls causes a filter with startTime that was valid at validation time to be treated as future-dated in the context, causing isComplete() to return true immediately and drop all messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ea0b6e8-1948-4669-8713-36cc1af8b7a2?mode=deep",
+    "timestamp": "2026-04-29 04:32:00.806333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the log.info('Subscribing to topic: {}', filter) call in subscribeTopic() to inject log-forging content via a crafted subscriberId field in TopicMessageFilter (which is randomly generated but could be influenced), polluting server logs and obscuring evidence of fund-related attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e76b796c-ebe8-4647-ba68-b61bb9355bbd?mode=deep",
+    "timestamp": "2026-04-29 04:32:19.435441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: missingMessages()] Can an unprivileged external user trigger the safety check branch (current == null) in missingMessages() by subscribing to a topic with no recent activity, and since the gapFilter is built without a limit, cause the retriever to return an unbounded result set that exhausts memory and crashes the service, dropping fund messages for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6dbced59-b0d7-421c-ba51-13ee56ee7eff?mode=deep",
+    "timestamp": "2026-04-29 04:32:39.982425",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the Schedulers.boundedElastic() scheduler used for the safetyCheck Flux in subscribeTopic() by opening many subscriptions simultaneously, exhausting the bounded elastic thread pool, causing the safety check gap recovery to queue indefinitely and miss fund-transfer messages that fall in the gap window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7afecdcc-a429-4ea8-a053-b1cfa2ab0c3e?mode=deep",
+    "timestamp": "2026-04-29 04:33:01.153525",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: incomingMessages()] Can an unprivileged external user exploit the filter.toBuilder().limit(limit).startTime(startTime).build() in incomingMessages() where limit is computed as filter.getLimit() - topicContext.getCount().get(), and if count has been incremented by a concurrent thread beyond filter.getLimit(), the result is negative, causing the new filter to have a negative limit that bypasses hasLimit() and creates an unbounded live subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1cc2c76b-f380-4de0-a847-3d7d1d7fdaf6?mode=deep",
+    "timestamp": "2026-04-29 04:33:21.707461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the fact that subscribeTopic() logs the full filter object (including subscriberId) at INFO level, and by crafting a subscriberId with special characters or extremely long strings, cause log system resource exhaustion or log injection that disrupts monitoring of fund-transfer activity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdc5396b-0f59-4c21-9f4a-d2d8c8a04456?mode=deep",
+    "timestamp": "2026-04-29 04:33:44.234772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: TopicContext.finished()] Can an unprivileged external user trigger the finished() callback with SignalType.ON_ERROR by causing an exception in the pipeline, and since finished() only logs without any cleanup or alerting, cause silent failure of a fund-transfer subscription where the client is unaware the stream has terminated and stops receiving payment messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fc0995b-96e5-424a-8e9e-40a2c70376a1?mode=deep",
+    "timestamp": "2026-04-29 04:34:07.670888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the Flux.merge(safetyCheck, live) in subscribeTopic() where both streams can emit messages concurrently, and the downstream filter (t.getSequenceNumber() > last.getSequenceNumber()) is not thread-safe because getLast() and the comparison are not atomic, causing a race condition where a fund-transfer message passes the filter but is then overwritten in last before onNext() processes it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1198a86-7507-4943-99e4-b3fed943d844?mode=deep",
+    "timestamp": "2026-04-29 04:34:31.077386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: topicExists()] Can an unprivileged external user perform a timing attack on the topicExists() method by measuring response latency differences between entityRepository.findById() hitting cache vs. database, to enumerate which topic IDs exist and are actively used for fund transfers, enabling targeted subscription attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7740503f-70e3-40b0-a626-865c62e4a720?mode=deep",
+    "timestamp": "2026-04-29 04:34:54.087358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the sequential filter check (last == null || t.getSequenceNumber() > last.getSequenceNumber()) in subscribeTopic() where the first message always passes (last == null), and if the first message delivered has an artificially high sequenceNumber, all subsequent legitimate fund messages with lower sequence numbers are filtered out as 'already seen'?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c2faf8c-3f10-4d92-ac07-c09844037843?mode=deep",
+    "timestamp": "2026-04-29 04:35:17.860689",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: missingMessages()] Can an unprivileged external user exploit the endTime set to current.getConsensusTimestamp() in the gap recovery filter in missingMessages(), where if consensusTimestamp equals the startTime of the gap, the retriever returns zero messages (exclusive end), causing the gap to never be filled and fund-transfer messages in the gap to be permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b938c8f-8747-492b-bf67-5615fd09f158?mode=deep",
+    "timestamp": "2026-04-29 04:35:43.959576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the doOnSubscribe(s -> subscriberCount.incrementAndGet()) hook by subscribing and immediately cancelling before doFinally fires, causing subscriberCount to increment without a corresponding decrement if the cancellation races with the doFinally registration, leading to an ever-growing subscriber count that triggers false capacity alarms and causes operators to throttle legitimate fund-transfer subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0cf721e-effd-430a-97bc-e9a2d8f183fc?mode=deep",
+    "timestamp": "2026-04-29 04:36:10.613927",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: TopicContext.isComplete()] Can an unprivileged external user exploit the RepeatSpec.create(r -> !topicContext.isComplete(), Long.MAX_VALUE) in pastEndTime() by providing an endTime that makes isComplete() oscillate between true and false due to clock drift, causing the pastEndTime() Flux to repeatedly emit and cancel the merged stream, creating a loop that drops fund messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35b670a6-4586-4da9-abcc-50b391560182?mode=deep",
+    "timestamp": "2026-04-29 04:36:37.827373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the fact that topicExists() is called before the flux pipeline is assembled, and if the topic is deleted between the topicExists() check and the actual subscription start, the subscription proceeds on a deleted topic, potentially receiving stale or replayed fund-transfer messages from cache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1969f2c4-dd53-4bfb-a922-85585e1118cf?mode=deep",
+    "timestamp": "2026-04-29 04:37:06.921443",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/service/TopicMessageService.java -> Scope: Critical: Direct loss of funds'] [Function: incomingMessages()] Can an unprivileged external user exploit the topicListener.listen(newFilter) call in incomingMessages() by subscribing to a topic with a startTime in the distant past, causing the listener to replay all historical messages as 'live' messages that bypass the historical deduplication logic, delivering duplicate fund-transfer messages to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f69624d7-7116-4e2b-9be5-eae94e4c1810?mode=deep",
+    "timestamp": "2026-04-29 04:37:34.656974",
+    "report_generated": false
+  }
+]
