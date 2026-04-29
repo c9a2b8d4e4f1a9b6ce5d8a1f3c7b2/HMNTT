@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user trigger a network partition between the first `pool.queryQuietly(timestampQuery, timestampParams)` call and the second `pool.queryQuietly(query, params)` call by flooding concurrent requests, causing the timestamp set to be fetched from one DB replica state while transaction details are fetched from a diverged replica, resulting in mismatched or phantom NFT transfer history being returned to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34947270-6338-4fbc-b6f5-bfa86aaf39c6?mode=deep",
+    "timestamp": "2026-04-29 00:27:32.142977",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user craft a request for a valid tokenId/serialNumber such that the first query succeeds and returns timestamps but the DB connection is partitioned before the second `pool.queryQuietly` executes, causing `response.transactions` to remain empty while `response.links.next` is still populated with a non-null anchor, leading to an infinite pagination loop that exhausts client resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf5d3714-0ca0-4b14-bd09-eeff3338de7e?mode=deep",
+    "timestamp": "2026-04-29 00:27:43.988453",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user exploit the two-phase query design (timestamp fetch then detail fetch) so that during a network partition the `NftService.getNft(tokenId, serialNumber)` call on line 1047 reaches a different DB node than the prior queries, causing `nft.createdTimestamp` to appear null and triggering a spurious HTTP 206 Partial Content response that misleads downstream consumers into treating complete data as incomplete?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f18e2bc-6a7c-413b-8e24-c615940e2597?mode=deep",
+    "timestamp": "2026-04-29 00:27:56.308932",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user supply a `timestamp` query parameter that causes `balances.getAccountBalanceTimestampRange(tsQuery, tsParams)` to execute against a partitioned replica that returns a stale `{lower, upper}` range, while the subsequent `pool.queryQuietly` executes against a current replica, producing a balance snapshot that is internally inconsistent and silently returned as authoritative data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_291b1c77-849f-4abc-83d6-a934a157846b?mode=deep",
+    "timestamp": "2026-04-29 00:28:09.160768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenBalances()] Can an unprivileged external user send a high-volume burst of `/tokens/:tokenId/balances` requests with `timestamp` filters to exhaust the DB connection pool, inducing a partition-like state where `balances.getAccountBalanceTimestampRange` hangs indefinitely, causing all subsequent requests to queue and the service to become unavailable outside its designed degradation parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_388a3353-7c38-4027-8b47-233e13b1078d?mode=deep",
+    "timestamp": "2026-04-29 00:28:22.909347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp` filter to `/tokens/:tokenId` that causes `buildHistoryQuery` to execute UNION ALL across `token`, `token_history`, `entity`, `entity_history`, `custom_fee`, and `custom_fee_history` tables, where a network partition mid-query causes the UNION ALL to return rows from only one side of the union, and the `order by modified_timestamp desc limit 1` silently selects a stale history record as the current state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0117107-1196-4e55-be7e-a1cbfc98bd20?mode=deep",
+    "timestamp": "2026-04-29 00:28:36.755721",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user trigger a network partition during the three-way JOIN across `token`, `entity`, and `custom_fee` tables in `extractSqlFromTokenInfoRequest`, causing the JOIN to return a row where `custom_fee` data is null (from a partitioned node), which then causes `getTokenInfoRequest` to throw `NotFoundError` for a token that actually exists, creating a denial-of-service for legitimate token lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ba1b082-0425-44ce-9531-48fe072731b6?mode=deep",
+    "timestamp": "2026-04-29 00:28:51.329240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user exploit the condition `rows.length !== 1 || !rows[0].custom_fee` on line 556 such that during a network partition the query returns 0 rows (connection dropped mid-execution), causing a `NotFoundError` to be thrown for a valid token, and if this is repeated at scale it constitutes a partition-amplified denial of service against the token info endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e9c264e-65ff-40a2-8708-e84b737a3075?mode=deep",
+    "timestamp": "2026-04-29 00:29:07.568359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: TokenService.putTokenCache()] Can an unprivileged external user cause a network partition between the `pool.queryQuietly` call in `getTokensRequest` and the `TokenService.putTokenCache(r)` call, so that stale or partial token rows are written into the cache, and subsequent calls to `TokenService.getCachedTokens` in `getTokenBalances` return incorrect `decimals` values that persist beyond the partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8165fc4c-e24c-4520-957e-99fa3e07fd7d?mode=deep",
+    "timestamp": "2026-04-29 00:29:23.823363",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenBalances()] Can an unprivileged external user exploit the cache population path in `getTokensRequest` (which calls `TokenService.putTokenCache`) being partitioned from the cache read path in `getTokenBalances` (which calls `TokenService.getCachedTokens`), causing `decimals` to resolve as `null` for all token balance responses during and after a partition event, silently corrupting balance data returned to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50a751b9-9f59-45b8-b353-0ddf1611b69e?mode=deep",
+    "timestamp": "2026-04-29 00:29:39.856810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user supply multiple `timestamp` filters to the NFT transfer history endpoint, causing `extractSqlFromNftTransferHistoryRequest` to build a UNION ALL across `nft`, `nft_history`, and `entity` tables with multiple timestamp conditions, where a network partition causes only the `nft` branch of the UNION to execute while `nft_history` and `entity` branches time out, returning a truncated event set that omits token deletion events?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f22e2930-0a3f-4461-ba63-91258102f925?mode=deep",
+    "timestamp": "2026-04-29 00:29:56.507893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user craft a request where `rows.length === 0` is returned from the timestamp query due to a network partition (not because the NFT has no history), causing the function to silently return an empty `response` with no error, making the NFT appear to have no transaction history when it actually does?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d467adec-cac2-4423-82d4-cb93acf7f4fe?mode=deep",
+    "timestamp": "2026-04-29 00:30:13.854761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user send a request without a `timestamp` filter so the code takes the `else` branch (line 667), which uses `token_account` instead of `token_balance`, and during a network partition where `token_account` is on a partitioned shard, the query returns empty results while `token_balance` would have returned valid data, causing silent data loss outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee276ba9-bc6f-4f48-b10b-a722f84320b4?mode=deep",
+    "timestamp": "2026-04-29 00:30:30.723900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokensRequest()] Can an unprivileged external user send a large number of concurrent `GET /tokens` requests with maximum `limit` values to saturate the DB connection pool, inducing a network partition condition where `pool.queryQuietly` calls begin failing or returning partial result sets, causing the `tokens` array to be populated with fewer entries than the limit without any error signal to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abaa48e2-2e10-49aa-bada-01da5d7bad9a?mode=deep",
+    "timestamp": "2026-04-29 00:30:48.534090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenRequest()] Can an unprivileged external user supply multiple `token.id` values (building a large `inClause` array passed as `any($N)`) to cause a query that, during a network partition, partially executes against a replica that only has a subset of token IDs, returning an incomplete set that is indistinguishable from a complete result to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2490ca4a-a960-4884-90dc-f8f119dcba07?mode=deep",
+    "timestamp": "2026-04-29 00:31:06.428761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user repeatedly query `/tokens/:tokenId` with a `timestamp` filter equal to the exact boundary of a partition event, causing `buildHistoryQuery`'s `order by modified_timestamp desc limit 1` to select different records on different replicas, resulting in non-deterministic token state being returned across requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83bee448-d375-4908-b0d1-ab0a3b716734?mode=deep",
+    "timestamp": "2026-04-29 00:31:25.103736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp` filter that causes `buildHistoryQuery` to query both the live `token` table and `token_history` table in a UNION ALL, where a network partition causes the live table query to return a row with a newer `modified_timestamp` than the history table, but the history table row is actually more consistent, and the `order by modified_timestamp desc limit 1` selects the inconsistent live row?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ad4b4a7-bed6-41d8-b658-e06560c3b934?mode=deep",
+    "timestamp": "2026-04-29 00:31:45.725643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTokensRequest()] Can an unprivileged external user send concurrent requests to `/tokens/:tokenId/nfts` with large `limit` values to exhaust DB connections, causing `pool.queryQuietly` to fail mid-result-set, and since there is no error handling beyond the pool itself, the partial `rows` array is silently mapped through `NftViewModel` and returned as a complete response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed460520-5007-477c-9a09-618fc731472c?mode=deep",
+    "timestamp": "2026-04-29 00:32:04.986869",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromNftTokensRequest()] Can an unprivileged external user craft NFT list requests with `account.id` and `serialnumber` filters that generate complex WHERE clauses, and during a network partition where the `nft` table is on a partitioned node, the `left join entity e on e.id = nft.token_id` returns null entity data while nft rows are returned, causing `NftViewModel` to be constructed with null entity fields that are silently serialized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e46a8ca9-3b17-42ed-8191-9b84e4fc676d?mode=deep",
+    "timestamp": "2026-04-29 00:32:26.081738",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenBalances()] Can an unprivileged external user exploit the fact that `response.timestamp` is set from `rows[0].consensus_timestamp ?? rows[0].snapshot_timestamp` (line 729), where during a network partition the `consensus_timestamp` column is null (from a partitioned `token_balance` table) and `snapshot_timestamp` is also null (from a failed CTE), causing `utils.nsToSecNs(null)` to produce an incorrect timestamp that is returned as authoritative?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7a9a8b1-eaa5-4dce-a90c-1bdfbdcdbc5a?mode=deep",
+    "timestamp": "2026-04-29 00:32:47.357023",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenBalancesRequest()] Can an unprivileged external user supply a `timestamp` filter causing `balances.getAccountBalanceTimestampRange` to be called, and if a network partition causes this async call to hang without timeout, the entire `getTokenBalances` handler hangs indefinitely, holding a DB connection and eventually causing connection pool exhaustion that partitions the service from its database outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_455d7c33-5ceb-40c6-915d-06f343b43851?mode=deep",
+    "timestamp": "2026-04-29 00:33:09.684767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user exploit the `jsonbPathQueryVars` construction (`utils.JSONStringify({token_id: tokenId, serial_number: serialNumber})`) on line 1028, where during a network partition the second query receives the correct `$3` JSONB path variable but the `$4` timestamps array is from a partitioned replica, causing the JSONB path filter to match transfers from a different serial number's history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66dd5c6f-a13c-46fd-b2c9-f24cf9190862?mode=deep",
+    "timestamp": "2026-04-29 00:33:32.941863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user trigger repeated requests to `/tokens/:tokenId` without a timestamp filter, causing `TokenService.putTokenCache(token)` to be called with data from a partitioned replica, poisoning the cache with stale token state that persists after partition recovery and is served to all subsequent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2d4eddb-511e-494f-b6b1-b45dabad5c76?mode=deep",
+    "timestamp": "2026-04-29 00:33:57.012426",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user supply a `timestamp=eq:X` filter that gets transformed by `transformTimestampFilterOp` to `lte`, and during a network partition where the `custom_fee_history` table is on a partitioned shard, the `buildHistoryQuery` for `customFeeQuery` returns null, causing the outer SELECT's `case when custom_fee.timestamp_range is not null` to evaluate to null and `getTokenInfoRequest` to throw `NotFoundError` for a valid token?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26140dd4-99ac-49ed-a37b-c87aa0719ad1?mode=deep",
+    "timestamp": "2026-04-29 00:34:20.555748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTokensRequest()] Can an unprivileged external user use the `name` filter (ILIKE query on line 177) with a pattern that causes a full table scan, and by sending many concurrent such requests during a network partition event, cause the DB to be overwhelmed with long-running queries that prevent partition recovery by holding locks on the `token` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81f8c47e-bd9b-408c-a389-9f7a5092c6a0?mode=deep",
+    "timestamp": "2026-04-29 00:34:44.831592",
+    "report_generated": false
+  }
+]
