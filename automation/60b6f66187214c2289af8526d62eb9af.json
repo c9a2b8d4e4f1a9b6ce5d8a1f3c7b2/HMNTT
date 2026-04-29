@@ -1,0 +1,56 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged receiver exploit the pagination cursor mechanism where the EXTRACTOR function builds the next-page link using tokenAirdrop.getReceiverId() and tokenAirdrop.getSenderId() as strings, and if these contain shard/realm prefixes (e.g., '0.0.123') that differ from the numeric IDs used in the DB query, the next-page request returns zero results, permanently hiding remaining PENDING airdrops?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_040f35bf-f88d-4c31-868b-77544fc87bd1?mode=deep",
+    "timestamp": "2026-04-29 05:13:22.650817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged user cause permanent fund freezing by exploiting the fact that the token_airdrop table has a unique index on (sender_account_id, receiver_account_id, token_id, serial_number) but no index enforcing state uniqueness, allowing a CANCELLED airdrop record to coexist with a new PENDING record for the same key if the upsert logic fails, causing the PENDING airdrop to be invisible to queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_163cdd9f-6a2a-4a51-9d68-5bbb63b28d4b?mode=deep",
+    "timestamp": "2026-04-29 05:13:34.761229",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged receiver exploit the fact that findAll() uses dslContext.selectFrom(TOKEN_AIRDROP) with a PENDING state filter, but if the importer writes a CLAIMED state update to the live table while a concurrent read is in progress, the receiver sees the airdrop as PENDING and attempts to claim it again on-chain, which fails, leaving the receiver unable to access their tokens?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e0d351c-0c1f-4604-94c6-1185a95215ae?mode=deep",
+    "timestamp": "2026-04-29 05:13:47.009484",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged user exploit the fact that the /outstanding endpoint sorts by RECEIVER_ACCOUNT_ID (primaryField for OUTSTANDING) while /pending sorts by SENDER_ACCOUNT_ID (primaryField for PENDING), and by supplying a receiver.id or sender.id filter with an lte operator equal to the minimum possible account ID, cause the query to return zero results, hiding all PENDING airdrops and preventing cancellation or claim?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fb13cbf-e800-47b4-b80d-cd41a18d3f6a?mode=deep",
+    "timestamp": "2026-04-29 05:13:59.906612",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged receiver exploit the DEFAULT_SERIAL_NUMBER='0L' string constant used in the EXTRACTOR for the next-page link, where the '0L' suffix causes the EntityIdRangeParameter or NumberRangeParameter parser to reject the value with a 400 error, making it impossible to paginate past the first page and permanently hiding PENDING airdrops beyond the first page?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfa36f05-f464-4a2c-ab6c-816519f553ce?mode=deep",
+    "timestamp": "2026-04-29 05:14:14.543954",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged user cause permanent fund freezing by exploiting the fact that the token_airdrop table in v2 (Citus) is distributed by receiver_account_id, but the unique index token_airdrop__sender_id is on (sender_account_id, receiver_account_id, token_id, serial_number), and cross-shard upsert failures could leave duplicate PENDING records that are never resolved, causing funds to appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b627c6f-1b97-42c1-9425-bdbc335bb302?mode=deep",
+    "timestamp": "2026-04-29 05:14:28.622113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged receiver exploit the fact that the /pending endpoint requires the path variable {id} to be the receiver's account ID, but if the receiver's account has been deleted and re-created with the same alias, entityService.lookup() resolves to the new entity ID which has no PENDING airdrops, making the old PENDING airdrops permanently invisible and unclaimable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34e3d015-f979-4a4d-b967-b0d12116a569?mode=deep",
+    "timestamp": "2026-04-29 05:14:43.547007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged user exploit the fact that TokenAirdropRequest.getBounds() returns List.of(primaryBound, secondaryBound, serialNumbers) only when all three bounds are non-empty, but when only entityIds is provided, getBounds() returns List.of(entityIds), silently ignoring token_id and serial_number filters, causing the query to return airdrops for unintended tokens and masking the actual PENDING airdrop the user needs to claim?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_457880f0-e05e-4038-a944-1e9a2c3800c3?mode=deep",
+    "timestamp": "2026-04-29 05:14:59.835653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TokenAirdropRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(TokenAirdropRequest, EntityId)] Can an unprivileged receiver exploit the fact that the Bound class uses the primaryField from AirdropRequestType (RECEIVER_ACCOUNT_ID for OUTSTANDING, SENDER_ACCOUNT_ID for PENDING) as the DB column for entityIds filtering, and if the user supplies an entityIds range that is off-by-one due to shard encoding, the PENDING airdrop falls outside the range and is permanently invisible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81d9fc28-57c1-4bfd-b5c0-f0b7d6c4b1ff?mode=deep",
+    "timestamp": "2026-04-29 05:15:15.998736",
+    "report_generated": false
+  }
+]
