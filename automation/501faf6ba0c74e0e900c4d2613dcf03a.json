@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user supply `order=asc` vs `order=desc` to reverse the apparent chronological sequence of NFT transfer history entries returned by the UNION ALL of `nft`, `nft_history`, and `entity` tables, causing downstream consumers to reconstruct a false ownership chain for a given `tokenId`/`serialNumber` pair?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc3947d4-31c5-4d6c-8ca7-541b8448e1f1?mode=deep",
+    "timestamp": "2026-04-29 04:27:01.428300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user submit a `timestamp=lt:<value>` filter that shares the same positional parameter index (`$3`, `$4`, etc.) for both `nftConditions` and `tokenDeleteConditions`, causing the token-deletion sentinel row to be filtered out of history while NFT transfer rows remain, producing a history that omits the deletion event and misrepresents the NFT's lifecycle?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee9ccd18-0540-47a9-9521-7b460c8d1ac8?mode=deep",
+    "timestamp": "2026-04-29 04:27:13.499973",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user exploit the fact that the `limit` parameter is applied identically to both the inner `nft_history` subquery (`order by timestamp ${order} limit $${limitIndex}`) and the outer UNION result, causing the inner limit to truncate `nft_history` rows before the outer sort, so that the final ordered history is missing earlier transfer events and appears to start at a later point in time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae1c4537-a705-4205-8ab9-f8d16e27ab98?mode=deep",
+    "timestamp": "2026-04-29 04:27:26.652881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user craft a `timestamp` filter that causes `extractSqlFromNftTransferHistoryRequest()` to return zero rows, triggering the early `return` at line 1023-1025, so that the response contains an empty `transactions` array with no indication that history was truncated, effectively hiding all transfer history from an API consumer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c27dd5b7-4952-4aff-9d3d-778fea8e41ef?mode=deep",
+    "timestamp": "2026-04-29 04:27:39.331553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user manipulate the `limit` query parameter to a value of `1` so that only the single most-recent (or oldest, depending on `order`) transfer event is returned, and the `next` pagination link anchors on that single event's `consensus_timestamp`, allowing the attacker to present a truncated history to any client that follows the link chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9615196d-8af5-4020-ba5e-5f54abd3b9c8?mode=deep",
+    "timestamp": "2026-04-29 04:27:53.963915",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp` filter to `getTokenInfoRequest()` that causes `buildHistoryQuery()` to select `order by lower(${tableAlias}.timestamp_range) desc limit 1` from the `_history` table, overriding the current-state row with a historical snapshot, so that the token's metadata, keys, or supply fields reflect a past state and mislead consumers about the current configuration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82b14dbd-40b5-4a2f-a887-7a66f00e545b?mode=deep",
+    "timestamp": "2026-04-29 04:28:08.379109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: buildHistoryQuery()] Can an unprivileged external user provide a `timestamp=eq:<value>` filter that is transformed by `transformTimestampFilterOp()` to `<=`, causing `buildHistoryQuery()` to match a broader range of history rows than intended, and the `order by modified_timestamp desc limit 1` selection to pick a row that does not correspond to the exact requested timestamp, producing a misleading historical view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad4535f8-0908-4f81-b0c6-d5b234fd9778?mode=deep",
+    "timestamp": "2026-04-29 04:28:23.358297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: transformTimestampFilterOp()] Can an unprivileged external user exploit the `eq`→`lte` operator transformation in `transformTimestampFilterOp()` to request token info at a specific timestamp but receive state from any earlier point in time (up to and including that timestamp), allowing the attacker to present a misleading 'point-in-time' history snapshot that does not correspond to the actual state at the claimed timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5975595-43ed-48e8-a2fc-f566b3d37cf0?mode=deep",
+    "timestamp": "2026-04-29 04:28:39.904783",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user submit multiple `timestamp` filters in a single request, exploiting the comment 'honor the last timestamp filter' (line 489) so that only the final filter is applied, causing earlier timestamp constraints to be silently ignored and the returned historical state to reflect a different point in time than the user or consumer expected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2de95d43-a1a3-4056-b7d3-27d122a2bfb5?mode=deep",
+    "timestamp": "2026-04-29 04:28:58.313361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user manipulate the `order` parameter to `asc` so that `last(response.transactions)` returns the oldest transaction as the pagination anchor, and then craft subsequent paginated requests using that anchor's `consensus_timestamp` to traverse history in a direction that skips the most recent transfers, presenting an incomplete forward-only history view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7835dc3b-987a-4f40-a29f-2080303e5816?mode=deep",
+    "timestamp": "2026-04-29 04:29:16.241453",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user trigger the `206 Partial Content` response (line 1050) by querying history for an NFT whose `createdTimestamp` is null (i.e., pre-genesis or partially ingested), causing API consumers to receive a partial history without a clear indication of which transfers are missing, leading to an incomplete and potentially misleading transaction record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_183f1121-11e6-4939-a93c-772df235e351?mode=deep",
+    "timestamp": "2026-04-29 04:29:35.101531",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user supply a `timestamp=gt:<very_large_value>` filter that excludes all `nft` and `nft_history` rows but still includes the `entity` deletion row (if the entity deletion timestamp is larger), causing the history response to contain only the deletion event with no preceding transfer events, making the NFT appear to have been deleted without any prior ownership history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0cf907a0-4729-419d-93b3-0c593e467254?mode=deep",
+    "timestamp": "2026-04-29 04:29:54.342341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user exploit the structure of the UNION ALL query—where `nft` (current state), `nft_history`, and `entity` (deletion) are unioned—by providing a `timestamp` filter that excludes the current `nft` row but includes `nft_history` rows, causing the history to appear as if the NFT was transferred but never reached its current owner, reorganizing the apparent ownership chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c62f3322-48bf-4766-830e-8e67a4e5c66e?mode=deep",
+    "timestamp": "2026-04-29 04:30:14.229399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: nftTransactionHistoryDetailsQuery] Can an unprivileged external user trigger the `CASE WHEN ${Transaction.TYPE} = 35` branch in `nftTransactionHistoryDetailsQuery` by querying history for a token that has a type-35 (token deletion) transaction, causing the `nft_transfer` field to be synthesized as a hardcoded JSON object with `receiver_account_id: null` and `sender_account_id: null`, which misrepresents the actual transfer parties and reorganizes the apparent history of who held the NFT at deletion time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43d06ee2-e94a-4ae2-80c4-f58c8c3c6a3a?mode=deep",
+    "timestamp": "2026-04-29 04:30:34.932368",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user craft a request where the first-stage timestamp query (`extractSqlFromNftTransferHistoryRequest`) returns a set of timestamps, but the second-stage details query (`nftTransactionHistoryDetailsQuery`) ordered by `${Transaction.CONSENSUS_TIMESTAMP}` with the user-controlled `order` appended at line 1030 produces results in a different order than the timestamps were originally retrieved, causing a mismatch between the expected and actual history sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d8d70f4-3e11-4208-9788-1a6c0f11bec0?mode=deep",
+    "timestamp": "2026-04-29 04:30:55.773375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user provide a `limit` value equal to the maximum allowed, combined with a `timestamp` filter, to cause the inner `nft_history` subquery to be limited before the outer UNION sort, so that the outer `order by timestamp ${order} limit $${limitIndex}` operates on an already-truncated dataset, producing a history page that omits transfers that should appear within the requested range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a88c242-44c5-4e6a-9a6a-37d26fc3e2c4?mode=deep",
+    "timestamp": "2026-04-29 04:31:16.989525",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user exploit the two-phase query design—first fetching timestamps, then fetching transaction details for those timestamps via `$4` array parameter—to observe a race condition (TOCTOU) where new transactions are inserted between the two queries, causing the details phase to return transactions not present in the timestamp phase or vice versa, reorganizing the apparent history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e436b220-761a-4208-97f8-dad5ee566958?mode=deep",
+    "timestamp": "2026-04-29 04:31:38.840375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user submit a `timestamp=lte:<boundary>` filter where the boundary falls exactly on the `lower(timestamp_range)` of a transfer event, exploiting off-by-one behavior in the `<=` operator to include or exclude that boundary event from history, causing the history to appear to start or end at a different point than the actual first/last transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acacd632-a592-40c7-b704-7c8f5d881aca?mode=deep",
+    "timestamp": "2026-04-29 04:32:02.388220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp` filter to `getTokenInfoRequest()` such that the UNION ALL in `buildHistoryQuery()` returns both a current-table row and a history-table row with the same `modified_timestamp`, causing the `order by modified_timestamp desc limit 1` to non-deterministically select either row, producing inconsistent historical state responses across repeated identical requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_127dbc7b-afa4-4790-9cd7-b3c378b0874a?mode=deep",
+    "timestamp": "2026-04-29 04:32:27.345095",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user exploit the fact that `conditionsSql.replace('entity_id', 'token_id')` and `conditionsSql.replace('entity_id', 'id')` are simple string replacements (line 500, 506) to craft a `timestamp` filter value that contains the substring `entity_id`, causing the replacement to corrupt the SQL condition and alter which history rows are selected, reorganizing the token's historical state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04acab93-db83-42a8-b2e4-ebc480e6a04a?mode=deep",
+    "timestamp": "2026-04-29 04:32:51.644357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getTokenInfoRequest()] Can an unprivileged external user supply a `timestamp` filter that causes `extractSqlFromTokenInfoRequest()` to join `token_history`, `entity_history`, and `custom_fee_history` tables where each history table independently selects its `limit 1` row, resulting in a composite token-info response that mixes fields from different historical points in time (e.g., token name from one timestamp, custom fees from another), presenting a historically inconsistent and misleading token state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13e7f9b5-2404-4db3-9cd6-fc089018d32b?mode=deep",
+    "timestamp": "2026-04-29 04:33:16.842378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user provide a `timestamp=lt:<value>` filter where the value is set to the exact `lower(timestamp_range)` of the NFT's creation event, causing the `nft` current-state row to be excluded while `nft_history` rows (if any) remain, making the history appear to show transfers for an NFT that does not yet exist at the queried point in time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74c146db-76a0-407e-be5b-4dfa618c3afa?mode=deep",
+    "timestamp": "2026-04-29 04:33:42.396355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user set `limit=1` and `order=desc` to retrieve only the most recent transfer, then use the returned `consensus_timestamp` as a `timestamp=lt:<value>` filter in a subsequent request to walk history one event at a time, and by doing so observe whether any transfers were inserted out of order (i.e., a later `consensus_timestamp` appearing before an earlier one in the history), revealing a history reorganization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_592afb7d-a10e-4576-83f0-f8750a0aa566?mode=deep",
+    "timestamp": "2026-04-29 04:34:09.415054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: extractSqlFromNftTransferHistoryRequest()] Can an unprivileged external user exploit the fact that the `entity` deletion subquery uses `lower(${Entity.TIMESTAMP_RANGE})` without being constrained to the `nft` table's `token_id`/`serial_number` scope (only `Entity.ID = $1`), causing the deletion timestamp of the token entity to always appear in the history regardless of whether it is logically associated with the specific NFT serial number being queried, injecting a spurious deletion event into the history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1550d6ff-ce03-439a-9036-90e88976e1d5?mode=deep",
+    "timestamp": "2026-04-29 04:34:36.753753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftTransferHistoryRequest()] Can an unprivileged external user craft a request with `order=asc` and `limit=<max>` to retrieve the full forward history, then craft a second request with `order=desc` and `limit=<max>` to retrieve the full reverse history, and compare the two to detect discrepancies caused by the asymmetric inner-limit truncation of `nft_history`, revealing that the two traversals do not produce mirror-image results and thus the history is not consistently ordered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd8d163f-4b02-4728-8014-601b1c75f502?mode=deep",
+    "timestamp": "2026-04-29 04:35:03.471720",
+    "report_generated": false
+  }
+]
