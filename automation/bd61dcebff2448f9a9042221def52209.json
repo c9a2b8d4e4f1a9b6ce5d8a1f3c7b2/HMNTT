@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the fact that NftAllowanceRepository extends CrudRepository which exposes a deleteById(AbstractNftAllowance.Id) method, by constructing an Id with a victim's owner, their own spender ID, and a target tokenId, and if the REST layer exposes this method, permanently remove the allowance record, causing the victim's NFT transfer operations to fail and effectively freezing those funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd6db53f-33b3-42d0-9537-ac8f35521306?mode=deep",
+    "timestamp": "2026-04-29 00:10:56.293260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceMapper.map() method's @Mapping(source='timestampRange', target='timestamp') annotation to cause a mapping error when timestampRange is an unbounded Range (e.g., Range.atLeast()), resulting in a NullPointerException or incorrect timestamp in the response, causing the client to misinterpret the allowance as expired and refuse to execute NFT transfers, effectively freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac29a82b-64a5-4188-a8d5-2a9cb862220c?mode=deep",
+    "timestamp": "2026-04-29 00:11:08.291026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the AbstractNftAllowance.getId() method which constructs an Id from owner, spender, and tokenId fields, by providing a request where the resolved EntityId.getId() returns 0 (for a system account), causing the getBaseCondition() to match all NFT allowances where owner=0 or spender=0, returning system-level approvedForAll grants that could be exploited to freeze funds across the entire network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd1494fb-16fa-42a6-9ce5-a103a9562c69?mode=deep",
+    "timestamp": "2026-04-29 00:11:20.742688",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the JooqRepository.getCondition(Field<Long>, RangeOperator, Long) method by triggering a path where the RangeOperator is UNKNOWN (with a null function), causing a NullPointerException when operator.getFunction().apply(field, value) is called, crashing the query execution and permanently blocking NFT allowance lookups, effectively freezing all NFT transfer operations that depend on allowance verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac8d87e5-6ccf-490c-85da-f506b58e5bc9?mode=deep",
+    "timestamp": "2026-04-29 00:11:33.902562",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the Bound.getInclusiveRangeValue() method which adds 1 to GT values and subtracts 1 from LT values, by providing a GT value of Long.MAX_VALUE-1 causing the adjusted value to equal Long.MAX_VALUE, and then the EQ condition in getPrimaryCondition() matches a tokenId of Long.MAX_VALUE, returning an NFT allowance for a system-reserved token ID that grants approvedForAll access and enables fund freezing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c88a0d00-87cb-4284-9d40-d311ccecf796?mode=deep",
+    "timestamp": "2026-04-29 00:11:47.630551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRequest default isOwner=true value by not providing the isOwner parameter, causing the getBaseCondition() to always filter on NFT_ALLOWANCE.OWNER, and then provide their own account ID as the owner to enumerate all spenders who have approvedForAll=true grants on their tokens, revealing which accounts can freeze their NFT funds and enabling targeted social engineering or further exploitation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5dec6c60-80dd-4709-be54-8fe95e008e9c?mode=deep",
+    "timestamp": "2026-04-29 00:12:01.893368",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRequest default limit=25 by providing limit=0, causing the .limit(0) clause in the JOOQ query to return zero results regardless of existing allowances, making the mirror node report no active NFT allowances when they actually exist, causing downstream systems to incorrectly deny NFT transfers and permanently freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed9208b3-36b8-46e8-ade7-40084231951a?mode=deep",
+    "timestamp": "2026-04-29 00:12:17.021440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRequest default limit=25 by providing a negative limit value, causing the .limit(negativeValue) clause in the JOOQ query to throw a database exception or return unexpected results, crashing the allowance lookup service and permanently blocking NFT transfer verification, effectively freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_adfd4d63-ccfd-4dee-ab22-90a25ade589b?mode=deep",
+    "timestamp": "2026-04-29 00:12:33.395984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the JooqRepository.getBoundConditions() method's handling of a null bounds list (returning noCondition()), by crafting a request where getBounds() returns a list containing a null element, causing a NullPointerException in bounds.getFirst() or subsequent processing, crashing the query and permanently blocking NFT allowance lookups, effectively freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7f7e633f-2952-4879-88b1-0688f537e513?mode=deep",
+    "timestamp": "2026-04-29 00:12:50.786836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the Bound.EMPTY singleton being shared across requests, by triggering a race condition where one thread's call to adjustUpperRange() or adjustLowerRange() on EMPTY modifies its state (since EMPTY is a static final instance), causing subsequent requests to use corrupted bound state, returning incorrect NFT allowances and enabling fund freezing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cb2430f-9473-4e03-98bf-730a3946c557?mode=deep",
+    "timestamp": "2026-04-29 00:13:08.025451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRepositoryCustomImpl.SORT_ORDERS static Map by providing an OrderSpec that is not present in the map (e.g., a null direction), causing SORT_ORDERS.get() to return null and the .orderBy(null) call to throw a NullPointerException, crashing the query execution and permanently blocking NFT allowance lookups, effectively freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46f4cf6b-6c9e-4d76-9b37-999f4da99660?mode=deep",
+    "timestamp": "2026-04-29 00:13:26.606560",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the EntityServiceImpl.lookup() switch expression which handles EntityIdNumParameter, EntityIdAliasParameter, and EntityIdEvmAddressParameter, by providing a parameter type that falls through to the default case (if any), causing an unhandled exception that crashes the service and permanently blocks NFT allowance lookups, effectively freezing funds for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2c72af3-59f4-4131-bab2-33fcff5d4c12?mode=deep",
+    "timestamp": "2026-04-29 00:13:44.780146",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the EntityServiceImpl.lookup() method's EntityNotFoundException thrown when no account is found, by repeatedly querying with non-existent account IDs to cause exception-based information leakage about which account IDs exist, then use that information to target accounts with active approvedForAll NFT allowances and exploit those allowances to freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fc49bee-4bcb-462a-b76d-54390d90db8b?mode=deep",
+    "timestamp": "2026-04-29 00:14:03.975272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the AbstractNftAllowance.payerAccountId field which is stored with EntityIdConverter, by crafting a request that causes the converter to deserialize a malformed payerAccountId value, resulting in an incorrect payer being associated with an NFT allowance, causing the allowance to be attributed to the wrong account and enabling fund freezing through misdirected allowance grants?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f13599d-8ac8-40e7-9972-cf586829626a?mode=deep",
+    "timestamp": "2026-04-29 00:14:23.722267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRepositoryCustomImpl.getBaseCondition() method which ANDs the account condition with APPROVAL_CONDITION, by providing an accountId whose getId() returns a value that matches both the OWNER and SPENDER columns of the same record, causing the query to return self-referential allowances where the owner and spender are the same account, enabling the user to freeze their own funds or exploit circular allowance logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e012747-7ad4-4472-8dfa-3ac3d8e7d09b?mode=deep",
+    "timestamp": "2026-04-29 00:14:44.947126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the NftAllowanceRequest.getBounds() method which returns List.of(primaryBound) when tokenIds is empty, causing the findAll() query to only filter on the owner/spender condition without any token ID constraint, returning all approvedForAll allowances for the given account across all token types, enabling the user to enumerate all tokens for which they have blanket transfer authority and exploit those to freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5c25e40-9f65-4cfc-9899-1a1185d94f2f?mode=deep",
+    "timestamp": "2026-04-29 00:15:07.290493",
+    "report_generated": false
+  }
+]
