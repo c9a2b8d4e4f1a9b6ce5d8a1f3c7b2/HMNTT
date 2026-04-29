@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply order=desc with a large limit to getTopicMessageTimestampRanges(), causing the DESC rangeExpression int8range(greatest(lower(range) - ($4 - 1), lower($2::int8range)), upper(range), '[)') to compute greatest(lower(range) - (limit-1), lower($2::int8range)) where limit-1 could underflow the lower bound to a very small value, causing an excessively wide range scan that exhausts database resources and denies financial message access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21d7e3b8-03b3-465b-ab97-21702591e0ff?mode=deep",
+    "timestamp": "2026-04-29 05:16:06.434081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user send repeated requests with large limit values to getTopicMessages() for a high-traffic financial HCS topic, causing getMessages() to return and serialize massive result sets, exhausting Node.js heap memory and causing a denial-of-service that prevents legitimate financial message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a0b9ac0-8a11-4fbf-ad21-e2c198fe2f87?mode=deep",
+    "timestamp": "2026-04-29 05:16:18.335466",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user exploit the fact that topicMessagesResponse is pre-populated with an empty messages array and null next link before the query executes, and if an unhandled exception occurs mid-execution, the partially populated res.locals[constants.responseDataLabel] could be returned to the client, causing downstream financial systems to receive an empty response and incorrectly conclude no fund transfer messages exist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b07c720-c3a4-4c3d-9abc-ed2da26358fd?mode=deep",
+    "timestamp": "2026-04-29 05:16:30.619673",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply a sequencenumber=ne:X filter to extractSqlFromTopicMessagesRequest(), which passes through the default case in the switch statement and adds a SQL condition with the ne operator (!=), but getRangeFromFilters() explicitly throws InvalidArgumentError for ne operator, creating an inconsistency where the SQL condition is added but the timestamp range lookup throws an error, causing unpredictable query behavior for financial message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45993553-3988-4d4c-bdd3-33172fb08736?mode=deep",
+    "timestamp": "2026-04-29 05:16:43.052428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply a timestamp filter with a future timestamp value to getTopicMessages(), causing the SQL query to include a condition that matches no current messages but the pagination link still generates a next URL pointing to that future timestamp, causing downstream financial systems to poll indefinitely for messages that don't yet exist and miss currently available fund transfer messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30e44a6f-2284-454f-8506-464728b6d911?mode=deep",
+    "timestamp": "2026-04-29 05:16:55.934948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply timestamp=gt:X and timestamp=lt:X (same value) filters to getTopicMessages(), causing getRangeFromFilters() to compute a range where lower > upper (since gt adds 1 and lt subtracts 1), returning null and causing extractSqlFromTopicMessagesRequest() to return {}, silently returning an empty messages array to downstream financial systems that expect to find fund transfer messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ff665a2-f48e-478f-9d15-2de2efc2e132?mode=deep",
+    "timestamp": "2026-04-29 05:17:09.393647",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a sequencenumber range that spans exactly the limit boundary (sequenceNumberRange.upper - sequenceNumberRange.lower + 1n === limit) to getTopicMessageTimestampRanges(), causing the code to take the simpler query path (no CTE), but if the actual messages span multiple lookup table rows, the simpler query may return incomplete timestamp ranges, causing the outer query to miss financial messages at range boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1a06683-b2f5-498f-8c6d-1c242d6a9a7b?mode=deep",
+    "timestamp": "2026-04-29 05:17:23.764256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user exploit the fact that the lastTimeStamp for pagination is taken from the last message's consensus_timestamp field (topicMessagesResponse.messages[messages.length-1][TopicMessage.CONSENSUS_TIMESTAMP]), and if two messages share the same consensus_timestamp, the generated next link will re-fetch the same timestamp, causing duplicate financial messages to be processed by downstream fund-transfer systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acc00877-a073-4e79-8883-05eb89da387d?mode=deep",
+    "timestamp": "2026-04-29 05:17:39.158610",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply order=desc to getTopicMessages(), causing the pagination link to use a lt: operator for the timestamp continuation, and if the last message's timestamp equals the first message's timestamp in the next page, the lt: filter will exclude that message, causing a gap in the financial message stream that downstream fund-processing systems cannot detect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc517ece-bdff-42b3-994e-cb39cec85eba?mode=deep",
+    "timestamp": "2026-04-29 05:17:55.722218",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: validateGetTopicMessagesParams()] Can an unprivileged external user supply a topicId in the format shard.realm.num where shard or realm are very large numbers to validateGetTopicMessagesParams(), which only calls EntityId.isValidEntityId(topicId, false), and if EntityId.parseString() encodes the ID differently than expected, cause the SQL query to target a different topic than intended, returning financial messages from the wrong HCS topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_181a40f1-087f-4ccb-aae9-aa69f2f4171e?mode=deep",
+    "timestamp": "2026-04-29 05:18:12.140275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: validateGetSequenceMessageParams()] Can an unprivileged external user supply a sequenceNumber of '0' to validateGetSequenceMessageParams(), which calls utils.isPositiveLong(seqNum) with allowZero defaulting to false, causing the validation to reject sequence number 0 and throw InvalidArgumentError, but if sequence number 0 is a valid HCS message in some edge case, this causes legitimate financial messages to be permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5444214-e5cb-44ad-8004-ae681d18a33e?mode=deep",
+    "timestamp": "2026-04-29 05:18:29.893322",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getMessageByConsensusTimestamp()] Can an unprivileged external user supply a consensusTimestamp with exactly 10 digits of seconds and 9 digits of nanoseconds (e.g., '9999999999.999999999') to getMessageByConsensusTimestamp(), which passes isValidTimestampParam() validation, but when parseTimestampParam() concatenates seconds and nanos to form a 19-digit nanosecond value, the resulting BigInt exceeds MAX_LONG, causing a PostgreSQL bigint overflow error that leaks database error details?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0922c11-0adf-4791-96c6-5b2756b665a8?mode=deep",
+    "timestamp": "2026-04-29 05:18:47.677787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user send a high volume of concurrent requests to getTopicMessages() for the same popular financial HCS topic, exploiting the lack of per-topic rate limiting, causing database connection pool exhaustion that denies legitimate financial message retrieval for all users of that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_230d3914-0e9b-4f97-a59f-592125350c8f?mode=deep",
+    "timestamp": "2026-04-29 05:19:06.389038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply a sequencenumber=gte:1 filter (effectively no lower bound restriction) combined with a large limit to getTopicMessageTimestampRanges(), causing the CTE query to scan the entire topic_message_lookup table for a given topicId, exhausting database I/O and causing a denial-of-service for financial message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef110771-0a43-4396-bcc1-77f05079f9d1?mode=deep",
+    "timestamp": "2026-04-29 05:19:26.640830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: extractSqlFromTopicMessagesRequest()] Can an unprivileged external user supply the maximum allowed number of repeated sequencenumber parameters (up to config.query.maxRepeatedQueryParameters) to extractSqlFromTopicMessagesRequest(), causing the conditions array to grow with one entry per filter, generating an extremely long SQL WHERE clause that causes PostgreSQL query planning overhead and denial-of-service for financial message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87e25484-b5a7-42c6-ae56-c51d844e108a?mode=deep",
+    "timestamp": "2026-04-29 05:19:46.257100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply a topicId that encodes to a very large entity_id value to getTopicMessages(), causing the SQL query to use a topic_id value that matches no rows but the query still executes a full index scan, wasting database resources and contributing to denial-of-service for legitimate financial message retrieval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4886b776-8e61-45a8-bdc0-b3ce8ae2fb02?mode=deep",
+    "timestamp": "2026-04-29 05:20:06.308971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getRangeFromFilters()] Can an unprivileged external user supply a sequencenumber=gte:9223372036854775806 filter to getRangeFromFilters(), causing range.lower to be set to MAX_LONG-1 (9223372036854775806n), and since range.upper is also MAX_LONG-1 (constants.MAX_LONG - 1n), the range is valid (lower <= upper), but the resulting timestamp range lookup covers only the very last sequence number, potentially causing the CTE query to miss financial messages if the lookup table has boundary issues?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_54cf6c2a-2ff3-4a13-8b19-993bd3454bf1?mode=deep",
+    "timestamp": "2026-04-29 05:20:27.109358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user exploit the fact that getTopicMessages() does not call utils.validateReq(req) with the acceptedTopicsParameters set, meaning unknown query parameters are not rejected, and supply extra parameters that are silently ignored by buildAndValidateFilters but could be logged or cached by intermediate proxies, leaking information about financial HCS topic access patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3d7a9cb-b79d-4ee8-9367-6f0840a775f7?mode=deep",
+    "timestamp": "2026-04-29 05:20:48.092507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessageTimestampRanges()] Can an unprivileged external user supply both sequencenumber and timestamp filters to getTopicMessageTimestampRanges() where the timestamp range is very narrow (e.g., a single nanosecond), causing the timestamp_range && $3::int8range condition to match very few or no rows in topic_message_lookup, returning an empty array and causing extractSqlFromTopicMessagesRequest() to return {}, silently hiding financial messages from downstream systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bbf96524-8f4c-4919-ba8f-6b9448c38fe4?mode=deep",
+    "timestamp": "2026-04-29 05:21:10.457125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply a timestamp=lte:X filter where X is a timestamp just before a critical financial message, causing the SQL query to exclude that message, and since the pagination next link uses the last returned message's timestamp with a gt: operator, the financial message at timestamp X+1 will never appear in any paginated response if the client follows the generated next links?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2caf033b-5bbb-4bcb-98a7-9240bcb10cb4?mode=deep",
+    "timestamp": "2026-04-29 05:21:34.149404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply a sequencenumber=gt:X filter combined with order=desc to getTopicMessages(), causing the DESC rangeExpression in getTopicMessageTimestampRanges() to expand the range downward by limit-1, potentially including sequence numbers below X in the timestamp range lookup, causing the outer SQL query to return messages with sequence numbers below X that should have been excluded by the filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_160b8e26-076a-49ba-92af-c4af6ef10576?mode=deep",
+    "timestamp": "2026-04-29 05:21:57.867379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getMessages()] Can an unprivileged external user trigger a scenario where getMessages() returns rows that are mapped to TopicMessage objects, but if a row has a null or malformed field that TopicMessage constructor does not validate, the resulting TopicMessageViewModel could contain null financial data that downstream systems interpret as a zero-value fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19cbd266-cfb6-415b-94d1-74cba9cf4c7e?mode=deep",
+    "timestamp": "2026-04-29 05:22:21.554282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/topicmessage.js -> Scope: Critical: Direct loss of funds'] [Function: getTopicMessages()] Can an unprivileged external user supply a limit parameter that is exactly at the boundary between the simple query path and the CTE path in getTopicMessageTimestampRanges() (sequenceNumberRange.upper - sequenceNumberRange.lower + 1n === limit), causing a race condition where concurrent requests with the same parameters take different code paths and return inconsistent sets of financial messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a83c029-f0e7-41a1-a273-ef8fd46f216c?mode=deep",
+    "timestamp": "2026-04-29 05:22:46.037124",
+    "report_generated": false
+  }
+]
