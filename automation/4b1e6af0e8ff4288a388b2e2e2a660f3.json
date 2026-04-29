@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with consensusStartTime set to the current time minus 1 nanosecond (just before now), causing the isValidStartTime() check to pass, but then the DB query to return zero historical messages and immediately enter the live listener path, creating a persistent connection that never terminates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17e1330d-d802-4e23-9a8e-0eb7c02c4073?mode=deep",
+    "timestamp": "2026-04-29 01:58:22.350002",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the Flux.merge(safetyCheck, live) pattern by subscribing to a topic where the live listener (Redis/polling) is partitioned from the DB, causing the safetyCheck to fire every second and issue repeated DB queries, amplifying the load on an already-degraded DB and worsening the partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee5ec232-3fe4-4bdb-a3e5-4947a5ef1299?mode=deep",
+    "timestamp": "2026-04-29 01:58:38.294821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user craft a ConsensusTopicQuery with consensusEndTime set to consensusStartTime + 1 nanosecond, causing the stream to immediately complete after emitting zero messages, and repeat this at high frequency to create a connection-open/close storm that exhausts TCP port resources and partitions the server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79e25732-491b-4dab-abd7-f2786be88549?mode=deep",
+    "timestamp": "2026-04-29 01:58:50.451395",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toFilter()] Can an unprivileged user send a ConsensusTopicQuery where both consensusStartTime and consensusEndTime are set to the same nanosecond value, bypassing the isValidEndTime() check (endTime > startTime is false), causing a ConstraintViolationException that is mapped to INVALID_ARGUMENT, but the error path itself triggers resource cleanup that races with ongoing stream operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e0b082c-bd68-42c2-9c60-9bd619848ff6?mode=deep",
+    "timestamp": "2026-04-29 01:59:02.948920",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the absence of a maximum concurrent subscription limit per topicId to subscribe to the same popular topic from thousands of connections, causing the shared Redis listener (topicMessages ConcurrentHashMap) to be accessed under extreme contention, degrading performance to a partition-like state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9445b6d-22e9-4d47-a9d1-7c2fd4aab9ed?mode=deep",
+    "timestamp": "2026-04-29 01:59:15.734361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with a valid topicId but set consensusStartTime to a future timestamp (which fails isValidStartTime()), causing a ConstraintViolationException that is mapped to INVALID_ARGUMENT via onErrorMap, and by sending this at high rate, flood the error-handling path and cause log I/O saturation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bf4abe0-89e3-471c-9486-0d91e2135e7c?mode=deep",
+    "timestamp": "2026-04-29 01:59:29.504142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that the Mono.fromCallable(() -> toFilter(request)) runs on the calling thread (no explicit scheduler), and by sending a request that causes toFilter() to block (e.g., via EntityId.of() with a pathological topicID value), tie up the gRPC server thread and prevent other requests from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecf597af-6298-4d22-9924-842ac5f5602a?mode=deep",
+    "timestamp": "2026-04-29 01:59:43.619082",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toResponse()] Can an unprivileged user trigger a scenario where toResponse() is called with a TopicMessage where chunkNum is non-null but chunkTotal is null or zero, causing ConsensusMessageChunkInfo.Builder.setTotal(null) to throw a NullPointerException that is not caught by onErrorMap, crashing the reactive pipeline and leaving the stream in a broken state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e20195ad-075d-4956-968f-cbed6cd4360a?mode=deep",
+    "timestamp": "2026-04-29 01:59:58.897024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the lack of gRPC flow control enforcement in subscribeTopic() to send a subscription request and then stop reading responses, causing the server-side write buffer to fill up, blocking the reactive pipeline's onNext calls, and eventually causing a thread to hang indefinitely in a partition-like state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_046695ce-657f-442d-a3fb-79221f74d943?mode=deep",
+    "timestamp": "2026-04-29 02:00:14.739077",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with a topicId that maps to a topic with an extremely high sequence number gap (e.g., sequence 1 to 10^9), causing the missingMessages() gap-fill query to attempt to retrieve 10^9 messages in a single DB query, exhausting memory and causing an OOM that partitions the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21899e68-67f0-4f66-aa4d-008d56ad78d7?mode=deep",
+    "timestamp": "2026-04-29 02:00:31.533156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that subscriberCount.incrementAndGet() in doOnSubscribe and subscriberCount.decrementAndGet() in doFinally are not atomic with respect to the Flux lifecycle, and during a network partition event where doFinally fires multiple times (due to error + cancel), the counter goes negative, causing monitoring to report incorrect subscriber counts and mask the true load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0148cb0-d535-498e-8eaa-1d652f336b96?mode=deep",
+    "timestamp": "2026-04-29 02:00:48.824252",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: convertTimestamp()] Can an unprivileged user send a consensusStartTime with seconds=9223372034 and nanos=999999999, causing convertTimestamp() to call DomainUtils.timestampInNanosMax() with a value that is just below the overflow guard but still produces a nanosecond value near Long.MAX_VALUE, which when used as a DB query parameter causes an index scan from the end of the table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86452130-857f-402f-b53e-71874ddd1bad?mode=deep",
+    "timestamp": "2026-04-29 02:01:06.202053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the Flux.merge(safetyCheck, live).takeUntilOther(pastEndTime(topicContext)) pattern by setting endTime to a value just past the current time, causing pastEndTime() to poll repeatedly at grpcProperties.getEndTimeInterval() frequency, and with many concurrent subscribers, overwhelming the scheduler with timer tasks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a903cebf-f6be-41f4-aa45-9b46aa140c1f?mode=deep",
+    "timestamp": "2026-04-29 02:01:24.529736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with a valid topicId and limit=1, causing the stream to complete after one message, and then immediately reconnect with the same query, creating a high-frequency reconnect loop that generates excessive DB queries and simulates a partition through resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d97512d-08bf-4fe9-be26-42a461c7ff9b?mode=deep",
+    "timestamp": "2026-04-29 02:01:44.667710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the absence of request deduplication in subscribeTopic() to send identical ConsensusTopicQuery requests from multiple connections simultaneously, causing the server to create redundant Flux pipelines for the same topic that each independently query the DB, multiplying the load and causing a partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60daa9b5-fe5f-416b-85e9-aae5ccad7836?mode=deep",
+    "timestamp": "2026-04-29 02:02:03.643059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toFilter()] Can an unprivileged user send a ConsensusTopicQuery with a topicID containing shard=Long.MAX_VALUE, realm=Long.MAX_VALUE, and topicNum=Long.MAX_VALUE, causing EntityId.of() to produce an EntityId with an ID value that overflows when stored as a long, resulting in a DB query with a negative or zero entity ID that returns unexpected results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da1af2c8-f008-447f-a464-7b5c647e3666?mode=deep",
+    "timestamp": "2026-04-29 02:02:23.801235",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that the onErrorMap(ProtoUtil::toStatusRuntimeException) only maps known exception types, and an unexpected RuntimeException from the reactive pipeline (e.g., from a corrupted TopicMessage in the DB) falls through to the UNKNOWN status path, causing the server to log a full stack trace for every such message and saturate the logging I/O?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e43efd11-88c9-42b9-80ef-ee43bdc1e12c?mode=deep",
+    "timestamp": "2026-04-29 02:02:43.854248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that there is no maximum message size limit enforced in subscribeTopic() before calling responseObserver::onNext, and by subscribing to a topic with very large messages (up to 6KiB each), cause the gRPC frame serialization to consume excessive CPU and memory, degrading the server to a partition-like state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c208e16-b01a-4a2f-8593-de7e52ad7bac?mode=deep",
+    "timestamp": "2026-04-29 02:03:04.846396",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with consensusStartTime set to epoch (0 seconds, 0 nanos) and no endTime or limit, causing the historical retrieval Flux to emit all messages ever stored for the topic, followed by an infinite live stream, holding a DB cursor open indefinitely and exhausting connection pool resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab431f08-4f35-4a70-b18e-bfae7bfe94a2?mode=deep",
+    "timestamp": "2026-04-29 02:03:26.711887",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the reactive pipeline's lack of timeout on the historical retrieval phase (historical = topicMessageRetriever.retrieve(filter, true)) to cause a subscription that hangs indefinitely if the DB query never returns, holding a gRPC stream open and consuming a server thread?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d240bc5e-e796-45b6-ae87-e37adc195594?mode=deep",
+    "timestamp": "2026-04-29 02:03:48.969109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that the Disposable returned by subscribe() is stored in a local variable and only referenced by the cancel handler, and if the cancel handler is never registered (non-ServerCallStreamObserver path), the Disposable is unreachable and the subscription runs forever, leaking resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0feb7f4a-13df-44e8-bc66-243085d007e8?mode=deep",
+    "timestamp": "2026-04-29 02:04:11.870249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: toResponse()] Can an unprivileged user trigger a scenario where toResponse() is called with a TopicMessage where payerAccountId.toAccountID() throws an exception (e.g., due to a corrupted entity ID in the DB), causing an unhandled exception in the reactive pipeline that is not caught by onErrorMap (which is upstream), terminating the stream unexpectedly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99098242-85b8-4613-b816-56562aa579e9?mode=deep",
+    "timestamp": "2026-04-29 02:04:35.022066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the absence of a global connection limit in the gRPC server configuration to open connections up to the OS file descriptor limit, causing the server to fail to accept new connections and effectively partitioning all new clients from the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e41837bd-fa67-4c23-9155-064d7583aaaa?mode=deep",
+    "timestamp": "2026-04-29 02:04:58.554355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user send a ConsensusTopicQuery with a valid topicId and set consensusStartTime to a timestamp that corresponds to a period of high message volume, causing the historical retrieval to emit a burst of messages that overwhelms the gRPC write buffer and triggers a DEADLINE_EXCEEDED overflow error, disconnecting the stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_221e277d-6627-4c32-85b2-c72fd628d2cb?mode=deep",
+    "timestamp": "2026-04-29 02:05:21.357140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribeTopic()] Can an unprivileged user exploit the fact that the Flux pipeline in subscribeTopic() does not apply any rate limiting (e.g., no limitRate() or delayElements()) to the message emission, causing a fast-producing topic to overwhelm a slow consumer and trigger backpressure overflow that terminates the stream with DEADLINE_EXCEEDED?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cf8f510-6945-43d7-847a-fedf0e3e00d9?mode=deep",
+    "timestamp": "2026-04-29 02:05:46.585408",
+    "report_generated": false
+  }
+]
