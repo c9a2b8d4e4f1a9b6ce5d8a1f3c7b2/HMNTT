@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: putTokenCache()] Can an unprivileged external user exploit the TOCTOU (time-of-check-time-of-use) race condition in `putTokenCache()` between `tokenCache.has(tokenId)` at line 123 and `tokenCache.set(tokenId, cachedToken)` at line 128, causing two concurrent requests to both pass the `has()` check and then both call `set()`, with the second write overwriting the first with potentially different (stale) token metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6069d11e-dc39-431a-afcd-d192b4d93838?mode=deep",
+    "timestamp": "2026-04-29 00:30:16.866864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: putTokenCache()] Can an unprivileged external user exploit the fact that `putTokenCache()` never updates an existing cache entry (it returns early if `tokenCache.has(tokenId)` is true at line 123-125), meaning that if the first population of the cache occurs with stale data (e.g., during DB replication lag), the stale token metadata persists indefinitely until LRU eviction, misrepresenting Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1dd65a65-cbc7-41ab-a33b-921fe1eae540?mode=deep",
+    "timestamp": "2026-04-29 00:30:28.731288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: putTokenCache()] Can an unprivileged external user be the first to trigger `putTokenCache()` for a newly created token during the window between the token's creation transaction being submitted to Hashgraph and the mirror node fully ingesting it, causing the cache to be populated with incomplete token metadata (e.g., `decimals: undefined`) that persists and misrepresents the token's true Hashgraph-recorded properties?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f0b96e9-8a62-4649-9fd1-1e89fe9abc60?mode=deep",
+    "timestamp": "2026-04-29 00:30:43.335964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCachedTokens()] Can an unprivileged external user supply a `tokenIds` Set containing a specially crafted BigInt value that causes the `tokenCacheQuery` (`where token_id = any ($1)`) to match unintended rows in the `token` table, returning metadata for a different token than requested and corrupting the cache with mismatched token_id-to-metadata mappings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f07ccb46-31f0-451b-9f68-eac094bce68f?mode=deep",
+    "timestamp": "2026-04-29 00:30:55.700136",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCachedTokens()] Can an unprivileged external user supply an extremely large Set of `tokenIds` to `getCachedTokens()`, causing the `uncachedTokenIds` array to grow unboundedly and the `tokenCacheQuery` with `any ($1)` to execute with a massive array parameter, causing DB performance degradation that results in query timeouts and incomplete historical token data being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7785ecbd-0e49-42ca-9353-c4868deb87b4?mode=deep",
+    "timestamp": "2026-04-29 00:31:08.749617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenAccounts()] Can an unprivileged external user craft a request where `rows.reduce((result, row) => result.add(row.token_id), new Set())` at line 103 produces a Set with duplicate-equivalent token IDs (e.g., due to type coercion between BigInt and Number representations of the same ID), causing `getCachedTokens()` to query the DB twice for the same token and potentially cache two different snapshots of its metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ec00e62-af45-4469-a66d-dde8cf96493d?mode=deep",
+    "timestamp": "2026-04-29 00:31:22.205546",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the fact that `cachedTokens.get(row.token_id)` at line 106 uses the raw `row.token_id` value as the Map key (which may be a string from the DB), while `tokenCache` stores entries keyed by BigInt, causing a key type mismatch that results in cache misses and repeated DB queries that may return inconsistent historical snapshots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e157a68a-4bc7-4c54-9cdc-926e059e1020?mode=deep",
+    "timestamp": "2026-04-29 00:31:36.672127",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenAccounts()] Can an unprivileged external user trigger a scenario where `getCachedTokens()` returns a Map where `cachedToken` is `undefined` for a valid `token_id` (due to the token not existing in the `token` table), causing `row.decimals`, `row.freeze_status`, and `row.kyc_status` to remain as DB-fetched values that may be `null`, and the resulting `TokenAccount` object misrepresents the token's Hashgraph-recorded state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78ceb19e-df8d-432f-9a51-4c351c906b8d?mode=deep",
+    "timestamp": "2026-04-29 00:31:52.296215",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL payload through `inConditions[].value` that includes a reference to the `token_history` table (e.g., `1 UNION SELECT token_id FROM token_history WHERE timestamp_range @> 0::bigint`), causing the API to return token IDs from historical snapshots that are no longer current, misrepresenting the active Hashgraph token state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f04c061e-1368-4064-a927-6aff7d79d952?mode=deep",
+    "timestamp": "2026-04-29 00:32:08.538029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user exploit the direct array-to-string interpolation in `in (${tokenIdInParams})` to inject a SQL expression like `SELECT token_id FROM token WHERE decimals != (SELECT decimals FROM token_history WHERE ...)`, causing the query to filter based on historical vs. current token state discrepancies and leaking information about Hashgraph history modifications?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b8a0287-fd1d-4c3e-ba6c-9c02864e7c2e?mode=deep",
+    "timestamp": "2026-04-29 00:32:24.512036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: tokenRelationshipsQuery (static)] Can an unprivileged external user exploit the static `tokenRelationshipsQuery` at lines 20-29 which filters by `ASSOCIATED = true`, by injecting SQL through `inConditions` that overrides this filter, causing the query to return token associations where `associated = false` (i.e., historically dissociated tokens), misrepresenting the current Hashgraph-recorded association state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d23a122-6ab2-4533-86ea-5bc8ec141a15?mode=deep",
+    "timestamp": "2026-04-29 00:32:42.390487",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a negative or zero `limit` value that, when used as `$2` in `getLimitQuery(2)`, causes the DB to return an error or an unexpected number of rows, potentially bypassing pagination controls and exposing the complete historical token relationship dataset for an account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d70ca392-fdd5-4db9-b2b3-91e77f8e6548?mode=deep",
+    "timestamp": "2026-04-29 00:33:00.217735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a `ownerAccountId` value that is a valid account ID on the Hashgraph but belongs to a different user, causing `getTokenRelationshipsQuery()` to return that account's complete historical token association records without any authentication check, exposing private Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6a26f52-9369-4fc6-8c2d-51c6417ea6d0?mode=deep",
+    "timestamp": "2026-04-29 00:33:19.112040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that `tokenCache` persists across requests (module-level singleton) to perform a cache poisoning attack by first triggering a request that populates the cache with token metadata from a DB read replica that is lagging behind the Hashgraph consensus state, then causing all subsequent users to receive stale historical token data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05ce303a-91b0-46c2-a989-ae8bda6866f9?mode=deep",
+    "timestamp": "2026-04-29 00:33:38.923583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL payload through `inConditions[].value` that uses PostgreSQL's `COPY` command or `pg_read_file()` function to read sensitive files from the mirror node server, leveraging the unparameterized `in (${tokenIdInParams})` interpolation as the injection vector?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d19994a0-dfce-4382-a590-11b042b1278e?mode=deep",
+    "timestamp": "2026-04-29 00:33:59.010250",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL UPDATE or INSERT statement through the unparameterized `in (${tokenIdInParams})` interpolation (using stacked queries if the DB driver supports them), directly modifying the `token` or `token_account` tables to alter the mirror node's representation of Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2d50537-d73b-41e3-8e81-dfcddfe915f0?mode=deep",
+    "timestamp": "2026-04-29 00:34:20.336115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL payload that modifies the `decimals` column in the `token` table through the unparameterized `in (${tokenIdInParams})` interpolation, causing the mirror node to permanently serve incorrect decimal precision for a token, misrepresenting the Hashgraph-recorded token properties to all API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71f651f2-38a7-4b87-bf04-c7f7bc910809?mode=deep",
+    "timestamp": "2026-04-29 00:34:42.160749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a SQL payload that alters `freeze_status` or `kyc_status` values in the `token_account` table through the unparameterized `in (${tokenIdInParams})` interpolation, causing the mirror node to report incorrect compliance status for token accounts, misrepresenting the Hashgraph-recorded KYC/freeze history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c57ddf60-e798-406c-873e-21e2fcd9538a?mode=deep",
+    "timestamp": "2026-04-29 00:35:03.929738",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the `row.freeze_status ?? cachedToken.freezeStatus` null-coalescing at line 109 by first causing a cache entry to be populated with `freezeStatus: 1` (FROZEN), then triggering a request where the DB returns `freeze_status: null` for that token-account pair, causing the API to report the account as FROZEN when the Hashgraph records it as NOT_APPLICABLE?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25c0268c-ebe1-460b-96e9-ad324addaedc?mode=deep",
+    "timestamp": "2026-04-29 00:35:26.304604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenAccounts()] Can an unprivileged external user exploit the `row.kyc_status ?? cachedToken.kycStatus` null-coalescing at line 110 by poisoning the cache with `kycStatus: 1` (GRANTED), then querying an account where the DB returns `kyc_status: null`, causing the API to falsely report KYC as GRANTED when the Hashgraph records no KYC status, misrepresenting compliance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a434f126-343e-4d12-8988-8d0c5f72814f?mode=deep",
+    "timestamp": "2026-04-29 00:35:49.169146",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that `tokenCache.set(tokenId, cachedToken)` at line 156 is called for every DB row returned by `tokenCacheQuery`, including rows where `freeze_status` or `kyc_status` is `null`, causing the cache to store `CachedToken` objects with `null` status values that then propagate to all subsequent API responses via the null-coalescing logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5de76c86-fa66-4691-892b-bbed1cbab9e9?mode=deep",
+    "timestamp": "2026-04-29 00:36:12.855165",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `token_id` value of `0` or a negative number that, when interpolated into `in (${tokenIdInParams})`, matches unexpected rows in the `token_account` table (due to entity ID encoding), returning token associations that should not be visible and exposing historical Hashgraph data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e484242c-af08-4dd2-986f-fb5c83b7be10?mode=deep",
+    "timestamp": "2026-04-29 00:36:36.995435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a `conditions` array with a `condition.value` that is an array itself, causing `params.push(condition.value)` at line 55 to push an array into the params list, which when referenced as `$${params.length}` in the SQL causes a type mismatch or unexpected query behavior that returns incorrect historical token data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_728beac1-163f-403a-b683-c21361ecca7c?mode=deep",
+    "timestamp": "2026-04-29 00:37:00.923809",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply an empty `conditions` array combined with a crafted `inConditions` array to bypass the `ASSOCIATED = true` filter in `tokenRelationshipsQuery` at line 29, causing the query to return token accounts where `associated = false`, exposing historical token dissociation events recorded on the Hashgraph?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07661dc6-c6c1-4792-8f07-2f638c1af55a?mode=deep",
+    "timestamp": "2026-04-29 00:37:26.442189",
+    "report_generated": false
+  }
+]
