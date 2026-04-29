@@ -1,0 +1,122 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: shouldParse() in AbstractStreamFileParser] Can an unprivileged external user exploit the hash chain check in `shouldParse()` where `previous.getType().isChained()` returns false (for non-chained stream types), bypassing the `HashMismatchException` and allowing a file with an incorrect `previousHash` to be accepted, breaking the cryptographic chain of custody for transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8d52904-fe1e-4121-94da-93dac7d1f3a9?mode=deep",
+    "timestamp": "2026-04-28 23:54:08.478436",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLast() in AbstractStreamFileParser] Can an unprivileged external user exploit the in-memory `AtomicReference<T> last` cache in `getLast()` being null on startup (falling back to `streamFileRepository.findLatest()`) to inject a RecordFile that appears to be the first file ever processed, bypassing hash chain validation and inserting fabricated history at the beginning of the chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c71501d4-7951-4f2c-b906-40b3da17246e?mode=deep",
+    "timestamp": "2026-04-28 23:54:20.505985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLast() in AbstractStreamFileParser] Can an unprivileged external user trigger a service restart (e.g., via OOM causing the `OutOfMemoryError` excluded from `@Retryable`) to reset the `AtomicReference<T> last` to null, then race to inject a file before `streamFileRepository.findLatest()` is called, exploiting the window where the in-memory state is lost but the DB state may be stale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d549843e-2568-4051-9212-272b37465f10?mode=deep",
+    "timestamp": "2026-04-28 23:54:33.184341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user supply a RecordFile with `getConsensusEnd()` set to `Long.MAX_VALUE`, causing `applicationEventPublisher.publishEvent(new RecordFileParsedEvent(this, Long.MAX_VALUE))` to fire, which triggers `HistoricalBalanceService.onRecordFileParsed()` to call `recordFileRepository.findLatest()` and generate a balance snapshot at an incorrect timestamp, corrupting the historical balance record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac856d09-012e-4629-b139-45b16ef8345f?mode=deep",
+    "timestamp": "2026-04-28 23:54:46.171376",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user craft a RecordFile where `getItems()` is an infinite or very large stream, causing the `forEach` loop in `doParse` to run indefinitely, holding the `@Transactional` lock until the `transactionTimeout` is exceeded, then on retry the `parserContext.clear()` discards all partial state, creating a permanent gap in the transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ec304fb-27c1-4069-8749-881dc4abab54?mode=deep",
+    "timestamp": "2026-04-28 23:55:00.642578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: parse(RecordFile)] Can an unprivileged external user exploit the `@Transactional(timeoutString)` annotation to cause a transaction timeout mid-parse, where the Spring transaction is rolled back but `parserContext.clear()` in the `finally` block still executes, leaving the `last` AtomicReference pointing to the previous file and causing the next retry to re-process the same file with a different `dateRangeFilter` result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59c830c5-6ef0-41a1-aca4-057f057c34b2?mode=deep",
+    "timestamp": "2026-04-28 23:55:15.547685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateIndex(RecordFile)] Can an unprivileged external user craft a RecordFile with `version = VERSION` (exactly v6) while the last file has `version = VERSION - 1` (exactly v5), and set `getIndex()` to a negative value, causing `offset = negative - lastIndex - 1` to produce a large negative offset that shifts all block numbers to negative values, making all historical blocks unreachable by positive block number queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91cbdb39-0ad3-4a59-b53d-5e819b83ca1b?mode=deep",
+    "timestamp": "2026-04-28 23:55:31.136702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateIndex(RecordFile)] Can an unprivileged external user exploit the fact that `updateIndex` uses `getLast()` which reads from the in-memory cache or DB, and if the DB has been pruned (via `RecordFileRepository.prune()`), `getLast()` may return a file with a very old index, causing the offset calculation to produce an enormous value that rewrites all remaining block indices?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6b35cbe-c269-45cf-a2e9-a56a6ed237c1?mode=deep",
+    "timestamp": "2026-04-28 23:55:47.289718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user supply a RecordFile where `recordFile.getItems()` returns items whose `getConsensusTimestamp()` values are all outside the `dateRangeFilter` range, causing `count` to remain 0 and `recordFile.setCount(0)` to be stored, making the block appear empty even though it was processed, misleading block explorers about transaction counts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8e38241-26be-4c96-b048-55f03bd3a99f?mode=deep",
+    "timestamp": "2026-04-28 23:56:03.566172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user craft a RecordFile with items whose `consensusTimestamp` values are exactly at the boundary of `dateRangeFilter` (i.e., `timestamp == start` or `timestamp == end`), exploiting off-by-one behavior in `filter(long timestamp)` (`timestamp >= start && timestamp <= end`) to include or exclude specific transactions from the persisted history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6365c336-12fb-4495-b30a-66872215a301?mode=deep",
+    "timestamp": "2026-04-28 23:56:20.809599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: RecordItemAggregator.update(RecordFile)] Can an unprivileged external user craft a RecordFile with contract results containing a bloom filter of all 1-bits (`0xFF...FF`), causing `logsBloom.or(...)` to set all bits in the stored bloom filter, making every possible log topic appear present in the block and causing all event-filter queries to return false positives for this block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0eccee82-4df6-458d-9f8d-aad53771cb42?mode=deep",
+    "timestamp": "2026-04-28 23:56:38.326929",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user supply a RecordFile where `getItems()` returns items in reverse chronological order (descending `consensusTimestamp`), causing `logIndex` to be assigned in reverse order, so that EVM logs from later transactions have lower indices than logs from earlier transactions, corrupting the log ordering invariant relied upon by Ethereum-compatible clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14d5b7a5-9eee-497c-b461-128f7f9cc20f?mode=deep",
+    "timestamp": "2026-04-28 23:56:57.711541",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: parse(RecordFile)] Can an unprivileged external user exploit the interaction between `@Retryable` and `@Transactional` where a retry after a DB constraint violation re-executes `doParse` with the same `RecordFile` object (whose mutable state like `logIndex` AtomicInteger has already been incremented), causing log indices to start from a non-zero value on retry and creating inconsistent log index assignments?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d90650ae-a524-403d-b5be-8503c075499a?mode=deep",
+    "timestamp": "2026-04-28 23:57:17.802521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user craft a RecordFile where `recordFile.getSidecars()` contains sidecar records with `consensusTimestamp` values that do not match any item in `getItems()`, causing orphaned sidecar records to be persisted via `parserContext.addAll(recordFile.getSidecars())` that are associated with non-existent transactions, corrupting the contract execution history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c204bb8d-e2e8-4e09-81c2-04a70b05ce7a?mode=deep",
+    "timestamp": "2026-04-28 23:57:39.462545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: shouldParse() in AbstractStreamFileParser] Can an unprivileged external user craft two consecutive RecordFiles where the second file's `previousHash` matches the first file's `hash` but the second file's `consensusStart` is set to a timestamp far in the future, passing hash chain validation but inserting a file that creates a massive temporal gap in the transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38a3046b-2bf2-4156-80f0-5291664ba64f?mode=deep",
+    "timestamp": "2026-04-28 23:58:01.278431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: shouldParse() in AbstractStreamFileParser] Can an unprivileged external user craft a RecordFile with `previousHash` set to the hash of a file that is not the most recently processed file (i.e., an older file in the chain), and if the `isChained()` check passes, cause the parser to accept a file that forks the transaction history from an earlier point?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c68290bb-5e17-4656-93a7-aa778370d137?mode=deep",
+    "timestamp": "2026-04-28 23:58:23.280474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user supply a RecordFile where `getItems()` contains a mix of top-level and child transactions in an order that causes `RecordItemAggregator.accept()` to skip child items (via `!recordItem.isTopLevel()` check) but `recordItemListener.onItem()` processes them, creating an inconsistency between the aggregated block metadata (gasUsed, logsBloom) and the actual transactions stored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40786a8e-95ef-4fb7-9489-6e64036f8114?mode=deep",
+    "timestamp": "2026-04-28 23:58:47.408414",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: updateIndex(RecordFile)] Can an unprivileged external user exploit the `@Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 7200)` on `RecordFileRepository.updateIndex()` to cause the index update to run in a separate transaction from the main parse transaction, so that if the main transaction rolls back, the index update is already committed, leaving the block indices permanently shifted while the triggering file is not stored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9b3ff4b-4207-44d6-ba35-f6ef035ae835?mode=deep",
+    "timestamp": "2026-04-28 23:59:11.137612",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: parse(RecordFile)] Can an unprivileged external user craft a RecordFile that causes `doParse` to succeed but `doFlush` (via `streamFileListener.onEnd()`) to fail, causing the `@Retryable` mechanism to retry the entire parse including `doParse`, resulting in `recordItemListener.onItem()` being called twice for all items in the file and creating duplicate transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a29a42f0-3d76-4f3a-a62a-9b85bcb5cce3?mode=deep",
+    "timestamp": "2026-04-28 23:59:35.733565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: doParse(RecordFile)] Can an unprivileged external user supply a RecordFile with `getConsensusEnd()` set to 0 or a very small value, causing `applicationEventPublisher.publishEvent(new RecordFileParsedEvent(this, 0))` to fire with an epoch-time consensus end, triggering downstream balance generation at timestamp 0 and corrupting the historical balance timeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68b6761e-cf09-4487-89b7-b98553b9569b?mode=deep",
+    "timestamp": "2026-04-29 00:00:01.286827",
+    "report_generated": false
+  }
+]
