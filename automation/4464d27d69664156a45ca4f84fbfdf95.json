@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: transactionSetTransactionId()] Can an unprivileged external user supply a crafted `valid_start_nanos` value far in the future via the `/construction/payloads` metadata, causing `hiero.NewTransactionIDWithValidStart(payer, time.Unix(0, validStartNanos))` to produce a transaction ID with a future valid-start, so that a signed transaction cannot be submitted until that future time, permanently locking the payer's funds in a signed-but-unsubmittable state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a73073b-8392-49b1-9931-d42561a402ce?mode=deep",
+    "timestamp": "2026-04-29 00:15:47.124293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user pass a `valid_until_nanos` value that is only slightly greater than `maxValidDurationNanos` (180 seconds in nanos), causing `validStartNanos = validUntil - maxValidDurationNanos` to resolve to a timestamp already in the past, so that by the time the transaction is signed and submitted via `ConstructionSubmit()` the window has expired, permanently freezing any funds already deducted from the payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f4acf88-41a0-4f94-99c3-741bae0d6bcd?mode=deep",
+    "timestamp": "2026-04-29 00:15:59.056264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: transactionSetValidDuration()] Can an unprivileged external user supply `valid_duration` = 1 (one second) via `/construction/payloads` metadata, which passes `isValidTransactionValidDuration()` (accepts 1 through 180), causing `hiero.TransactionSetTransactionValidDuration(transaction, time.Second*1)` to set a 1-second window, so that any network latency between payloads and submit causes the transaction to expire with funds already committed to the signed payload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95bbf100-ac2c-4a80-b090-b6c1e661f614?mode=deep",
+    "timestamp": "2026-04-29 00:16:11.618266",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isValidTransactionValidDuration()] Can an unprivileged external user supply `valid_duration` = 0 via `/construction/payloads` metadata, which passes `isValidTransactionValidDuration()` because the check is `validDuration >= 0`, causing `transactionSetValidDuration()` to silently default to `defaultValidDurationSeconds = 180`, creating a mismatch between the client's expected duration and the actual frozen transaction duration, leading to unexpected expiry and fund lock?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7074ee44-11fe-43db-9ce5-fc5be8dadf09?mode=deep",
+    "timestamp": "2026-04-29 00:16:24.622295",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user craft a `account_map` metadata string where one alias is a prefix of another (e.g., `0x1234:0.0.5,0x12345:0.0.6`), exploiting the `strings.HasPrefix(aliasMap, payerAlias)` check to resolve the wrong numeric account ID as the payer, causing the transaction to be frozen with the wrong payer account, permanently locking funds from the misidentified account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_763d5556-4e64-4472-8992-3a4f0bafc1b5?mode=deep",
+    "timestamp": "2026-04-29 00:16:38.772175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user supply a malformed `account_map` metadata string with no colon separator (e.g., `aliasonly`), causing `strings.Split(aliasMap, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56eb6c4c-5f2b-4c1d-b7c0-1ee0fb8b0314?mode=deep",
+    "timestamp": "2026-04-29 00:16:53.495485",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user supply an `account_map` where the numeric part after the colon is an empty string (e.g., `alias:`), causing `hiero.AccountIDFromString(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6941ae9b-579c-4617-9517-7d16be78b481?mode=deep",
+    "timestamp": "2026-04-29 00:17:08.506965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user submit a `/construction/payloads` request where `signers` returned by `c.transactionHandler.Construct()` is empty, causing `signers[0]` to panic with an index-out-of-bounds, crashing the service mid-transaction-construction and leaving any partially-constructed frozen transaction state unrecoverable, effectively freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c66e060-5525-44f5-9022-e25e88c000d3?mode=deep",
+    "timestamp": "2026-04-29 00:17:24.559919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: transactionFreeze()] Can an unprivileged external user trigger `transactionFreeze(transaction)` via `ConstructionPayloads()` where `hiero.TransactionFreezeWith(transaction, nil)` is called with a nil client, causing the SDK to freeze the transaction with no node account IDs set, producing a frozen transaction that cannot be submitted to any node, permanently locking the payer's funds in an unsubmittable frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f137792-f1a9-46f1-9c97-9c8eca73dbbc?mode=deep",
+    "timestamp": "2026-04-29 00:17:41.147119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionCombine()] Can an unprivileged external user call `/construction/combine` with a valid signature over the frozen body bytes but for a different transaction body (replay from another transaction), bypassing `ed25519.Verify(pubKey.Bytes(), frozenBodyBytes, signature.Bytes)` by reusing a valid signature, causing `TransactionAddSignature` to attach the signature to the wrong transaction, which then gets submitted and permanently freezes funds in the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cb8346a-d7f8-46a4-92db-c2367419a04b?mode=deep",
+    "timestamp": "2026-04-29 00:17:57.775244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionCombine()] Can an unprivileged external user call `/construction/combine` where `_, _ = hiero.TransactionAddSignature(transaction, pubKey, signature.Bytes)` silently discards both return values, meaning a failed signature attachment is never detected, causing a transaction to be returned as `SignedTransaction` with missing or incorrect signatures, which when submitted via `ConstructionSubmit()` fails on-chain and permanently locks the payer's fee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd5acf80-00cc-4b1b-9a00-a272a37b7d14?mode=deep",
+    "timestamp": "2026-04-29 00:18:16.526112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getFrozenTransactionBodyBytes()] Can an unprivileged external user supply a hex-encoded transaction in `/construction/combine` where `hiero.TransactionString(transaction)` returns a proto-text representation that `prototext.Unmarshal([]byte(data), &signedTransaction)` fails to parse, returning `ErrTransactionUnmarshallingFailed` after the transaction was already partially processed, causing the caller to retry with a new transaction ID and double-freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de216c1a-c911-498f-b651-679b4c70997b?mode=deep",
+    "timestamp": "2026-04-29 00:18:34.372124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionSubmit()] Can an unprivileged external user call `/construction/submit` with a signed transaction where `transaction.GetNodeAccountIDs()` returns an empty slice, causing `transaction.GetNodeAccountIDs()[0]` in the log statement to panic with an index-out-of-bounds, crashing the service after `hiero.TransactionExecute` may have already broadcast the transaction, leaving funds in an unknown state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc160b3d-d829-4104-a2e3-66b8f62ef0a6?mode=deep",
+    "timestamp": "2026-04-29 00:18:53.631226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply both `valid_until_nanos` and `valid_duration`/`valid_start_nanos` in the same metadata map, exploiting the early-return logic (`if _, ok := metadata[metadataKeyValidUntilNanos]; ok`) to have `valid_until_nanos` silently override the user's intended `valid_start_nanos`, causing the transaction to be frozen with an unintended timestamp window that expires before submission, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddaa4b0c-57f7-4968-b721-cf181a2e6006?mode=deep",
+    "timestamp": "2026-04-29 00:19:13.768607",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply `valid_until_nanos` as a very large integer string (near `int64` max), causing `validStartNanos = validUntil - maxValidDurationNanos` to overflow to a negative value, which is caught by `validStartNanos <= 0` check returning `ErrInvalidArgument`, but only after the metadata has already been partially processed, causing inconsistent state in the transaction construction pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d5a6aed-93e5-41f0-899f-23cf594822ce?mode=deep",
+    "timestamp": "2026-04-29 00:19:34.724599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getIntMetadataValue()] Can an unprivileged external user supply `valid_start_nanos` as a non-string type (e.g., a JSON number) in the metadata map, causing the `value, ok := metadata[metadataKey].(string)` type assertion to fail and return `ErrInvalidArgument`, but since `getIntMetadataValue` returns 0 on error and `transactionSetTransactionId` treats 0 as 'generate new ID', the transaction could be frozen with an auto-generated timestamp that the client cannot predict, making the signed payload unusable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4ffc50c-0228-483c-bd50-9e8113260235?mode=deep",
+    "timestamp": "2026-04-29 00:19:56.109156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: cryptoCreateTransactionConstructor.Construct()] Can an unprivileged external user submit a `CRYPTO_CREATE` operation with a `key` field in metadata set to a public key they do not control (e.g., a known burned/unspendable key), causing `SetKeyWithoutAlias(cryptoCreate.Key.PublicKey)` to create an account with that key, so any `InitialBalance` transferred to the new account is permanently frozen because no one holds the corresponding private key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b0cc4b1-067e-4440-96ff-ed825f178bb5?mode=deep",
+    "timestamp": "2026-04-29 00:20:18.548538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: cryptoCreateTransactionConstructor.Construct()] Can an unprivileged external user set `auto_renew_period` to 1 second (minimum positive value) in the `CRYPTO_CREATE` operation metadata, causing `transaction.SetAutoRenewPeriod(time.Second * 1)` to create an account that expires almost immediately, so any `InitialBalance` sent to the new account is permanently frozen when the account is deleted by the network before the owner can access it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_981bc02d-481e-4cce-959c-f120af8ecdfb?mode=deep",
+    "timestamp": "2026-04-29 00:20:40.336195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: cryptoCreateTransactionConstructor.preprocess()] Can an unprivileged external user submit a `CRYPTO_CREATE` operation with `amount.GetValue() == 0` (zero initial balance), which passes the `amount.GetValue() > 0` rejection check, causing `cryptoCreate.InitialBalance = -0 = 0`, creating an account with zero balance but with a key the attacker controls, and then use that account as a proxy to receive and freeze funds from other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10b58734-3473-4ceb-aac9-417053adb2b9?mode=deep",
+    "timestamp": "2026-04-29 00:21:02.414022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: cryptoCreateTransactionConstructor.Construct()] Can an unprivileged external user set `proxy_account_id` in `CRYPTO_CREATE` metadata to an account they control, causing `transaction.SetProxyAccountID(*cryptoCreate.ProxyAccountId)` to redirect staking rewards to the attacker's account, effectively freezing the victim's staking yield while the attacker harvests it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6389148a-3c76-46b0-a981-958bed79d568?mode=deep",
+    "timestamp": "2026-04-29 00:21:25.978773",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: resolveAccountAliases()] Can an unprivileged external user supply a comma-separated `account_aliases` option with a duplicate alias (e.g., `alias1,alias1`), causing `resolveAccountAliases()` to call `c.accountRepo.GetAccountId()` twice for the same alias and build an `accountMap` with two identical entries, which then causes `getSdkPayerAccountId()` to match the first occurrence via `strings.HasPrefix`, potentially resolving to a stale or incorrect account ID and freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_378a6045-ed18-421f-a885-b4e1ea12b880?mode=deep",
+    "timestamp": "2026-04-29 00:21:50.292132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionMetadata()] Can an unprivileged external user call `/construction/metadata` with a valid `operation_type` but then use the returned `valid_until_nanos` value in a subsequent `/construction/payloads` call after the 180-second window has elapsed (e.g., by deliberately delaying), causing `transactionSetTransactionId()` to freeze the transaction with an already-expired `validStartNanos`, making the signed transaction permanently unsubmittable and locking the payer's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_405bab90-705c-4d89-a1ba-1a18f9f61dfd?mode=deep",
+    "timestamp": "2026-04-29 00:22:15.380574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: transactionSetTransactionId()] Can an unprivileged external user supply `valid_start_nanos` = 1 (epoch + 1 nanosecond, far in the past), which passes `getIntMetadataValue()`'s `metadataValue < 0` check (1 is not negative), causing `hiero.NewTransactionIDWithValidStart(payer, time.Unix(0, 1))` to create a transaction ID with a 1970-era timestamp, making the transaction immediately expired and permanently unsubmittable, freezing any fees already committed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddda74ad-c5f9-4cad-a006-39eedeed59e6?mode=deep",
+    "timestamp": "2026-04-29 00:22:40.295131",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: updateTransaction()] Can an unprivileged external user trigger a partial failure in `updateTransaction()` where `transactionSetMemo()` or `transactionSetNodeAccountId()` succeeds but `transactionSetTransactionId()` fails, causing the function to return an error but leaving the transaction object in a partially-mutated state, and if the caller retries with the same transaction object, the frozen state accumulates incorrect fields that permanently invalidate the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8250235-9ba2-4684-9a61-3d1649449c33?mode=deep",
+    "timestamp": "2026-04-29 00:23:06.350895",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user submit operations where `c.transactionHandler.Construct()` returns a transaction and signers, but the `payer` resolved by `getSdkPayerAccountId()` does not match the actual account that signed the transaction, causing `transactionSetTransactionId(payer, validStartNanos)` to freeze the transaction with a mismatched payer, so the transaction is rejected on-chain and the actual payer's funds are locked in the signed payload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_359a377b-1677-45cd-9fa6-059f5ff0630a?mode=deep",
+    "timestamp": "2026-04-29 00:23:32.415006",
+    "report_generated": false
+  }
+]
