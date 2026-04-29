@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: cacheKeyGenerator()] Can an unprivileged external user send requests with extremely long `req.originalUrl` values (e.g., tens of thousands of characters) to force `crypto.createHash('md5').update(req.originalUrl)` to consume excessive CPU per request, causing event-loop starvation and a non-network DoS against the mirror node REST API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12d6a737-761a-44bc-b203-7a9c4b5bd834?mode=deep",
+    "timestamp": "2026-04-29 02:05:49.292315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: cacheKeyGenerator()] Can an unprivileged external user craft millions of unique `req.originalUrl` values to generate unique MD5 cache keys, flooding Redis with distinct `setSingle()` entries until Redis memory is exhausted, causing OOM-based DoS for all subsequent cache reads and writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98c6ec85-b07e-4b29-9f16-fce08f16058a?mode=deep",
+    "timestamp": "2026-04-29 02:06:01.190330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the fact that `cacheKeyGenerator` uses MD5 (a collision-prone hash) to craft two different URLs that produce the same cache key, causing one response to overwrite another in Redis and serving incorrect data to all users, effectively poisoning the cache and causing a functional DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc0b341a-3006-4df0-8161-231fafab0131?mode=deep",
+    "timestamp": "2026-04-29 02:06:13.576516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user trigger caching of a very large response body via `getCache().setSingle(responseCacheKey, ttl, cachedResponse)` by requesting an endpoint that returns a large payload, causing Redis memory to be consumed by a single oversized entry and degrading cache availability for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2d50d8f-19b2-409f-8262-b97a22e4e5a2?mode=deep",
+    "timestamp": "2026-04-29 02:06:26.455142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user repeatedly request endpoints that produce large responses, causing `responseCacheUpdateHandler` to call `new CachedApiResponse(statusCode, headers, responseBody, shouldCompress(responseBody))` with `gzipSync(body)` synchronously on the Node.js event loop, blocking all other requests and causing a CPU-based DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f3e73b4-3a38-42b9-866c-35449a4e499a?mode=deep",
+    "timestamp": "2026-04-29 02:06:39.956077",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: shouldCompress()] Can an unprivileged external user craft requests that consistently return bodies just above `config.cache.response.compressThreshold`, causing `gzipSync(body)` to be called synchronously on every response, saturating the CPU with compression work and starving other concurrent requests of event-loop time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_312dc330-111b-4f11-bec4-ef9ff0c7adfd?mode=deep",
+    "timestamp": "2026-04-29 02:06:54.096574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user trigger `cachedResponse.getUncompressedBody()` which calls `unzipSync(Buffer.from(this.body, 'base64url'))` synchronously on a large compressed cache entry, blocking the Node.js event loop for the duration of decompression and causing a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35fc535c-c570-4ab3-b04d-843285d4ec9d?mode=deep",
+    "timestamp": "2026-04-29 02:07:08.987724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send requests without an `accept-encoding: gzip` header to force `cachedResponse.getUncompressedBody()` to be called on every cache hit for a large compressed entry, causing repeated synchronous `unzipSync` calls that block the event loop and degrade throughput for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77ed60ba-7cc4-418c-bcc5-e6504d60b14c?mode=deep",
+    "timestamp": "2026-04-29 02:07:23.550354",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: negotiate()] Can an unprivileged external user send crafted `accept-encoding` headers that cause `new Negotiator(req)` to perform expensive parsing on every cache hit, and by sending many concurrent requests with malformed or extremely long `accept-encoding` values, exhaust CPU resources and cause a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba58c1a1-0041-424b-9386-008239796766?mode=deep",
+    "timestamp": "2026-04-29 02:07:40.332485",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getCacheControlExpiryOrDefault()] Can an unprivileged external user exploit the default TTL of `DEFAULT_REDIS_EXPIRY = 1` second by causing cache misses on every request (via unique URLs), forcing the backend to process every request without cache benefit, effectively bypassing the cache layer and causing a resource exhaustion DoS on the underlying database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ffeeda13-d917-410e-90b5-2234c593d788?mode=deep",
+    "timestamp": "2026-04-29 02:07:56.753574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `Object.assign(new CachedApiResponse(), redisValue)` pattern to perform prototype pollution if `redisValue` from Redis contains `__proto__` or `constructor` keys, corrupting the Node.js runtime environment and causing a DoS for all subsequent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57330288-78fe-465d-8b37-6bc27c51b4ef?mode=deep",
+    "timestamp": "2026-04-29 02:08:14.314300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user craft a request where `cachedResponse.headers` contains a very large number of headers (stored in Redis), causing `res.set(headers)` to iterate over a massive object and exhaust memory or CPU when serving the cached response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89856352-ed5a-4574-8293-99e7a0950595?mode=deep",
+    "timestamp": "2026-04-29 02:08:32.952769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user trigger a cache update where `res.getHeaders()` returns headers with extremely long values, causing `JSONStringify(cachedResponse)` in `Cache.setSingle()` to produce a massive Redis entry that exhausts Redis memory and causes DoS for all cache operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b89d6b4a-8b9b-4d55-b8e3-e220a9919cd3?mode=deep",
+    "timestamp": "2026-04-29 02:08:51.501292",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: getCache()] Can an unprivileged external user exploit the singleton pattern of `getCache()` such that if the single `Cache` instance enters a broken state (e.g., due to a crafted request that corrupts its internal state), all subsequent requests share the same broken cache instance, causing a persistent DoS across the entire service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71cd7eaf-bfc1-45db-8ab0-2a354c7df084?mode=deep",
+    "timestamp": "2026-04-29 02:09:10.615386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a request with a crafted `if-none-match` header containing a very long string, causing the string comparison `conditionalHeader === cachedResponse.headers[ETAG_HEADER]` to consume excessive memory or time, contributing to event-loop delays under high concurrency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ac31c12-d422-42ff-a28a-7d2722288512?mode=deep",
+    "timestamp": "2026-04-29 02:09:30.152355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the log statement `logger.info(req.ip + req.method + req.originalUrl + ...)` by sending requests with extremely long `req.originalUrl` values, causing excessive memory allocation for log strings and degrading the logging subsystem, leading to indirect DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d71a898e-9924-4a19-b42d-0e5abb9510cf?mode=deep",
+    "timestamp": "2026-04-29 02:09:51.075358",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user cause a cache stampede by sending many concurrent requests to the same uncached endpoint simultaneously, causing all of them to miss the cache check in `responseCacheCheckHandler` and all proceed to the backend, multiplying load on the database and causing a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5e996ed-d75e-4242-b1f4-8ab60a1271d1?mode=deep",
+    "timestamp": "2026-04-29 02:10:11.486914",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the lack of URL normalization in `cacheKeyGenerator` (noted in the comment referencing issue 9113) by sending semantically equivalent URLs with different query parameter orderings (e.g., `?a=1&b=2` vs `?b=2&a=1`), causing cache misses for every permutation and exhausting Redis memory with duplicate entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d230c2c2-8d10-49bd-90b0-8d34ac92ccba?mode=deep",
+    "timestamp": "2026-04-29 02:10:32.205483",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the absence of URL normalization to send the same logical request with different URL encodings (e.g., `%61` vs `a`), generating different MD5 cache keys for identical responses, causing Redis to store redundant entries and exhausting memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e1407ae-9e9a-4096-a8cf-b5b98ec8fb88?mode=deep",
+    "timestamp": "2026-04-29 02:10:54.421160",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a HEAD request to a cached endpoint, triggering the `negotiate(cachedResponse, req, res)` path inside the `isHead` branch, and by sending many concurrent HEAD requests with varying `accept-encoding` headers, cause excessive `Negotiator` object instantiation and memory pressure leading to DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e79114f1-210b-4df5-b630-20766cb51182?mode=deep",
+    "timestamp": "2026-04-29 02:11:16.366367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: CachedApiResponse.getLength()] Can an unprivileged external user exploit the inaccurate `getLength()` formula `Math.floor((this.body.length * 3) / 4)` which approximates base64url-decoded length, causing `content-length` mismatches that force HTTP clients to buffer or re-request data, amplifying server load and causing a DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89636f3e-496a-421b-bfde-3092b67518d6?mode=deep",
+    "timestamp": "2026-04-29 02:11:39.497372",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user trigger the 304 code path in `responseCacheUpdateHandler` where headers are merged from `config.response.headers.default`, `res.getHeaders()`, and `res.locals[responseHeadersLabel]`, causing a large merged header object to be serialized and stored in Redis, exhausting Redis memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b03e2e03-d218-4276-9f71-57d26996eb61?mode=deep",
+    "timestamp": "2026-04-29 02:12:03.442396",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send requests that hit a cached entry where `cachedResponse.getBody()` returns a large `Buffer.from(this.body, 'base64url')`, causing repeated large buffer allocations on every cache hit and exhausting Node.js heap memory under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15a64dc1-f876-4418-a734-d84428e395d6?mode=deep",
+    "timestamp": "2026-04-29 02:12:27.712477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: negotiate()] Can an unprivileged external user send requests with a crafted `accept-encoding` header containing many comma-separated encodings (e.g., `br, deflate, identity, *`), causing `negotiator.encoding([GZIP_ENCODING])` to perform expensive parsing and matching, and under high concurrency, saturate CPU and cause a non-network DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78bfa8dc-ff56-4248-a19c-51ebd0cde832?mode=deep",
+    "timestamp": "2026-04-29 02:12:51.147537",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: High: Non-network-based DoS affecting projects with greater than or equal to 25% of the market capitalization on top of the respective layer'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the fact that `getCacheControlExpiryOrDefault` falls back to `DEFAULT_REDIS_EXPIRY = 1` when no `cache-control` header is present, causing rapid cache churn where entries expire every second and every request triggers a backend call, amplifying database load and causing DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71fff516-f48e-4211-bd54-66619e5ac5f7?mode=deep",
+    "timestamp": "2026-04-29 02:13:16.986347",
+    "report_generated": false
+  }
+]
