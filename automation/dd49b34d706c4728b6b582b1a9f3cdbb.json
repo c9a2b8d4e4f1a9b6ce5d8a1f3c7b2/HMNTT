@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a URL containing a fragment identifier (e.g., `/swagger/metrics/#fragment`) so that `new URL(req.url, 'http://localhost').pathname` returns `/swagger/metrics/` and `normalizedPath === metricsPath` matches, allowing unauthenticated access to the metrics endpoint when `authentication` is disabled, exposing fee-related histogram data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6bd2990-fa1d-4254-bd98-0078fd99644c?mode=deep",
+    "timestamp": "2026-04-29 05:04:10.244272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: initMetrics()] Can an unprivileged external user trigger a condition where `metricsHandler()` is called multiple times (e.g., via hot-reload or module re-import) so that `initMetrics()` re-initializes all metric instruments including `requestSizeHistogram` and `durationHistogram`, resetting accumulated fee-related metric data and causing fee-estimation systems to operate on incomplete or zeroed baseline data outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ed1d83c-f85f-4d14-b88b-14b5c4dc4793?mode=deep",
+    "timestamp": "2026-04-29 05:04:22.109868",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a `content-length` header containing leading/trailing whitespace (e.g., `  1000  `) so that `parseInt('  1000  ', 10)` returns `1000` correctly, but a different parser in the fee-estimation pipeline interprets the same header differently, creating a discrepancy between recorded and actual request sizes that pushes fee parameters outside design bounds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9dd83fc-8c1f-4fa2-b00a-2ca36566ff81?mode=deep",
+    "timestamp": "2026-04-29 05:04:34.584730",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with `content-length: 1e10` (scientific notation) so that `parseInt('1e10', 10)` returns `1` (stops at 'e'), causing `requestSizeHistogram` to record `1` byte instead of 10 billion bytes, systematically under-reporting request sizes and causing fee-estimation systems to compute fees below design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed75759b-d222-4588-a080-ecc9c9ab3650?mode=deep",
+    "timestamp": "2026-04-29 05:04:47.866319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with `content-length: +9999999` (with leading plus sign) so that `parseInt('+9999999', 10)` returns `9999999`, recording a falsely large request size into `requestSizeHistogram` that causes fee-estimation systems consuming `api_request_size_bytes` to compute inflated fees outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8de682e3-4632-437e-997d-e5984028a46b?mode=deep",
+    "timestamp": "2026-04-29 05:05:01.291567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getChunkSize()] Can an unprivileged external user trigger a response path where `res.end()` is called with a non-Buffer, non-string chunk (e.g., a Uint8Array or ArrayBuffer) so that `getChunkSize(chunk)` returns `0` instead of the actual byte length, causing `responseSizeHistogram.record(responseSize, labels)` to record `0` and systematically under-report response sizes in fee-related metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19a2b777-1025-4df4-904a-9bb46cadb7fe?mode=deep",
+    "timestamp": "2026-04-29 05:05:15.671642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request that causes the server to call `res.write()` multiple times with large chunks so that `responseSize += getChunkSize(chunk)` accumulates a very large value, causing `responseSizeHistogram.record(responseSize, labels)` to record an inflated response size that skews fee-related metrics outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30fb9c9d-d5a5-4084-8715-f6d8decdd70c?mode=deep",
+    "timestamp": "2026-04-29 05:05:31.052206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request that causes `res.end()` to be called with both a chunk argument and then `res.write()` is called again (if middleware ordering allows), causing `responseSize` to be double-counted and `responseSizeHistogram` to record an inflated value that corrupts fee-related response-size metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cf1df99-574c-4528-a2a4-3e370e720dd6?mode=deep",
+    "timestamp": "2026-04-29 05:05:46.419064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a high volume of requests with unique `path` label values derived from `toOpenApiPath()` so that the OpenTelemetry `MeterProvider` accumulates unbounded label combinations in `durationHistogram`, causing memory exhaustion in the Node.js process that degrades fee-estimation API availability and forces fallback fee values outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d5e5212-f1f7-4fb7-834b-bf74b99b0830?mode=deep",
+    "timestamp": "2026-04-29 05:06:02.430117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send requests with `req.method` values containing Prometheus text format special characters (e.g., `GET\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7374bd5-b1f0-4df3-a4ee-84ca03534e0d?mode=deep",
+    "timestamp": "2026-04-29 05:06:19.135558",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request that causes `res.on('finish')` to fire multiple times (e.g., by exploiting Express middleware ordering or HTTP/1.1 keep-alive edge cases) so that `inFlightCounter.add(-1)` is called more times than `inFlightCounter.add(1)`, causing `api_all_request_in_processing_total` to go negative and misrepresent congestion levels used in fee multiplier calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b889294-f099-49bd-9d39-af3f8edbe80f?mode=deep",
+    "timestamp": "2026-04-29 05:06:37.214613",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request that is abruptly terminated (TCP RST) after `inFlightCounter.add(1)` is called but before `res.on('finish')` fires, so that `inFlightCounter.add(-1)` is never called, causing `api_all_request_in_processing_total` to permanently increment and misrepresent in-flight load used in throttle-based fee calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8dfbcd6c-525e-4768-be57-82a940f10a6e?mode=deep",
+    "timestamp": "2026-04-29 05:06:54.898391",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a `content-length` header set to `0` but with a large actual body so that `requestSizeHistogram.record(0, labels)` records zero bytes, causing fee-estimation systems that use `api_request_size_bytes` to systematically under-estimate request sizes and compute fees below design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f4a1e26-96ff-44fc-9607-d6cc96dfedaa?mode=deep",
+    "timestamp": "2026-04-29 05:07:13.220915",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: authenticate()] Can an unprivileged external user send a request to the metrics endpoint with an empty `Authorization` header so that `basicAuth(req)` returns `null`, `credentials && ...` short-circuits to `null` (falsy), and `authenticate()` returns `null` instead of `false`, causing the `if (!authenticate(req))` check to behave unexpectedly and potentially allow unauthenticated access to fee-related metrics data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8406996b-578e-4675-bf4d-83316909c8e6?mode=deep",
+    "timestamp": "2026-04-29 05:07:32.272527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: authenticate()] Can an unprivileged external user send a request to the metrics endpoint with a malformed `Authorization` header (e.g., `Basic ` with no credentials) so that `basicAuth(req)` returns an object with empty `name` and `pass` fields, and `tsscmp('', username)` returns `true` if `username` is also empty (misconfigured), allowing unauthenticated access to fee-related Prometheus metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5250b7c-9988-42b8-a609-d8094249479e?mode=deep",
+    "timestamp": "2026-04-29 05:07:52.505220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a URL containing Unicode characters in the path (e.g., `/api/v1/transactions/\\u0000fee`) so that `new URL(req.url, 'http://localhost').pathname` normalizes the path differently than Express's router, causing `toOpenApiPath()` to produce a unique label value that inflates metric cardinality and corrupts fee-related aggregations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c95b9d7-721b-4d96-96d6-c23971c21122?mode=deep",
+    "timestamp": "2026-04-29 05:08:11.536728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a URL containing double slashes (e.g., `//api/v1/transactions`) so that `new URL(req.url, 'http://localhost').pathname` normalizes it to `/api/v1/transactions` but `toOpenApiPath()` produces a path that does not start with `apiPrefix`, causing the `apiPrefix + '/' + path` branch to create a malformed label like `/api/v1//api/v1/transactions` that corrupts fee-related metric aggregations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_059723a0-2238-465c-a673-31e2f219fa4e?mode=deep",
+    "timestamp": "2026-04-29 05:08:31.835817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: initMetrics()] Can an unprivileged external user exploit the fact that `durationBuckets`, `requestSizeBuckets`, and `responseSizeBuckets` are read from `config.metrics.config` at initialization time, and if the config is sourced from an environment variable that the attacker can influence (e.g., via HTTP header injection into a config-reload endpoint), cause `durationHistogram` to be initialized with bucket boundaries that make all fee-related duration measurements fall into a single bucket, obscuring performance data used in fee calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b83bdb3b-8ab7-4df7-801e-9dadc0b1ecba?mode=deep",
+    "timestamp": "2026-04-29 05:08:53.788782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with a `content-length` header containing a string that starts with a valid integer followed by non-numeric characters (e.g., `100abc`) so that `parseInt('100abc', 10)` returns `100`, recording a request size of 100 bytes regardless of the actual body size, causing systematic misreporting of request sizes in `requestSizeHistogram` that skews fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_123feba3-7572-48c3-97ab-708331538ea7?mode=deep",
+    "timestamp": "2026-04-29 05:09:16.116181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with multiple `content-length` headers (HTTP header duplication) so that `req.headers['content-length']` returns a comma-joined string (e.g., `'100, 200'`) and `parseInt('100, 200', 10)` returns `100`, causing `requestSizeHistogram` to record only the first value and systematically misreport request sizes used in fee-related metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aca7eb93-7ab7-42dd-beb7-e1f6c09ee7f9?mode=deep",
+    "timestamp": "2026-04-29 05:09:38.033382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/metricsHandler.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: metricsMiddleware()] Can an unprivileged external user send a request with `content-length: -1` so that `parseInt('-1', 10)` returns `-1` and since `-1` is truthy (non-zero), the `|| 0` fallback does NOT apply, causing `requestSizeHistogram.record(-1, labels)` to record a negative value that corrupts the histogram's sum and count statistics used in fee-related metrics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b111223-b7ae-4969-a58f-cac36430fefa?mode=deep",
+    "timestamp": "2026-04-29 05:10:00.603223",
+    "report_generated": false
+  }
+]
