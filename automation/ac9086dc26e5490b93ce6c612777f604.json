@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where getConsensusEnd() returns Long.MAX_VALUE, causing Instant.ofEpochSecond(0, Long.MAX_VALUE) in parseLatencyMetric.record() to throw an ArithmeticException or produce an invalid Instant, which propagates as an uncaught exception and triggers infinite retries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fcdb6e45-bca5-4f64-823b-b722b081039b?mode=deep",
+    "timestamp": "2026-05-01 15:35:22.539091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: recordMetrics()] Can an unprivileged external user craft a RecordItem with getConsensusTimestamp() = Long.MAX_VALUE, causing Instant.ofEpochSecond(0, Long.MAX_VALUE) to overflow and Duration.between() to produce an incorrect or exception-throwing result, corrupting the latency metric timer and potentially crashing the metrics subsystem?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e885eeee-8fc0-4876-8a4b-b32ff26ce245?mode=deep",
+    "timestamp": "2026-05-01 15:35:34.433776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where getItems() returns a lazy stream that throws a RuntimeException mid-iteration inside the forEach lambda, causing recordFile.setCount(count.get()) to record a partial count, aggregator.update() to store partial gasUsed/logsBloom, and updateIndex() to run with an inconsistent state, all before parserContext.add(recordFile) stores the corrupted RecordFile?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e56ea22-8710-4a02-b3a8-a31055f26054?mode=deep",
+    "timestamp": "2026-05-01 15:35:46.939428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: parse(RecordFile)] Can an unprivileged external user exploit the @Transactional timeout (default 120s) by crafting a RecordFile with enough items to exceed the timeout, causing the transaction to be rolled back but the @Retryable annotation to immediately retry, creating a repeated cycle of partial work and rollback that permanently blocks the parser and prevents any new files from being ingested?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_711b55a2-a292-46c3-a776-8a742b160bd2?mode=deep",
+    "timestamp": "2026-05-01 15:36:00.028122",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: updateIndex()] Can an unprivileged external user craft a sequence of RecordFiles where the first has version=5 and a very low index, and the second has version=6 and a very high index, so that offset = recordFile.getIndex() - lastRecordFile.getIndex() - 1 is a value close to Long.MAX_VALUE, causing repository.updateIndex(offset) to set all record_file.index values to overflow and wrap around to negative numbers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c973ef6-1add-4e14-97ac-883954c66553?mode=deep",
+    "timestamp": "2026-05-01 15:36:12.980241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where recordFile.getItems() returns items in non-monotonic consensus timestamp order, causing dateRangeFilter.filter() to accept some items and reject others in an unpredictable pattern, resulting in logIndex values that are non-contiguous and EVM log indices that are incorrect for the persisted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56938d36-9af9-41ad-b70a-94708062b902?mode=deep",
+    "timestamp": "2026-05-01 15:36:26.018815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: RecordItemAggregator.accept()] Can an unprivileged external user craft a ContractFunctionResult with a bloom field that is exactly 257 bytes (one byte over BYTE_SIZE), causing logsBloom.or(DomainUtils.toBytes(result.getBloom())) to throw an IllegalArgumentException ('Invalid parameter') that propagates out of the forEach lambda, aborts doParse() mid-stream, and leaves the database in a partially updated state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a191af2-79a7-4636-b13b-59ea2cdbe210?mode=deep",
+    "timestamp": "2026-05-01 15:36:39.417760",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where parserContext.add(recordFile) is called with a RecordFile object that has null fields (e.g., null name, null hash), causing the ParserContext's ConcurrentSkipListMap to throw a NullPointerException during class comparison, corrupting the context state and preventing subsequent files from being parsed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3b5cd82-c0c9-454e-afc2-2e495460e53c?mode=deep",
+    "timestamp": "2026-05-01 15:36:52.479885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: parse(RecordFile)] Can an unprivileged external user exploit the interaction between @Retryable and @Transactional to cause a phantom read: on the first attempt, doParse() reads getLast() which returns file A; the transaction rolls back; on retry, getLast() returns file B (a different file now in the DB), causing updateIndex() to compute a different offset and apply a second, incorrect bulk index update on top of the first?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4fbd39e-b38c-4859-8f9a-4cf875be8187?mode=deep",
+    "timestamp": "2026-05-01 15:37:05.929747",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where applicationEventPublisher.publishEvent() triggers a synchronous event listener that throws an unchecked exception, causing doParse() to abort before recordFile.setCount(), aggregator.update(), updateIndex(), parserContext.add(), and parserContext.addAll() are called, resulting in a RecordFileParsedEvent being fired for a file that was never actually parsed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8aa86a66-04b8-474f-9610-5be7cfdf14c8?mode=deep",
+    "timestamp": "2026-05-01 15:37:18.900071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: RecordItemAggregator.update()] Can an unprivileged external user craft a RecordFile where aggregator.update() sets recordFile.setLoadEnd(System.currentTimeMillis()) to a value that is earlier than recordFile.getLoadStart(), causing totalDurationMetric.record(streamFile.getLoadEnd() - streamFile.getLoadStart()) in the parent class to record a negative duration, corrupting the importer duration metric?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d6948a3-d481-46dc-8add-4d38fab98aee?mode=deep",
+    "timestamp": "2026-05-01 15:37:32.292233",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile with a getConsensusEnd() value of 0 or negative, causing the RecordFileParsedEvent to carry an invalid consensusEnd, and downstream listeners that use this value to compute time ranges or trigger downstream processing to operate on incorrect timestamps, potentially causing data to be skipped or double-processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27062f40-3f30-499f-9797-c3da93ea5f4e?mode=deep",
+    "timestamp": "2026-05-01 15:37:45.400160",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: parse(List<RecordFile>)] Can an unprivileged external user supply a List<RecordFile> containing a single null element, causing streamFiles.get(0) to return null and subsequent calls like streamFile.getName() to throw a NullPointerException that is caught by the catch block, logged with a null filename, and then re-thrown, triggering infinite retries on a null file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cace0662-ba42-4299-ad19-6dfc357d078e?mode=deep",
+    "timestamp": "2026-05-01 15:37:59.170229",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where recordFile.getSidecars() returns a very large collection (e.g., millions of sidecar objects), causing parserContext.addAll(recordFile.getSidecars()) to exhaust heap memory, trigger an OutOfMemoryError that is excluded from @Retryable, and crash the importer JVM process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8aa8c39-98b9-4e6d-8411-3d1fa89131b3?mode=deep",
+    "timestamp": "2026-05-01 15:38:14.232039",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile with items that each have a very large getTransaction().getSerializedSize(), causing the sizeMetrics DistributionSummary to accumulate values that overflow its internal histogram buckets, corrupting the Micrometer metric registry state and causing all subsequent metric recordings to produce incorrect values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84531517-bd53-4d60-85f8-6aec7df2d984?mode=deep",
+    "timestamp": "2026-05-01 15:38:28.265580",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: RecordFileParser() constructor] Can an unprivileged external user exploit the fact that all TransactionType values are registered as metric tags at construction time, so if a new TransactionType with a duplicate protoId is added, ImmutableMap.builder() will throw an IllegalArgumentException during bean initialization, preventing the entire importer from starting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28d0676e-046a-490d-b885-686704acc098?mode=deep",
+    "timestamp": "2026-05-01 15:38:42.095222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where recordItemListener.onItem(recordItem) throws an ImporterException for one item, causing the forEach to abort mid-stream, but count, gasUsed, and logsBloom reflect only the items processed before the failure, and these partial values are then stored via aggregator.update() and parserContext.add() before the exception propagates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b328ac9-429d-4b39-b5da-161672b7b159?mode=deep",
+    "timestamp": "2026-05-01 15:38:55.938230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where the items list is modified concurrently during the forEach iteration (e.g., via a shared mutable list), causing ConcurrentModificationException to be thrown mid-parse, leaving the database in a partially updated state while the exception triggers a retry that re-processes already-committed items?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d238af4d-1eec-4a06-89f2-36aae3e1f614?mode=deep",
+    "timestamp": "2026-05-01 15:39:08.552865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: updateIndex()] Can an unprivileged external user craft a RecordFile where streamFileRepository is not an instance of RecordFileRepository (e.g., a mock or alternative implementation is injected), causing the instanceof check to fail and updateIndex() to silently skip the block number correction, leaving v5 block numbers permanently incorrect after a v5-to-v6 transition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0bd0efa7-9839-422b-891b-9f90e73d8dd3?mode=deep",
+    "timestamp": "2026-05-01 15:39:21.828447",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where getItems() returns an empty iterable, causing count=0, gasUsed=0, logsBloom=EMPTY to be stored, and updateIndex() to still execute with getLast() potentially returning a stale cached value, triggering an unintended bulk index update on all record files even though no items were processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_302498bf-c2a1-4eeb-b8f1-2faa49c08f6a?mode=deep",
+    "timestamp": "2026-05-01 15:39:35.210062",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: parse(RecordFile)] Can an unprivileged external user exploit the fact that the synchronized lock is on the RecordFileParser instance (this), and if Spring AOP wraps the bean in a proxy, the synchronized keyword may not apply to the proxy's method invocation, allowing concurrent calls to parse() to race and corrupt the shared parserContext state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55349afd-767a-46fe-9570-032b1b1be97f?mode=deep",
+    "timestamp": "2026-05-01 15:39:48.411588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where recordItem.getConsensusTimestamp() returns Long.MIN_VALUE, causing dateRangeFilter.filter(Long.MIN_VALUE) to return false (since MIN_VALUE < filter.start), silently skipping the item, but aggregator.accept() still processes it and accumulates its gasUsed and bloom, creating a discrepancy between the stored count and the actual gas/bloom data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a05431c6-e7ed-4439-b206-cedf5b91c5e2?mode=deep",
+    "timestamp": "2026-05-01 15:40:02.008595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: RecordItemAggregator.accept()] Can an unprivileged external user craft a RecordItem where isTopLevel() returns true but getTransactionRecord() returns a record with both hasContractCreateResult() and hasContractCallResult() returning true, causing the ternary operator to always prefer contractCreateResult, and the contractCallResult's gas and bloom to be silently ignored, corrupting block-level aggregates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a88eb38c-9f5b-40f5-a7c3-8583f485391d?mode=deep",
+    "timestamp": "2026-05-01 15:40:16.076642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: doParse()] Can an unprivileged external user craft a RecordFile where parserContext.add(recordFile) is called inside doParse() but the @Transactional transaction is rolled back after doParse() returns (e.g., due to a constraint violation in doFlush()), leaving the in-memory parserContext populated with the RecordFile object even though the database transaction was rolled back, causing state inconsistency on retry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a228b76d-3a5d-4fe8-841d-8b7e0505ace3?mode=deep",
+    "timestamp": "2026-05-01 15:40:30.095095",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: '] [Function: parse(RecordFile)] Can an unprivileged external user exploit the exponential backoff in @Retryable (multiplier=2, maxBackoff=30s) by crafting a file that fails on every attempt, causing the parser to spend up to 30 seconds between each retry indefinitely (maxAttempts=Integer.MAX_VALUE), effectively halting all record file ingestion for the lifetime of the process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fdb3dd0-2aac-4579-b413-ddea45310c75?mode=deep",
+    "timestamp": "2026-05-01 15:40:45.325415",
+    "report_generated": false
+  }
+]
