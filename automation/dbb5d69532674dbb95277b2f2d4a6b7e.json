@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user trigger message loss by opening a slow gRPC subscription that exhausts the onBackpressureBuffer(maxBufferSize, BufferOverflowStrategy.ERROR) buffer in SharedTopicListener, causing the shared Flux to emit an overflow error and silently drop all subsequent TopicMessage records for every co-subscriber on the same topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a47eaf29-e1e8-47a9-95d0-59671679e51b?mode=deep",
+    "timestamp": "2026-05-01 17:29:39.311916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSharedListener()] Can an unprivileged external user cause missing records by subscribing to a topic, then immediately cancelling, triggering unsubscribe() which removes the topic from topicMessages, while a concurrent subscriber's computeIfAbsent call races to re-create the subscription, resulting in a window where Redis pub/sub messages are not received and are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_076fb70a-1faf-42b4-bf8b-131e5c31e66c?mode=deep",
+    "timestamp": "2026-05-01 17:29:51.339167",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: unsubscribe()] Can an unprivileged external user cause incorrect records by cancelling their subscription at the exact moment a new subscriber calls computeIfAbsent, so that unsubscribe() removes the newly inserted Flux from topicMessages before the new subscriber has received any messages, resulting in the new subscriber receiving an empty or incomplete stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e48f5ff8-7203-4173-abfd-a08513be95b5?mode=deep",
+    "timestamp": "2026-05-01 17:30:03.783177",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing TopicMessage records by subscribing to a topic during the Redis reconnection retry window (Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(4L))), where all messages published to the Redis channel during the backoff period are permanently lost because no subscriber is active on the channel?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01ed5155-b857-4825-8a75-fd09003db70e?mode=deep",
+    "timestamp": "2026-05-01 17:30:16.577274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopic()] Can an unprivileged external user receive incorrect records belonging to a different topic by exploiting the channel naming scheme String.format('topic.%d', filter.getTopicId().getId()), if two distinct EntityId objects produce the same numeric getId() value due to encoding ambiguity, causing messages from topic A to be delivered to a subscriber of topic B?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f70a90a6-f520-43e5-9d62-abaf83e49f5f?mode=deep",
+    "timestamp": "2026-05-01 17:30:29.019578",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a high-volume topic, where the .share() operator on the Flux means late-joining subscribers miss all messages emitted before their subscription, and no replay or catch-up mechanism exists in the Redis listener to fill the gap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3290047-a86b-47de-adf7-da1e4f10a55a?mode=deep",
+    "timestamp": "2026-05-01 17:30:42.049731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user trigger incorrect records by sending a malformed MessagePack payload to the Redis channel (e.g., via a compromised Redis client or MITM), causing the Jackson2JsonRedisSerializer to throw a deserialization exception that is swallowed by doOnError(t -> log.error(...)), silently dropping the message and causing a gap in the sequence number stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c45f8143-78ae-4000-9908-b876094ffff8?mode=deep",
+    "timestamp": "2026-05-01 17:30:55.815757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSharedListener()] Can an unprivileged external user cause missing records by opening many concurrent subscriptions to the same topic, exhausting the Schedulers.boundedElastic() thread pool used in publishOn(), causing downstream message delivery to stall and the onBackpressureBuffer to overflow, dropping messages for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd9365f7-aa23-4b20-a134-d3bc46e75b58?mode=deep",
+    "timestamp": "2026-05-01 17:31:09.716545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a topic and then never consuming messages (zero-demand subscriber), causing the onBackpressureBuffer(maxBufferSize, BufferOverflowStrategy.ERROR) to fill up and terminate the shared Flux with an overflow error, which then removes the subscription and causes all other subscribers on the same topic to lose messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d3c29f2-5dfd-4ec3-bab8-ef2674147882?mode=deep",
+    "timestamp": "2026-05-01 17:31:22.826890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RedisTopicListener()] Can an unprivileged external user cause missing records by triggering repeated Redis connection failures (e.g., by flooding the Redis server with connections), forcing the container Mono to retry indefinitely with Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(8)), during which all TopicMessage records published to Redis channels are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5f44dc8-5528-4bfd-b029-2a4c1daf05e5?mode=deep",
+    "timestamp": "2026-05-01 17:31:37.411315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause incorrect records by subscribing to a topic with a startTime in the past, where the Redis listener has no startTime filtering (unlike CompositeTopicListener.filterMessage() which only checks consensusTimestamp >= filter.getStartTime()), and the shared Flux delivers messages that predate the subscriber's requested startTime?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_754b086f-f8dc-4944-9f09-310390f0ce68?mode=deep",
+    "timestamp": "2026-05-01 17:31:51.566872",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a topic with an endTime, where the Redis listener does not enforce endTime filtering, causing the subscriber to receive messages beyond the requested endTime window and miss the stream termination signal, leading to an incorrect record set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d8c3ab9-b270-4c2b-953f-361133de63b2?mode=deep",
+    "timestamp": "2026-05-01 17:32:05.576772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a topic with a limit, where the Redis listener does not enforce the limit field from TopicMessageFilter, causing the subscriber to receive more records than requested or miss the stream completion signal, resulting in an incorrect record count?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4028389-6a58-46ad-b672-d8f8f6acb4eb?mode=deep",
+    "timestamp": "2026-05-01 17:32:19.698948",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: unsubscribe()] Can an unprivileged external user cause missing records by cancelling their subscription (doOnCancel -> unsubscribe()), which removes the topic from topicMessages, while another subscriber is mid-stream on the same shared Flux, causing the second subscriber's Flux to be orphaned and no longer receive new messages published to the Redis channel?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55782028-ce10-4160-80bb-4957320e60d9?mode=deep",
+    "timestamp": "2026-05-01 17:32:32.575143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by exploiting the .share() operator's behavior where, if all subscribers cancel simultaneously, the shared Flux terminates and any messages published to Redis between the termination and the next computeIfAbsent call are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08b3c60e-a96e-4ab5-89cf-261018bdf574?mode=deep",
+    "timestamp": "2026-05-01 17:32:45.278649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSharedListener()] Can an unprivileged external user cause missing records by subscribing to a topic immediately after another subscriber's cancellation triggers unsubscribe(), where the topicMessages.remove() and the new computeIfAbsent() are not atomic, creating a race window where the new subscription misses messages published during the gap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4733167c-b027-4d2a-a12e-bafadabc2688?mode=deep",
+    "timestamp": "2026-05-01 17:32:58.696159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause incorrect records by subscribing to a topic where the Redis channel receives a TopicMessage with a null or zero consensusTimestamp, which passes through the deserialization pipeline without validation and is delivered to the subscriber as a valid record, corrupting the subscriber's view of the message sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1551d3d-7d76-4e90-80b4-7c878f1ef19d?mode=deep",
+    "timestamp": "2026-05-01 17:33:11.249489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a topic and then rapidly toggling between subscribing and cancelling, causing repeated unsubscribe()/subscribe() cycles that create and destroy ReactiveRedisMessageListenerContainer subscriptions faster than Redis can acknowledge them, resulting in message gaps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11004824-f6a3-4dfb-bb8a-f1727f116407?mode=deep",
+    "timestamp": "2026-05-01 17:33:24.825988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a large number of distinct topic IDs simultaneously, causing the topicMessages ConcurrentHashMap to grow unboundedly and the ReactiveRedisMessageListenerContainer to manage an excessive number of channel subscriptions, degrading performance and causing message delivery failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8369acdf-c0c9-4796-bef0-4ce7c0cf3cf2?mode=deep",
+    "timestamp": "2026-05-01 17:33:38.487879",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTopic()] Can an unprivileged external user cause missing records by subscribing to a topic with topicId.getId() returning 0, creating a channel named 'topic.0' that may conflict with internal or default Redis channels, causing messages to be misrouted or lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef21c574-e77a-41d6-9c41-8c288f090562?mode=deep",
+    "timestamp": "2026-05-01 17:33:52.840364",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by exploiting the fact that Redis pub/sub is fire-and-forget with no message acknowledgment, so if the ReactiveRedisMessageListenerContainer is not yet subscribed when a message is published (e.g., during the lazy initialization window), the message is permanently lost and never delivered to the subscriber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f668f5d5-1539-4e06-a99e-d5e85ca7b8c2?mode=deep",
+    "timestamp": "2026-05-01 17:34:06.424890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RedisTopicListener()] Can an unprivileged external user cause missing records by triggering the lazy container initialization (Mono.defer) at a time when many messages are being published, so that the container is not yet subscribed to the Redis channel and all messages published before the subscription is established are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_596333de-c819-4dbd-9b11-e487f771fe08?mode=deep",
+    "timestamp": "2026-05-01 17:34:21.050816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause incorrect records by subscribing to a topic where the Redis channel delivers duplicate messages (e.g., due to Redis cluster failover or network retransmission), and the RedisTopicListener has no deduplication logic, causing the subscriber to receive the same TopicMessage multiple times with the same sequenceNumber?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0cbc4222-a34a-4efb-a8ad-6febc7d51f73?mode=deep",
+    "timestamp": "2026-05-01 17:34:35.830832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause incorrect records by subscribing to a topic where the Redis channel delivers messages out of order (e.g., due to network reordering or Redis cluster partitioning), and the RedisTopicListener has no ordering enforcement, causing the subscriber to receive TopicMessage records with non-monotonically increasing sequenceNumber values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c5ff7cd-4341-4988-9796-c8e12664304c?mode=deep",
+    "timestamp": "2026-05-01 17:34:50.539475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: subscribe()] Can an unprivileged external user cause missing records by subscribing to a topic and then sending a gRPC cancel signal, which triggers doOnCancel() -> unsubscribe(), removing the topic from topicMessages even if other subscribers are still active on the shared Flux, causing those subscribers to lose their Redis channel subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e2b2f5f-d3c1-4703-9d7e-b7f49a1dfc40?mode=deep",
+    "timestamp": "2026-05-01 17:35:04.117822",
+    "report_generated": false
+  }
+]
