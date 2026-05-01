@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user submit a request with a very large gasLimit (e.g., Long.MAX_VALUE) so that the float arithmetic `(long)(gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f)` overflows or produces an incorrect `gasLimitToRestoreBaseline`, causing the throttle bucket to be restored with a wrong value and allowing the attacker to bypass gas-based rate limiting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7872ea4b-bcde-4762-a378-bf762b54b8af?mode=deep",
+    "timestamp": "2026-05-01 20:20:33.026839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user craft a request where `result.gasUsed()` returns a value greater than `gasLimit` (e.g., due to EVM accounting discrepancy), causing `gasRemaining = gasLimit - result.gasUsed()` to be negative, and then `Math.min(gasRemaining, gasLimitToRestoreBaseline)` restores a negative amount to the throttle bucket, corrupting the throttle state and enabling subsequent requests to bypass rate limiting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_576c3a5e-dca4-4214-a0df-d249731def29?mode=deep",
+    "timestamp": "2026-05-01 20:20:45.124361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user trigger a failed transaction (where `!result.isSuccessful() && gasLimit == result.gasUsed()`) repeatedly with a gasLimit just above the `GAS_SCALE_FACTOR` threshold so that `gasLimitToRestoreBaseline` is always restored at the configured refund percent, effectively draining the throttle bucket faster than it refills and causing a denial of service for other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3358dc7b-d65a-4f6b-9bd9-a2610ce7831b?mode=deep",
+    "timestamp": "2026-05-01 20:20:57.548277",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user set `estimate=true` (via the `isEstimate()` flag on `CallServiceParameters`) to bypass both `validateResult()` and `restoreGasToBucket()`, allowing them to execute arbitrary EVM calls without consuming gas from the throttle bucket and without triggering revert validation, effectively getting unlimited free EVM execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d0848f4-9d9c-4c1b-b2fa-0b3775929955?mode=deep",
+    "timestamp": "2026-05-01 20:21:10.166134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user cause a `MirrorEvmTransactionException` to be thrown from `transactionExecutionService.execute()` with a null `result` (via `e.getResult()` returning null), so that `restoreGasToBucket(null, params.getGas())` is called, and the null-check branch restores `gasLimitToRestoreBaseline` unconditionally, allowing the attacker to recover all throttle gas on every failed call and bypass rate limiting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5dabf1d-f092-4b7f-a788-c48b921ca2d9?mode=deep",
+    "timestamp": "2026-05-01 20:21:23.304808",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user trigger an `IllegalStateException` or `IllegalArgumentException` inside `transactionExecutionService.execute()` so that it is caught and re-thrown as a `MirrorEvmTransactionException` with `EMPTY` detail, bypassing the `restoreGasToBucket` call in the `finally` block (since `result` remains null and the exception path skips metric recording), causing the throttle bucket to be incorrectly restored and enabling repeated free calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d88750a2-afd3-4ef1-8938-339f3e56522a?mode=deep",
+    "timestamp": "2026-05-01 20:21:36.599771",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: updateMetrics()] Can an unprivileged external user craft a request where `e.getMessage()` (used as the `status` tag in `updateMetrics`) contains an arbitrarily long or high-cardinality string, causing unbounded metric label cardinality in the `invocationCounter` and `gasUsedCounter` MeterProvider instances, leading to memory exhaustion (metric cardinality explosion) and denial of service of the metrics/monitoring subsystem?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4edcd1d-e22a-41e8-a9a7-ed909ac48c82?mode=deep",
+    "timestamp": "2026-05-01 20:21:50.365824",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: updateMetrics()] Can an unprivileged external user submit requests with different `CallType` values (ETH_CALL, ETH_ESTIMATE_GAS, ETH_DEBUG_TRACE_TRANSACTION) combined with crafted error messages to generate a large number of unique tag combinations in `Tags.of(TAG_STATUS, status, TAG_TYPE, callType)`, causing the Micrometer registry to allocate unbounded meter instances and exhaust JVM heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0394e20-97f3-4ee9-af0c-d66a0fe975dd?mode=deep",
+    "timestamp": "2026-05-01 20:22:04.774374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: getBlock()] Can an unprivileged external user submit a historical call with a timestamp value that, when passed to `Instant.ofEpochSecond(0L, t).atZone(UTC)`, causes an `ArithmeticException` or `DateTimeException` due to nanosecond overflow (e.g., t = Long.MAX_VALUE), resulting in an unhandled exception that crashes the request processing thread or leaks internal stack trace information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8891d06-d49b-4e40-97aa-768738b95772?mode=deep",
+    "timestamp": "2026-05-01 20:22:19.549733",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: getBlock()] Can an unprivileged external user submit a historical block request with a timestamp just above `Utils.getCurrentTimestamp()` (a near-future timestamp) so that the filter `t <= Utils.getCurrentTimestamp()` passes intermittently due to a race condition between the timestamp check and the actual current time, causing inconsistent metric tag values and potentially leaking future block information in metric labels?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b369d86-e20b-4325-bf7b-c0dc90b72357?mode=deep",
+    "timestamp": "2026-05-01 20:22:32.818868",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: callContract(CallServiceParameters)] Can an unprivileged external user call the `@VisibleForTesting` public method `callContract(CallServiceParameters params)` directly (bypassing subclass-specific pre-validation logic) to execute EVM calls without going through throttle checks or input sanitization that subclasses enforce, leading to unauthorized EVM execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62ee817a-c22d-4d62-9976-a192d37719e6?mode=deep",
+    "timestamp": "2026-05-01 20:22:46.802758",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user supply a `BlockType` that causes `recordFileService.findByBlockType(params.getBlock())` to return an empty Optional, triggering `BlockNumberNotFoundException` from the lazy `blockSupplier`, and by doing so repeatedly exhaust database connection pool resources or cause cascading failures in the record file lookup service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_056a0124-dd96-48b6-8355-fc7f14cdb8a5?mode=deep",
+    "timestamp": "2026-05-01 20:23:01.790782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: callContract(CallServiceParameters, ContractCallContext)] Can an unprivileged external user supply a crafted `params.getBlock()` value that causes the `Suppliers.memoize()` lambda to be evaluated multiple times concurrently (if memoization is not thread-safe), leading to multiple redundant database queries for the same block and a potential race condition in the `ContractCallContext` block supplier state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_491bc9db-5f96-4f43-834e-73bf340f7643?mode=deep",
+    "timestamp": "2026-05-01 20:23:16.742282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user trigger a scenario where `transactionExecutionService.execute()` throws a `MirrorEvmTransactionException` with a non-null `result` (via `e.getResult()`), and the `status` is set to `e.getMessage()` which contains user-controlled contract revert data, causing that user-controlled string to be recorded as a metric tag label and polluting the metrics system with attacker-controlled data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b4307b3-8e2f-4947-a727-041f545ff6ef?mode=deep",
+    "timestamp": "2026-05-01 20:23:30.761668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user submit a request with `gasLimit = 0` (if not validated upstream), causing `gasLimitToRestoreBaseline = (long)(0 * gasLimitRefundPercent / 100f) = 0`, and then `throttleManager.restore(0)` is called, which may have undefined behavior in the bucket4j implementation (e.g., restoring zero tokens causing an exception or no-op that skips proper accounting)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f38dfc1-b437-4735-89d8-27c4369b63a8?mode=deep",
+    "timestamp": "2026-05-01 20:23:44.744759",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user craft a successful transaction where `result.gasUsed()` equals exactly `gasLimit`, causing `gasRemaining = 0`, and `Math.min(0, gasLimitToRestoreBaseline) = 0`, so zero gas is restored to the throttle bucket even though the configured refund percent should apply, effectively over-consuming the throttle bucket and denying service to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac300f1a-cda2-499d-a16f-04264199e258?mode=deep",
+    "timestamp": "2026-05-01 20:23:58.639189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user cause `transactionExecutionService.execute()` to return a result where `result.isSuccessful()` is true but `result.gasUsed()` is 0 (e.g., via a no-op contract call), so that `restoreGasToBucket` restores `Math.min(gasLimit - 0, gasLimitToRestoreBaseline) = gasLimitToRestoreBaseline` gas, and by doing so repeatedly the attacker effectively never depletes the throttle bucket, bypassing rate limiting entirely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec3850de-d4f9-4e26-a898-bd9d28aebcf7?mode=deep",
+    "timestamp": "2026-05-01 20:24:12.974961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: validateResult()] Can an unprivileged external user trigger a contract revert that produces a malformed hex error message (not starting with `HEX_PREFIX`) so that `txnResult.getErrorMessage()` returns `Optional.empty()`, causing `revertReasonHex` to default to `HEX_PREFIX` only, and the `maybeDecodeSolidityErrorStringToReadableMessage` call receives an empty hex string, potentially causing a decoding exception or returning misleading error information to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97a66f58-dc84-4529-b203-593b71d38b01?mode=deep",
+    "timestamp": "2026-05-01 20:24:26.278947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: validateResult()] Can an unprivileged external user craft a contract call that returns a revert reason with an extremely large hex-encoded error string, causing `maybeDecodeSolidityErrorStringToReadableMessage(revertReasonHex)` to perform unbounded string processing, leading to excessive CPU or memory consumption during error decoding and a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_98e25a02-5ce2-41e9-a3e3-a154aa72bc94?mode=deep",
+    "timestamp": "2026-05-01 20:24:40.773733",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: updateGasLimitMetric()] Can an unprivileged external user submit requests with `params.getGas()` set to `Long.MAX_VALUE`, causing `gasLimitCounter.withTag(TAG_TYPE, callType).increment(Long.MAX_VALUE)` to overflow the counter value in the Micrometer registry, corrupting gas limit metrics and potentially causing monitoring alerts to fire incorrectly or be suppressed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e500f94-65a1-4d09-9df2-dbf5fc446fa7?mode=deep",
+    "timestamp": "2026-05-01 20:24:54.350650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user exploit the fact that when `estimate=true`, neither `validateResult()` nor `restoreGasToBucket()` is called in the `finally` block, to repeatedly invoke the estimate path with maximum gas values and never deplete the throttle bucket, effectively getting unlimited EVM simulation at no throttle cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd4b2e0b-0385-4f36-9604-8be0cf004bda?mode=deep",
+    "timestamp": "2026-05-01 20:25:09.062008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: doProcessCall()] Can an unprivileged external user cause a scenario where `result` is null after `transactionExecutionService.execute()` throws a non-`MirrorEvmTransactionException` (e.g., `IllegalStateException`), so that `restoreGasToBucket(null, params.getGas())` is called, and the null-result branch restores `gasLimitToRestoreBaseline` unconditionally, allowing the attacker to recover throttle gas on every pre-EVM failure and bypass rate limiting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc563e0a-f272-4cdf-95b7-b76a0442d925?mode=deep",
+    "timestamp": "2026-05-01 20:25:23.587285",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: callContract(CallServiceParameters)] Can an unprivileged external user call `callContract` concurrently from multiple threads, and since `ContractCallContext.run()` uses `ScopedValue`, verify whether a context leak between concurrent calls is possible if the ScopedValue binding is not properly isolated, leading to one user's call parameters being visible in another user's execution context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26602227-a8dc-4104-a344-79c6859f3102?mode=deep",
+    "timestamp": "2026-05-01 20:25:38.421740",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user submit a request where `gasLimitRefundPercent` is configured to 0 (minimum allowed by `@Min(0)`), causing `gasLimitToRestoreBaseline = 0`, and then for a failed transaction `throttleManager.restore(0)` is called, meaning no gas is ever restored to the bucket, allowing the attacker to permanently drain the throttle bucket with repeated failed calls and deny service to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c69f122c-42bb-4d8b-853b-08d16295ad6b?mode=deep",
+    "timestamp": "2026-05-01 20:25:52.186564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractCallService.java -> Scope: '] [Function: restoreGasToBucket()] Can an unprivileged external user exploit the float precision loss in `(long)(gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f)` when `gasLimit` is a large value (e.g., near `Long.MAX_VALUE / 100`), causing the float multiplication to lose precision and compute a `gasLimitToRestoreBaseline` that is significantly lower than the correct integer value, resulting in under-restoration of the throttle bucket and a slow denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bfe465f-973c-4953-9d21-70cb295f8dbe?mode=deep",
+    "timestamp": "2026-05-01 20:26:06.720078",
+    "report_generated": false
+  }
+]
