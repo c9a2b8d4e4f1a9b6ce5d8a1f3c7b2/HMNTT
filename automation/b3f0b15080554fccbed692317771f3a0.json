@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogs()] Can an unprivileged external user exploit the timestamp deduplication logic at lines 385-389 — `if (row.consensus_timestamp !== timestamps[timestamps.length - 1])` — where deduplication assumes rows are ordered by timestamp, but a UNION query in `getContractLogsQuery()` may return rows in non-timestamp order, causing duplicate timestamps to be included in the `timestamps` array and resulting in incorrect `recordFileMap` lookups that return `undefined` block data for fund-related log entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_340624f9-bfda-408f-aa07-b2ad8bc89afe?mode=deep",
+    "timestamp": "2026-05-01 15:48:00.731360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogs()] Can an unprivileged external user craft pagination parameters (`lower`, `inner`, `upper` filters) that cause `getContractLogsQuery()` to generate a UNION of subqueries with conflicting ORDER BY clauses, resulting in the outer `orderClauseNoAlias` at line 364 being applied to already-ordered subquery results, causing log entries for fund Transfer events to be returned out of order or duplicated, corrupting the fund-movement audit trail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79a38dd1-53c7-4a42-9662-7587b2222110?mode=deep",
+    "timestamp": "2026-05-01 15:48:12.756196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user supply pagination filters where `lower`, `inner`, and `upper` are all non-empty, causing `getContractLogsQuery()` to generate a three-way UNION query where the `limitClause` is applied to each subquery independently AND to the outer UNION, resulting in up to `3 * limit` rows being fetched and then re-limited, potentially skipping critical fund-related log entries that fall outside the re-applied limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f092812f-d7b4-49d7-bb73-835c1eb92c93?mode=deep",
+    "timestamp": "2026-05-01 15:48:25.482087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogsQuery()] Can an unprivileged external user exploit the `contractLogsPaginationColumns` mapping at line 174-177 — which maps `filterKeys.TIMESTAMP` to `ContractLog.CONSENSUS_TIMESTAMP` and `filterKeys.INDEX` to `ContractLog.INDEX` — by supplying a filter with an unknown `key` that maps to `undefined`, causing `ContractLog.getFullName(undefined)` to produce a malformed column reference in the SQL query and potentially causing a database error that freezes all log retrieval for the contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d7e8a15-5918-4240-8828-6b17a70d5f16?mode=deep",
+    "timestamp": "2026-05-01 15:48:38.039520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByIdAndFiltersQuery()] Can an unprivileged external user exploit the `whereConditions.join(' and ')` at line 220 — where `whereConditions` is an array of pre-built SQL condition strings — to inject SQL if any upstream validation fails to sanitize condition strings, causing the query to return wrong contract results and making fund-related transactions appear absent or failed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41ea5a90-18e3-47da-a5bc-1ab71bcb4408?mode=deep",
+    "timestamp": "2026-05-01 15:48:50.954397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByIdAndFilters()] Can an unprivileged external user supply a `limit=0` parameter that, when passed to `getContractResultsByIdAndFiltersQuery()`, causes `getLimitQuery(whereParams.length + 1)` to generate `LIMIT $N` where `$N` resolves to `0`, returning zero contract results and making all fund-related transactions for a contract appear absent to downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb5aa388-c9a6-4f11-9904-845b7231d66d?mode=deep",
+    "timestamp": "2026-05-01 15:49:03.835341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTimestamps()] Can an unprivileged external user supply an empty `timestamps` array to `getContractResultsByTimestamps()`, causing `params` to be set to `[]` (empty array) at line 273 and `timestampsOpAndValue` to be `in ()` (empty IN clause), generating invalid SQL that either throws a database error or returns zero rows, making all contract results appear absent and fund transfers appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34218d81-b98b-45a1-b3dc-06423d57a7fc?mode=deep",
+    "timestamp": "2026-05-01 15:49:17.631956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTimestamps()] Can an unprivileged external user exploit the branch at line 272 — `if (Array.isArray(timestamps))` — where a single non-array timestamp causes `params = [timestamps]` and `timestampsOpAndValue = '= $1'`, while an array causes `params = timestamps` (the array itself becomes params), to craft a single-element array `[timestamp]` that generates `in ($1)` instead of `= $1`, potentially causing type mismatch errors in the database that suppress contract results for fund transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d79d95b-9430-4fc3-86c0-ec24b7f95a58?mode=deep",
+    "timestamp": "2026-05-01 15:49:30.594830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user supply an empty `timestamps` array to `getContractStateChangesByTimestamps()`, causing `params = []` and `timestampsOpAndValue = 'in ()'` (empty IN clause), generating invalid SQL that causes a database error, making all state changes for a contract appear absent and fund-related slot writes appear to have never occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecb35873-b582-4e0d-b01c-3ce5a1684bc5?mode=deep",
+    "timestamp": "2026-05-01 15:49:43.872200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the `involvedContractIds?.length` check at line 426 — where `involvedContractIds` defaults to `[]` — to cause `contractIdsQuery` to be set to the JavaScript boolean `true`, which when interpolated into SQL at line 432 as `(contract_id = $N or (true and migration is false))`, includes ALL non-migration state changes regardless of contract ID, leaking state changes from other contracts and corrupting the fund-state view for the target contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a75c75f8-d315-4319-b0b3-a6254bfc797b?mode=deep",
+    "timestamp": "2026-05-01 15:49:57.486038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user exploit the `migration is false` condition at line 436 — which uses `is false` (not `= false`) — to cause rows where `migration IS NULL` to be excluded from results (since `NULL is false` evaluates to false in SQL), making state changes from contracts with a NULL migration flag appear absent and causing fund-related slot writes to be invisible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7fc31ca-c255-4f82-baaf-9208a9e5aff7?mode=deep",
+    "timestamp": "2026-05-01 15:50:10.776226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateChangesByTimestamps()] Can an unprivileged external user supply a `contractId` value of `0` (falsy in JavaScript) to `getContractStateChangesByTimestamps()`, causing the `if (contractId)` check at line 429 to evaluate to `false` even though `0` is a valid contract ID, routing the query to the `else` branch that applies `migration is false` globally and excludes migration records for the target contract, making its initial state changes invisible and funds appear frozen at zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7af863d1-9f03-46a3-ad96-7f3b18b0d0aa?mode=deep",
+    "timestamp": "2026-05-01 15:50:24.458539",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInvolvedContractsByTimestampAndContractId()] Can an unprivileged external user exploit the `!timestamp` check at line 311 — where a timestamp value of `0` (falsy) causes the function to return `null` — to make `getInvolvedContractsByTimestampAndContractId()` return `null` for a valid timestamp of `0`, causing the controller to throw `NotFoundError` and making all contract results for that timestamp permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03e163c7-0329-4c62-8f6c-00792186ce4d?mode=deep",
+    "timestamp": "2026-05-01 15:50:37.069070",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getInvolvedContractsByTimestampAndContractId()] Can an unprivileged external user exploit the `getSingleRow()` behavior at line 314 — which returns `null` when `rows.length > 1` — to cause `getInvolvedContractsByTimestampAndContractId()` to return `null` when multiple `contract_transaction` rows exist for the same timestamp and contract ID, making the controller throw `NotFoundError` and permanently blocking access to fund-related contract results for that transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e6eb0cd-4a34-44b5-90c6-e25226d333ba?mode=deep",
+    "timestamp": "2026-05-01 15:50:50.408093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user exploit the `isEmpty(payers) || isEmpty(timestamps)` check at line 521 — where `isEmpty` from lodash treats non-array objects as empty — to cause `getEthereumTransactionsByPayerAndTimestampArray()` to return an empty `transactionMap` when `payers` or `timestamps` is a non-array truthy value, making all Ethereum transactions for fund transfers appear absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9332d0ba-c610-4133-8f06-a909cbe639fa?mode=deep",
+    "timestamp": "2026-05-01 15:51:04.006282",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user exploit the `MAX_LONG` initial value for `minTimestamp` at line 526 — where `MAX_LONG` is a BigInt constant — to cause an overflow or type error if any timestamp in the array is not a BigInt, causing the `ethereumTransactionByPayerAndTimestampArrayQuery` to receive wrong `$3`/`$4` bounds and return zero Ethereum transactions, making fund transfers appear absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e706e2ee-e2e4-40fc-a194-25988a612ae6?mode=deep",
+    "timestamp": "2026-05-01 15:51:18.200196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEthereumTransactionsByPayerAndTimestampArray()] Can an unprivileged external user supply a `timestamps` array with a single very large BigInt value that causes `maxTimestamp` to overflow when compared with `MAX_LONG`, causing the `ethereumTransactionByPayerAndTimestampArrayQuery`'s `CONSENSUS_TIMESTAMP >= $3 AND CONSENSUS_TIMESTAMP <= $4` bounds to be inverted (min > max), returning zero rows and making all Ethereum fund transfers appear absent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1563f822-ef64-4e11-aae0-94a4f56da775?mode=deep",
+    "timestamp": "2026-05-01 15:51:34.049056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/contractService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateByIdAndFilters()] Can an unprivileged external user supply a `whereConditions` array with a `consensus_timestamp <=` condition pointing to a timestamp before any `VALUE_WRITTEN` entries exist for a balance slot, causing `contractStateTimestampQuery`'s `coalesce(VALUE_WRITTEN, VALUE_READ)` to return `VALUE_READ` for every slot, making all balance slots appear to hold their initial read values (potentially zero or a pre-funding value) and all funds appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b97c5313-c8f5-4a32-bd9f-1ce634731aff?mode=deep",
+    "timestamp": "2026-05-01 15:51:46.709685",
+    "report_generated": false
+  }
+]
