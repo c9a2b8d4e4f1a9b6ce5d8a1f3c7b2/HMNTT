@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: getSharedListener(TopicMessageFilter filter) in RedisTopicListener] Can an unprivileged user enumerate all active topic subscriptions by observing Redis channel names in the format `topic.<id>` (derived from `getTopic()`) through side-channel timing attacks or Redis monitoring, revealing which topic IDs are currently being subscribed to by other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25b09a0e-6fa5-44ec-b0d3-e8d945e3499b?mode=deep",
+    "timestamp": "2026-05-01 17:46:27.043725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in PollingTopicListener] Can an unprivileged user set `interval` to its minimum value of 50ms (via configuration if exposed) and open many subscriptions, causing `PollingTopicListener` to issue database queries at 20 queries/second per subscriber, creating a database amplification attack where N subscribers generate 20*N queries/second?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44021895-114a-4512-abe1-5b2ba744a383?mode=deep",
+    "timestamp": "2026-05-01 17:46:39.046477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: poll(PollingContext context) in PollingTopicListener] Can an unprivileged user cause `Math.min(limit, listenerProperties.getMaxPageSize())` in `poll()` to return `Integer.MAX_VALUE` when `filter.hasLimit()` is false (limit=0), causing `topicMessageRepository.findByFilter(newFilter)` to attempt to load `Integer.MAX_VALUE` rows into memory, causing an OOM condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2a7a33d-ff9a-41df-84e0-08cadeb068a6?mode=deep",
+    "timestamp": "2026-05-01 17:46:51.348628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user trigger the `default` branch in `getTopicListener()` by manipulating the `listenerProperties.getType()` to an unrecognized value (if configuration is externally mutable), causing an `UnsupportedOperationException` with the message `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89f84445-25b8-4ad5-ab7e-e613c626f1f5?mode=deep",
+    "timestamp": "2026-05-01 17:47:03.974276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: onStart(Subscription subscription) in SharedPollingTopicListener.PollingContext] Can an unprivileged user who is the first subscriber to `SharedPollingTopicListener` trigger `onStart()` which sets `lastConsensusTimestamp` to `DomainUtils.now()`, and if the clock skew between the server and database is significant, cause messages that arrived before `now()` to be permanently missed by all subscribers using the shared listener?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e85829e-1a52-4c55-8d2e-1a0bb15941ad?mode=deep",
+    "timestamp": "2026-05-01 17:47:17.132149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in SharedTopicListener] Can an unprivileged user subscribe to a topic with `SHARED_POLL` or `REDIS` mode and set `startTime` far in the past, causing the shared `topicMessages` Flux to emit messages that predate the subscriber's `startTime`, relying on the downstream `filterMessage()` in `CompositeTopicListener` to filter them—but if the shared Flux emits faster than the filter can process, causing backpressure overflow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a79547d-677d-46bc-93a1-7d0b4b3d5991?mode=deep",
+    "timestamp": "2026-05-01 17:47:30.088723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: recordMetric(TopicMessage topicMessage) in CompositeTopicListener] Can an unprivileged user cause `getConsensusLatencyTimer()` (a lazy-initialized `Timer`) to be initialized concurrently by multiple threads when many subscribers connect simultaneously, and if the lazy initialization via Lombok `@Getter(lazy=true)` is not thread-safe in this context, cause a race condition that registers duplicate metrics or corrupts the `MeterRegistry`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9385a53f-9b48-431f-898d-ad27a4b58c55?mode=deep",
+    "timestamp": "2026-05-01 17:47:42.587192",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in PollingTopicListener] Can an unprivileged user subscribe to a topic with `limit=1` and `startTime=0`, causing `poll()` to set `pageSize=1` and query the database, but since `PollingContext.count` is not reset between polls, subsequent polls compute `limit = 1 - 1 = 0` which maps to `Integer.MAX_VALUE` via `Math.min(0, maxPageSize)` = 0, causing the query to return all remaining messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_988499f5-de54-45bb-bd18-989afa9cb47d?mode=deep",
+    "timestamp": "2026-05-01 17:47:55.500382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: subscribe(Topic topic) in RedisTopicListener] Can an unprivileged user exploit the `retryWhen(Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(4L)))` in `subscribe()` to cause the server to accumulate an unbounded number of retry attempts (up to `Long.MAX_VALUE`) per subscription, each consuming memory for retry state, leading to a slow memory exhaustion attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd99a6d2-a885-457e-8230-9ccc9214abe7?mode=deep",
+    "timestamp": "2026-05-01 17:48:08.827488",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user subscribe to a topic with `endTime` set to `startTime + 1` nanosecond, causing the `pastEndTime()` check in `TopicMessageServiceImpl` to poll repeatedly with `grpcProperties.getEndTimeInterval()` delay, creating many short-lived subscriptions that each hold scheduler resources until the end time is detected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79dd8234-cb7c-472f-a4ca-becaec434a28?mode=deep",
+    "timestamp": "2026-05-01 17:48:22.228187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: getSharedListener(TopicMessageFilter filter) in RedisTopicListener] Can an unprivileged user cause a memory leak by subscribing to many distinct topic IDs, each causing `topicMessages.computeIfAbsent(topic.getTopic(), key -> subscribe(topic))` to add a new entry to the `ConcurrentHashMap`, and since entries are only removed on `doOnCancel`/`doOnComplete`, if the Flux never completes (infinite stream), the map grows unboundedly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4532afa9-dfb1-4279-a819-192516463b60?mode=deep",
+    "timestamp": "2026-05-01 17:48:35.594894",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in PollingTopicListener] Can an unprivileged user exploit the `jitter(0.1)` in `RepeatSpec.times(Long.MAX_VALUE).jitter(0.1).withFixedDelay(interval)` to cause timing side-channels that reveal the server's internal scheduling state, or does the jitter introduce insufficient randomness to prevent timing-based inference attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f039056e-4018-4ac9-902e-d3118ee4c866?mode=deep",
+    "timestamp": "2026-05-01 17:48:49.401017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: onPollEnd() in SharedPollingTopicListener.PollingContext] Can an unprivileged user observe the log output from `onPollEnd()` which logs `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff1530b9-aae6-4a20-ba94-bb079349d3f0?mode=deep",
+    "timestamp": "2026-05-01 17:49:02.292495",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in SharedTopicListener] Can an unprivileged user subscribe to a topic with `SHARED_POLL` mode and a very large `maxBufferSize` (up to 65536), causing the server to allocate up to 65536 `TopicMessage` objects per subscriber in the backpressure buffer, and with many concurrent subscribers, exhaust heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04c060cd-339e-492d-9447-78c3ed46acf5?mode=deep",
+    "timestamp": "2026-05-01 17:49:16.937848",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: filterMessage(TopicMessage message, TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user exploit the fact that `filterMessage()` only checks `topicId` equality and `consensusTimestamp >= startTime` but does NOT check `endTime`, meaning messages past the requested `endTime` may be emitted by the listener and only filtered by the downstream `takeWhile` in `TopicMessageServiceImpl`, creating a window where extra messages are processed unnecessarily?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0815de0-0d5c-497f-9233-0194b3a98840?mode=deep",
+    "timestamp": "2026-05-01 17:49:29.857997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user subscribe to a topic with `REDIS` mode and craft a `topicId` whose string representation in `getTopic()` (`topic.<id>`) matches an existing Redis key used for another purpose, causing the `ReactiveRedisMessageListenerContainer` to receive and deserialize unintended data, potentially causing deserialization errors or data corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdb808a7-cf06-46ff-b9d9-f3ad311a3134?mode=deep",
+    "timestamp": "2026-05-01 17:49:43.523199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: subscribe(Topic topic) in RedisTopicListener] Can an unprivileged user trigger the `doOnError(t -> log.error(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea1ebd41-320f-4d23-8d0a-6eb4f29e9609?mode=deep",
+    "timestamp": "2026-05-01 17:49:56.685210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in PollingTopicListener] Can an unprivileged user subscribe to a topic that has a very high message rate, causing `PollingContext.onNext()` to be called rapidly and `count.incrementAndGet()` to approach `Long.MAX_VALUE`, after which `filter.getLimit() - context.getCount().get()` overflows to a negative value, causing `(int)` cast to produce a large positive integer and bypassing the intended limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_719d907f-4c2f-4d09-8617-6eb5c257b899?mode=deep",
+    "timestamp": "2026-05-01 17:50:10.211916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in SharedTopicListener] Can an unprivileged user subscribe to a topic with `SHARED_POLL` mode and immediately cancel the subscription, triggering `doOnCancel(() -> log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5a7e5ac-72dd-44b6-a0e7-cecc9ffa3f37?mode=deep",
+    "timestamp": "2026-05-01 17:50:23.905175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: poll(PollingContext context) in SharedPollingTopicListener] Can an unprivileged user cause `findLatest(context.getLastConsensusTimestamp().get(), listenerProperties.getMaxPageSize())` to be called with `lastConsensusTimestamp` = 0 (the default `AtomicLong` value) if `onStart()` has not yet been called, causing the query to return all messages from timestamp 0 and broadcast them to all subscribers of the shared listener?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71b5bc45-5ab7-4a51-ae0e-b2a5577459f2?mode=deep",
+    "timestamp": "2026-05-01 17:50:37.257030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user subscribe to a topic with `REDIS` mode and observe that the `container` Mono in `RedisTopicListener` is cached (`.cache()`), meaning all subscribers share the same Redis connection, and if one subscriber triggers a connection error, the cached error state causes all subsequent subscribers to fail immediately?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e48b22bc-44ef-4613-b96a-8d1f59b93926?mode=deep",
+    "timestamp": "2026-05-01 17:50:50.275220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in PollingTopicListener] Can an unprivileged user set `startTime` to a value that causes `last.getConsensusTimestamp() + 1` in `poll()` to equal `filter.getStartTime()` on every poll cycle (e.g., by subscribing to a topic with no new messages), causing the polling loop to issue identical database queries on every interval indefinitely, wasting database resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8b2f5ac-10a3-47ca-a8d1-e187acb876a6?mode=deep",
+    "timestamp": "2026-05-01 17:51:04.117491",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in SharedTopicListener] Can an unprivileged user exploit the `publishOn(Schedulers.boundedElastic(), false, listenerProperties.getPrefetch())` call where `prefetch` can be up to 256, causing the scheduler to eagerly request up to 256 messages per subscriber from the shared upstream, amplifying memory usage when many subscribers are active?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65d8a07b-f8dc-4be6-a47b-dda4118f6ba8?mode=deep",
+    "timestamp": "2026-05-01 17:51:18.133808",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: getSharedListener(TopicMessageFilter filter) in RedisTopicListener] Can an unprivileged user subscribe to a topic in `REDIS` mode and observe that `topicMessages.computeIfAbsent()` is not atomic with respect to the `subscribe()` call, allowing two concurrent subscribers to the same topic to each call `subscribe()` and create two separate Redis subscriptions for the same channel, causing duplicate message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ece5ef4c-4b7e-4793-b146-804433d46a03?mode=deep",
+    "timestamp": "2026-05-01 17:51:31.701199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/TopicListener.java -> Scope: '] [Function: listen(TopicMessageFilter filter) in CompositeTopicListener] Can an unprivileged user subscribe to a topic with `REDIS` mode and trigger the `retryWhen(Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(8)))` on the container `Mono`, causing the server to retry Redis connection indefinitely while the subscriber's stream remains open, holding resources for an unbounded duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09c60e69-d498-42b6-981a-953da5b7b4f0?mode=deep",
+    "timestamp": "2026-05-01 17:51:46.311353",
+    "report_generated": false
+  }
+]
