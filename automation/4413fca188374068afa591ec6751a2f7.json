@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: timeStampInNanos()] Can an unprivileged external user submit a transaction with a crafted Timestamp whose getSeconds() value (e.g., 1568376750538L) causes Math.multiplyExact() to throw ArithmeticException, causing the importer to drop the transaction entirely and preventing it from being gossiped or persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f3458da-4c70-466f-9146-08de681892bb?mode=deep",
+    "timestamp": "2026-05-01 14:56:37.819097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: timeStampInNanos()] Can an unprivileged external user craft a transaction with Timestamp.seconds = Long.MAX_VALUE and Timestamp.nanos = 1, triggering an ArithmeticException in Math.addExact() inside timeStampInNanos(), causing the transaction record to be rejected and never stored, effectively silencing its gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_024d6109-6ee1-4b36-ad6e-433b30209598?mode=deep",
+    "timestamp": "2026-05-01 14:56:49.933793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: timeStampInNanos()] Can an unprivileged external user submit a transaction with a negative Timestamp.seconds value that overflows Math.multiplyExact(timestamp.getSeconds(), NANOS_PER_SECOND), causing an uncaught ArithmeticException that halts processing of the entire record file batch, preventing gossip of all subsequent transactions in that batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_699ed13b-3d73-4c4a-b26d-5a78facffc38?mode=deep",
+    "timestamp": "2026-05-01 14:57:02.268839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: convertToNanosMax()] Can an unprivileged external user craft two distinct transactions with different timestamps that both overflow convertToNanosMax() and clamp to Long.MAX_VALUE, causing both to map to the same nanosecond key in the database, so the second transaction silently overwrites or is rejected as a duplicate, preventing its gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e890fec-14a9-44ee-b434-d608853d08a8?mode=deep",
+    "timestamp": "2026-05-01 14:57:14.977430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: convertToNanosMax()] Can an unprivileged external user submit a transaction with a far-future timestamp (seconds > 9223372036) so that convertToNanosMax() returns Long.MAX_VALUE, colliding with any other transaction that also overflows, causing one transaction to be silently dropped and its gossip suppressed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cf6bdf8-fcec-46e5-8d48-dadbbf306b71?mode=deep",
+    "timestamp": "2026-05-01 14:57:27.726842",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: convertToNanos()] Can an unprivileged external user submit a transaction whose consensus timestamp seconds field is set to a value that causes Math.multiplyExact(second, NANOS_PER_SECOND) to overflow, throwing an ArithmeticException that propagates up and aborts the entire record stream file parsing, preventing gossip of all transactions in that file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d646c92d-a6a8-4a8b-90f5-ed289e04793e?mode=deep",
+    "timestamp": "2026-05-01 14:57:41.608830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: convertToNanosMax(Instant)] Can an unprivileged external user trigger a scenario where convertToNanosMax(Instant) receives a null Instant (falling back to Instant.EPOCH = 0), causing all transactions processed at that moment to receive a consensus timestamp of 0, colliding with TIMESTAMP_ZERO and preventing correct gossip ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7704a53-5023-4597-b653-29000c70f81e?mode=deep",
+    "timestamp": "2026-05-01 14:57:55.070723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getPublicKey(byte[])] Can an unprivileged external user submit a transaction with a protobuf Key field containing deeply nested THRESHOLDKEY structures that exceed the depth > 2 guard in getPublicKey(Key, int), causing the key to resolve to null and the transaction's entity key to be silently dropped, preventing the transaction from being correctly associated and gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_853d7666-66c4-40c1-a63c-73cce5b981f8?mode=deep",
+    "timestamp": "2026-05-01 14:58:08.429959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getPublicKey(byte[])] Can an unprivileged external user craft a malformed protobuf byte array for a Key field that causes Key.parseFrom() to throw an InvalidProtocolBufferException, which is caught and logged but returns null, causing the transaction's public key to be silently nulled out and the transaction to be stored without a valid key, disrupting downstream gossip verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dccd187c-9865-4e17-a587-02e6ca005485?mode=deep",
+    "timestamp": "2026-05-01 14:58:21.068494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getPublicKey(byte[])] Can an unprivileged external user submit a transaction with a KeyList containing exactly 2 or more keys, causing getPublicKey(KeyList, int) to return null (since keys.size() != 1), so the transaction's public key is stored as null, making it impossible to verify the transaction's signature during gossip validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6caffd81-eb29-482f-8c2d-04d89bbf9e29?mode=deep",
+    "timestamp": "2026-05-01 14:58:33.988374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getPublicKey(byte[])] Can an unprivileged external user craft a transaction with a THRESHOLDKEY wrapping a KeyList of exactly 1 key, which itself is a KEYLIST of 2 keys, so that at depth=2 the inner KeyList returns null, causing the transaction's key to be silently dropped and preventing gossip-level signature verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05795973-2ec4-4083-84eb-b641e21b4587?mode=deep",
+    "timestamp": "2026-05-01 14:58:47.052370",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: sanitize()] Can an unprivileged external user embed Unicode characters other than the null character (0x0000) in a transaction memo field that sanitize() does not replace, causing those characters to be stored in PostgreSQL and potentially triggering encoding errors or silent truncation that prevents the transaction from being correctly indexed and gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4af9e0e5-1067-4fc4-90e6-2da7a5902d5b?mode=deep",
+    "timestamp": "2026-05-01 14:59:00.083408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: sanitize()] Can an unprivileged external user craft a transaction memo containing only null characters (0x0000), causing sanitize() to replace all of them with the replacement character 0xFFFD, producing a memo that differs from the original transaction data, creating a hash mismatch that prevents gossip chain validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdfcbb16-6cc7-475a-ac36-385185ad477c?mode=deep",
+    "timestamp": "2026-05-01 14:59:13.111909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: sanitize()] Can an unprivileged external user submit a transaction with a memo containing a mix of null characters and valid UTF-8 text, where sanitize() replaces null characters with 0xFFFD but leaves other control characters (e.g., 0x0001-0x001F) intact, causing downstream database constraints to reject the transaction and prevent its gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f9876f2-14a4-4f46-b20e-c773916e2bfb?mode=deep",
+    "timestamp": "2026-05-01 14:59:25.428074",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: toBytes(ByteString)] Can an unprivileged external user craft a transaction payload containing a ByteString that passes the UnsafeByteOutput.supports() check (size > 16 and class == LiteralByteString), causing toBytes() to return the internal backing array by reference, so that any subsequent mutation of that array corrupts the transaction data in memory and prevents correct gossip propagation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28a51cdc-0939-4931-97da-86e77e3ba8aa?mode=deep",
+    "timestamp": "2026-05-01 14:59:38.106884",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: toBytes(ByteString)] Can an unprivileged external user submit a transaction with a ByteString payload that triggers an IOException in UnsafeByteOperations.unsafeWriteTo(), causing toBytes() to fall back to byteString.toByteArray() silently, but if the fallback also fails due to a corrupted ByteString, the transaction data is lost and gossip is prevented?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45cc2857-7086-4d6c-9311-000b2aec21d7?mode=deep",
+    "timestamp": "2026-05-01 14:59:50.543182",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: UnsafeByteOutput.write(byte[], int, int)] Can an unprivileged external user craft a transaction with a ByteString where UnsafeByteOutput.write(byte[] bytes, int offset, int length) is called with a non-zero offset, but the implementation ignores offset and length and stores the entire backing array, causing the returned byte array to contain extra bytes beyond the intended range, corrupting the transaction hash and preventing gossip chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4340e70f-500e-48d7-9adc-145b96999736?mode=deep",
+    "timestamp": "2026-05-01 15:00:03.268257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: UnsafeByteOutput.writeLazy(byte[], int, int)] Can an unprivileged external user submit a transaction whose ByteString triggers writeLazy(byte[] bytes, int offset, int length) with offset > 0, causing the full backing array (not the slice) to be returned by toBytes(), so the transaction's byte representation is larger than expected, causing hash mismatches that prevent gossip validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0a6a3c2-0a7a-4713-aa93-461cb45726bc?mode=deep",
+    "timestamp": "2026-05-01 15:00:17.003776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fromBytes(byte[])] Can an unprivileged external user trigger a code path where fromBytes() wraps a mutable byte array via UnsafeByteOperations.unsafeWrap() without copying, and a concurrent thread modifies the original array, causing the ByteString to contain corrupted data that prevents the transaction from being correctly gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62f5b74e-ec1c-4cff-9f52-02637f5fbd62?mode=deep",
+    "timestamp": "2026-05-01 15:00:29.958605",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fromEvmAddress(byte[])] Can an unprivileged external user craft a transaction referencing an EVM address where the first 12 bytes are all zeros (matching MIRROR_PREFIX) but bytes 12-19 encode a negative long value, causing fromEvmAddress() to call EntityId.of() with a negative num, throwing InvalidEntityException that is caught and logged, returning null and silently dropping the entity reference, preventing the transaction from being gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40e08fb8-d07d-49a5-b98b-1f0f1fd0a172?mode=deep",
+    "timestamp": "2026-05-01 15:00:43.075543",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fromEvmAddress(byte[])] Can an unprivileged external user submit a transaction with an EVM address that is exactly 20 bytes but has non-zero bytes in positions 0-11, causing isLongZeroAddress() to return false and fromEvmAddress() to return null, so the entity lookup fails silently and the transaction is processed without a valid entity reference, disrupting gossip routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db7cbc8c-f991-4832-a0c3-c205d9d39a33?mode=deep",
+    "timestamp": "2026-05-01 15:00:56.033931",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fromTrimmedEvmAddress(byte[])] Can an unprivileged external user craft a transaction with a trimmed EVM address of length 1-19 bytes, causing fromTrimmedEvmAddress() to left-pad it with zeros, potentially creating a long-zero address that maps to a different entity than intended, causing the transaction to be attributed to the wrong entity and preventing correct gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_715fe77c-8ac3-4060-ad61-3cc87002254b?mode=deep",
+    "timestamp": "2026-05-01 15:01:09.652941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: fromTrimmedEvmAddress(byte[])] Can an unprivileged external user submit a transaction with a trimmed EVM address of exactly 0 bytes (empty array), causing fromTrimmedEvmAddress() to pad it to 20 zero bytes, which isLongZeroAddress() returns true for, mapping it to entity num=0, causing an InvalidEntityException and preventing the transaction from being gossiped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbc02a8c-ba52-487f-afc0-0b8b78d9126a?mode=deep",
+    "timestamp": "2026-05-01 15:01:23.714943",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: isLongZeroAddress(byte[])] Can an unprivileged external user craft a transaction with an EVM address where bytes 0-11 are all zeros but bytes 12-19 encode a valid entity num, causing isLongZeroAddress() to return true and fromEvmAddress() to resolve it to a specific EntityId, allowing the attacker to spoof a system entity address (num <= 999) and inject a transaction attributed to a system entity, disrupting gossip integrity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f621b57-fa50-4da6-8516-5f7434745d2d?mode=deep",
+    "timestamp": "2026-05-01 15:01:37.386097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: isLongZeroAddress(byte[])] Can an unprivileged external user submit a transaction with an EVM address of length != 20 bytes, causing isLongZeroAddress() to return false regardless of content, so a valid long-zero address that was trimmed is not recognized, causing the entity lookup to fail and the transaction to be dropped, preventing its gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae4edfb0-cba3-4415-9795-b954a57975de?mode=deep",
+    "timestamp": "2026-05-01 15:01:51.585196",
+    "report_generated": false
+  }
+]
