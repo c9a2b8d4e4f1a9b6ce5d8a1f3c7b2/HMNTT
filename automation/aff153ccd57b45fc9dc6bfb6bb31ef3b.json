@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user induce a network partition that causes the parse(List<T>) batch loop to call shouldParse() with a previous value that was set during the current batch (not from the database), and when the partition causes a mid-batch failure, the next retry re-reads getLast() from the database which returns a different value, causing the hash chain check to use a different expectedHash than the one used in the failed attempt, potentially accepting a file that should have been rejected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f9d46d4-cdd6-4401-8a82-f0d005d06a4a?mode=deep",
+    "timestamp": "2026-05-01 21:46:54.676960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the BlockFileSource.doGet() to throw a BlockStreamException wrapping a timeout, and the AbstractBlockSource retry logic to re-download the same block number, but the discoverNetwork() lazy getter has already cached a stale network folder name, causing the re-download to fetch a file from a different (post-reset) network and pass it to onEnd() with a mismatched hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_afd9e566-e4c4-46a5-afd1-2b4df8fb8af3?mode=deep",
+    "timestamp": "2026-05-01 21:47:06.424860",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that makes the Downloader.verifySignatures() catch a HashMismatchException and log a warning (not an error), then continue to the next signature in the loop, and if all CONSENSUS_REACHED signatures fail hash verification due to the partition-induced stale lastStreamFile, the method returns false and the stream file is silently skipped, causing onEnd() to never be called and creating a permanent gap in the mirror node's data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8b75c3c-750a-49d6-9f37-c2c4b2af6875?mode=deep",
+    "timestamp": "2026-05-01 21:47:18.675930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user exploit a network partition that causes the executorService in BatchStreamFileNotifier to be shut down (via close()) while the StreamFileSubscriber.run() loop is blocked on queue.poll(), causing the InterruptedException handler to return without processing remaining items in the queue, so that onEnd() is never called for buffered stream files and those files are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_31b9d898-4195-4e40-8c4d-547d64c31fbf?mode=deep",
+    "timestamp": "2026-05-01 21:47:31.222852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the flush() method in BatchStreamFileNotifier to evaluate lag = DomainUtils.now() - streamFile.getConsensusEnd() as a very large value (because the partition delayed processing), causing the window check to always return false and the buffer to grow unboundedly until maxFiles or maxItems is reached, then flushing a massive batch to onEnd() that causes an OOM or transaction timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58f21392-8e49-408d-8dfa-f248a0018b89?mode=deep",
+    "timestamp": "2026-05-01 21:47:44.417825",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that interrupts the AbstractStreamFileParser.parse(T) method after doParse() succeeds but before doFlush() is called, and since the @Transactional annotation wraps the entire parse() method, the transaction is rolled back, but the in-memory last AtomicReference is not reset, causing the next parse() call to use the stale last value and skip the hash chain re-verification against the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b8a77af-30da-4aa0-ab37-14e4eb211689?mode=deep",
+    "timestamp": "2026-05-01 21:47:57.828704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user induce a network partition that causes the RecordFileParser.doParse() to publish a RecordFileParsedEvent via applicationEventPublisher before onEnd() is called, and if the event listener performs database operations that succeed while the outer transaction (containing onEnd()) is rolled back due to the partition, the event-driven side effects are committed but the stream file record is not, creating an irreconcilable inconsistency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1678aa03-d96a-4681-9774-7d672c182965?mode=deep",
+    "timestamp": "2026-05-01 21:48:11.488313",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the streamFileRepository.findLatest() call inside getLast() to throw a DataAccessException, which propagates up through shouldParse() and parse(), causing the entire parse cycle to fail with an unchecked exception that is not an ImporterException, bypassing any ImporterException-specific error handling in callers of onEnd()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b48bdf82-e358-4ade-a4b7-831ff88fe2f3?mode=deep",
+    "timestamp": "2026-05-01 21:48:25.856327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that makes the BlockStreamVerifier.verifySignature() fail after verifyHashChain() has already mutated the blockFile object (e.g., setPreviousHash() or setPreviousWrappedRecordBlockHash() called in the cutover path), leaving the blockFile in a partially-modified state that is then retried with incorrect hash values, causing onEnd() to eventually receive a file with corrupted hash fields?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fdc5b70-d0df-44b7-9f87-e7d515c49748?mode=deep",
+    "timestamp": "2026-05-01 21:48:38.705298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user exploit a network partition that causes the CompositeRecordStreamFileListener.onEnd() to throw an ImporterException from the i-th listener, leaving listeners at indices i+1 through n-1 un-notified, and since the exception propagates to doFlush() which does not catch it, last.set(streamFile) is never called, causing the next parse cycle to re-process the same stream file and call the first i listeners again, resulting in duplicate processing for those listeners?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34b7b022-200c-4a76-b35c-02c5df94ecd8?mode=deep",
+    "timestamp": "2026-05-01 21:48:51.696242",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the @Retryable parse() in RecordFileParser to exhaust all maxAttempts retries, and since the exception is re-thrown after all retries, the BatchStreamFileNotifier.StreamFileSubscriber.run() catches it as a generic Exception and logs it without re-queuing the stream file, causing permanent data loss for that stream file with no alerting mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f365440-bf69-40a3-8b98-ad604c3136ce?mode=deep",
+    "timestamp": "2026-05-01 21:49:05.094378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that makes the LocalStreamFileProvider.list() timeout (via .timeout(downloaderProperties.getTimeout())), causing the Flux to emit an error that is mapped to a TransientProviderException, which is then re-thrown by CompositeStreamFileProvider.shouldRetry() without marking the provider unhealthy, causing the importer to loop indefinitely on the same file and never call onEnd()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_703eb227-41a4-4929-912e-71a7df47f273?mode=deep",
+    "timestamp": "2026-05-01 21:49:19.060623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user induce a network partition that causes the SyntheticTokenAllowanceOwnerMigration.onEnd() to execute with a streamFile whose getHapiVersion() returns an incorrect version (due to partial parse before the partition), causing the executed AtomicBoolean to be set to true prematurely and preventing the migration from ever running again, even after the partition is resolved and correct data is available?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72c9152a-5472-4866-b066-da793fa1468d?mode=deep",
+    "timestamp": "2026-05-01 21:49:33.751504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the parse(List<T>) method to call doFlush(previous) where previous is the last successfully parsed file in the batch, but if the partition caused some files in the batch to be skipped via shouldParse() returning false, onEnd() is called with a file that has gaps in the consensus timeline, causing downstream listeners to have an incomplete view of the ledger state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbd2c9a1-3ab7-40e6-b7cb-7100978241bd?mode=deep",
+    "timestamp": "2026-05-01 21:49:47.092399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that interrupts the Downloader.download() polling loop, causing it to restart and re-download signature files for the same batch, and since lastStreamFile is still set from the previous successful download, the verifyHashChain() check passes for the re-downloaded files, causing onEnd() to be called twice for the same stream file if the first call's transaction was not fully committed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0af97183-8e09-4b14-ab97-13cfa2d8e0e2?mode=deep",
+    "timestamp": "2026-05-01 21:50:01.919355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user exploit a network partition that causes the BlockNodeSubscriber to switch to a different block node mid-stream, and the new block node provides a block with a different previousHash than expected (because it is on a different fork), causing verifyHashChain() to throw a HashMismatchException that propagates through onEnd() and permanently halts block processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82067d52-3263-4391-89f6-ff41943d3c34?mode=deep",
+    "timestamp": "2026-05-01 21:50:15.519992",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the AbstractStreamFileParser.parse(T) to fail with an exception after doFlush() has called streamFileListener.onEnd() and last.set(streamFile) but before streamFile.clear() executes, leaving the StreamFile's bytes and items in memory, and on the next parse cycle the same StreamFile object is re-used with stale data, causing onEnd() to process duplicate items?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0e2431a-e959-44d0-90bf-5b6b0b8daccc?mode=deep",
+    "timestamp": "2026-05-01 21:50:29.683610",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that makes the BatchStreamFileNotifier.StreamFileSubscriber buffer accumulate files beyond the expected window, and when the partition resolves and exceedsInterval() triggers a flush, the streamFileParser.parse(new ArrayList<>(buffer)) call processes files whose consensus timestamps span the partition gap, causing onEnd() to receive files with non-contiguous consensus ranges that violate the sequential processing assumption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ceb56ad8-9991-4f01-bc40-e44070780eb4?mode=deep",
+    "timestamp": "2026-05-01 21:50:42.472244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user induce a network partition that causes the Downloader.partialCollection() to select a different random subset of nodes on each retry (due to Collections.shuffle()), and if the partition affects only some nodes, the selected subset may not have the correct stream file, causing verifySignatures() to fail for all CONSENSUS_REACHED signatures and onEnd() to never be called, creating a permanent stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94262175-a496-4ffe-91b6-75db3f0c86ca?mode=deep",
+    "timestamp": "2026-05-01 21:50:55.160707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the RecordFileParser.parse() @Transactional method to time out (transactionTimeoutString exceeded), and since the timeout causes a TransactionTimedOutException (a RuntimeException), the @Retryable annotation retries the entire parse including doParse() and onEnd(), potentially causing duplicate event publishing via applicationEventPublisher.publishEvent() for the same RecordFile?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca86187e-0280-4d49-8df0-12298ebcf201?mode=deep",
+    "timestamp": "2026-05-01 21:51:09.393582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user cause a network partition that makes the streamFileRepository.findLatest() return an Optional.empty() (because the database is unreachable and returns no results), causing getLast() to return null, and shouldParse() to skip the hash chain check entirely (previous == null path), allowing any stream file to be passed to onEnd() without hash chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fd533e1-5c8b-4691-84f8-e6c28ed6a513?mode=deep",
+    "timestamp": "2026-05-01 21:51:23.176551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user exploit a network partition that causes the CutoverService.getLastRecordFile() to return an empty Optional (because the underlying repository is unreachable), causing BlockStreamVerifier.verifyHashChain() to return immediately without any hash verification, and the unverified block file is passed to streamFileNotifier.verified() which calls onEnd(), allowing injection of an unverified block into the mirror node's state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1cc0156d-bd9c-47a6-9a6a-d49cfa309748?mode=deep",
+    "timestamp": "2026-05-01 21:51:36.812732",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onEnd(T streamFile)] Can an unprivileged external user trigger a network partition that causes the CompositeStreamFileProvider to exhaust all providers (index.get() + 1 >= providers.size()), causing Exceptions.propagate(exception) to be called, which wraps the original exception in a ReactiveException, and this unchecked exception propagates through the reactive pipeline to the downloader, causing the download loop to terminate without calling onEnd() for the pending stream file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d016af5d-52e5-4089-b2f2-4b8aaec99bcb?mode=deep",
+    "timestamp": "2026-05-01 21:51:49.906970",
+    "report_generated": false
+  }
+]
