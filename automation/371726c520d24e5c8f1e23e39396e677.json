@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a very large `limit` value (up to `maxLimit: 100`) combined with an account that has many token associations, causing `getTokenRelationshipsQuery()` to generate a query that returns the maximum number of rows, each requiring a cache lookup in `getCachedTokens()`, maximizing per-request DB load and enabling a low-volume request flood to exhaust DB resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6adf2597-9e02-46d6-b9d5-a334559679c7?mode=deep",
+    "timestamp": "2026-05-01 21:31:51.454726",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user send requests where `conditions` contains many entries (up to `maxRepeatedQueryParameters: 100` for token_id gt/lt filters), causing `getTokenRelationshipsQuery()` to build a SQL query with 100+ AND conditions, creating a complex query plan that consumes excessive DB CPU and blocks other queries from executing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_053c08d7-765a-4e84-9c41-06fe9b800f92?mode=deep",
+    "timestamp": "2026-05-01 21:32:03.703807",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user exploit the fact that `getLimitQuery(2)` always references `$2` (the second parameter position) regardless of how many `conditions` entries shift the parameter indices, causing the limit to be applied to the wrong parameter value (e.g., a token_id value instead of the intended limit), resulting in unbounded query results that exhaust DB memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e59d96c4-1a66-469b-bf18-e466871851db?mode=deep",
+    "timestamp": "2026-05-01 21:32:16.286189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user send a request with both `conditions` (gt/lt filters) and `inConditions` (eq filters) simultaneously, causing `getTokenRelationshipsQuery()` to build a query where the `$2` limit parameter (from `getLimitQuery(2)`) is misaligned with the actual params array (which has `ownerAccountId` at $1, `limit` at $2, then condition values at $3+), and if the limit value is accidentally applied as a token_id filter, return an unbounded result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6ad4c79-adb6-4d0d-ae3e-a2d46bafa603?mode=deep",
+    "timestamp": "2026-05-01 21:32:29.351959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `condition.value` that is a JavaScript Array (e.g., `[1, 2, 3]`), which when coerced to string via `${tokenIdInParams}` (Array.toString()) produces `1,2,3` in the IN clause, bypassing any single-value validation and injecting multiple token IDs into the unparameterized IN clause, potentially enabling SQL injection through nested array coercion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2ec8309-9f3b-45dc-92b7-24c9a8bfd6d7?mode=deep",
+    "timestamp": "2026-05-01 21:32:42.888800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `condition.value` containing a newline character followed by SQL (`\\\\n; SELECT pg_sleep(30)--`), which when interpolated into `in (${tokenIdInParams})` breaks out of the IN clause and injects a sleep statement, holding the DB connection open and contributing to connection pool exhaustion when sent concurrently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b093c8c-9757-4a24-8c82-873f47f42c49?mode=deep",
+    "timestamp": "2026-05-01 21:32:56.682765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a value like `0),(SELECT 1 FROM pg_sleep(20))--` into `inConditions[].value`, which when interpolated into `and ta.token_id in (${tokenIdInParams})` produces `and ta.token_id in (0),(SELECT 1 FROM pg_sleep(20))--`, causing a 20-second DB sleep per request, and with 10 concurrent requests exhausting all DB connections for 20 seconds, effectively shutting down the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32fa83e2-626e-45d1-babb-fbbf4c306c06?mode=deep",
+    "timestamp": "2026-05-01 21:33:09.672391",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user inject a value that causes the IN clause to reference a very large subquery (e.g., `SELECT generate_series(1, 1000000)`), causing PostgreSQL to generate a million-row intermediate result set that exhausts DB memory and crashes the database server, taking down the entire mirror node infrastructure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a63e4612-b1e3-4447-9ab0-445018e6932a?mode=deep",
+    "timestamp": "2026-05-01 21:33:22.935274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: tokenCache (module-level)] Can an unprivileged external user exploit the module-level singleton `tokenCache` (shared across all requests in the same Node.js process) by flooding with requests that each introduce a unique token ID, causing the LRU to evict 100,000 entries and re-populate them on every request cycle, creating a memory allocation/deallocation storm that triggers Node.js garbage collection pauses and degrades service responsiveness to the point of timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9908cc5-c129-47cb-8277-4acd3ebdfe03?mode=deep",
+    "timestamp": "2026-05-01 21:33:36.532716",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: tokenCache (module-level)] Can an unprivileged external user cause the `tokenCache` (maxSize: 100,000) to be filled with 100,000 entries of maximum-size `CachedToken` objects by querying accounts with many unique token associations, consuming all available Node.js heap memory and triggering an OOM crash that shuts down the REST service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ec074b8-26bb-45f2-88ec-74dcb7388a5c?mode=deep",
+    "timestamp": "2026-05-01 21:33:50.509593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getCachedTokens()] Can an unprivileged external user send requests where `tokenIds` Set contains token IDs that are all cache misses, causing `uncachedTokenIds` to be a large array passed to `super.getRows(TokenService.tokenCacheQuery, [uncachedTokenIds])`, where PostgreSQL's `any ($1)` operator with a very large array causes excessive query planning time that blocks the DB thread and prevents other queries from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c80c725b-23aa-4c0f-8d3e-28ac19d240ce?mode=deep",
+    "timestamp": "2026-05-01 21:34:06.797628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getCachedTokens()] Can an unprivileged external user exploit the sequential async pattern in `getCachedTokens()` (first iterating `tokenIds.forEach()` to check cache, then issuing a DB query) to create a time-of-check-to-time-of-use (TOCTOU) window where a concurrent request modifies `tokenCache` between the check and the DB query, causing duplicate DB queries for the same token IDs and amplifying DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97d6defe-33ce-40f9-a92f-0cbf7e7463cb?mode=deep",
+    "timestamp": "2026-05-01 21:34:20.509600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenAccounts()] Can an unprivileged external user cause `getTokenAccounts()` to enter an error state where `super.getRows(sqlQuery, params)` succeeds but `this.getCachedTokens(tokenIds)` throws a DB connection error, resulting in an unhandled promise rejection that, if not caught by the caller, crashes the Node.js event loop and takes down the REST service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e2e721e-719a-415b-a30c-0f8b86a07d6e?mode=deep",
+    "timestamp": "2026-05-01 21:34:34.282702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenAccounts()] Can an unprivileged external user trigger a memory exhaustion attack by querying an account with the maximum token balance limit (1000 per `tokenBalance.singleAccount`), causing `getTokenAccounts()` to build a 1000-element `tokenIds` Set, a 1000-element `cachedTokens` Map, and a 1000-element result array simultaneously, and by sending many concurrent requests, exhaust Node.js heap memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12091c48-3501-4f48-8b3d-81345e08290d?mode=deep",
+    "timestamp": "2026-05-01 21:34:48.554722",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply an `order` value that is not sanitized before being passed to `OrderSpec.from(TokenAccount.getFullName(TokenAccount.TOKEN_ID), order)`, injecting SQL into the ORDER BY clause (e.g., `asc; SELECT pg_sleep(30)--`) that causes a blocking DB query, contributing to connection pool exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a332e62-831c-4eae-91ee-6f90589ed718?mode=deep",
+    "timestamp": "2026-05-01 21:35:02.532600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply an `ownerAccountId` value of `null` or `undefined`, causing `params = [ownerAccountId, limit]` to pass a null value as `$1` in `tokenRelationshipsQuery`, which may cause PostgreSQL to return all rows (if the WHERE clause evaluates unexpectedly) or throw an error that crashes the request handler?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d5806bf-e9ca-4c91-8cd8-0011eaf8e736?mode=deep",
+    "timestamp": "2026-05-01 21:35:15.758501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenRelationshipsQuery()] Can an unprivileged external user supply a `limit` value of `0` or a negative number, causing `params = [ownerAccountId, limit]` to pass an invalid limit to `getLimitQuery(2)`, which generates `limit $2` with a zero/negative value, causing PostgreSQL to return an error or behave unexpectedly, and if unhandled, crash the request handler?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e73bfc5-38a2-45e7-a5af-d583bed3d5ab?mode=deep",
+    "timestamp": "2026-05-01 21:35:30.457634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `condition.value` of `NaN` or `Infinity`, which when coerced to string via `${tokenIdInParams}` produces `NaN` or `Infinity` in the SQL IN clause, causing a PostgreSQL type error that propagates as an unhandled exception and crashes the request handler for all concurrent requests sharing the same event loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46ac4db8-dfe5-4c7d-b895-4146a856c41d?mode=deep",
+    "timestamp": "2026-05-01 21:35:45.099986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getInClauseSubQuery()] Can an unprivileged external user supply a `condition.value` that is an empty string `''`, which when interpolated into `in ('')` causes a PostgreSQL syntax or type error (since token_id is a bigint column), and if this error is not caught, propagates as an unhandled rejection that crashes the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a682c742-37b7-459b-bd1e-dbb140c91275?mode=deep",
+    "timestamp": "2026-05-01 21:35:57.980046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getCachedTokens()] Can an unprivileged external user exploit the fact that `tokenCache.get(tokenId)` uses BigInt keys, and by supplying token IDs as strings instead of BigInts, cause cache misses on every request (since `BigInt(1) !== '1'` as a Map key), ensuring all token IDs are always treated as uncached and always trigger DB queries, creating a permanent cache bypass?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42fa03b8-7239-43f0-a850-08219886745f?mode=deep",
+    "timestamp": "2026-05-01 21:36:11.528536",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getCachedTokens()] Can an unprivileged external user send requests with token IDs that are valid but extremely large BigInt values (near `maxNum`), causing `tokenCache` key comparisons to be slow due to BigInt arithmetic, and by flooding with many such requests, create CPU exhaustion in the cache lookup loop that degrades service performance to the point of timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_520bd3a5-553d-4dc4-a8d3-29d77811a704?mode=deep",
+    "timestamp": "2026-05-01 21:36:24.993238",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getTokenAccounts()] Can an unprivileged external user cause `rows.reduce((result, row) => result.add(row.token_id), new Set())` to throw a TypeError if `row.token_id` is undefined (e.g., due to a DB schema change or NULL value), and since this is inside an async function without a try/catch, the unhandled rejection crashes the request handler and makes the endpoint unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0f3f566-1035-411c-a7e0-c09d3e4f84bb?mode=deep",
+    "timestamp": "2026-05-01 21:36:38.522361",
+    "report_generated": false
+  }
+]
