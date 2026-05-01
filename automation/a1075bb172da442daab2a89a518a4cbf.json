@@ -94,5 +94,101 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99a06b09-86d1-41bd-9475-ae35e5581c11?mode=deep",
     "timestamp": "2026-04-29 04:12:34.698995",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause `RetrieveBalanceAtBlock()` to compute `hbarAmount.Value += hbarValue` with an integer overflow by observing that both `ab.Balance` (from `account_balance`) and `change.Value` (from `crypto_transfer` sum) are `int64`, and if tampered rows inject extreme `amount` or `balance` values near `math.MaxInt64`, the addition overflows and returns a wildly incorrect balance to the Rosetta API caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6442ddd4-c5c2-45f3-9164-e06ec9fa455f?mode=deep",
+    "timestamp": "2026-05-01 17:54:25.002450",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getBalanceChange()] Can an unprivileged external user cause `getBalanceChange()` to return a negative balance change by observing that `balanceChangeBetween` sums all `amount` values (which can be negative for debits) from `crypto_transfer`, and if tampered rows inject large negative `amount` values for a target account within the `consensusStart` to `consensusEnd` window, the function returns a large negative `change.Value`, causing `hbarAmount.Value` to underflow below zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea6a0459-8735-4089-bfa7-ab0389f4ea67?mode=deep",
+    "timestamp": "2026-05-01 17:54:37.114686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCryptoEntity()] Can an unprivileged external user cause `getCryptoEntity()` to return an entity from `entity_history` that was never legitimately created on-chain by observing that the UNION ALL query between `entity` and `entity_history` has no cryptographic proof of record authenticity, and if a fabricated `entity_history` row is injected with a valid-looking `alias`, `id`, `timestamp_range`, and `deleted = false`, the function returns it as a legitimate historical entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e1b6f87-640e-4687-827b-feed852484ef?mode=deep",
+    "timestamp": "2026-05-01 17:54:49.532101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause `getLatestBalanceSnapshot()` to return `hErrors.ErrDatabaseError` for all accounts by observing that the function queries `mirror_node_time_partitions` and `account_balance` sequentially, and if the `mirror_node_time_partitions` table is tampered to contain no rows matching `parent = 'account_balance'`, the `partitionLowerBound` defaults to 0, and if `account_balance` is also tampered to have no treasury rows, `latestBalanceBeforeConsensus` returns no results, triggering `ErrDatabaseError`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9fb8bfb-5430-4644-a255-c6e113e3e655?mode=deep",
+    "timestamp": "2026-05-01 17:55:01.897444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user observe that `RetrieveBalanceAtBlock()` uses `id = entity.Id.EncodedId` when `accountId.HasAlias()`, and if the `id` field in the entity row returned by `getCryptoEntity()` is tampered to a different account's encoded ID, the subsequent `getLatestBalanceSnapshot()` and `getBalanceChange()` calls query the wrong account's balance data, returning another account's balance to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d8f00e7-c4c7-4947-9fb1-e67817b267da?mode=deep",
+    "timestamp": "2026-05-01 17:55:14.994245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getBalanceChange()] Can an unprivileged external user cause `getBalanceChange()` to include transfers from a different account by observing that `balanceChangeBetween` filters on `entity_id = @account_id`, and if the `entity_id` column of `crypto_transfer` rows is tampered to associate transfers from one account with another account's ID, the function sums those transfers into the wrong account's balance change?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc1bed8b-564d-4703-a540-441b87a4b767?mode=deep",
+    "timestamp": "2026-05-01 17:55:27.380030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause `getLatestBalanceSnapshot()` to return a balance snapshot from a future timestamp by observing that `latestBalanceBeforeConsensus` selects the most recent `account_balance` row with `consensus_timestamp <= @timestamp`, and if a tampered row is injected with a `consensus_timestamp` equal to `@timestamp` but a falsified `balance` value, the function returns that tampered balance as the authoritative snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e4383f9-db29-43aa-93f4-1c484a5ee449?mode=deep",
+    "timestamp": "2026-05-01 17:55:40.232216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCryptoEntity()] Can an unprivileged external user cause `getCryptoEntity()` to return a CONTRACT-type entity instead of an ACCOUNT-type entity by observing that `selectCryptoEntityById` filters `type in ('ACCOUNT', 'CONTRACT')`, and if the `type` field in `entity_history` is tampered from `ACCOUNT` to `CONTRACT` for a specific historical range, the function returns the tampered entity, potentially affecting downstream balance logic that differentiates between account and contract types?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f637f372-084a-4e6f-ab2c-f2c573587646?mode=deep",
+    "timestamp": "2026-05-01 17:55:53.037120",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getBalanceChange()] Can an unprivileged external user cause `getBalanceChange()` to return a falsified balance change by observing that the `balanceChangeBetween` query does not verify the `payer_account_id` field of `crypto_transfer` rows, and if tampered rows are injected with a valid `entity_id` and `consensus_timestamp` but a fabricated `payer_account_id`, the function includes them in the sum without detecting the inconsistency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_016d6ee5-be50-44da-b368-49208d32b524?mode=deep",
+    "timestamp": "2026-05-01 17:56:05.697901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause `RetrieveBalanceAtBlock()` to return a non-nil balance for an account that was never created on-chain by observing that when `entity == nil` and `!accountId.HasAlias()`, the function proceeds to call `getLatestBalanceSnapshot()` and `getBalanceChange()` with `id = accountId.GetId()`, and if tampered `account_balance` or `crypto_transfer` rows exist for that numeric ID, the function returns a fabricated balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00e79b06-c190-48da-b171-22f22821553f?mode=deep",
+    "timestamp": "2026-05-01 17:56:18.438169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause `getLatestBalanceSnapshot()` to anchor the snapshot to a tampered treasury balance timestamp by observing that `latestBalanceBeforeConsensus` uses a subquery to find the treasury's latest `account_balance` row, and if the treasury's `account_balance` rows are tampered to have a `consensus_timestamp` far in the past, the snapshot window shifts backward, causing all accounts' balances to be computed from an outdated baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53743c7e-1d75-44c6-ade7-b6ea0fc4092d?mode=deep",
+    "timestamp": "2026-05-01 17:56:32.543907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCryptoEntity()] Can an unprivileged external user cause `getCryptoEntity()` to return an entity with a tampered `alias` field by observing that `selectCryptoEntityByAlias` returns the full entity row including `alias`, and if the `alias` column in `entity_history` is tampered to a different value, the returned entity has a mismatched alias, potentially causing `types.NewAccountIdFromEntity(entity)` in `GetAccountAlias()` to create an AccountId for the wrong alias?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6b3387b-e454-427c-9f4b-fe57c7bfd007?mode=deep",
+    "timestamp": "2026-05-01 17:56:45.579203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getBalanceChange()] Can an unprivileged external user cause `getBalanceChange()` to double-count a transfer by observing that the `balanceChangeBetween` query sums all `crypto_transfer` rows matching `entity_id`, `consensus_timestamp > @start`, and `consensus_timestamp <= @end`, and if a tampered duplicate row is injected with the same `consensus_timestamp` and `amount` as a legitimate transfer but a different `payer_account_id`, the function counts it twice in the sum?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74cd7f43-866c-4b6d-97e9-0a788ddac759?mode=deep",
+    "timestamp": "2026-05-01 17:56:58.870467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user cause `RetrieveBalanceAtBlock()` to return a balance computed from a tampered `balanceChangeEndTimestamp` by observing that `balanceChangeEndTimestamp = entity.GetModifiedTimestamp()` when the entity is deleted, and if `entity_history` rows are tampered to set `GetModifiedTimestamp()` to a timestamp after `consensusEnd`, the deletion branch is not triggered and the full `consensusEnd` window is used, including transfers that occurred after the actual deletion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f898e8e5-ee1c-474a-ab10-09eef5d1e250?mode=deep",
+    "timestamp": "2026-05-01 17:57:12.001402",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getCryptoEntity()] Can an unprivileged external user cause `getCryptoEntity()` to return multiple entities from the UNION ALL query and silently use only the first one by observing that `entities[0]` is returned without checking for duplicates, and if tampered `entity_history` rows create multiple entries with overlapping `timestamp_range` values for the same alias, the function non-deterministically returns whichever row sorts first by `timestamp_range desc`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2803460e-2f8f-488d-bc34-84703c068bca?mode=deep",
+    "timestamp": "2026-05-01 17:57:24.738114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause `getLatestBalanceSnapshot()` to return a balance of 0 for a high-value account by observing that `latestBalanceBeforeConsensus` uses `coalesce(balance, 0)` when no matching `account_balance` row exists for the account within the partition window, and if the account's `account_balance` rows are deleted from the DB (history tampering), the function returns 0 as the baseline, causing `RetrieveBalanceAtBlock()` to underreport the balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38d37570-f4c7-40d6-8b9d-8f7e3267a52d?mode=deep",
+    "timestamp": "2026-05-01 17:57:37.677393",
+    "report_generated": false
   }
 ]
