@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `live` case prints the raw `err` from `os.Stat` to stderr (line 30: `fmt.Fprintln(os.Stderr, err)`), which may include the full file path `/tmp/alive`, to confirm the exact path used by the healthcheck and plan targeted filesystem attacks against the liveness mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d71f621-e3fc-4cc5-a0cc-4be5ef52e59e?mode=deep",
+    "timestamp": "2026-05-01 18:19:25.797388",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the readiness probe and liveness probe both use `os.Stat` on `/tmp` files without any mutual exclusion, so that a concurrent deletion and recreation of `/tmp/ready` between the `os.Stat` call and the `os.Exit(0)` call causes a TOCTOU race that makes the probe return an incorrect result, leading to a spurious Kubernetes restart and a gap in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61531d00-a509-4305-8be6-57e6b92b2702?mode=deep",
+    "timestamp": "2026-05-01 18:19:37.676881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger's `submitWithRetry` function (in `transfer.go`) uses exponential backoff via `backoff(cfg.baseBackoff, i)` which can delay retries up to 30 seconds, and the liveness probe only fails after 2 minutes of no heartbeat, so that a series of failed transaction attempts within the backoff window creates a gap in transaction history that is invisible to the liveness probe?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_904640c0-cf7a-4d32-a703-a101ecf0ef8f?mode=deep",
+    "timestamp": "2026-05-01 18:19:49.593888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger writes `/tmp/alive` on a 15-second ticker regardless of whether `submitWithRetry` succeeded or failed, so that the liveness probe always passes even when all transaction submissions are failing, creating a prolonged gap in transaction history that is completely hidden from Kubernetes health monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_209931a9-29e2-42e7-afb7-581730e8cec6?mode=deep",
+    "timestamp": "2026-05-01 18:20:01.786164",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary is a separate process from the pinger main process, and there is no IPC or shared state between them beyond the filesystem files, so that the healthcheck can never detect a deadlock in the pinger's main goroutine (e.g., in `submitWithRetry`) as long as the heartbeat goroutine continues to write `/tmp/alive`, masking transaction history gaps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b504980a-d9f4-4685-9353-a5c68c5d1b0d?mode=deep",
+    "timestamp": "2026-05-01 18:20:14.085992",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `live` mode checks `fi.ModTime()` but the `ready` mode only checks file existence, creating an asymmetry where a pinger that is 'ready' (has `/tmp/ready`) but not 'live' (stale `/tmp/alive`) can exist in a state where Kubernetes considers it ready for traffic but not alive, leading to a window where transactions are expected but not submitted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8b0dcc2-d33a-4b21-a810-6c42514e30a8?mode=deep",
+    "timestamp": "2026-05-01 18:20:26.728909",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary uses `os.Exit(1)` for both 'not ready' and 'not alive' conditions, making it impossible for external monitoring to distinguish between a pinger that has never started (no `/tmp/ready`) and one that has stopped heartbeating (stale `/tmp/alive`), thereby obscuring the root cause of transaction history gaps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c096926-b08f-4c82-8cb7-aff60093b45f?mode=deep",
+    "timestamp": "2026-05-01 18:20:39.288298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `age > 2*time.Minute` comparison uses `time.Since` which calls `time.Now()` at the moment of the check, so that if the system clock is stepped forward (e.g., by an NTP correction) between the heartbeat write and the liveness check, a valid heartbeat appears stale, triggering a pod restart and a transaction history gap?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13290120-1c4d-4ccc-b80d-190592265663?mode=deep",
+    "timestamp": "2026-05-01 18:20:51.870564",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger's `buildNetworkFromMirrorNodes` function (in `mirror_node_client.go`) fetches network topology from a configurable `cfg.mirrorRest` URL, and if this URL is poisoned via DNS spoofing or a compromised mirror node, the pinger submits transactions to attacker-controlled nodes, causing those transactions to be ordered differently or suppressed in the consensus history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2733aabd-5b30-4f3c-b01b-96d110d25567?mode=deep",
+    "timestamp": "2026-05-01 18:21:04.544010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that `fetchMirrorNodeNetwork` in `mirror_node_client.go` parses `nodesEnvelope` JSON without validating the number of nodes returned, so that a mirror node returning a single malicious node entry causes all pinger transactions to be routed to one node, concentrating transaction history on that node and making it easier to reorganize or suppress those transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a72c7e28-5f34-4938-b0e2-b5eeede9cb07?mode=deep",
+    "timestamp": "2026-05-01 18:21:17.114746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's `ready` case exits with code 0 as soon as `/tmp/ready` exists, without verifying that the pinger's network client (`newClient` in `sdk_client.go`) has successfully connected to any Hiero node, so that a pinger with a broken network connection is marked ready and Kubernetes never restarts it, leaving a permanent gap in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e1ed70f-e4dc-43a9-a834-f470d07b4a45?mode=deep",
+    "timestamp": "2026-05-01 18:21:29.491224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the liveness probe's `failureThreshold: 5` (from `values.yaml`) combined with `periodSeconds: 10` means the pod is only killed after 50 seconds of failed liveness checks, and the 2-minute heartbeat staleness window means the probe won't even fail until 120 seconds after the last heartbeat, creating a total window of up to 170 seconds of transaction history gap before Kubernetes intervenes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bcf2c78-de71-441a-9a6a-23f49d7f1807?mode=deep",
+    "timestamp": "2026-05-01 18:21:41.797508",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger's `submitWithRetry` retries up to `cfg.maxRetries + 1` times (default 11 attempts) with exponential backoff, and the liveness probe only checks the heartbeat file (not transaction success), so that a series of failed transactions during the retry window creates a gap in transaction history that is completely invisible to the health monitoring system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4386d369-e0c6-47ee-b346-fefe8bee674c?mode=deep",
+    "timestamp": "2026-05-01 18:21:54.205581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not check whether the pinger process is actually running (no PID file or process check), so that if the pinger process crashes but the container keeps running (e.g., due to a supervisor), the healthcheck will keep returning exit 1 for liveness (stale `/tmp/alive`) but the container won't be restarted until the `failureThreshold` is reached, creating a predictable transaction history gap window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59057275-d3b0-4354-962f-1746d7ef3580?mode=deep",
+    "timestamp": "2026-05-01 18:22:07.053814",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `live` case uses `os.Stat(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_841aca36-a1ed-4970-bcc0-0778d8d729c4?mode=deep",
+    "timestamp": "2026-05-01 18:22:19.760974",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's `ready` case does not check whether the pinger's `ticker` (in `pinger/main.go`) has been initialized, so that a pinger that has written `/tmp/ready` but whose ticker has not yet fired (within the first `cfg.interval` duration) is considered ready while no transactions have been submitted yet, creating an initial gap in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8949f69-9e0a-4ebb-876e-98312370ea5f?mode=deep",
+    "timestamp": "2026-05-01 18:22:32.254774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger writes `/tmp/ready` with mode `0o644` (world-readable and world-writable by group), so that a process running as the same GID (1000, per `fsGroup: 1000` in `values.yaml`) can delete or overwrite `/tmp/ready`, causing the readiness probe to fail and Kubernetes to stop routing to the pinger, suppressing transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71740a08-16b9-456e-82ac-bc98bca5800b?mode=deep",
+    "timestamp": "2026-05-01 18:22:44.803166",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary is invoked as a Kubernetes exec probe (not an HTTP probe), meaning there is no network-level authentication or rate limiting on probe invocations, so that an attacker who can exec into the pod can invoke the healthcheck binary directly to probe the state of `/tmp/ready` and `/tmp/alive` and time attacks on the transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4413c548-5859-466e-8826-79b97a2ca343?mode=deep",
+    "timestamp": "2026-05-01 18:22:57.246899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `live` case prints `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9813102b-016d-4e60-9b03-27ba3476a853?mode=deep",
+    "timestamp": "2026-05-01 18:23:09.798483",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not validate the content of `/tmp/alive` (only its mtime), so that writing any content to `/tmp/alive` — including content that would indicate an error state — keeps the liveness probe passing, allowing a malfunctioning pinger to continue appearing healthy while submitting malformed or duplicate transactions that corrupt the transaction history ordering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83f92c26-2b02-4397-89e0-e5f7dc9e64d2?mode=deep",
+    "timestamp": "2026-05-01 18:23:22.403510",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the pinger's `newClient` function (in `sdk_client.go`) calls `buildNetworkFromMirrorNodes` only once at startup, so that if the mirror node network topology changes after startup (e.g., nodes are added or removed), the pinger continues submitting transactions to the old topology, potentially routing transactions to decommissioned nodes and causing them to be absent from the expected transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_726b5ec8-e7d4-48ec-a294-0135a421f7c5?mode=deep",
+    "timestamp": "2026-05-01 18:23:34.899248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `fetchMirrorNodeNetwork` function in `mirror_node_client.go` only fetches the first page of nodes (no pagination handling for `links.next`), so that if the mirror node returns a large network with many nodes and the first page contains only a subset, the pinger submits all transactions through a limited set of nodes, concentrating transaction history and making it easier to reorganize?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec078ca8-dcde-43a4-af77-72072b335da6?mode=deep",
+    "timestamp": "2026-05-01 18:23:47.849018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the `backoff` function in `transfer.go` caps the backoff at `30 * time.Second` using `min(d, 30*time.Second)`, so that with `maxRetries: 10` and `baseBackoff: 2s`, the total retry window can be up to ~5 minutes, during which the liveness probe (2-minute threshold) may trigger a pod restart mid-retry, causing a partially-submitted transaction to be retried by a new pod instance and potentially creating duplicate entries in transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_106f0442-675d-4a75-b4c9-04bd19d15e5e?mode=deep",
+    "timestamp": "2026-05-01 18:24:00.568198",
+    "report_generated": false
+  }
+]
