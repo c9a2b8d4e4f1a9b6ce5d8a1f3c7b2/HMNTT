@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user send a ContractCallRequest with gas exactly equal to GAS_SCALE_FACTOR (10,000) so that scaleGas() returns 0, causing gasLimitBucket.tryConsume(0) to always succeed and allowing unlimited high-value contract calls that drain funds from victim contracts without ever consuming gas throttle tokens?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0507f866-4d60-4e22-b9b3-16078adb32ba?mode=deep",
+    "timestamp": "2026-05-01 18:53:43.586547",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that rateLimitBucket is not synchronized (unlike gasLimitBucket which uses SynchronizationStrategy.SYNCHRONIZED) to race concurrent requests past the rateLimitBucket.tryConsume(1) check, bypassing per-second rate limits and flooding the node with fund-draining contract calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f5af5f9-d755-4510-b442-dbbdd2123454?mode=deep",
+    "timestamp": "2026-05-01 18:53:55.486194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user trigger repeated InvalidParametersException paths in ContractController.call() to cause throttleManager.restore(request.getGas()) to be called with the full gas limit each time, artificially inflating gasLimitBucket tokens beyond its configured capacity and allowing subsequent high-value calls that would otherwise be throttled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f699dc68-0112-4457-832e-308626c57fa9?mode=deep",
+    "timestamp": "2026-05-01 18:54:07.892978",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user craft a ContractCallRequest with gas=21000 (minimum allowed by @Min(21_000)) so that scaleGas(21000) returns Math.floorDiv(21000, 10000) = 2, consuming only 2 tokens per request instead of proportional gas, allowing the attacker to submit far more fund-draining calls per second than the gasPerSecond limit intends?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d32e7976-6611-4931-aed1-739d95e9fcbe?mode=deep",
+    "timestamp": "2026-05-01 18:54:20.527256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user exploit the float arithmetic in gasLimitToRestoreBaseline = (long)(gasLimit * throttleProperties.getGasLimitRefundPercent() / 100f) to cause precision loss that systematically over-restores gas tokens to the gasLimitBucket, enabling more fund-draining calls per second than the throttle was designed to allow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_beb65315-43be-4bbd-b63b-4dc8af96e649?mode=deep",
+    "timestamp": "2026-05-01 18:54:33.031201",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user send requests with a spoofed 'from' field (no authentication is enforced on ContractCallRequest.getFrom()) to bypass RequestFilter rules that match on FilterField.FROM, causing REJECT or THROTTLE actions to be skipped and allowing fund-draining calls to a protected contract address to proceed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63b0cc59-73d6-4c9c-be41-51717d04e98d?mode=deep",
+    "timestamp": "2026-05-01 18:54:45.723820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the case-insensitive CONTAINS filter (Strings.CI::contains) in RequestFilter.test() by crafting a 'data' field that contains the filter expression as a substring in an unexpected position, causing the THROTTLE action to trigger on legitimate users while the attacker's fund-draining calls use a data payload that avoids the match?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36af291e-ef2b-4936-ac83-304e3a7e125c?mode=deep",
+    "timestamp": "2026-05-01 18:54:58.656017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the sequential check order in throttle() — rateLimitBucket checked before gasLimitBucket — by sending many low-gas requests that pass the rate limit check but collectively exhaust the gasLimitBucket, causing a denial-of-service that prevents legitimate high-value fund-recovery calls from executing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab9d512e-0a6c-4e0e-b7a6-08b54eefd547?mode=deep",
+    "timestamp": "2026-05-01 18:55:12.488611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user trigger the null-result branch in restoreGasToBucket() (result == null) by causing an IllegalStateException or IllegalArgumentException inside the EVM execution, which results in throttleManager.restore(gasLimitToRestoreBaseline) being called with the full gasLimit, over-restoring tokens and enabling more fund-draining calls than the throttle budget allows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b291bff-7593-4a63-9fb5-777d62cf1188?mode=deep",
+    "timestamp": "2026-05-01 18:55:26.030591",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the gasLimitBucket consumes tokens before request filters are evaluated in throttle(), so that if a REJECT filter fires after gas tokens are consumed, those tokens are never restored (no restore() call on REJECT path), allowing the attacker to drain the gasLimitBucket and block legitimate fund-related calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a74f7033-b945-46fc-aa33-ae8ab1c27aa3?mode=deep",
+    "timestamp": "2026-05-01 18:55:40.002927",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user send a ContractCallRequest with gas=Long.MAX_VALUE (if validation is bypassed or misconfigured) causing scaleGas() to return Long.MAX_VALUE / 10000, which when passed to gasLimitBucket.tryConsume() could cause arithmetic overflow or immediately exhaust the bucket, blocking all other users' fund-related calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27207e24-e9e6-4e3e-a96e-5fa7feaf4125?mode=deep",
+    "timestamp": "2026-05-01 18:55:55.505227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user repeatedly call the /api/v1/contracts/call endpoint with requests that fail validation after throttle() succeeds, causing restore() to be called with request.getGas() (the full unscaled gas value) each time, and since gasLimitBucket.addTokens() has no upper cap enforcement beyond bucket capacity, systematically inflate available tokens for subsequent fund-draining calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_719f2e55-31b9-49c3-8d58-0f1e770a262d?mode=deep",
+    "timestamp": "2026-05-01 18:56:09.388686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the AtomicLong counter in RequestProperties.test() — which increments unconditionally via counter.getAndIncrement() — to exhaust the counter up to the configured limit value, after which the filter permanently returns false and REJECT/THROTTLE actions are never applied, allowing unlimited fund-draining calls to previously protected endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20f1d4e3-488b-4a35-ad35-e3d706dc4677?mode=deep",
+    "timestamp": "2026-05-01 18:56:23.977522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that when filters list is empty in RequestProperties, test() returns true (return filters.isEmpty()), causing the action to apply to every single request regardless of content, and if the action is LOG (default), all requests pass through — meaning a misconfigured empty-filter THROTTLE rule could be bypassed by an attacker who understands this logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64f8d89b-2756-4fca-a58f-abf0a37cdcba?mode=deep",
+    "timestamp": "2026-05-01 18:56:37.870569",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the probabilistic rate check in RequestProperties.test() — RandomUtils.secure().randomLong(0L, 100L) >= rate — by sending a high volume of requests, statistically ensuring that a fraction always pass through even when rate < 100, allowing fund-draining calls to slip past THROTTLE or REJECT actions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_518e0df5-9a44-42e3-84c5-259501944c02?mode=deep",
+    "timestamp": "2026-05-01 18:56:52.305810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the THROTTLE action check in RequestProperties.test() skips the RandomUtils rate check (action != ActionType.THROTTLE is false), but the per-filter bucket in createBucket() uses capacity=rate with rate defaulting to 100, meaning a THROTTLE filter with rate=100 allows 100 requests/second per filter — far more than intended for high-value fund calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30671ab2-7d32-4c41-a078-c6a6a7badd19?mode=deep",
+    "timestamp": "2026-05-01 18:57:06.889941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user craft a sequence of requests where each request passes throttle() consuming gas tokens, then triggers an exception path that calls restore() with a larger gas value than was originally consumed (due to float rounding in gasLimitRefundPercent=100 calculation), creating a net positive token gain per request cycle that enables unbounded fund-draining calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5064b5cd-d46e-4ff4-be25-cd0de61dcbb1?mode=deep",
+    "timestamp": "2026-05-01 18:57:21.799699",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the 'to' field in ContractCallRequest is matched case-insensitively via FilterType.EQUALS (String::equalsIgnoreCase) to bypass a REJECT filter targeting a specific contract address by submitting the address in mixed case (e.g., '0xAbCd...'), allowing fund-draining calls to a protected contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a79ae326-47ee-4e79-b48e-fe23b444b928?mode=deep",
+    "timestamp": "2026-05-01 18:57:35.576026",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the 'value' field in ContractCallRequest is extracted as a long and converted to String via String.valueOf() in RequestFilter.test(), so a filter expression like '100' would match value=100 but also value=1000 via CONTAINS match type, causing unintended filter bypass for high-value fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f5e5c11-d1cc-42eb-a22e-de821744fbd6?mode=deep",
+    "timestamp": "2026-05-01 18:57:49.850509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the 'estimate' field in ContractCallRequest is a boolean extracted via isEstimate() and converted to String ('true'/'false') in RequestFilter.test(), and by setting estimate=true, bypass REJECT filters that only match on estimate=false, allowing the attacker to use the estimate path to probe fund-draining call outcomes without triggering protective filters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_260a7c16-cf52-438b-8101-97f9ca139a67?mode=deep",
+    "timestamp": "2026-05-01 18:58:02.987998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that gasLimitBucket.tryConsume() is called with scaleGas(request.getGas()) which floors the division, meaning gas values just above multiples of GAS_SCALE_FACTOR (10,000) consume the same tokens as the multiple itself, allowing the attacker to get slightly more EVM execution per token consumed and execute more fund-draining operations per throttle budget?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9118ec8-b645-46c9-b8b5-26d7135750f4?mode=deep",
+    "timestamp": "2026-05-01 18:58:17.098423",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: restore()] Can an unprivileged external user trigger concurrent requests that all fail after throttle() succeeds, causing multiple simultaneous restore() calls that each call gasLimitBucket.addTokens() — and since gasLimitBucket uses SynchronizationStrategy.SYNCHRONIZED, the synchronized block serializes additions but does not cap at bucket capacity — resulting in token inflation that enables a burst of fund-draining calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f73fa0c6-fbd8-481e-8795-a304fa5d5501?mode=deep",
+    "timestamp": "2026-05-01 18:58:30.338489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that multiple RequestProperties entries in throttleProperties.getRequest() are evaluated sequentially in a for-loop, and if one entry has action=LOG (passes through) while a later entry has action=THROTTLE, the attacker can craft requests that match only the LOG filter and skip the THROTTLE filter, bypassing rate limits on fund-draining calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f95510f-551a-462a-8e57-178575edd73e?mode=deep",
+    "timestamp": "2026-05-01 18:58:44.829009",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the 'block' field in ContractCallRequest defaults to BlockType.LATEST and is matched via FilterField.BLOCK, by sending requests with a historical block number that doesn't match a REJECT filter targeting 'latest', allowing the attacker to execute fund-draining calls against historical state that bypasses protective filters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4093e40-5198-4c26-b259-9227bdf0d931?mode=deep",
+    "timestamp": "2026-05-01 18:58:57.669441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManager.java -> Scope: Critical: Direct loss of funds'] [Function: throttle()] Can an unprivileged external user exploit the fact that the 'data' field in ContractCallRequest is matched via FilterField.DATA using CONTAINS (case-insensitive), and by padding the calldata with extra bytes before or after the function selector, avoid matching a REJECT filter that targets a specific function selector, allowing fund-draining calls to a protected function?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_470713b0-41fb-4961-ba2d-44b601700a30?mode=deep",
+    "timestamp": "2026-05-01 18:59:10.973992",
+    "report_generated": false
+  }
+]
