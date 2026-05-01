@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a crafted `accountId` path parameter that resolves to a victim's entity ID via alias or EVM address lookup, causing `getBaseCondition()` to anchor the query to the victim's owner record and return their granted NFT allowances without the victim's knowledge or consent, enabling the attacker to enumerate which spenders hold `approved_for_all` rights over the victim's NFT collections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78bfd5f9-0e42-4978-93c9-72a31536702a?mode=deep",
+    "timestamp": "2026-05-01 22:38:02.877459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user toggle the `owner` query parameter to `false` on any arbitrary account ID, causing `getBaseCondition()` to switch the filter from `NFT_ALLOWANCE.OWNER` to `NFT_ALLOWANCE.SPENDER`, thereby revealing all NFT collections for which that account has been granted `approved_for_all` rights by other owners without any authorization check on the requesting user's identity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cec83369-d5f7-47d6-9df3-8183d1458af8?mode=deep",
+    "timestamp": "2026-05-01 22:38:15.130330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBaseCondition(EntityId, boolean)] Can an unprivileged external user observe that `APPROVAL_CONDITION` is a static compile-time constant (`NFT_ALLOWANCE.APPROVED_FOR_ALL.isTrue()`) and craft a request where the `ownerOrSpenderIds` bound conditions override or conflict with `APPROVAL_CONDITION` via jOOQ condition chaining, causing rows with `approved_for_all = false` to be returned, effectively treating non-approved allowances as authorized and enabling unauthorized NFT transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c7a225b-e931-45cf-92df-725cc048ab33?mode=deep",
+    "timestamp": "2026-05-01 22:38:27.799474",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `account.id=gte:0` as the `ownerOrSpenderIds` bound with `owner=true`, causing `findAll()` to return all NFT allowances across all owners in the system (not just the path `{id}` account), because `getBaseCondition()` anchors only on the path `accountId` but `getBoundConditions()` adds an additional GTE condition on the spender column that effectively scans the entire table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5a79f2f-b460-4871-9407-27132d430450?mode=deep",
+    "timestamp": "2026-05-01 22:38:40.617109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user set `limit` to `MAX_LIMIT` and combine it with `account.id=gte:0` and `token.id=gte:0` bounds to enumerate the entire `nft_allowance` table in paginated batches, reconstructing a full map of which accounts have `approved_for_all` grants over which token collections, enabling targeted social engineering or replay attacks against token owners?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9ef9e68-efce-482f-a6eb-4e1a711540af?mode=deep",
+    "timestamp": "2026-05-01 22:38:53.983521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the fact that `NftAllowanceRepository` extends `CrudRepository<NftAllowance, Id>` to call inherited `findById(Id)` directly with a guessed composite key `(owner, spender, tokenId)`, bypassing the `APPROVAL_CONDITION` filter entirely in `getBaseCondition()`, and retrieve a specific NFT allowance record regardless of whether `approved_for_all` is true or false?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fad3cb12-a308-459b-b410-8263bb519da7?mode=deep",
+    "timestamp": "2026-05-01 22:39:06.761208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a path `{id}` that resolves to a deleted or non-existent entity, and if `entityService.lookup()` returns a default or zero-value `EntityId`, cause `getBaseCondition()` to match all rows where `owner = 0` or `spender = 0`, potentially returning system-level or genesis account NFT allowances that should not be publicly accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e9788bf-3d66-4d4d-ac06-6835d6b6abb4?mode=deep",
+    "timestamp": "2026-05-01 22:39:20.248207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user craft a `tokenIds` bound with `token.id=gte:0` while omitting `account.id`, and if the validation in `checkOwnerSpenderParamValidity()` has an edge case where `ownerOrSpenderIds.isEmpty()` is incorrectly evaluated, bypass the guard that throws `IllegalArgumentException('token.id parameter must have account.id present')` and execute an unanchored cross-account query against the `nft_allowance` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4ed4aa9-92fe-4804-9a36-aa7483759568?mode=deep",
+    "timestamp": "2026-05-01 22:39:32.988746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply two conflicting `account.id` range parameters (e.g., `account.id=gte:X&account.id=lte:Y`) where X > Y, and if `getBounds()` or `getBoundConditions()` does not validate the logical consistency of the range, cause the jOOQ WHERE clause to produce a tautology or always-true condition that returns all `approved_for_all` allowances in the table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e1dba7d-e7fd-45dc-8d3c-ae0f4b172e18?mode=deep",
+    "timestamp": "2026-05-01 22:39:45.790624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `account.id=eq:X` where X is the spender's own account ID while setting `owner=true`, causing `getBaseCondition()` to filter by `NFT_ALLOWANCE.OWNER = pathAccountId AND NFT_ALLOWANCE.SPENDER = X`, effectively confirming whether a specific spender has `approved_for_all` rights over a specific owner's tokens without the owner's awareness, leaking sensitive authorization state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32bd5b88-265c-4ac2-b582-8bf088b850d0?mode=deep",
+    "timestamp": "2026-05-01 22:39:59.310569",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user use the pagination `next` link returned by `LinkFactory.create()` (which encodes `account.id=gte:spenderId&token.id=gt:tokenId`) to iterate through all NFT allowances for any account without any session or authentication token, since the cursor is fully reconstructable from public response data and the endpoint has no rate limiting or auth guard?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb993078-85c9-414f-8da0-f2bd1754f4c6?mode=deep",
+    "timestamp": "2026-05-01 22:40:12.613558",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBaseCondition(EntityId, boolean)] Can an unprivileged external user observe that when `byOwner=false`, `getBaseCondition()` anchors on `NFT_ALLOWANCE.SPENDER = accountId`, and by querying any account ID with `owner=false`, enumerate all token collections for which that account is a spender with `approved_for_all`, effectively discovering which NFT collections the account can transfer on behalf of owners without the owners' consent to this disclosure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c282baa6-9e91-4cc5-ac0a-8573c5e12a86?mode=deep",
+    "timestamp": "2026-05-01 22:40:25.924697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a negative or zero `limit` value that bypasses the `@Positive` constraint (e.g., through HTTP parameter pollution or type coercion), causing `findAll()` to execute a `LIMIT 0` or `LIMIT -1` query that either returns no results (masking the attack) or returns all rows depending on the database driver behavior, enabling full table scans of `nft_allowance`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca24140f-6e74-4d09-89c5-d188badd6172?mode=deep",
+    "timestamp": "2026-05-01 22:40:39.223034",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `MAX_LIMIT + 1` as the limit value and if the `@Max(MAX_LIMIT)` constraint is not enforced at the repository layer (only at the controller layer), cause `findAll()` to execute with an unbounded or very large limit, returning far more `approved_for_all` allowance records than intended and enabling bulk data exfiltration of authorization state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42305485-1886-46a4-b28a-51b12176f1b5?mode=deep",
+    "timestamp": "2026-05-01 22:40:53.422812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply an EVM address in the `{id}` path parameter that maps to a smart contract account rather than an EOA, and if `entityService.lookup()` resolves it to a valid entity ID, cause `findAll()` to return NFT allowances granted by or to that contract, potentially revealing contract-level authorization grants that downstream systems use to authorize NFT transfers without the contract owner's explicit per-request approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b6ba38a-b1a7-40b2-b3b1-dc72ada622f4?mode=deep",
+    "timestamp": "2026-05-01 22:41:07.194907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply an alias-format account ID in the `{id}` path parameter that resolves to a different entity than the numeric ID the user believes they are querying, due to alias collision or alias reuse after account deletion, causing `getBaseCondition()` to anchor on the wrong account's `owner` or `spender` field and return NFT allowances belonging to an unintended account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_847c8ac3-2c46-4db2-a8ac-895052a6c4ca?mode=deep",
+    "timestamp": "2026-05-01 22:41:19.828778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `SORT_ORDERS` map lookup in `findAll()` where `SORT_ORDERS.get(new OrderSpec(byOwner, request.getOrder()))` returns `null` if the key is not found, causing a `NullPointerException` in the jOOQ `orderBy()` call that either crashes the service or falls back to an unordered full-table scan, enabling a denial-of-service or unintended data exposure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7caaa688-3960-4a84-8ba7-362d05fdfaa1?mode=deep",
+    "timestamp": "2026-05-01 22:41:33.644107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `order=DESC` (uppercase) or an invalid direction string that bypasses Spring's `Sort.Direction` parsing, causing the `OrderSpec` record lookup in `SORT_ORDERS` to fail and either throw an unhandled exception or default to an unintended sort order that changes which records are returned within the `limit`, potentially hiding or exposing specific `approved_for_all` allowance records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22044d6d-44f3-4bcc-9d4e-da39bb170655?mode=deep",
+    "timestamp": "2026-05-01 22:41:47.618701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `account.id=gte:0&account.id=lte:9999999999` as bounds while querying a victim's account with `owner=true`, causing `getBoundConditions()` to add a spender range condition that effectively returns all spenders with `approved_for_all` over the victim's tokens, leaking the complete set of authorized spenders for that owner's entire NFT portfolio?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c79e4e19-2481-45cc-89b5-0e71442f6d7b?mode=deep",
+    "timestamp": "2026-05-01 22:42:01.741737",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the fact that `NftAllowanceRepository` inherits `findAll()` from `CrudRepository` (no-argument version) in addition to the custom `findAll(NftAllowanceRequest, EntityId)`, and if the no-argument `CrudRepository.findAll()` is accessible via any code path or reflection, retrieve all `NftAllowance` records from the database without any `APPROVAL_CONDITION` or account-scoping filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36b37768-7618-45a9-8dd1-37a7d9a875e6?mode=deep",
+    "timestamp": "2026-05-01 22:42:16.643550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a `token.id=eq:X` filter without a corresponding `account.id` filter, and if the validation logic in `checkOwnerSpenderParamValidity()` has an off-by-one or null-check gap when `ownerOrSpenderIds` is `Bound.EMPTY`, bypass the guard and execute a query that returns all `approved_for_all` allowances for a specific token ID across all owners and spenders?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2abaccb3-ddca-4aec-a400-32823eb7d178?mode=deep",
+    "timestamp": "2026-05-01 22:42:29.558839",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply `account.id=lte:X` with a very large X value while `owner=false`, causing `getBaseCondition()` to anchor on `NFT_ALLOWANCE.SPENDER = pathAccountId` but `getBoundConditions()` to add `NFT_ALLOWANCE.OWNER <= X` covering all owners, effectively returning all `approved_for_all` grants to the path account from any owner up to X, leaking the full authorization scope of that spender account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bd2616d9-417c-4e5f-8cda-f5c9d7e60305?mode=deep",
+    "timestamp": "2026-05-01 22:42:43.786691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `payerAccountId` field in `AbstractNftAllowance` (which is returned in query results via `fetchInto(NftAllowance.class)`) to discover which account paid for the allowance transaction, potentially revealing the relationship between a payer and an owner/spender pair that was intended to be private, enabling targeted phishing or social engineering to authorize further transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f68ce232-0a02-41ef-970f-f15c3ab8e833?mode=deep",
+    "timestamp": "2026-05-01 22:42:57.210643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a `token.id=gte:0` bound alongside `account.id=eq:victimSpender` with `owner=false`, causing `findAll()` to return all token collections for which the victim spender has `approved_for_all` rights, and then use this information to craft transactions that exercise those allowances against the token owners without the owners being aware their allowances are being enumerated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9968b862-609b-4cb4-b280-0cc52bc31f57?mode=deep",
+    "timestamp": "2026-05-01 22:43:11.131657",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user supply a `timestampRange`-based filter (if exposed through any query parameter) to query historical `nft_allowance` states where `approved_for_all` was `true` but has since been revoked, causing `findAll()` to return stale allowance records that downstream systems might incorrectly treat as currently valid authorizations, enabling transactions that the owner has explicitly revoked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae796002-a18e-470c-bfec-f54e63d9757e?mode=deep",
+    "timestamp": "2026-05-01 22:43:24.932329",
+    "report_generated": false
+  }
+]
