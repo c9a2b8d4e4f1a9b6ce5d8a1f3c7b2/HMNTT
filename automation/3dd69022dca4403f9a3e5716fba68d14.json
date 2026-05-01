@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user flood GET /api/v1/topics/{id} with high-frequency requests against TopicRepository.findById() which has no @Cacheable annotation unlike other repositories, causing every call to hit the database directly and exhausting the DB connection pool, degrading service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_485de1e6-09ce-432f-9770-f616bb4599f8?mode=deep",
+    "timestamp": "2026-05-01 17:18:30.501211",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the fact that TopicController.getTopic() triggers three separate repository calls (topicService.findById, entityService.findById, customFeeService.findById) all backed by uncached TopicRepository.findById(), creating a 3x DB query amplification per single HTTP request, enabling sustained database load with minimal attacker bandwidth?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab1dfd6f-87f5-4908-af37-2e627db5883f?mode=deep",
+    "timestamp": "2026-05-01 17:18:42.301028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user send concurrent requests to GET /api/v1/topics/{id} with no rate limiting on the rest-java service, causing TopicRepository.findById() to be called unboundedly in parallel, exhausting the JPA/Hibernate connection pool and causing HTTP 500 errors for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0137b042-5be6-43cc-ae56-32bebdc9a8d7?mode=deep",
+    "timestamp": "2026-05-01 17:18:54.517531",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user repeatedly query non-existent topic IDs (e.g., GET /api/v1/topics/999999999999) causing TopicServiceImpl.findById() to throw EntityNotFoundException on every call, flooding application logs with exception stack traces and degrading observability for operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_283a257a-dff9-4fe0-a6ee-d3e37d332a07?mode=deep",
+    "timestamp": "2026-05-01 17:19:07.102471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user enumerate all valid topic IDs by iterating numeric IDs through GET /api/v1/topics/{id} and observing 404 vs 200 responses, since TopicRepository.findById() returns empty Optional for missing topics and TopicServiceImpl throws EntityNotFoundException, leaking the existence of every topic on the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b697be6a-0874-433d-b3c6-8b7955556bb9?mode=deep",
+    "timestamp": "2026-05-01 17:19:20.261523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the absence of any caching on TopicRepository (unlike grpc EntityRepository which uses @Cacheable) to force repeated full table scans or index lookups on the topic table for the same ID, causing unnecessary I/O load on the database replica?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32db5d0f-452d-4eaa-9559-40167f7e28b3?mode=deep",
+    "timestamp": "2026-05-01 17:19:33.312302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user submit requests using all valid EntityIdNumParameter formats (num-only, realm.num, shard.realm.num) for the same topic ID, causing TopicRepository.findById() to be called with the same encoded Long ID from different parsed representations, bypassing any potential future caching keyed on the raw string?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09774700-1789-41ee-9b02-7b9538fcd25c?mode=deep",
+    "timestamp": "2026-05-01 17:19:45.731232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user craft requests to GET /api/v1/topics/{id} with the maximum valid numeric ID (274877906943 per EntityIdNumParameter regex) to force TopicRepository.findById() to query for IDs that will never exist, generating guaranteed EntityNotFoundException storms and log pollution at scale?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8dbdc696-3ee2-413f-92dd-c681270b547f?mode=deep",
+    "timestamp": "2026-05-01 17:19:58.716206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the fact that TopicRepository extends CrudRepository with no query timeout configured, causing long-running findById() calls during database contention to hold connections open indefinitely, starving other requests of DB connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_240e384c-7f7b-4645-b857-69498459ec88?mode=deep",
+    "timestamp": "2026-05-01 17:20:12.067001",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user trigger repeated calls to FeeTopicStore.getTopic() via fee estimation endpoints, which internally calls TopicRepository.findById() without caching, causing double the database load compared to a direct topic lookup since both the topic and custom fee are fetched per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1732555-943e-4980-b849-f22c9b95c0f4?mode=deep",
+    "timestamp": "2026-05-01 17:20:24.854575",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user send a burst of requests to GET /api/v1/topics/{id} for a single valid topic ID, causing TopicRepository.findById() to execute the same SELECT query repeatedly with no result caching, generating unnecessary repeated reads from the topic table and increasing database CPU utilization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b8ae423-f8bb-4410-a3e0-b183f261c1fc?mode=deep",
+    "timestamp": "2026-05-01 17:20:38.272038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the sequential nature of topic IDs (Long primary key) to perform a full enumeration scan from ID 1 to the maximum, with each request causing TopicRepository.findById() to execute a database query, effectively performing a full table scan via the API with no throttling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1379b93-5548-4f5f-a640-1a290560c767?mode=deep",
+    "timestamp": "2026-05-01 17:20:52.131340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the lack of per-IP or per-client rate limiting on the rest-java /api/v1/topics endpoint to sustain thousands of requests per second to TopicRepository.findById(), causing database connection pool exhaustion that affects all other repository operations across the entire mirror node REST API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_885590ba-194f-410c-bfa4-944d3ce821a5?mode=deep",
+    "timestamp": "2026-05-01 17:21:06.018611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user cause TopicServiceImpl.findById() to throw EntityNotFoundException for a non-existent topic ID, and since this exception propagates through the controller without being caught before the entity and customFee lookups, observe whether the error response leaks internal class names or stack traces that aid further griefing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_234058ee-438f-497e-b06d-469456864c2e?mode=deep",
+    "timestamp": "2026-05-01 17:21:21.402886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the fact that TopicController calls topicService.findById() first and throws EntityNotFoundException before entityService.findById() and customFeeService.findById() are called, to use the 404 response as a fast oracle for topic existence enumeration with lower DB cost than a full 3-query lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cfa2ab5-2088-4c51-af3a-c35a39af56f4?mode=deep",
+    "timestamp": "2026-05-01 17:21:34.938891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user send requests with valid but boundary EntityIdNumParameter values such as shard=1023, realm=65535, num=274877906943 to TopicRepository.findById(), causing the encoded Long ID to collide with or shadow legitimate topic IDs due to the bit-packing scheme in EntityId.of(shard, realm, num)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3c386b2-55b6-4fc6-a237-b1bfe695c348?mode=deep",
+    "timestamp": "2026-05-01 17:21:48.983544",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the absence of HTTP-level caching headers enforcement on GET /api/v1/topics/{id} responses to bypass any CDN or proxy cache by varying request headers (Accept-Encoding, Cache-Control: no-cache), forcing every request to reach TopicRepository.findById() directly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8754eca1-06f0-4bb3-ab03-adf0e49a1ddd?mode=deep",
+    "timestamp": "2026-05-01 17:22:03.881616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user cause a griefing condition by sending requests to GET /api/v1/topics/{id} for IDs corresponding to deleted topics, where TopicRepository.findById() returns the topic record (since deletion is tracked in the entity table, not the topic table), causing inconsistent responses that confuse downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1dd4649-ff9a-473a-9a96-a112d941c40f?mode=deep",
+    "timestamp": "2026-05-01 17:22:17.927527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the fact that TopicRepository has no @Transactional annotation, causing each of the three service calls in TopicController.getTopic() to run in separate transactions, creating a window for inconsistent reads where topic, entity, and customFee data reflect different points in time, returning a griefed/inconsistent response to legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea2c17cd-9668-43b1-8469-337755ea0d2d?mode=deep",
+    "timestamp": "2026-05-01 17:22:31.246849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user send a large number of concurrent requests to GET /api/v1/topics/{id} for the same valid topic ID, causing TopicRepository.findById() to generate a thundering herd of identical SELECT queries against the database primary key index, degrading query performance for all other database operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff2482d8-167e-47e3-9fa7-cf55c23f8a2b?mode=deep",
+    "timestamp": "2026-05-01 17:22:44.180203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the EntityIdNumParameter regex allowing realm values up to 65535 and shard values up to 1023 to generate a large space of distinct encoded IDs that all map to non-existent topics, enabling a systematic griefing scan that generates EntityNotFoundException for each, flooding logs without triggering any input validation error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6c4dd8d-03a1-4be8-93a3-f05e733a2355?mode=deep",
+    "timestamp": "2026-05-01 17:22:56.861462",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the fact that FeeTopicStore.sizeOfState() always returns 0 (hardcoded) to cause incorrect fee calculation behavior when the fee calculator relies on this value for capacity checks, potentially causing fee estimation to return wrong results that grieve users submitting topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_646c13f6-2a6e-41f8-a959-fb6b4e91147b?mode=deep",
+    "timestamp": "2026-05-01 17:23:10.376885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user trigger repeated fee estimation requests that invoke FeeTopicStore.getTopic() -> TopicRepository.findById() for a topic with a large number of custom fees, causing Collections.nCopies(customFee.getFixedFees().size(), FixedCustomFee.DEFAULT) to allocate large lists on every call with no caching, increasing heap pressure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_592254f2-16b5-4bbf-9048-ee2f9f2a8dbf?mode=deep",
+    "timestamp": "2026-05-01 17:23:23.281153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user cause a griefing condition by sending requests to GET /api/v1/topics/{id} where the topic exists but has a very large feeExemptKeyList stored as bytea, causing TopicRepository.findById() to load and deserialize large binary blobs on every uncached request, increasing memory allocation per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef6499ab-e391-4a8a-8407-9fa8fdb10178?mode=deep",
+    "timestamp": "2026-05-01 17:23:36.975276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/TopicRepository.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: findById()] Can an unprivileged external user exploit the absence of any in-flight request deduplication on TopicRepository.findById() to send N concurrent requests for the same topic ID, causing N identical database queries to execute simultaneously rather than coalescing, multiplying database load by N for a single logical lookup?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df1c5230-2d98-498b-8b76-d25d917a2220?mode=deep",
+    "timestamp": "2026-05-01 17:23:51.230465",
+    "report_generated": false
+  }
+]
