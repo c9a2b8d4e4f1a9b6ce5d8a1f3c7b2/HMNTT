@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user inject SQL via the `filter.operator` field (directly concatenated as `${column}${filter.operator}$${params.length}` on line 37) by crafting a request to `/api/v1/accounts/{id}/allowances/tokens` with a manipulated operator string that bypasses `formatComparator` validation, causing the WHERE clause to be altered so that `amountCondition` (`amount > 0`) is removed and zero-balance or revoked allowances are returned, enabling the attacker to identify and exploit on-chain allowances believed to be revoked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc1dc2c0-bddd-4f70-80b0-a317d583e356?mode=deep",
+    "timestamp": "2026-05-01 14:36:10.324958",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user supply a crafted `order` query parameter value that is not strictly 'asc' or 'desc' and flows unsanitized into `OrderSpec.from(column, order)` and then `OrderSpec.toString()` (producing `${this.column} ${this.order}`), injecting arbitrary SQL into the ORDER BY clause of the `union all` query, causing the query to return allowance rows for accounts other than the requested owner, leading to unauthorized disclosure of token allowance amounts that enables targeted fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12e70c44-5e33-49a8-b2ba-12649bd2ee90?mode=deep",
+    "timestamp": "2026-05-01 14:36:22.558864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user cause `TokenAllowanceService.columns[filter.key]` to resolve to `undefined` by supplying a `filter.key` that is accepted by `acceptedTokenAllowanceParameters` but not present in the `columns` map, producing the SQL fragment `undefined${operator}$N` which causes a DB error or unexpected query behavior that leaks allowance data for unintended accounts, enabling fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ad317a6-a1ec-476d-8a5d-46d052e4e5b4?mode=deep",
+    "timestamp": "2026-05-01 14:36:34.565042",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user exploit the shared mutable `params` array (initialized as `[ownerAccountId, limit]`) that is passed by reference into multiple sequential `getSubQuery()` calls for `lower`, `inner`, and `upper` filter sets, causing parameter positional indices (`$3`, `$4`, etc.) to be miscalculated across subqueries in the `union all`, resulting in filter values being bound to wrong parameters and returning allowance rows belonging to a different owner account, enabling unauthorized fund access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efcf4517-9c5e-4ad6-be2e-1059d2ae31aa?mode=deep",
+    "timestamp": "2026-05-01 14:36:46.752567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getAccountTokenAllowances()] Can an unprivileged external user enumerate all token allowances for any account by calling `GET /api/v1/accounts/{victimId}/allowances/tokens` with no filters, triggering the `subQueries.length === 0` branch in `getQuery()` which creates a query with only `owner = $1` and `amount > 0` conditions and no pagination restriction beyond `limit $2`, and then iterating through all pages via the `next` link to map the complete allowance graph of a victim account, enabling targeted on-chain exploitation of those allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_303a4b7e-455c-4208-9d69-50671df17b44?mode=deep",
+    "timestamp": "2026-05-01 14:37:00.439093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user supply an extremely large `limit` value that bypasses the effective max limit check and is stored as `params[1]` (`$2`), causing `getQuery()` to return all token allowances for a victim account in a single response, exposing the full set of spender-token pairs with their remaining `amount` values, enabling the attacker to identify the highest-value allowances and execute on-chain `transferFrom` calls to drain funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd72ea95-239b-47a6-bf56-e36d15520195?mode=deep",
+    "timestamp": "2026-05-01 14:37:13.240102",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user exploit the `select *` in `accountTokenAllowanceQuery = 'select * from token_allowance'` to receive the `payer_account_id` column in the raw `TokenAllowance` model object (before `TokenAllowanceViewModel` filtering), and if any serialization bug or middleware error causes the raw model to be returned instead of the view model, expose `payer_account_id` values that reveal financial relationships enabling social engineering or targeted fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f9ed5eb-b231-4f41-84c9-47396f3dce9b?mode=deep",
+    "timestamp": "2026-05-01 14:37:25.750853",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user craft a `spender.id` filter with a boundary value (e.g., `spender.id=gte:0`) that, combined with the `amountCondition = 'amount > 0'` static string being appended without parameterization, causes the SQL WHERE clause to be structured in a way that the DB query planner ignores the owner condition due to index selection, returning allowance rows for all owners rather than just the requested account, enabling mass allowance disclosure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea159bd3-50a2-4c2d-b2c9-e3ffafbc3b3b?mode=deep",
+    "timestamp": "2026-05-01 14:37:38.139935",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user manipulate the `lower`, `inner`, and `upper` filter arrays passed into `getQuery()` such that the `union all` of three subqueries each with `limit $2` returns up to `3 * limit` rows before the outer `limit $2` is applied, and by crafting pagination requests that exploit this over-fetch behavior, reconstruct the complete allowance table for a victim account faster than intended, enabling rapid identification of exploitable allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d20b3703-a565-44d0-af84-ebcda0c64929?mode=deep",
+    "timestamp": "2026-05-01 14:37:51.216939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user supply a `token.id` filter value that, after `EntityId.parseString()` processing in `formatComparator`, resolves to a different encoded ID than the user-visible token address (e.g., via EVM address aliasing), causing `getSubQuery()` to bind the wrong token ID as `$N` and return allowance data for a different token than requested, leaking the victim's allowance amount for a high-value token and enabling targeted fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_54f7df1f-da38-43ee-a277-be0e00434b89?mode=deep",
+    "timestamp": "2026-05-01 14:38:04.287008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getAccountTokenAllowances()] Can an unprivileged external user trigger a race condition by sending concurrent requests to `getAccountTokenAllowances()` that all share the same singleton `TokenAllowanceService` instance (exported as `new TokenAllowanceService()`), causing the mutable `params` array constructed in `getQuery()` to be corrupted across concurrent calls, resulting in one request receiving allowance data belonging to another user's account, enabling unauthorized fund access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c211799-042a-4216-a9cb-ac1ae71ce2b4?mode=deep",
+    "timestamp": "2026-05-01 14:38:17.231627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user bypass the `amountCondition = 'amount > 0'` filter by exploiting a DB-level type coercion issue where the `amount` column stores a value that evaluates as greater than 0 in SQL but represents a revoked allowance in the application layer (e.g., due to a migration bug like the one addressed in `V1.87.1__fix_token_allowance_amount.sql`), causing the API to report a non-zero allowance that has actually been spent, enabling the attacker to attempt an on-chain transfer that fails but reveals the victim's allowance state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7439f25d-93e0-4895-9921-460b49b48b08?mode=deep",
+    "timestamp": "2026-05-01 14:38:31.059489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user craft a `spender.id=gte:X&token.id=gt:Y` filter combination that causes `getLowerFilters()`, `getInnerFilters()`, and `getUpperFilters()` to all return non-empty arrays, generating a three-way `union all` query where the outer `orderClause` and `limitClause` reference `$2` (limit) but the inner subqueries have already pushed additional values to `params`, causing the outer `limit $2` to bind to a filter value instead of the intended limit, returning an unbounded result set that exposes all allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_988d89ba-91bb-4625-b9b6-57cd90a568fb?mode=deep",
+    "timestamp": "2026-05-01 14:38:43.296826",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user supply a `spender.id` value of `0` (zero entity ID) that passes `EntityId.parseString()` validation and is stored as `$3` in the params array, causing the SQL `spender = $3` condition to match allowances where the spender is the zero account, potentially revealing system-level or default allowances that should not be publicly visible, enabling fund theft from those allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f09e248a-e2a5-496a-a65c-4e45af322cef?mode=deep",
+    "timestamp": "2026-05-01 14:38:55.614231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user exploit the fact that `accountIdCondition = '${TokenAllowance.OWNER} = $1'` always uses positional parameter `$1` regardless of how many subqueries are generated, and if a future code change reorders the `params` array initialization (currently `[ownerAccountId, limit]`), the owner binding could silently shift to a different value, causing the query to return allowances for a different account without any error, enabling unauthorized fund access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f4c7fbf-61ae-4abc-a374-2bda5ec59db2?mode=deep",
+    "timestamp": "2026-05-01 14:39:07.867364",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getAccountTokenAllowances()] Can an unprivileged external user cause `getRows(sqlQuery, params)` to execute a query where `params` contains more elements than expected due to the mutable array being modified by multiple `getSubQuery()` calls, causing PostgreSQL to receive extra unused parameters that trigger a query error or, in some DB driver versions, cause parameter binding to shift, returning allowance data for the wrong owner account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a02679a7-7dbf-4f7c-8aa4-66e64230398a?mode=deep",
+    "timestamp": "2026-05-01 14:39:20.269445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user supply a `spender.id=lte:MAX_LONG` filter that causes `getSubQuery()` to generate a condition `spender <= $3` with `MAX_LONG` as the value, effectively removing the spender filter and returning all allowances for the owner account regardless of spender, enabling the attacker to enumerate all spender-token pairs and their remaining amounts to plan targeted on-chain fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cc86e0a-4200-47b2-8a98-b637be9b43f1?mode=deep",
+    "timestamp": "2026-05-01 14:39:32.903369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user exploit the `union all` (non-deduplicating) behavior in the multi-subquery path to receive duplicate allowance rows in the response, causing the `TokenAllowanceViewModel` to report the same allowance multiple times, and if any downstream system (e.g., a wallet or DeFi protocol) sums these values, it would overestimate available funds and approve transactions that exceed the actual allowance, leading to failed transactions and potential loss of gas fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4719205a-7cea-46a8-96c0-22cc2fe33000?mode=deep",
+    "timestamp": "2026-05-01 14:39:45.412897",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user craft a request where `filter.operator` contains a SQL comment sequence (e.g., `--` or `/*`) that, when concatenated as `${column}${filter.operator}$${params.length}`, comments out the remainder of the WHERE clause including the `amountCondition`, causing the query to return allowances with `amount = 0` (revoked allowances), enabling the attacker to identify previously revoked allowances and attempt on-chain exploitation before the revocation is fully propagated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68c40568-15e3-4958-ac0d-10fed4221902?mode=deep",
+    "timestamp": "2026-05-01 14:39:58.388270",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user supply a `limit=1` parameter to force single-row pagination and then iterate through all pages using the `next` link generated by `getPaginationLink()`, which encodes the last row's `spender` and `token_id` values, to enumerate the complete allowance table for a victim account one row at a time, mapping all active allowances and their amounts to enable targeted on-chain fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ae58154-cd80-41b0-b61b-7bc246087b99?mode=deep",
+    "timestamp": "2026-05-01 14:40:11.381319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user exploit the `select *` query against `token_allowance` table to receive the `amount_granted` column (original approved amount) alongside the current `amount` (remaining balance), enabling the attacker to calculate how much of an allowance has already been spent and infer the victim's token transfer history, which could be used to time an attack when the allowance is about to be renewed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99536340-34ed-496b-8d5d-769bea1bd74d?mode=deep",
+    "timestamp": "2026-05-01 14:40:24.345580",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user supply a `spender.id=eq:X` filter that causes `getLowerFilters()` to return all filters in the lower array (including both primary equal and secondary filters), and if the secondary `token.id` filter is also supplied as `eq`, the `getPaginationLink()` returns `null` (no next page), causing the attacker to know exactly which token allowance exists for a specific spender without pagination, enabling precise targeting for on-chain fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11b4893d-82aa-442b-8c09-bd8183a78b8e?mode=deep",
+    "timestamp": "2026-05-01 14:40:37.326046",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getSubQuery()] Can an unprivileged external user cause the `conditions.join(' and ')` in `getSubQuery()` to produce a malformed WHERE clause by supplying a filter whose `filter.key` maps to `undefined` in `TokenAllowanceService.columns`, resulting in the SQL string `undefined = $3` which PostgreSQL may interpret as a column named `undefined`, and if such a column exists or the error is swallowed, return unintended data that exposes allowances for other accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d5fe941-cf6b-4d0c-96d1-5b3acbf517ee?mode=deep",
+    "timestamp": "2026-05-01 14:40:49.582735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the `TokenAllowance` constructor's use of `mapKeys(tokenAllowance, (v, k) => camelCase(k))` to receive unexpected camelCase-transformed column names from the `select *` result (e.g., `payerAccountId`, `amountGranted`, `timestampRange`) that are not filtered by `TokenAllowanceViewModel`, and if a serialization middleware accidentally returns the raw model, expose sensitive financial metadata enabling fund theft planning?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7bf81e3-3b29-4902-96e8-99b89ce59283?mode=deep",
+    "timestamp": "2026-05-01 14:41:02.679256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Direct loss of funds'] [Function: getQuery()] Can an unprivileged external user supply both `spender.id=gte:X` and `token.id=gt:Y` filters to trigger the three-subquery `union all` path, and exploit the fact that the outer `orderClause` is the same string object as the inner `orderClause` (both built from `getOrderByQuery()`), so if the `order` parameter contains SQL injection, it affects all three subqueries simultaneously, amplifying the injection impact and enabling mass allowance data exfiltration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_292b4f4b-ea92-4580-96ae-d15afa43a36b?mode=deep",
+    "timestamp": "2026-05-01 14:41:15.034490",
+    "report_generated": false
+  }
+]
