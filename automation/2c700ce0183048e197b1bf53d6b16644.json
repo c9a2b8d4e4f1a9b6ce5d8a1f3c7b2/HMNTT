@@ -124,5 +124,131 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5cedd4ab-1e1f-4e77-a3da-483f86eb837d?mode=deep",
     "timestamp": "2026-05-01 22:21:44.713120",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertTimestamp()] Can an unprivileged external user supply a Timestamp with seconds=0 and nanos=0 as consensusStartTime, causing convertTimestamp() to return 0 nanoseconds as startTime, which combined with a very large endTime causes the TopicMessageFilter to query the entire history of a high-volume topic, exhausting database connection pool resources and preventing fund-release messages from being delivered to other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52802dfb-d453-4981-a909-bb63e49da495?mode=deep",
+    "timestamp": "2026-05-01 22:51:08.828775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter()] Can an unprivileged external user send a ConsensusTopicQuery with a topicID whose shard and realm fields are set to non-zero values that EntityId.of() maps to a valid but unintended entity, causing the subscription to attach to a different topic than intended, so that fund-release messages published to the correct topic are never received and funds remain permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f0fbe52-c765-4fa5-b556-e5f372776026?mode=deep",
+    "timestamp": "2026-05-01 22:51:21.170461",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the race condition between Mono.fromCallable(() -> toFilter(request)) executing on one thread and the ServerCallStreamObserver cancel handler being registered on another thread, such that a rapid cancel before the disposable is assigned causes the stream to never be disposed, leaking resources and eventually causing OOM that freezes fund-release message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9226dd67-92d3-4472-93e4-47d8b125cb24?mode=deep",
+    "timestamp": "2026-05-01 22:51:34.150693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has a consensusTimestamp of Long.MIN_VALUE or 0, causing ProtoUtil.toTimestamp() to produce an Instant at epoch zero or a negative epoch, and if a downstream fund-release protocol validates that the message timestamp is within an acceptable window before releasing funds, the invalid timestamp causes it to permanently reject the release?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7862236-203f-4139-8746-bcb9aba78ea2?mode=deep",
+    "timestamp": "2026-05-01 22:51:46.773586",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has sequenceNumber=0 or a duplicate sequenceNumber, causing toResponse() to emit a response with an invalid sequence number, and if a downstream fund-release protocol uses sequence numbers to ensure exactly-once processing of fund-release commands, the duplicate or zero sequence causes it to skip the release and permanently freeze funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c714642-7730-4708-9b3c-681aea1a7d08?mode=deep",
+    "timestamp": "2026-05-01 22:52:00.005594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user send a ConsensusTopicQuery with a negative limit value (e.g., -1 cast to uint64 becomes a very large positive long), bypassing the @Min(0) constraint if protobuf uint64-to-Java-long conversion wraps to negative, causing the reactive flux.take() to behave unexpectedly and either never terminate or immediately terminate, preventing fund-release messages from being delivered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24726848-7556-4ff6-a83b-79c405b9e49a?mode=deep",
+    "timestamp": "2026-05-01 22:52:13.246746",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter()] Can an unprivileged external user send a ConsensusTopicQuery where consensusEndTime is set to a timestamp only 1 nanosecond after consensusStartTime, causing the TopicMessageFilter to have an extremely narrow time window that excludes all fund-release messages published at that exact nanosecond boundary, permanently preventing fund release?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efef2d47-c933-4431-b18f-bccddc0ea443?mode=deep",
+    "timestamp": "2026-05-01 22:52:27.218077",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the fact that the Mono.fromCallable(() -> toFilter(request)) is not bounded by any timeout, by sending a ConsensusTopicQuery that causes toFilter() to block (e.g., via EntityId.of() throwing an unchecked exception not caught by onErrorMap), causing the gRPC thread to hang and preventing fund-release messages from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52207a9e-38a3-4398-9f9b-63ba02967975?mode=deep",
+    "timestamp": "2026-05-01 22:52:39.945875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: parseTransactionID()] Can an unprivileged external user subscribe to a topic where a message's initialTransactionId bytes contain a valid protobuf TransactionID but with accountID fields set to 0.0.0 (null account), causing parseTransactionID() to return a TransactionID with an empty AccountID, and if a downstream fund-release protocol uses this AccountID to authorize a transfer, the empty account causes the authorization to fail and funds to be permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b52705b7-390e-4178-b66e-d810c5b7edc6?mode=deep",
+    "timestamp": "2026-05-01 22:52:53.617889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a chunked message has chunkNum=1 and chunkTotal=1 (single-chunk message) but the initialTransactionId fails to parse, causing toResponse() to fall back to the synthetic TransactionID path using payerAccountId and validStartTimestamp, and if these fields are stale or belong to a different transaction, the wrong TransactionID causes fund-release authorization to permanently fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11715daa-1314-4211-92db-087b8a767ed6?mode=deep",
+    "timestamp": "2026-05-01 22:53:06.571172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user open a large number of subscriptions to the same high-traffic topic with limit=0 and startTime=0, causing the TopicMessageRetriever to execute massive historical queries for each subscription simultaneously, exhausting the database connection pool and causing fund-release message delivery to fail for all subscribers, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79f08986-8641-43f9-b9c1-acec7b111300?mode=deep",
+    "timestamp": "2026-05-01 22:53:20.517961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has a validStartTimestamp of null but a non-null payerAccountId, causing ProtoUtil.toTimestamp(null) to return null for validStartInstant, which causes the else-if branch in toResponse() to be skipped (since validStartInstant is null), resulting in a ChunkInfo with no initialTransactionID, permanently breaking fund-release coordination that depends on this field?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7762387b-860c-4283-963c-9759094cf252?mode=deep",
+    "timestamp": "2026-05-01 22:53:33.399551",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has a payerAccountId that maps to EntityId.EMPTY or a zero-value entity, causing toResponse() to build a TransactionID with an AccountID of 0.0.0, and if a downstream fund-release system uses this AccountID to debit fees before releasing funds, the invalid account causes the debit to fail and funds to remain permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_316040be-a7c3-4d45-857a-c91e42dd335b?mode=deep",
+    "timestamp": "2026-05-01 22:53:46.645240",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: convertTimestamp()] Can an unprivileged external user supply a Timestamp with seconds=Long.MAX_VALUE/1000000000 and nanos=999999999 (just below the 9223372035L guard) to convertTimestamp(), causing DomainUtils.timestampInNanosMax() to return a value that overflows when added to nanos, producing a negative endTime that passes isValidEndTime() but causes the database query to return no results, permanently preventing fund-release messages from being retrieved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79cecfa3-f380-4c6b-a8ea-e713ddc39e08?mode=deep",
+    "timestamp": "2026-05-01 22:54:00.264874",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the fact that responseObserver::onError is called directly from the reactive pipeline's error handler, by crafting a request that causes a non-gRPC exception (e.g., NullPointerException in toResponse()) to be mapped to Status.UNKNOWN by ProtoUtil.toStatusRuntimeException(), causing the client to receive an opaque error and permanently stop retrying, leaving funds frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5e503af-997c-4ab7-ada7-e833fc34052c?mode=deep",
+    "timestamp": "2026-05-01 22:54:13.752269",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter()] Can an unprivileged external user send a ConsensusTopicQuery with both consensusStartTime and consensusEndTime set to the same value (e.g., both seconds=1000, nanos=0), causing convertTimestamp() to return the same nanosecond value for both, which then fails the isValidEndTime() assertion (endTime must be strictly greater), returning INVALID_ARGUMENT and causing a fund-release client to permanently abandon the subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56a6a258-91ae-4a8a-b0c7-eb89cacfcc38?mode=deep",
+    "timestamp": "2026-05-01 22:54:26.784549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user send a malformed protobuf ConsensusTopicQuery (e.g., with unknown fields or wrong wire types) that causes Mono.fromCallable(() -> toFilter(request)) to throw an unchecked exception not covered by onErrorMap(ProtoUtil::toStatusRuntimeException), resulting in an unhandled exception that crashes the reactive pipeline and leaves the gRPC stream in an undefined state, preventing fund-release message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc612527-0985-41ae-a5c0-54c2e1e81ef0?mode=deep",
+    "timestamp": "2026-05-01 22:54:39.711677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has a chunkNum of Integer.MAX_VALUE, causing ConsensusMessageChunkInfo.Builder.setNumber() to accept the value but downstream fund-release assemblers that use int arithmetic to track chunk completion to overflow and never reach the expected total, permanently preventing fund release?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_291844ac-4883-4204-8caf-fd59e3bf63e1?mode=deep",
+    "timestamp": "2026-05-01 22:54:53.009258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic()] Can an unprivileged external user exploit the lack of rate limiting on subscribeTopic() to open connections faster than the server can register cancel handlers, creating a window where streams exist without cancel handlers, and if the server is then restarted or the connection is dropped, the undisposed subscriptions cause resource exhaustion that prevents fund-release messages from being processed after restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e3b140a-5d71-4e41-8b5b-cad3457bef1e?mode=deep",
+    "timestamp": "2026-05-01 22:55:05.845829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter()] Can an unprivileged external user send a ConsensusTopicQuery with a topicID containing a topicNum of Long.MAX_VALUE, causing EntityId.of() to create an EntityId that maps to a non-existent topic, and if grpcProperties.isCheckTopicExists() is true, the EntityNotFoundException is mapped to Status.NOT_FOUND, causing a fund-release client to permanently stop subscribing and leave funds frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30c8c6bc-0ad6-4c5d-86c0-0256226b78ca?mode=deep",
+    "timestamp": "2026-05-01 22:55:19.241669",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/controller/ConsensusController.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toResponse()] Can an unprivileged external user subscribe to a topic where a TopicMessage has a chunkTotal of 0 but a non-null chunkNum, causing ConsensusMessageChunkInfo to be built with total=0, and if a downstream fund-release protocol divides by chunkTotal to calculate completion percentage, a division-by-zero exception causes the fund-release process to crash and funds to remain permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4aa79e65-3a4e-436c-a122-457b1aa34c3c?mode=deep",
+    "timestamp": "2026-05-01 22:55:31.852251",
+    "report_generated": false
   }
 ]
