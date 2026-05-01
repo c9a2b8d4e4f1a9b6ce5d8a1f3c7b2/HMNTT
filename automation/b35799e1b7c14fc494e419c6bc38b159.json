@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user trigger permanent fund freezing by repeatedly calling findStorage() with a crafted slot key whose underlying byte[] is mutated after ByteBuffer.wrap(key) is called, corrupting the cached ByteBuffer key in contractSlotsCache so that the balance/allowance slot for a token contract permanently returns zero, causing all subsequent transfers to revert?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9ebcfde-879a-4c28-9a5b-2f33d969a748?mode=deep",
+    "timestamp": "2026-05-01 22:54:40.468485",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause permanent fund freezing by flooding findStorageBatch() with requests for many distinct slot keys for a target contract, exhausting the slotsPerContract cache (maximumSize=1500), evicting the legitimate balance slot key, so that isKeyEvictedFromCache=true triggers the fallback to contractStateRepository.findStorage() which returns a stale @Cacheable value representing a zero balance, permanently locking funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3bc72b2-92d2-4aa3-833e-b9eb9f39352c?mode=deep",
+    "timestamp": "2026-05-01 22:54:52.748696",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user exploit the reference equality check (cachedValue != EMPTY_VALUE) in findStorage() by causing a new byte[0] instance (not the EMPTY_VALUE sentinel reference) to be stored in contractStateCache for a balance slot, so that the check passes and Optional.of(new byte[0]) is returned as a valid zero-value slot, making the EVM read the balance as zero and permanently freezing all funds in the contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08f4dcfa-993f-4b10-ab4e-ea8b172feb69?mode=deep",
+    "timestamp": "2026-05-01 22:55:05.846027",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass a crafted blockTimestamp value (e.g., a timestamp from before a token unfreeze transaction) to findStorageByBlockTimestamp() to retrieve a historical storage slot value where the freeze_status was FROZEN=1, causing the EVM simulation to treat the account as frozen and permanently block fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ef8cf70-1627-49b8-861a-10a16cf12c76?mode=deep",
+    "timestamp": "2026-05-01 22:55:18.685245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by racing two concurrent findStorageBatch() calls for the same contractId and key, where the first call caches EMPTY_VALUE via putIfAbsent() and the second call reads cachedSlotKeys before the batch DB result is written, resulting in the key being permanently associated with a zero/empty slot value in contractStateCache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b94ca61e-4367-4ead-ae8a-f9c0cf765316?mode=deep",
+    "timestamp": "2026-05-01 22:55:31.874811",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the window between contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE) and the subsequent contractStateRepository.findStorageBatch() call to cause a race condition where the batch query executes against a DB state where the balance slot has been zeroed out, caching a zero value that persists for the contractState cache TTL (2s) and causes fund freezing during that window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19d1f60d-b36a-4038-87e3-5e0d2c1a8115?mode=deep",
+    "timestamp": "2026-05-01 22:55:45.600683",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user cause permanent fund freezing by sending requests that fill the contractStateCache (maximumSize=25000) with zero-value entries for all slots of a target token contract, so that when the EVM reads the token's balance mapping slot it always gets zero from cache (within the 2s expireAfterWrite window), blocking all transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_785010f3-3867-4059-8014-9da5978adcbf?mode=deep",
+    "timestamp": "2026-05-01 22:55:59.308232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() calls contractStateRepository.findStorageBatch() (which is NOT @Cacheable) while the fallback path calls contractStateRepository.findStorage() (which IS @Cacheable), creating an inconsistency where the @Cacheable path returns a stale frozen-state value for a balance slot that was updated after the cache was populated, permanently freezing funds until cache expiry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3580710e-a9ba-493c-85b1-45f44e4cad88?mode=deep",
+    "timestamp": "2026-05-01 22:56:12.793849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass Long.MAX_VALUE as blockTimestamp to findStorageByBlockTimestamp() to bypass the intended block-scoped state lookup, retrieving the absolute latest historical value from contract_state_change via the coalesce(value_written, value_read) query, which may differ from the current contract_state table value and return a stale frozen/zero balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03f5be29-2649-4036-8d82-eca8b00e3868?mode=deep",
+    "timestamp": "2026-05-01 22:56:26.623069",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by submitting a request with a zero-length key byte array (new byte[0]) to findStorageBatch(), where ByteBuffer.wrap(new byte[0]) is semantically equivalent to the EMPTY_VALUE sentinel used in contractSlotsCache, causing the cache to confuse a real slot lookup with the 'not yet fetched' sentinel and permanently return empty for that slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66a9f749-27f1-41a9-bc24-1b25a60f727b?mode=deep",
+    "timestamp": "2026-05-01 22:56:40.575339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user exploit the 2-second expireAfterWrite window of contractStateCache combined with high-frequency requests to ensure that a balance slot is always re-fetched from the batch path, and by timing requests to coincide with a DB replication lag window, cause the batch query to consistently return a stale zero balance, effectively freezing funds for extended periods?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63b0584a-5ba2-4a4a-9b03-80d62316cd57?mode=deep",
+    "timestamp": "2026-05-01 22:56:55.131136",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by exploiting the fact that contractSlotsCache.getNativeCache().asMap().keySet() is a live view of the Caffeine cache, so that between the iteration over cachedSlotKeys and the findStorageBatch() DB call, concurrent evictions reduce the slot list, causing the batch query to miss the target balance slot and return null as cachedValue, which is then stored as Optional.empty() causing the EVM to treat the balance as zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c711024-9d32-4f44-9f97-64c9c0b53417?mode=deep",
+    "timestamp": "2026-05-01 22:57:08.441457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: generateCacheKey()] Can an unprivileged external user cause fund freezing by exploiting the SimpleKey(contractId, slotKey) cache key generation, where byte[] arrays use reference equality in Java's default equals(), potentially causing two logically identical slot keys with different byte[] references to generate different SimpleKey entries, leading to cache misses that always re-query the DB and return inconsistent values for balance slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99ddde06-ba0c-4324-987b-06fa41f31991?mode=deep",
+    "timestamp": "2026-05-01 22:57:21.976595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user cause fund freezing by providing a blockTimestamp that corresponds to a point in time when a contract's balance slot was being written (mid-transaction), causing the coalesce(value_written, value_read) query to return value_read (the pre-write value) instead of value_written, making the EVM see a stale zero balance and blocking all fund withdrawals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed1b2846-55ae-489e-adcc-97e468a932c5?mode=deep",
+    "timestamp": "2026-05-01 22:57:35.506861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause permanent fund freezing by exhausting the contractSlotsCache (maximumSize=3000) across all contracts, so that when a new contract's balance slot is first queried, the contractSlotsCache.get(contractId, supplier) evicts an existing entry, and the supplier creates a new slotsPerContract cache that starts empty, causing the first batch query to return no results and cache a null/empty value for the balance slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad2d2055-498a-488d-8643-532fda8ec20d?mode=deep",
+    "timestamp": "2026-05-01 22:57:49.945310",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user cause fund freezing by exploiting the enableBatchContractSlotCaching flag path: when the flag is false, findStorage() directly calls contractStateRepository.findStorage() which is @Cacheable with CACHE_MANAGER_CONTRACT_STATE; if the attacker can trigger a cache population with a zero value (e.g., by querying before the contract state is written), the @Cacheable annotation will cache the empty Optional and return it for all subsequent calls within the cache TTL?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21fe0207-87ab-48b5-b770-9251e5241344?mode=deep",
+    "timestamp": "2026-05-01 22:58:03.908230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by sending concurrent requests that cause contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE) to be called multiple times for the same key across threads, where the Caffeine putIfAbsent is not atomic with the subsequent getNativeCache().asMap().keySet() snapshot, leading to a batch query that includes duplicate slot keys and causes the DB to return unexpected results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ccca58d-106e-4048-8132-96e6168fe3ab?mode=deep",
+    "timestamp": "2026-05-01 22:58:17.738499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by crafting a slot key that, when wrapped with ByteBuffer.wrap(key), has a position/limit state that causes wrappedKey.equals(slot) to return false even for the same underlying bytes, making isKeyEvictedFromCache remain true and triggering the fallback contractStateRepository.findStorage() which may return a stale cached zero value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff76eea8-9f92-484b-9008-c5e1dc46a9b8?mode=deep",
+    "timestamp": "2026-05-01 22:58:30.916623",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user cause fund freezing by providing a blockTimestamp of 0 (or a very early timestamp) to findStorageByBlockTimestamp(), causing the query to return Optional.empty() for a balance slot that has a non-zero current value, making the EVM treat the balance as zero and blocking all fund transfers for that historical simulation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6539e444-858c-4e17-8e1a-315128d1e7d3?mode=deep",
+    "timestamp": "2026-05-01 22:58:44.587889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by exploiting the fact that ((ByteBuffer) slot).array() in the cachedSlots loop returns the full backing array regardless of the ByteBuffer's position and limit, so that if a slot key was stored as a ByteBuffer with a non-zero position, the array() call returns extra leading bytes, causing the DB query to look up the wrong slot key and return null for the balance slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa619baa-1b27-463b-b504-97830fec524f?mode=deep",
+    "timestamp": "2026-05-01 22:58:58.671408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorage()] Can an unprivileged external user cause fund freezing by exploiting the timing gap between contractStateCache expiry (expireAfterWrite=2s) and contractSlotsCache expiry (expireAfterAccess=5m), where after contractStateCache expires the batch re-query uses stale slot keys from contractSlotsCache that no longer correspond to valid DB entries, causing the balance slot to return null and be treated as zero by the EVM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94081f04-1a1d-4c42-be7d-8837d4b074c3?mode=deep",
+    "timestamp": "2026-05-01 22:59:11.707772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by sending a request with a null key to findStorage(), which passes null to ByteBuffer.wrap(null) in findStorageBatch(), throwing a NullPointerException that propagates up and causes the EVM execution to treat the storage read as failed/zero, blocking fund transfers that depend on that slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fc405c8-5f07-4e73-b836-221602d73366?mode=deep",
+    "timestamp": "2026-05-01 22:59:25.433989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by flooding the slotsPerContract cache for a specific contract (maximumSize=1500 per contract) with 1500 distinct fake slot keys, so that when the legitimate balance slot key is queried it is immediately evicted (LRU), isKeyEvictedFromCache=true, and the fallback findStorage() returns a @Cacheable stale zero value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79f2a738-177e-426f-8d59-bade851e9bbf?mode=deep",
+    "timestamp": "2026-05-01 22:59:38.765081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user cause fund freezing by providing a blockTimestamp that is exactly equal to the consensus_timestamp of a transaction that deleted a slot (valueWritten=null, valueRead=some_value), causing coalesce(value_written, value_read) to return value_read (the pre-deletion read value) instead of null/zero, making the EVM see a phantom non-zero balance that cannot actually be transferred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c17d2740-aff7-4e02-80b2-6f15f10c0885?mode=deep",
+    "timestamp": "2026-05-01 22:59:52.713889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findStorageBatch()] Can an unprivileged external user cause fund freezing by exploiting the non-atomic sequence of putIfAbsent + getNativeCache().asMap().keySet() + findStorageBatch() DB call, where a concurrent thread evicts the key between putIfAbsent and the keySet snapshot, causing cachedSlots to not include the target key, the batch query to not return it, cachedValue to remain null, and Optional.empty() to be returned for the balance slot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d53df5ef-0570-4b31-b424-affff0acbba5?mode=deep",
+    "timestamp": "2026-05-01 23:00:06.770839",
+    "report_generated": false
+  }
+]
