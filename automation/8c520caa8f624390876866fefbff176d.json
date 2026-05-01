@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: router.getExt('/:contractId/state')] Can an unprivileged external user supply a crafted EVM address as contractId to getContractStateById() that resolves via computeContractIdFromString() to a different contract than intended, causing the mirror node to permanently serve stale/frozen slot values for the victim contract, making funds appear locked to any integrator relying on this state endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_855faf5b-08de-42cf-998c-843fdd29e211?mode=deep",
+    "timestamp": "2026-05-01 16:11:22.576655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateById()] Can an unprivileged external user pass timestamp=eq:T to extractContractStateByIdQuery() which silently converts the eq operator to lte, causing the endpoint to return historical (pre-freeze) state as if it were current state, misleading downstream systems into believing funds are accessible when they are actually frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f71d8f0-51a7-4a28-80fd-a75a04e3ea33?mode=deep",
+    "timestamp": "2026-05-01 16:11:34.509433",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractContractStateByIdQuery()] Can an unprivileged external user submit timestamp=lte:0 to getContractStateById() causing the query to return an empty state set (no slots), which downstream integrators interpret as a fully frozen/inaccessible contract, permanently blocking fund withdrawals based on false state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b82c4e0e-5225-4715-bfe3-61e70e128679?mode=deep",
+    "timestamp": "2026-05-01 16:11:46.996088",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateById()] Can an unprivileged external user supply a slot value with inconsistent padding (e.g., slot=0x01 vs slot=0x0000...01) to formatSlot() in extractContractStateByIdQuery() such that the slot lookup returns no results when timestamp is absent but returns results when timestamp is present, creating a split-brain view of contract storage that causes integrators to treat funds as frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acccfbff-ae42-4354-a5f9-c696c82be37e?mode=deep",
+    "timestamp": "2026-05-01 16:12:00.651051",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: computeContractIdFromString()] Can an unprivileged external user craft a CREATE2 EVM address that matches multiple contracts in the database (non-unique evm_address index), causing getContractIdByEvmAddress() to throw an internal error that permanently prevents state queries for that contract, effectively freezing all fund operations dependent on that state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_037e2f15-4060-4866-89d4-fb51d9549ebd?mode=deep",
+    "timestamp": "2026-05-01 16:12:14.739947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: router.getExt('/:contractId/results')] Can an unprivileged external user supply a block_number filter to extractContractResultsByIdQuery() referencing a non-existent block, causing the skip:true early return that results in an empty response, which downstream bridges interpret as a failed/frozen contract execution and permanently halt fund releases?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3b80a67-089f-45bf-99e0-fa8d77640176?mode=deep",
+    "timestamp": "2026-05-01 16:12:28.957621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: optimizeTimestampFilters()] Can an unprivileged external user submit timestamp filters that produce an empty optimized range via bindTimestampRange(), causing optimizeTimestampFilters() to return an empty filters array, which triggers the skip:true path in extractContractResultsByIdQuery() and causes downstream systems to treat all contract results as absent, freezing fund flows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10381883-0845-439d-bc83-c6df1201c2ee?mode=deep",
+    "timestamp": "2026-05-01 16:12:43.874410",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTimestamp()] Can an unprivileged external user request /:contractId/results/:consensusTimestamp with a timestamp that exists in the database but whose callResult is null, causing a 206 Partial Content response that some integrators treat as a failed transaction, permanently blocking fund release logic that depends on a 200 OK with full call result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_548897cb-77d4-46c0-92ee-32a37b603206?mode=deep",
+    "timestamp": "2026-05-01 16:12:57.582806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTransactionIdOrHash()] Can an unprivileged external user submit a transaction ID whose nonce parameter (getLastNonceParamValue()) selects a child transaction with a null callResult, causing a 206 Partial Content response that downstream fund-release systems interpret as a permanently failed transaction, freezing associated funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1dc65b9-f0ef-47a4-8479-7faef8047c5e?mode=deep",
+    "timestamp": "2026-05-01 16:13:10.109093",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: router.getExt('/results/:transactionIdOrHash')] Can an unprivileged external user submit a valid Ethereum transaction hash that maps to an ethereum transaction record with no matching contract result, causing getContractResultsByTransactionIdOrHash() to throw NotFoundError, which fund-release bridges interpret as a permanently failed transaction and freeze the associated funds indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a723a31b-51c5-475d-a9ad-c6ee680a7cec?mode=deep",
+    "timestamp": "2026-05-01 16:13:23.108179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTransactionIdOrHash()] Can an unprivileged external user craft a transaction ID where getInvolvedContractsByTimestampAndContractId() returns null (no matching contract details), causing a NotFoundError that external fund-release systems treat as a permanent failure, locking funds that were actually successfully transferred on-chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1366c1c2-cd2d-462d-b985-ba631997029a?mode=deep",
+    "timestamp": "2026-05-01 16:13:36.623397",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractActions()] Can an unprivileged external user query /results/:transactionIdOrHash/actions with a valid hash that resolves to a transaction with no actions, causing an empty actions array response that automated fund-release systems misinterpret as a frozen/failed contract call, permanently halting fund withdrawals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16e8ba24-8136-4146-a801-2fd8da553807?mode=deep",
+    "timestamp": "2026-05-01 16:13:50.109588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: alterTimestampRange()] Can an unprivileged external user submit timestamp=gte:T&timestamp=lte:T to getContractLogsById() causing alterTimestampRange() to collapse both filters into a single eq filter, which is then passed to extractContractLogsMultiUnionQuery() and interpreted as lte in the state endpoint, returning stale pre-freeze logs that cause integrators to believe a freeze event never occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2558e396-c99d-40c4-9dfe-ade4d6816421?mode=deep",
+    "timestamp": "2026-05-01 16:14:03.554755",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: checkTimestampsForTopics()] Can an unprivileged external user submit a topic filter without a valid timestamp range to getContractLogsById(), causing checkTimestampsForTopics() to throw InvalidArgumentError, which if repeatedly triggered against a monitoring system causes it to miss freeze events emitted in contract logs, leaving funds permanently frozen without detection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d81a558-9cfd-4453-9228-14a9d0bc5c87?mode=deep",
+    "timestamp": "2026-05-01 16:14:17.908162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractLogsById()] Can an unprivileged external user supply a CREATE2 EVM address as contractId that does not exist in the database, causing computeContractIdFromString() to throw NotFoundError, which is surfaced as a 404 that fund-monitoring systems interpret as the contract being destroyed/frozen, triggering permanent fund lockup in dependent protocols?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2cf7c8d1-8907-49bd-a312-d2d8eb563d23?mode=deep",
+    "timestamp": "2026-05-01 16:14:30.485549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractContractLogsMultiUnionQuery()] Can an unprivileged external user submit a transaction.hash filter to getContractLogs() that matches zero rows in getTransactionHash(), causing extractContractLogsMultiUnionQuery() to return null and the handler to return an empty logs response, which freeze-detection systems interpret as no freeze event having occurred, leaving funds permanently locked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa0ff9c2-52fd-43fc-ab63-c933165414a1?mode=deep",
+    "timestamp": "2026-05-01 16:14:43.950179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractById()] Can an unprivileged external user query /:contractId with a timestamp filter that causes the union query over entity and entity_history tables to return a historical record where the contract appears deleted (deleted=true), causing downstream systems to treat the contract as permanently destroyed and freeze all associated funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f82b19f6-83f0-491f-9c51-048789ef9cb3?mode=deep",
+    "timestamp": "2026-05-01 16:14:56.354175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractById()] Can an unprivileged external user supply a timestamp that falls between two history records for a contract, causing the union query with 'order by timestamp_range desc limit 1' to return an intermediate state where the contract's key field is null, which fund-management systems interpret as a permanently frozen (keyless) contract?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75e1ad7b-6e55-4e49-8453-c56398a42e20?mode=deep",
+    "timestamp": "2026-05-01 16:15:09.486530",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsById()] Can an unprivileged external user supply a from= filter with an EVM address that EntityService.getEncodedId() cannot resolve (returns NotFoundError), causing the entire results endpoint to fail with 404, which fund-release systems interpret as the contract having no successful executions and permanently freeze pending withdrawals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81d039e9-14ae-4854-bc1f-6c4350220b1c?mode=deep",
+    "timestamp": "2026-05-01 16:15:22.534772",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractContractResultsByIdQuery()] Can an unprivileged external user submit internal=false (default) to getContractResultsById(), causing the nonce=0 condition to filter out all child contract calls that actually transferred funds, making the results endpoint return empty and causing fund-release bridges to believe no transfer occurred, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa6c15f1-c18e-4ec9-a2ae-6c57d70f5230?mode=deep",
+    "timestamp": "2026-05-01 16:15:36.176249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResults()] Can an unprivileged external user submit a block_hash filter to the global /results endpoint that resolves to a block whose consensusStart equals consensusEnd (single-transaction block), causing the timestamp range to be a single nanosecond window that excludes the target transaction, returning empty results that freeze-detection systems treat as a permanently failed fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8268d451-fcac-4e75-82e3-2af35e4e7e17?mode=deep",
+    "timestamp": "2026-05-01 16:15:49.914411",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateById()] Can an unprivileged external user submit multiple slot= filters with eq operators to extractContractStateByIdQuery() causing the slot values to be aggregated into an IN clause, where a single malformed slot value causes the entire query to return no results, making all contract storage appear empty and funds appear frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9f82bc0-55ca-4bec-a3ac-2ee56fe4a59a?mode=deep",
+    "timestamp": "2026-05-01 16:16:03.997410",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateContractIdParam()] Can an unprivileged external user submit a contractId that passes EntityId.isValidEvmAddress() but fails at the database lookup stage in computeContractIdFromString(), causing an unhandled error path that returns 500 instead of 404, which some fund-release systems treat as a permanent contract freeze rather than a transient error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dea1bedd-5871-4923-bf78-0cba27cbb3d0?mode=deep",
+    "timestamp": "2026-05-01 16:16:19.079115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractResultsByTimestamp()] Can an unprivileged external user request /:contractId/results/:consensusTimestamp where the contractId is a valid entity ID but the contract was deleted at that timestamp, causing getInvolvedContractsByTimestampAndContractId() to return null and a NotFoundError, which fund-release systems interpret as the transaction never having occurred, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3010c291-28c3-4d97-a1f4-5302310cf1e8?mode=deep",
+    "timestamp": "2026-05-01 16:16:34.210015",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/contractRoute.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getContractStateById()] Can an unprivileged external user submit timestamp=gte:T (open upper bound) to extractContractStateByIdQuery(), which does not throw because ne is the only rejected operator, causing the lte conversion logic to be skipped and an unbounded timestamp condition to be applied, returning future state that has not yet been finalized, misleading fund systems into acting on unconfirmed state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6599b34-a914-4819-a917-cc854b38048f?mode=deep",
+    "timestamp": "2026-05-01 16:16:47.857015",
+    "report_generated": false
+  }
+]
