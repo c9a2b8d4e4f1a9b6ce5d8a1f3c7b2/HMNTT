@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an entityIdString that is exactly at the boundary of isValidEntityId() acceptance (e.g., max encoded ID `2^63-1`) causing getEncodedId() to return a BigInt that overflows when used in downstream SQL queries or arithmetic for transaction gossip timestamp calculations, leading to incorrect entity resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b11d9d3-fcf9-4c09-b1d8-21c6f23ce1c5?mode=deep",
+    "timestamp": "2026-05-01 15:09:56.673467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountFromAlias()] Can an unprivileged external user send thousands of unique valid alias strings per second to endpoints that call getAccountFromAlias(), each triggering a separate database query via entityFromAliasQuery with no rate limiting at the service layer, causing sustained database load that prevents the mirror node from processing legitimate transaction gossip queries in real time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da87325f-0df2-40a3-84a2-0a662d3ac584?mode=deep",
+    "timestamp": "2026-05-01 15:10:08.676796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an EVM address that is a valid long-form address (first 12 bytes all zero) with a num value that exceeds maxNum, causing EntityId.parseString() to treat it as an opaque EVM address (evmAddress !== null path), triggering a database lookup via getEntityIdFromEvmAddress(), while a slightly different encoding of the same logical entity bypasses the DB lookup, creating inconsistent gossip routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f40846e-2a34-4637-a69b-dc431fa4bc7c?mode=deep",
+    "timestamp": "2026-05-01 15:10:21.133382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: isValidAccount()] Can an unprivileged external user supply a string accountId (instead of BigInt/Number) to isValidAccount() that is coerced by the database driver in an unexpected way when passed to getSingleRow(entityExistenceQuery, [accountId]), causing a type confusion that matches unintended entities and returns true for accounts that should be considered invalid for transaction gossip purposes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f651510e-bfca-459c-82a6-f39f2451a0c7?mode=deep",
+    "timestamp": "2026-05-01 15:10:33.830489",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an alias string that passes AccountAlias.isValid() but whose base32.decode() produces a binary sequence that matches the alias column of a different entity than the one the user intended, due to base32 alphabet ambiguity (e.g., auto-correction of 0→O, 1→L, 8→B in the loose decoder), causing transaction gossip to be routed to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8df37e1c-3fd8-4c1c-a285-91cc66e14726?mode=deep",
+    "timestamp": "2026-05-01 15:10:47.183440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user supply an EVM address that resolves to an entity of type CONTRACT (not ACCOUNT), causing getEntityIdFromEvmAddress() to return that contract's ID without any type validation, allowing transaction gossip queries intended for accounts to be routed to contract entities, bypassing any account-specific gossip prevention logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_89895864-c7cd-47f0-9d57-fa9ff58abbd5?mode=deep",
+    "timestamp": "2026-05-01 15:11:01.291550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit the fact that entityFromAliasQuery uses `coalesce(${Entity.DELETED}, false) <> true` which returns entities where deleted IS NULL (treating NULL as not-deleted), to look up entities that were created but never explicitly marked as deleted, potentially exposing entities that should be considered inactive for transaction gossip routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf9a1f2e-9f7a-4987-b7a3-c162329580c9?mode=deep",
+    "timestamp": "2026-05-01 15:11:14.960324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply a realm.alias format string (two-part) where the realm matches the system realm, causing AccountAlias.fromString() to succeed and getAccountIdFromAlias() to be called, while a three-part shard.realm.alias with a different shard throws InvalidArgumentError that is caught and re-thrown as InvalidArgumentError.forParams(), masking the shard mismatch and allowing the caller to retry with a different format that succeeds, enabling cross-shard entity probing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de4404b9-a60e-49c8-8033-37f460c6d122?mode=deep",
+    "timestamp": "2026-05-01 15:11:28.739997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user supply an EVM address where entityId.evmAddress contains uppercase hex characters, and Buffer.from(entityId.evmAddress, 'hex') handles them correctly, but the database stores EVM addresses in a different case format, causing a case-sensitive mismatch in the WHERE clause that returns zero rows, triggering NotFoundError even for existing entities and preventing legitimate transaction gossip routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8913e754-dca4-4d53-b087-d2d3b5c954d8?mode=deep",
+    "timestamp": "2026-05-01 15:11:41.328091",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply a specially crafted entityIdString that causes EntityId.isValidEntityId() to return true but EntityId.parseString() to throw an InvalidArgumentError (due to shard/realm mismatch), which is caught at line 129 and rethrown as InvalidArgumentError.forParams(paramName), causing the caller to receive a generic invalid parameter error rather than a not-found error, leaking information about the validation boundary for transaction gossip entity resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1e12a08-1254-4624-a934-d240469a104e?mode=deep",
+    "timestamp": "2026-05-01 15:11:54.811300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit the singleton export (`export default new EntityService()`) at line 140 to cause shared mutable state corruption if any instance variable is modified during concurrent requests, potentially causing one user's alias lookup to interfere with another user's transaction gossip entity resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_152a7fcd-15eb-4b60-abf3-6a9054e8a2a7?mode=deep",
+    "timestamp": "2026-05-01 15:12:08.988880",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user supply an EVM address that is 20 bytes of zeros (the null address 0x0000...0000) which is not a long-form address (prefix is not all zeros in the right positions), causing getEntityIdFromEvmAddress() to query the database for an entity with evm_address = 0x0000...0000, and if such an entity exists (e.g., a system entity), return its ID for transaction gossip routing without the caller expecting it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d44924f-43ed-4258-b45f-095e40688f24?mode=deep",
+    "timestamp": "2026-05-01 15:12:21.366825",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an entityIdString of '0' (zero) which passes isValidEntityId() and resolves to entity ID 0 via getEncodedId() without a database lookup, and if downstream transaction gossip logic treats entity ID 0 as a special sentinel value (e.g., 'no entity'), cause transactions to be silently dropped or misrouted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_587ff7f1-a387-4cff-95c5-a6ed0b096c23?mode=deep",
+    "timestamp": "2026-05-01 15:12:34.276594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountIdFromAlias()] Can an unprivileged external user exploit the requireResult=true default in getAccountIdFromAlias() to cause a NotFoundError to be thrown for any alias that doesn't exist, and by measuring response time differences between 'alias not found' (fast DB miss) and 'alias found but deleted' (also returns null via getAccountFromAlias returning null), enumerate which aliases correspond to deleted accounts relevant to transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01130cf2-df57-4a59-a4f2-77c23696bfa4?mode=deep",
+    "timestamp": "2026-05-01 15:12:47.822774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user supply an EVM address that matches an entity of type TOPIC (not ACCOUNT or CONTRACT), causing getEntityIdFromEvmAddress() to return that topic's entity ID without type validation, allowing transaction gossip queries to be routed to topic entities, potentially exposing topic-related transaction data that should be filtered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df100d2b-5ee8-4cee-bc96-c0bd8a93aa2b?mode=deep",
+    "timestamp": "2026-05-01 15:13:01.872751",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply a very long alias string (up to the regex limit of accountAliasRegex `/^(\\\\d{1,5}\\\\.){0,2}[A-Z2-7]+$/`) that passes AccountAlias.isValid() but whose base32.decode() produces a very large byte array, causing the entityFromAliasQuery to perform a byte-array comparison against a very large parameter, potentially causing performance degradation in the database that affects transaction gossip query throughput?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b343523b-378c-4490-a792-4375fb2962b7?mode=deep",
+    "timestamp": "2026-05-01 15:13:15.256871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit the fact that getAccountFromAlias() returns `new Entity(rows[0])` (line 52) which wraps the raw database row, and if the Entity constructor does not validate or sanitize the row data, cause prototype pollution or property injection if the database row contains unexpected fields that override Entity prototype methods used in downstream transaction gossip logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06dde2e1-6135-4bff-8266-536f6a19962e?mode=deep",
+    "timestamp": "2026-05-01 15:13:28.223691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an EVM address with the `0x` prefix that causes EntityId.isValidEntityId() to return true via evmAddressRegex, but where the hex decoding in getEntityIdFromEvmAddress() via Buffer.from(entityId.evmAddress, 'hex') strips the prefix correctly, while a version without `0x` prefix resolves to a different binary value due to a parsing inconsistency, enabling two different EVM address strings to resolve to the same entity for transaction gossip?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cac9f8eb-744d-4b98-89e3-6e10270b3631?mode=deep",
+    "timestamp": "2026-05-01 15:13:41.455495",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: isValidAccount()] Can an unprivileged external user supply a null or undefined accountId to isValidAccount() which passes it directly to getSingleRow(entityExistenceQuery, [accountId]), causing the database driver to throw an error or execute a query with a NULL parameter that matches unexpected rows, returning true for an invalid account and allowing transaction gossip to proceed for a null entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8762f11-de48-44a8-9e89-bef14ddf704f?mode=deep",
+    "timestamp": "2026-05-01 15:13:55.718320",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user supply an EVM address that resolves to an entity whose `deleted` column is explicitly set to `false` (not NULL), confirming it passes the `deleted <> true` filter, but the entity has been logically deactivated through other means (e.g., expired auto-renew), causing getEntityIdFromEvmAddress() to return its ID for transaction gossip when it should be excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae6159a0-ebdf-44e6-a592-53e80ab02beb?mode=deep",
+    "timestamp": "2026-05-01 15:14:09.630680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an entityIdString that is a valid encoded entity ID (large integer) that decodes to a shard/realm/num combination where shard and realm are non-zero, causing getEncodedId() to return the encoded ID without checking whether the shard/realm matches the system configuration, allowing cross-shard entity IDs to be used in transaction gossip queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a56813fa-c34b-45f4-bb3c-67a75766f0a1?mode=deep",
+    "timestamp": "2026-05-01 15:14:23.965258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit the binary alias comparison in entityFromAliasQuery (`${Entity.ALIAS} = $1`) where the alias is passed as a Buffer, to perform a timing side-channel attack by measuring database query response times for different alias byte patterns, enabling enumeration of which alias byte prefixes match existing entities for transaction gossip reconnaissance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dfcffee7-adab-4938-a44f-19f854be3451?mode=deep",
+    "timestamp": "2026-05-01 15:14:38.136476",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: getEncodedId()] Can an unprivileged external user supply an entityIdString that causes both EntityId.isValidEntityId() and AccountAlias.isValid() to return false, causing getEncodedId() to fall through to `throw InvalidArgumentError.forParams(paramName)` at line 136, but by crafting inputs near the boundary of both validators, enumerate the exact validation rules and use that knowledge to craft inputs that bypass gossip prevention checks in other endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5173e921-fa17-4d64-9086-6c97b80ee7bf?mode=deep",
+    "timestamp": "2026-05-01 15:14:54.632026",
+    "report_generated": false
+  }
+]
