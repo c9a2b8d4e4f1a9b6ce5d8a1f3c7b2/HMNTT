@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic(TopicMessageFilter)] Can an unprivileged external user exploit the race condition between the historical Flux and the live Flux in subscribeTopic(), where the safetyCheck fires after 1 second and the live listener also starts, causing duplicate delivery of messages that are then filtered by sequence number, but if the freeze message is the duplicate that gets filtered out by the last.getSequenceNumber() > check, it is silently dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d90c2b89-6a7e-4931-9dfd-00a193cba9f4?mode=deep",
+    "timestamp": "2026-05-01 17:11:27.804963",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: incomingMessages(TopicContext)] Can an unprivileged external user cause the limit calculation in incomingMessages() (filter.getLimit() - topicContext.getCount().get()) to underflow to a negative value due to a race condition in AtomicLong count updates, resulting in a newFilter with a negative limit that causes unexpected behavior in the downstream query, potentially skipping freeze messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba7ed1cf-7443-4992-a6f1-4de31151163d?mode=deep",
+    "timestamp": "2026-05-01 17:11:40.087837",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isNext(TopicMessage)] Can an unprivileged external user exploit the isNext() check in TopicContext, where getLast() returns null for the first message, to inject a message with an arbitrary sequence number as the first message in the stream, establishing a false baseline that causes all subsequent freeze messages with lower sequence numbers to be filtered out by the t.getSequenceNumber() > last.getSequenceNumber() predicate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a2ac5aa-0dfe-4f0a-b843-1cbcbc7d89b3?mode=deep",
+    "timestamp": "2026-05-01 17:11:52.956704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: poll(PollingContext)] Can an unprivileged external user in SharedPollingTopicListener exploit the shared lastConsensusTimestamp AtomicLong, where one subscriber's message processing advances the timestamp past a freeze message's timestamp, causing subsequent polls to start after that timestamp and all other subscribers to miss the freeze message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7690ac05-f8c3-4168-ab37-f3236ebb2552?mode=deep",
+    "timestamp": "2026-05-01 17:12:05.764798",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: onStart(Subscription)] Can an unprivileged external user trigger a new subscription to SharedPollingTopicListener at a moment when DomainUtils.now() returns a timestamp after a freeze message has been published but before it has been ingested by the importer, causing lastConsensusTimestamp to be set to a value that skips the freeze message in all subsequent polls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_160b7536-666b-4ac9-9d86-55f6f97d7129?mode=deep",
+    "timestamp": "2026-05-01 17:12:19.227064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: filterMessage(TopicMessage, TopicMessageFilter)] Can an unprivileged external user subscribe to a topic with a startTime set to exactly the consensus timestamp of a freeze message, and due to the >= comparison in filterMessage() (message.getConsensusTimestamp() >= filter.getStartTime()), the freeze message is included, but if the startTime is set to timestamp+1, the freeze message is silently excluded, allowing an attacker to craft a startTime that skips exactly the freeze message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14f875b1-382b-4ebf-bbd6-a14a9efc0376?mode=deep",
+    "timestamp": "2026-05-01 17:12:33.208205",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isValidStartTime()] Can an unprivileged external user set startTime to exactly DomainUtils.now() at the nanosecond boundary, passing the isValidStartTime() validation (startTime <= DomainUtils.now()), but by the time the subscription is processed, the startTime is in the past and the historical retriever skips messages that arrived in that nanosecond window, including a freeze message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_025b5797-772b-4aaf-b6fb-aebd939cd6a5?mode=deep",
+    "timestamp": "2026-05-01 17:12:47.397209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isValidEndTime()] Can an unprivileged external user set endTime to startTime+1 nanosecond, passing the isValidEndTime() check (endTime > startTime), but this creates an extremely narrow time window that excludes all freeze messages except those with that exact nanosecond timestamp, effectively causing the client to receive an empty stream and assume no freeze events occurred?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ca4c8f6-bc88-4140-be5c-20356d93243c?mode=deep",
+    "timestamp": "2026-05-01 17:13:01.517375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: retrieve(TopicMessageFilter, boolean)] Can an unprivileged external user trigger the unthrottled retrieval path (throttled=false) with maxPolls=12 and pollingFrequency=20ms, causing the retriever to exhaust all 12 polls before the importer has ingested a freeze message, completing the historical retrieval without the freeze message and transitioning to the live listener which may also miss it due to timing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4746c576-b677-493e-bafe-eaad52f033e5?mode=deep",
+    "timestamp": "2026-05-01 17:13:16.228503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: isComplete()] Can an unprivileged external user in PollingTopicMessageRetriever exploit the isComplete() logic where throttled=true returns true when pageSize < maxPageSize, causing the retriever to stop polling after receiving a partial page that does not include the freeze message (because the freeze message is on the next page), permanently missing it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_651a3af0-3ec8-43b2-ba60-8b4fc665966b?mode=deep",
+    "timestamp": "2026-05-01 17:13:30.243656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic(ConsensusTopicQuery, StreamObserver)] Can an unprivileged external user cancel the gRPC stream (triggering setOnCancelHandler -> disposable.dispose()) at the exact moment a freeze message is being delivered via onNext(), causing the message to be dropped mid-delivery and the client to reconnect from a startTime after the freeze message, permanently missing the freeze notification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddccc3c9-8b5b-4c1b-a323-97175ec4a2b0?mode=deep",
+    "timestamp": "2026-05-01 17:13:44.361645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic(ConsensusTopicQuery, StreamObserver)] Can an unprivileged external user exploit the fact that the disposable.dispose() cancel handler is only set when responseObserver is an instance of ServerCallStreamObserver, and if it is not (e.g., in certain proxy configurations), the subscription is never cancelled, causing resource leaks that exhaust the thread pool and prevent other clients from receiving freeze messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95a18f86-36dd-49eb-9f1b-28d13faa9bc8?mode=deep",
+    "timestamp": "2026-05-01 17:13:58.470779",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: missingMessages(TopicContext, TopicMessage)] Can an unprivileged external user cause the safety check path in missingMessages() (current == null) to fire repeatedly by keeping the topicContext.isComplete() returning false indefinitely (no endTime set), causing the safetyCheck Mono.delay(1s) to trigger gap recovery queries that each consume database connections, exhausting the connection pool and blocking freeze message retrieval for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5f7e150-3adf-44ac-80b8-da296c40c5ab?mode=deep",
+    "timestamp": "2026-05-01 17:14:11.867643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: poll(PollingTopicListener)] Can an unprivileged external user subscribe with a limit that causes the pageSize calculation (Math.min(limit, maxPageSize)) to be 0 when limit equals 0 (no limit set, Integer.MAX_VALUE used), and if the topic has exactly maxPageSize messages including a freeze message at position maxPageSize, the freeze message is included in the last page but the isComplete() check stops polling, causing the freeze message to be delivered only if the page is full?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f772d78-888f-428c-b45b-39be4c421cc6?mode=deep",
+    "timestamp": "2026-05-01 17:14:26.866502",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getTopicListener()] Can an unprivileged external user exploit the UnsupportedOperationException thrown in CompositeTopicListener.getTopicListener() for an unknown ListenerType, which is mapped to a server error by toStatusRuntimeException(), causing the entire gRPC service to return UNKNOWN errors to all clients, preventing any freeze or unfreeze messages from being delivered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95486d90-f452-43fa-8e57-099c1df0adae?mode=deep",
+    "timestamp": "2026-05-01 17:14:42.602108",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: recordMetric(TopicMessage)] Can an unprivileged external user publish a topic message with a consensusTimestamp so large that the latency calculation (System.currentTimeMillis() - consensusTimestamp/1000000) overflows to a negative value, causing the latency metric to be skipped (latency > 0 check), which while not directly causing fund freezing, masks the detection of delayed freeze message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfa991ec-1ecd-4a77-a574-4ee2ee2e0db0?mode=deep",
+    "timestamp": "2026-05-01 17:14:57.327877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic(TopicMessageFilter)] Can an unprivileged external user set limit=1 in the subscription, causing flux.take(1) to complete after the first message, and if the first message is not the freeze/unfreeze message but a preceding message, the stream terminates before the freeze message is delivered, leaving the client permanently unaware of the freeze state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9db08402-655b-4bbb-b8e9-0d956ea1d0b6?mode=deep",
+    "timestamp": "2026-05-01 17:15:10.414790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: subscribeTopic(TopicMessageFilter)] Can an unprivileged external user exploit the Flux.merge(safetyCheck, live) behavior where both the safetyCheck and live fluxes emit the same freeze message, and the deduplication filter (t.getSequenceNumber() > last.getSequenceNumber()) drops the second emission, but if the first emission is from safetyCheck and is processed incorrectly, the live emission is dropped and the client's state is corrupted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ad3798b-a640-4051-96aa-ac4da64d8415?mode=deep",
+    "timestamp": "2026-05-01 17:15:23.634865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter(ConsensusTopicQuery)] Can an unprivileged external user omit the topicID field in ConsensusTopicQuery (hasTopicID() returns false), causing the filter to be built with a null topicId, which passes through toFilter() without validation and causes a NullPointerException or database error downstream that terminates the stream before any freeze messages are delivered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b846a22f-122e-4f42-8d72-c666e057d33e?mode=deep",
+    "timestamp": "2026-05-01 17:15:36.635283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: toFilter(ConsensusTopicQuery)] Can an unprivileged external user set limit=Long.MAX_VALUE in ConsensusTopicQuery, causing the limit field in TopicMessageFilter to be set to Long.MAX_VALUE, which when used in the limit calculation (filter.getLimit() - topicContext.getCount().get()) could overflow to a negative value, causing take() to behave unexpectedly and potentially terminate the stream before freeze messages are delivered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f50251b-f7d2-42bb-b246-cc6493cbe927?mode=deep",
+    "timestamp": "2026-05-01 17:15:49.478341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: findByFilter(TopicMessageFilter)] Can an unprivileged external user craft a filter with endTime set to a value that causes the JPA criteria query predicate (cb.lessThan(root.get(CONSENSUS_TIMESTAMP), filter.getEndTime())) to use strict less-than, excluding a freeze message whose consensusTimestamp equals exactly the endTime, causing the client to miss the freeze message by one nanosecond?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_554dbac8-9c65-48cd-b39d-b76c84e0cf79?mode=deep",
+    "timestamp": "2026-05-01 17:16:02.851890",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: missingMessages(TopicContext, TopicMessage)] Can an unprivileged external user cause the gap recovery filter in missingMessages() to set endTime=current.getConsensusTimestamp() (strict less-than in findByFilter), which excludes the current message from the gap query, and then concatWithValues(current) appends it, but if current is a freeze message and the gap query times out, the stream terminates before current is appended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1b0c44d-96c3-449d-80e9-73704ca36621?mode=deep",
+    "timestamp": "2026-05-01 17:16:15.478983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: Critical: Unintended permanent freezing of funds'] [Function: retryWhen(Retry.backoff)] Can an unprivileged external user cause repeated database errors during freeze message retrieval, triggering the retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))) in PollingTopicMessageRetriever, which retries indefinitely but each retry resets the polling context, potentially re-delivering already-processed messages and causing the client to process a freeze message twice, leading to incorrect fund state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea2294d9-c115-4d39-866a-d533de553623?mode=deep",
+    "timestamp": "2026-05-01 17:16:29.530546",
+    "report_generated": false
+  }
+]
