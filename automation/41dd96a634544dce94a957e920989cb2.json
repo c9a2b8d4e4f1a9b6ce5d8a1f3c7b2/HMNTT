@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateHashOrNumber()] Can an unprivileged external user submit a 96-char Hedera hash that is a prefix of a different block's hash, causing RecordFileService.getByHashOrNumber() to invoke getSingleRow() which returns null when multiple rows match the LIKE pattern, making a valid block permanently unreachable by hash and breaking any downstream EVM execution that depends on that block's data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a11bfcc-27e2-4e22-8af0-c9f500012655?mode=deep",
+    "timestamp": "2026-05-01 21:10:10.147385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateHashOrNumber()] Can an unprivileged external user supply a hash string of the form '0x0x<62-hex-chars>' where isValidEthHashOrHederaHash() accepts it as a 64-char hex match after the optional '0x' prefix, and then hashOrNumber.replace('0x', '') strips only the first occurrence leaving '0x<62-hex-chars>' passed to RecordFileService.getByHashOrNumber(), causing a wrong block to be returned and downstream contract execution to reference incorrect block state, permanently freezing funds locked in time-sensitive contracts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56a5d54b-f4fe-46bf-9aa8-94c74d003889?mode=deep",
+    "timestamp": "2026-05-01 21:10:22.225916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractLimitFromFilters()] Can an unprivileged external user send a request with two limit parameters (e.g., ?limit=1&limit=99999) so that findLast() selects the last value (99999), which exceeds getEffectiveMaxLimit(), causing the fallback to defaultLimit instead of maxLimit, resulting in a pagination cursor that skips blocks between defaultLimit and maxLimit and permanently omitting those blocks from any client iterating the full block history used to reconstruct fund-transfer state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4113f985-185a-4a39-91a1-b4947e92dc59?mode=deep",
+    "timestamp": "2026-05-01 21:10:34.751245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractLimitFromFilters()] Can an unprivileged external user exploit the condition 'limit.value > maxLimit ? defaultLimit : limit.value' by supplying limit=maxLimit+1 to force the response to use defaultLimit (which may be smaller than maxLimit), causing a pagination gap where blocks between index defaultLimit and maxLimit are never returned in a single page, and a naive client that stops paginating when results < requested limit would permanently miss those blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_199db572-ab0b-4ea4-a3ea-fa6cce8bd66f?mode=deep",
+    "timestamp": "2026-05-01 21:10:47.550303",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: generateNextLink()] Can an unprivileged external user craft a request where blocks.length equals filters.limit exactly, causing generateNextLink() to always emit a next link via getPaginationLink() with {[filterKeys.BLOCK_NUMBER]: last(blocks).index}, and if last(blocks).index is undefined (e.g., RecordFile model missing index field), the pagination cursor becomes '?block.number=undefined', causing all subsequent paginated requests to return zero results and permanently halting block traversal needed to unlock time-locked funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9b3b01a-d327-4f4c-8881-ceda4ef6b16d?mode=deep",
+    "timestamp": "2026-05-01 21:11:00.847418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user supply both a block.number filter and a timestamp filter simultaneously, causing extractSqlFromBlockFilters() to build a whereQuery with two conditions that together exclude all blocks (e.g., block.number=gte:999999999 AND timestamp=lte:1), resulting in RecordFileService.getBlocks() returning an empty array, and a dependent system that uses this endpoint to determine the current block for fund-release logic permanently seeing no valid block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcadbee7-2101-4c64-9fb9-5dead9b17dbd?mode=deep",
+    "timestamp": "2026-05-01 21:11:14.295974",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user send a request where filters is a non-empty array but all entries have keys not in blockWhereFilters (e.g., only ORDER and LIMIT), causing the switch statement in the .map() to fall through all cases and return undefined for each entry, resulting in whereQuery containing [undefined, undefined], which is then passed to buildWhereSqlStatement() in RecordFileService where whereQuery[i-1].query throws a TypeError, crashing the request handler and making the blocks endpoint permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_955235e5-b309-41f3-89f1-9e3a1f5c123f?mode=deep",
+    "timestamp": "2026-05-01 21:11:28.125592",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getByHashOrNumber()] Can an unprivileged external user call GET /api/v1/blocks/0 (block number zero), which passes isPositiveLong(hashOrNumber, true) with allowZero=true, causing RecordFileService.getByHashOrNumber(null, '0') to query 'WHERE index = $1' with value '0', and if the genesis block contains critical fund-initialization state, returning it with incorrect gasUsed=-1 sentinel mapped to null in BlockViewModel, causing downstream EVM tools to treat the genesis block as having no gas capacity and refusing to process any transactions referencing it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c82e415f-84a9-4fe2-a361-cd72e5ccfaa1?mode=deep",
+    "timestamp": "2026-05-01 21:11:42.343701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getBlocks()] Can an unprivileged external user send repeated GET /api/v1/blocks requests with timestamp=lte:1 (a timestamp before any block exists), causing RecordFileService.getBlocks() to return an empty array every time, and generateNextLink() to return null (since blocks.length is 0), causing any automated fund-release system that polls this endpoint and expects a non-null next link to enter an infinite retry loop that never advances, effectively freezing fund-release processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6076dfe-1e29-4c9d-8699-c12b877a7529?mode=deep",
+    "timestamp": "2026-05-01 21:11:57.513840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractOrderFromFilters()] Can an unprivileged external user supply multiple order parameters (e.g., ?order=asc&order=desc) so that findLast() selects 'desc', and orderFilterValues['DESC'] resolves to the DESC constant, causing blocks to be returned in descending order when the client expects ascending order, resulting in a pagination cursor anchored to the highest block number that, when followed, returns no new blocks and permanently stalls a fund-release monitor that processes blocks sequentially?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2de6114-59e9-464f-ad34-901e770768d0?mode=deep",
+    "timestamp": "2026-05-01 21:12:09.722589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a hash that is a valid 32-byte (64 hex char) prefix of multiple blocks' 48-byte Hedera hashes stored in the database, causing RecordFileService.getByHashOrNumber() to execute 'WHERE hash LIKE $1' with 'prefix%', matching multiple rows, and getSingleRow() returning null when rows.length > 1, throwing NotFoundError for a block that actually exists, permanently preventing any fund-release logic that looks up blocks by hash from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb857250-bdac-454d-8627-53c5dabb080a?mode=deep",
+    "timestamp": "2026-05-01 21:12:22.633577",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateHashOrNumber()] Can an unprivileged external user pass a 64-char all-zeros hex string ('0000...0000') to getByHashOrNumber(), which passes isValidEthHashOrHederaHash(), and after replace('0x','') remains '0000...0000', causing RecordFileService.getByHashOrNumber() to query 'WHERE hash LIKE 0000...0000%', potentially matching the genesis block or a null-hash sentinel block, returning incorrect block data to EVM tools that use it to determine fund-transfer validity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_24719cba-6dff-4d2b-94f6-8782a483bc12?mode=deep",
+    "timestamp": "2026-05-01 21:12:35.495289",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractLimitFromFilters()] Can an unprivileged external user send ?limit=0 (if filterValidityChecks allows it via isPositiveLong which requires val >= 1, but if a bypass exists), causing extractLimitFromFilters() to set limit=0, which is then passed to RecordFileService.getBlocks() as 'LIMIT 0', returning zero rows, and generateNextLink() returning null since blocks.length (0) !== filters.limit (0) is false, causing the client to believe pagination is complete when no blocks were actually returned, permanently halting block-based fund-release processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa33c345-a201-45c5-b03a-025d5fbdee5f?mode=deep",
+    "timestamp": "2026-05-01 21:12:48.261211",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getBlocks()] Can an unprivileged external user send a request with block.number=eq:9223372036854775807 (max signed long), causing extractSqlFromBlockFilters() to build a WHERE condition for the maximum possible block index, and if this block exists and contains a fund-freeze transaction, returning it in isolation while generateNextLink() emits a next-page cursor pointing beyond the maximum block number, causing downstream systems to query a non-existent block and permanently stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60b98336-694b-4ab8-936d-528c0728605b?mode=deep",
+    "timestamp": "2026-05-01 21:13:02.029910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractOrderByFromFilters()] Can an unprivileged external user send a request with only a LIMIT filter (no BLOCK_NUMBER or TIMESTAMP filter), causing extractOrderByFromFilters() to return RecordFile.CONSENSUS_END as the default orderBy, while a client that previously queried with block.number filter (orderBy=index) now gets results ordered by consensus_end, producing a different block sequence that skips or reorders blocks containing fund-transfer transactions, causing a fund-release monitor to process blocks out of order and permanently miss a critical unlock block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f226de3c-3031-4c19-a115-0ed6f84c46e7?mode=deep",
+    "timestamp": "2026-05-01 21:13:14.705878",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getByHashOrNumber()] Can an unprivileged external user call GET /api/v1/blocks/{hashOrNumber} where hashOrNumber is a valid block number string that also happens to be a valid hex string of length 64 (e.g., a 64-digit decimal number), causing isValidEthHashOrHederaHash() to match it as a hash before isPositiveLong() is checked, resulting in a hash-based lookup instead of index-based lookup, returning a completely different block than intended and feeding wrong block data to EVM execution that determines fund-transfer validity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_208ad28c-48a3-4c69-9c5a-21cb4bda3afe?mode=deep",
+    "timestamp": "2026-05-01 21:13:27.760387",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: BlockViewModel constructor (via getBlocks/getByHashOrNumber)] Can an unprivileged external user trigger a response where recordFile.gasUsed is exactly -1 (the sentinel value), causing BlockViewModel to set gas_used=null, and a downstream EVM tool that interprets null gas_used as 'block not yet finalized' to refuse to process any transactions in that block, permanently freezing funds that were transferred in that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_287f33d5-88d8-4ba9-a237-cfb9cdf9f8ee?mode=deep",
+    "timestamp": "2026-05-01 21:13:42.022359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: generateNextLink()] Can an unprivileged external user send a request where the returned blocks array has exactly filters.limit entries, causing generateNextLink() to call utils.getPaginationLink() with {[filterKeys.BLOCK_NUMBER]: last(blocks).index} where last(blocks).index is the same as the current page's last block, and if getPaginationLink() constructs a cursor of 'block.number=gte:X' that includes the already-seen block X, causing infinite pagination loops that never advance past block X and permanently stalling fund-release processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04e45093-082d-40d6-af7e-fc47ad70b9ae?mode=deep",
+    "timestamp": "2026-05-01 21:13:54.617726",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getBlocks()] Can an unprivileged external user send concurrent requests with conflicting timestamp filters (e.g., timestamp=gte:T1 and timestamp=lte:T2 where T1>T2), causing extractSqlFromBlockFilters() to build a WHERE clause with contradictory conditions (consensus_end >= T1 AND consensus_end <= T2 where T1>T2), returning zero blocks, and a fund-release system that depends on finding the block containing timestamp T (T1>T>T2) to permanently fail to locate the block and freeze the associated funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e37f6e35-18aa-4429-9ee3-8158169a29fd?mode=deep",
+    "timestamp": "2026-05-01 21:14:08.441498",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractSqlFromBlockFilters()] Can an unprivileged external user send a request with a very large number of repeated block.number filters (up to maxRepeatedQueryParameters), causing extractSqlFromBlockFilters() to build a whereQuery array with many conditions, and buildWhereSqlStatement() in RecordFileService to construct a SQL query with many AND clauses that together form an impossible range (e.g., index > 100 AND index < 50), returning zero blocks and causing a fund-release monitor to permanently skip the blocks in that range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1aac59cd-1ae0-45d5-8736-29dda26ea9c5?mode=deep",
+    "timestamp": "2026-05-01 21:14:21.336034",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getByHashOrNumber()] Can an unprivileged external user send GET /api/v1/blocks/{hash} where hash is a valid 96-char Hedera hash with '0x' prefix (98 chars total), causing validateHashOrNumber() to call hashOrNumber.replace('0x', '') which strips only the first '0x', passing the 96-char hash to RecordFileService.getByHashOrNumber(hash, null), and if the hash lookup via LIKE returns a different block than the one with that exact hash (due to prefix matching), downstream EVM execution uses wrong block data causing fund-transfer validation to fail permanently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8608df9-c42d-4382-9cac-61771ead2383?mode=deep",
+    "timestamp": "2026-05-01 21:14:34.824756",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getBlocks()] Can an unprivileged external user exploit the fact that extractSqlFromBlockFilters() uses filters.length === 0 as the early-return condition (line 71), but when filters is non-empty and contains only ORDER/LIMIT entries (no blockWhereFilters entries), the .filter() on line 76 produces an empty array for whereQuery, resulting in a full table scan with no WHERE clause, and if the database is under load, the query times out, causing the blocks endpoint to return an error that a fund-release system interprets as 'no blocks available' and permanently halts processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6f1d952a-2a86-4ec8-bee6-ba6bc336bd7c?mode=deep",
+    "timestamp": "2026-05-01 21:14:48.888322",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: extractLimitFromFilters()] Can an unprivileged external user send ?limit=1 followed by paginated requests, where each page returns exactly 1 block and generateNextLink() always emits a next link, but due to the limit=1 constraint, the client must make O(N) requests to traverse N blocks, and if the server applies rate limiting after K requests, the client is permanently blocked from reaching blocks K+1 through N, freezing any fund-release logic that requires processing all blocks up to a specific one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_664219f0-ec45-483a-ac24-693b26e48f7d?mode=deep",
+    "timestamp": "2026-05-01 21:15:02.583357",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getByHashOrNumber()] Can an unprivileged external user send GET /api/v1/blocks/{number} where number is a valid block number that exists in the database, but RecordFileService.getByHashOrNumber(null, number) passes number as a string (not parsed to integer) to the SQL query 'WHERE index = $1', and if the database driver performs implicit type coercion that fails for very large block numbers near the int8 boundary (9223372036854775807), causing a database error that throws NotFoundError, permanently making that block unreachable and freezing funds associated with transactions in it?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0f62688-c727-46f0-a601-62fc483fa970?mode=deep",
+    "timestamp": "2026-05-01 21:15:16.049800",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/controllers/blockController.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: validateHashOrNumber()] Can an unprivileged external user send a path parameter that is exactly 64 hex chars (valid ETH hash) but also a valid positive long integer (e.g., a 19-digit decimal number that happens to be all hex digits like '1234567890123456789' which is 19 chars, not 64), and since isValidEthHashOrHederaHash() is checked first, a 64-char all-decimal string would be treated as a hash lookup instead of a block number lookup, returning a completely different block and causing downstream systems to use wrong block data for fund-transfer validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4a7d68d-9218-45a3-af1a-5bd51bb681b0?mode=deep",
+    "timestamp": "2026-05-01 21:15:29.088388",
+    "report_generated": false
+  }
+]
