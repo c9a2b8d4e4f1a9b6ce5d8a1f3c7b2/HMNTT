@@ -136,5 +136,143 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72255e06-1c43-41ce-86e7-3a5fd159a57f?mode=deep",
     "timestamp": "2026-05-01 16:49:19.326344",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user send requests with gas values just above GAS_SCALE_FACTOR (e.g., gas=10001) to consume only 1 token per request from gasLimitBucket, effectively submitting up to gasPerSecond/10000 requests per second regardless of actual gas, causing the mirror node to process far more requests than the gas budget intends and exporting incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37825421-0c97-4ec9-b457-b14e10770b59?mode=deep",
+    "timestamp": "2026-05-01 22:37:12.266319",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: restore()] Can an unprivileged external user exploit the race condition between throttle() consuming gasLimitBucket tokens and restore() adding them back — since gasLimitBucket uses SYNCHRONIZED strategy but restore() is called from a different thread after execution — to create a window where the bucket appears depleted, causing legitimate concurrent requests to be throttled and their records to be missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e783ffd4-e0e1-4137-874d-de7f94bc8e52?mode=deep",
+    "timestamp": "2026-05-01 22:37:24.436491",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that when a ThrottleException is thrown from action() after gasLimitBucket tokens have been consumed, ContractController.call() does not catch ThrottleException and does not call restore(), causing permanent gas token loss and starving legitimate users whose records would otherwise be exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0d20b96-25a4-46e7-9347-2282b98e8c66?mode=deep",
+    "timestamp": "2026-05-01 22:37:36.848713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user craft a ContractCallRequest with a FROM field value that matches a REJECT filter's CONTAINS expression (e.g., a specific hex prefix), causing all requests from addresses matching that pattern to be rejected with ThrottleException('Invalid request'), effectively censoring specific contract interactions and causing their records to be missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd4359b3-1001-45ec-8011-a64fde92947e?mode=deep",
+    "timestamp": "2026-05-01 22:37:49.751649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the case-insensitive CONTAINS filter in RequestFilter.test() using FilterType.CONTAINS backed by Strings.CI::contains to craft DATA payloads that match filter expressions regardless of hex case (e.g., '0xABCD' vs '0xabcd'), causing unexpected filter matches that trigger REJECT actions and result in missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba2586bd-8ac7-44b5-93e6-41e8c38d8df1?mode=deep",
+    "timestamp": "2026-05-01 22:38:03.090309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that RequestProperties.test() increments the AtomicLong counter before checking filters, meaning even requests that don't match any filter still increment the counter toward the limit, causing the limit to be exhausted by non-matching requests and preventing legitimate matching requests from being properly throttled or logged, leading to incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e10a23a1-6930-4b79-974d-62affa979bfa?mode=deep",
+    "timestamp": "2026-05-01 22:38:17.332021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the AtomicLong counter overflow in RequestProperties when counter reaches Long.MAX_VALUE and wraps to Long.MIN_VALUE, causing counter.getAndIncrement() >= limit to evaluate incorrectly (MIN_VALUE < MAX_VALUE), re-enabling a filter that should have been permanently disabled and causing unexpected REJECT/LOG/THROTTLE actions on records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9d0794a-4cbc-4837-a419-b2e7f62da088?mode=deep",
+    "timestamp": "2026-05-01 22:38:30.829252",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user send requests with gas=Long.MAX_VALUE (if not bounded upstream) causing scaleGas() to compute Math.floorDiv(Long.MAX_VALUE, 10000) which returns a very large positive number, causing gasLimitBucket.tryConsume() to always fail and permanently blocking all gas-based requests, resulting in all contract call records being missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88576975-00bc-44cd-8cb1-dd56313f4eef?mode=deep",
+    "timestamp": "2026-05-01 22:38:44.776966",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: restore()] Can an unprivileged external user exploit the fact that restore() calls gasLimitBucket.addTokens(tokens) without any cap, and bucket4j's addTokens() can exceed the bucket's configured capacity, allowing the bucket to hold more tokens than gasPerSecond, effectively increasing the burst capacity and allowing more gas to be processed than intended, causing incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30330fd8-5feb-47e1-9e55-01a5be5ebf09?mode=deep",
+    "timestamp": "2026-05-01 22:38:58.374283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that the THROTTLE action in action() uses filter.getBucket() which is lazily initialized via @Getter(lazy=true), and the lazy initialization is not thread-safe under high concurrency, causing multiple bucket instances to be created and the per-filter rate limit to be effectively multiplied, allowing more requests than intended and causing incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_635418c3-b400-42ed-b6fb-116cdbbbee1f?mode=deep",
+    "timestamp": "2026-05-01 22:39:11.742440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that RequestProperties.createBucket() uses rate as both capacity and refill rate, and if rate=0 the bucket has 0 capacity, causing filter.getBucket().tryConsume(1) to always return false and every THROTTLE-filtered request to throw ThrottleException, effectively creating a permanent denial-of-service for all matching requests and causing missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf6a3c1d-ca91-44ef-9d2f-9db9e2d72486?mode=deep",
+    "timestamp": "2026-05-01 22:39:26.190029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that filters.isEmpty() returns true in RequestProperties.test() when no filters are configured, causing the filter to match ALL requests regardless of content, and if the action is REJECT, causing all contract call requests to be rejected and all records to be missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a167e4a-8ec5-4257-b527-ad26d5242789?mode=deep",
+    "timestamp": "2026-05-01 22:39:39.135007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that the ESTIMATE field in FilterField uses ContractCallRequest::isEstimate which returns a boolean converted to String ('true'/'false'), and craft a request with estimate=true to match a filter expression 'true', causing all gas estimation requests to be rejected and their records to be missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3eec50a3-ef12-4da6-8ded-47a90797a3b4?mode=deep",
+    "timestamp": "2026-05-01 22:39:51.491997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the GAS FilterField which extracts ContractCallRequest::getGas as a long converted to String, and craft a filter expression that matches a substring of the gas value (e.g., '000'), causing requests with gas values containing that substring to be unexpectedly throttled and their records to be missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd498c6e-2817-4164-8094-af4ce9c1d50f?mode=deep",
+    "timestamp": "2026-05-01 22:40:04.129912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the VALUE FilterField which extracts ContractCallRequest::getValue and converts it to String, and if getValue() returns null, String.valueOf(null) returns the string 'null', causing a filter with expression='null' to match all requests with no value set and trigger unexpected REJECT/THROTTLE actions, causing missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d16bf14f-be57-428a-ad8f-b77baa37dd94?mode=deep",
+    "timestamp": "2026-05-01 22:40:16.731700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that rateLimitBucket and opcodeRateLimitBucket are created without SynchronizationStrategy.SYNCHRONIZED while gasLimitBucket uses it, creating inconsistent thread-safety guarantees, and under high concurrency the unsynchronized buckets may allow more requests than the configured limit, causing more records than intended to be exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba0ccda4-ab35-4714-a1ae-04604a7b2e6e?mode=deep",
+    "timestamp": "2026-05-01 22:40:29.516583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user send a burst of requests that all pass rateLimitBucket.tryConsume(1) simultaneously (due to lack of synchronization), then all attempt gasLimitBucket.tryConsume() where only some succeed, causing the rateLimitBucket to be depleted by requests that ultimately fail the gas check, blocking legitimate requests and causing missing records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7db4a4ae-ce82-4610-ad9a-b0b5019444c3?mode=deep",
+    "timestamp": "2026-05-01 22:40:43.246758",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: restore()] Can an unprivileged external user exploit the fact that restore() is only called for InvalidParametersException in ContractController but NOT for ThrottleException, MirrorEvmTransactionException, or other runtime exceptions, causing gasLimitBucket tokens to be permanently consumed on any non-InvalidParametersException failure, gradually depleting the bucket and causing legitimate records to be missing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7481bab0-e8ea-4491-9a3f-edda795549dd?mode=deep",
+    "timestamp": "2026-05-01 22:40:55.516362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that scaleGas() uses Math.floorDiv which always rounds down, meaning a request with gas=19999 consumes only 1 token (same as gas=10001), allowing users to submit requests with nearly double the gas for the same throttle cost, causing the mirror node to process more gas than the throttle intends and exporting incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3828c866-1cc6-4c51-a579-5cc234298ae3?mode=deep",
+    "timestamp": "2026-05-01 22:41:08.328901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that the request filter loop in throttle() does not break after the first matching filter throws a ThrottleException, meaning the exception propagates immediately but gasLimitBucket tokens are already consumed, and by crafting requests that match early REJECT filters, the attacker can drain gasLimitBucket tokens without any actual EVM execution, causing missing records for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_344e0f7d-b4b0-4c74-a9ef-3af908e9218b?mode=deep",
+    "timestamp": "2026-05-01 22:41:21.345649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that the LOG action in action() calls log.info('{}', request) which invokes ContractCallRequest.toString() on the full request object, and if the request contains a very large DATA field, this causes excessive memory allocation during string formatting, potentially causing OutOfMemoryError that disrupts record export to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_10136d8f-e5f3-4543-b653-14eb84b01411?mode=deep",
+    "timestamp": "2026-05-01 22:41:35.033249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that the BLOCK FilterField uses ContractCallRequest::getBlock which may return a BlockType enum or string, and by setting the block field to a value that matches a REJECT filter expression, cause historical block queries to be rejected and their records to be missing from the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_873038ee-fe01-4599-ac93-73c6e113f252?mode=deep",
+    "timestamp": "2026-05-01 22:41:49.902388",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/throttle/ThrottleManagerImpl.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: throttle()] Can an unprivileged external user exploit the fact that throttle() consumes from rateLimitBucket and gasLimitBucket atomically in sequence but not as a single atomic transaction, creating a TOCTOU window where rateLimitBucket is consumed but gasLimitBucket fails, causing the rate limit to be permanently decremented without any corresponding gas consumption, starving legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d758dd87-eb79-4779-8c2c-888dd5ab3142?mode=deep",
+    "timestamp": "2026-05-01 22:42:03.865540",
+    "report_generated": false
   }
 ]
