@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidAccount()] Can an unprivileged external user trigger a network partition by flooding concurrent requests to any endpoint that calls isValidAccount(), causing the global pool to exhaust all connectionTimeoutMillis slots, so that every subsequent isValidAccount() call throws DbError instead of returning a boolean, resulting in a complete denial-of-service for all account-validation-dependent endpoints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_307fd9ac-8255-45fc-8481-f921cd5ded06?mode=deep",
+    "timestamp": "2026-05-01 21:30:43.139064",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidAccount()] Can an unprivileged external user exploit a network partition where the DB is unreachable, causing isValidAccount() to throw DbError rather than return false, so that callers which expect a boolean and do not catch DbError crash their request handler, leading to unhandled promise rejection and service unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53a2ff29-9bf2-4538-8db9-06a10eda5fb6?mode=deep",
+    "timestamp": "2026-05-01 21:30:55.266618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidAccount()] Can an unprivileged external user exploit a partial network partition where the DB returns 0 rows for a valid account (due to read replica lag or split-brain), causing isValidAccount() to return false for a legitimately existing account, so that downstream authorization checks incorrectly deny access to valid account resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca5f52b7-05b2-4eff-b3e2-cfd1a5f4887a?mode=deep",
+    "timestamp": "2026-05-01 21:31:07.607964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidAccount()] Can an unprivileged external user exploit a network partition that causes getSingleRow() to return null when rows.length > 1 (due to duplicate rows from split-brain replication), causing isValidAccount() to return false for a valid account that has duplicate DB entries, leading to incorrect denial of service for that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6509fdb-eeb4-430d-96a9-c3e4f5c40830?mode=deep",
+    "timestamp": "2026-05-01 21:31:20.274728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit a network partition where the DB returns 0 rows for a valid alias (due to replica lag), causing getAccountFromAlias() to return null silently, so that getAccountIdFromAlias() with requireResult=false returns null and downstream callers treat a valid account as non-existent, bypassing account-existence checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cf3b164-5179-485c-971f-56718b06c39e?mode=deep",
+    "timestamp": "2026-05-01 21:31:33.528769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit a network partition that causes the entity table to return duplicate rows for a single alias (split-brain write amplification), triggering the rows.length > 1 branch in getAccountFromAlias(), which throws a generic Error('Multiple alive entities matching alias') and logs internal DB state, causing information disclosure of internal database inconsistency to error monitoring systems accessible to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a70a4c63-9c44-42f5-917b-c4929526cf20?mode=deep",
+    "timestamp": "2026-05-01 21:31:47.495281",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountFromAlias()] Can an unprivileged external user send a high volume of alias-lookup requests during a network partition, causing getAccountFromAlias() to queue DB connections until connectionTimeoutMillis is exceeded for every slot in the global pool, resulting in sustained denial of service that persists even after the partition heals because the pool does not drain queued requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05bf4ec2-3658-4ad6-89fa-1750c137b8f8?mode=deep",
+    "timestamp": "2026-05-01 21:32:00.486520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit a network partition where the DB connection is established but the query hangs indefinitely (no statement_timeout enforced at the entityService layer), causing getAccountFromAlias() to hold a pool connection open until the pool is exhausted, denying service to all other concurrent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_453a2055-ec54-40aa-9850-2c2f7d040d6b?mode=deep",
+    "timestamp": "2026-05-01 21:32:16.714906",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountIdFromAlias()] Can an unprivileged external user exploit a network partition that causes getAccountFromAlias() to return null (0 rows from partitioned DB), and since requireResult defaults to true, getAccountIdFromAlias() throws NotFoundError('No account with a matching alias found'), causing the caller to treat a valid account as not found and return a 404 to the user, effectively denying access to legitimate account data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_831e6431-a98d-4d55-918c-30603aa68295?mode=deep",
+    "timestamp": "2026-05-01 21:32:29.940810",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountIdFromAlias()] Can an unprivileged external user exploit a network partition where requireResult=false is used by a caller (e.g., balances.js parseAccountIdQueryParam), causing getAccountIdFromAlias() to silently return null instead of throwing, so that the caller proceeds with a null account ID and constructs a SQL query with a null parameter, potentially returning all accounts or causing a SQL error that leaks query structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27ad3b91-b3a6-4fd2-81dc-40d6a40c5721?mode=deep",
+    "timestamp": "2026-05-01 21:32:42.714350",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user exploit a network partition where the DB returns 0 rows for a valid EVM address (replica lag), causing getEntityIdFromEvmAddress() with requireResult=true to throw NotFoundError(), so that a valid contract/account lookup returns 404, denying legitimate users access to their contract data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d3515fa-8a34-4957-a639-05076119ae35?mode=deep",
+    "timestamp": "2026-05-01 21:32:56.959664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user exploit a network partition that causes split-brain replication to produce duplicate EVM address rows, triggering the rows.length > 1 branch in getEntityIdFromEvmAddress(), which throws a generic Error('Multiple alive entities matching evm address') and logs the entityId object, causing information disclosure of internal entity state through error logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1827833c-1c9b-4734-83ac-432c89ec3950?mode=deep",
+    "timestamp": "2026-05-01 21:33:11.784339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user exploit the inconsistency between entityFromEvmAddressQuery (uses 'deleted <> true' without COALESCE) and entityFromAliasQuery (uses 'coalesce(deleted, false) <> true'), so that during a network partition where deleted column values become NULL due to incomplete writes, getEntityIdFromEvmAddress() excludes entities with NULL deleted (treating them as deleted) while getAccountFromAlias() includes them, creating an exploitable inconsistency in entity resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e110d395-40d6-490c-b5c1-ec5bfe6a96b3?mode=deep",
+    "timestamp": "2026-05-01 21:33:25.087633",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user craft a request using an EVM address that maps to an entity where the deleted column is NULL (possible during a network partition that interrupted a delete operation), causing entityFromEvmAddressQuery to exclude the entity (deleted <> true fails for NULL), while entityFromAliasQuery would include it via COALESCE, leading to inconsistent entity resolution between alias and EVM address lookup paths?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b107e3c4-6b89-4e3f-acef-8fde39fb1d15?mode=deep",
+    "timestamp": "2026-05-01 21:33:38.852732",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user exploit a network partition where getEntityIdFromEvmAddress() with requireResult=false returns null, and the caller (getEncodedId()) propagates null as the resolved entity ID, causing downstream SQL queries to use null as a parameter and return unintended result sets or bypass entity-scoped access controls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b279874c-e496-4c60-90cc-d22da9d24f6a?mode=deep",
+    "timestamp": "2026-05-01 21:33:52.360629",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit a network partition that causes getEntityIdFromEvmAddress() to throw DbError, which is caught by getEncodedId()'s catch block only for InvalidArgumentError and rethrown for all others, causing the raw DbError (containing DB host, query details, or error codes) to propagate to the HTTP response handler and potentially leak internal infrastructure details in the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5df5d55-cdf7-4e50-99d6-f9bd46e0cf57?mode=deep",
+    "timestamp": "2026-05-01 21:34:06.003841",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit a network partition that causes getAccountIdFromAlias() to throw DbError, which bypasses the InvalidArgumentError catch in getEncodedId() and propagates as an unhandled DbError, causing the HTTP framework to return a 500 with internal error details rather than a sanitized error response, leaking DB connection information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_149b447b-da1e-4716-8a2f-4ddd48b54d59?mode=deep",
+    "timestamp": "2026-05-01 21:34:20.772270",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user send concurrent EVM address lookup requests during a network partition, causing getEncodedId() to call getEntityIdFromEvmAddress() which holds DB connections open until statement_timeout, exhausting the pool and causing all subsequent getEncodedId() calls to fail with connection timeout errors, resulting in complete API unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_782362a0-54d1-49e2-84a1-628c903522b4?mode=deep",
+    "timestamp": "2026-05-01 21:34:34.058504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit a network partition where the DB is intermittently available, causing getEncodedId() to return inconsistent results for the same input across concurrent requests (one returns a valid ID, another returns null or throws), leading to race conditions in callers that cache or act on the result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e6fcb45-52e3-4876-a2eb-e56e02ff7b6d?mode=deep",
+    "timestamp": "2026-05-01 21:34:48.491149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit the fact that getEncodedId() with requireResult=false returns null when the DB is partitioned (alias/EVM address not found), and a caller uses this null to skip further processing (e.g., returning empty results), effectively causing the attacker to receive a successful empty response instead of an error, masking the partition from monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99b84d0c-3775-4555-a122-3e312d43d7dc?mode=deep",
+    "timestamp": "2026-05-01 21:35:03.002011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit a network partition that causes the entityId LRU cache (in entityId.js) to cache a null or incorrect encoded ID for an EVM address, so that after the partition heals, subsequent requests for the same EVM address continue to receive stale null/incorrect results until the cache entry expires (maxAge), causing prolonged denial of service for that entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d93f64c3-02e2-4202-b42e-f7314a9d056c?mode=deep",
+    "timestamp": "2026-05-01 21:35:16.344764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEncodedId()] Can an unprivileged external user exploit a network partition to cause getEncodedId() to throw DbError for alias lookups, and since the error is rethrown without wrapping, the error message from the DB (e.g., 'connection refused to host X.X.X.X') is exposed in the HTTP 500 response body, leaking internal network topology?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1692a96-d499-4ca5-9a26-b1d1a342fb38?mode=deep",
+    "timestamp": "2026-05-01 21:35:30.520546",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getAccountFromAlias()] Can an unprivileged external user exploit a network partition where the DB connection is dropped mid-query, causing queryQuietly to catch the error and throw DbError, which propagates through getAccountFromAlias() -> getAccountIdFromAlias() -> getEncodedId() without any retry or circuit-breaker logic, so that a single partition event causes 100% failure rate for all alias-based lookups with no graceful degradation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17508e40-7565-4ff5-a833-e920f378e731?mode=deep",
+    "timestamp": "2026-05-01 21:35:44.118391",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidAccount()] Can an unprivileged external user exploit a network partition where getSingleRow() returns null because rows.length > 1 (split-brain duplicate), causing isValidAccount() to return false for a valid account, and a caller that uses isValidAccount() as a guard before performing a write operation skips the write, causing silent data loss or state corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ba352f7-7715-410d-8cbc-14643b0a4bed?mode=deep",
+    "timestamp": "2026-05-01 21:35:57.418802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user exploit a network partition that causes the DB to return a partial result set (1 row instead of the correct 0 rows for a non-existent EVM address), causing getEntityIdFromEvmAddress() to return a wrong entity ID, so that the caller resolves the attacker's crafted EVM address to a legitimate entity's ID, enabling unauthorized access to that entity's data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_045fe21e-fc57-483e-ad2e-0a847d454a33?mode=deep",
+    "timestamp": "2026-05-01 21:36:10.624145",
+    "report_generated": false
+  }
+]
