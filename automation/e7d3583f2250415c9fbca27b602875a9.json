@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to an empty string or whitespace, bypassing the `strings.TrimSpace` normalization in `loadConfig()` to reach the `default` case in `newClient()` which returns an error, causing `log.Fatalf` to terminate the pinger process entirely and halt all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84f44ef6-0bc1-495a-a3e6-44cb290eccdf?mode=deep",
+    "timestamp": "2026-05-01 23:13:10.669757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_OPERATOR_KEY` to the default hardcoded key (`302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137`) which is publicly known, allowing the attacker to sign competing transactions from the same operator account, causing nonce/sequence conflicts that make the pinger's transactions fail with `TRANSACTION_EXPIRED` or duplicate transaction errors, halting confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c57ef056-a858-4418-b373-cca677d7eafb?mode=deep",
+    "timestamp": "2026-05-01 23:13:22.459532",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user who knows the default operator key (hardcoded in `config.go`) drain the operator account balance to zero by submitting their own transfers, causing every `Execute(client)` call in `submitWithRetry()` to fail with `INSUFFICIENT_ACCOUNT_BALANCE`, exhausting all retries and permanently halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7573f06d-a065-4aeb-9469-c08aa261a5a4?mode=deep",
+    "timestamp": "2026-05-01 23:13:34.795833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user exploit the publicly exposed default operator key to submit a `CryptoDelete` transaction against the operator account (`0.0.2`), causing all subsequent `Execute(client)` calls in `submitWithRetry()` to fail with `ACCOUNT_DELETED`, permanently halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dff6d08d-fd38-4f15-829d-8f28617c8dfc?mode=deep",
+    "timestamp": "2026-05-01 23:13:47.041406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user exploit the publicly exposed default operator key to freeze the operator account, causing all subsequent `Execute(client)` calls in `submitWithRetry()` to fail with `ACCOUNT_FROZEN_FOR_TOKEN` or similar, exhausting all retries and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_163fec94-0485-4a8f-b24f-3685bd4ee574?mode=deep",
+    "timestamp": "2026-05-01 23:13:59.649979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_MAX_RETRIES` to `0` so that `attempts = 1` and `submitWithRetry()` makes exactly one attempt with no retries, meaning any transient network error causes immediate failure and the pinger reports the network as unable to confirm transactions even during brief, recoverable outages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d32ef4d-cf83-466d-a6a5-fde41d7665ba?mode=deep",
+    "timestamp": "2026-05-01 23:14:12.280678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_INTERVAL` to a very large value (e.g., `24h`) so that the ticker fires only once per day, causing the pinger to miss detecting real transaction confirmation failures for extended periods, effectively masking a total network shutdown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa35343c-51d7-4bb5-a153-29826899e02e?mode=deep",
+    "timestamp": "2026-05-01 23:14:25.563612",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and `HIERO_MIRROR_PINGER_REST` to a URL that returns HTTP 200 with an empty `nodes` array, causing `fetchMirrorNodeNetwork()` to return `no usable service_endpoints found`, `buildNetworkFromMirrorNodes()` to fail, `newClient()` to return an error, and `log.Fatalf` to terminate the pinger, halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34a75b8a-e083-4157-92c2-8515d0f13662?mode=deep",
+    "timestamp": "2026-05-01 23:14:40.175257",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response where all `service_endpoints` have `port: 0`, causing `fetchMirrorNodeNetwork()` to skip all endpoints (due to `ep.Port == 0` check), return an empty network map, and crash the pinger with `no usable service_endpoints found`, halting all transaction confirmations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca0cbc8e-f9a5-40db-ad02-bc0408eac44e?mode=deep",
+    "timestamp": "2026-05-01 23:14:52.755994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response where all `service_endpoints` have empty `domain_name` and empty `ip_address_v4`, causing `fetchMirrorNodeNetwork()` to skip all endpoints and return `no usable service_endpoints found`, crashing the pinger and halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_106863f7-d45e-4acf-854b-34301ccef120?mode=deep",
+    "timestamp": "2026-05-01 23:15:05.536718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with `node_account_id` values that all fail `hiero.AccountIDFromString()` parsing (e.g., `invalid`), causing all nodes to be skipped, the network map to be empty, and the pinger to crash with `no usable service_endpoints found`, halting all transaction confirmations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_127a1ba9-537c-42d1-b956-af114c688507?mode=deep",
+    "timestamp": "2026-05-01 23:15:17.867533",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with a malformed JSON body (e.g., truncated), causing `json.NewDecoder(resp.Body).Decode(&payload)` to return an error, `fetchMirrorNodeNetwork()` to return `retry=false`, `buildNetworkFromMirrorNodes()` to exhaust all retries immediately, and the pinger to crash, halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c13b211-f7aa-48f8-a93e-199212a2cc1f?mode=deep",
+    "timestamp": "2026-05-01 23:15:30.519330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response that returns HTTP 429 (Too Many Requests) on every request, causing `fetchMirrorNodeNetwork()` to set `retry=true` and `buildNetworkFromMirrorNodes()` to exhaust all `mirrorNodeClientMaxRetries` attempts, crashing the pinger and halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3f0ed85-0b9a-4a1b-9402-90db57059ab9?mode=deep",
+    "timestamp": "2026-05-01 23:15:43.279877",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_TIMEOUT` to `1ns` so that every HTTP request in `fetchMirrorNodeNetwork()` times out immediately, causing `buildNetworkFromMirrorNodes()` to fail on all retries, crashing the pinger with a fatal error and halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33a6dac7-c6e9-4cfa-908d-6ca957a27b8d?mode=deep",
+    "timestamp": "2026-05-01 23:15:56.426299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_TIMEOUT` to an extremely large value (e.g., `8760h`) so that a slow mirror REST server causes `fetchMirrorNodeNetwork()` to block for hours, preventing `newClient()` from completing and the pinger from ever starting transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_edb57f3d-333b-4654-818e-4297fe86fa69?mode=deep",
+    "timestamp": "2026-05-01 23:16:08.868188",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_MAX_RETRIES` to `0` so that `buildNetworkFromMirrorNodes()` makes only one attempt to fetch node topology, and any transient mirror REST error causes the pinger to crash immediately, halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cd3bc61c-3296-462b-9ca3-fda9649c6a56?mode=deep",
+    "timestamp": "2026-05-01 23:16:21.842274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with `service_endpoints` containing a `domain_name` with embedded null bytes or control characters, causing `net.JoinHostPort` to produce an invalid address that the Hiero SDK cannot connect to, making all `Execute(client)` calls fail and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3306ea0c-0481-4f83-927f-740d37a8fdcb?mode=deep",
+    "timestamp": "2026-05-01 23:16:35.005306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with `ip_address_v4` set to a broadcast address (e.g., `255.255.255.255`) or multicast address, causing `net.JoinHostPort` to produce an address that the SDK attempts to connect to but always fails, making all `Execute(client)` calls fail and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea5a7df5-b3fc-497b-aaac-c85aaf68aaaa?mode=deep",
+    "timestamp": "2026-05-01 23:16:47.493198",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with `port` values set to `65535` or other reserved/blocked ports, causing `net.JoinHostPort` to produce addresses that are always connection-refused, making all `Execute(client)` calls fail and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e52e859-4945-441f-9388-1c23a686bff6?mode=deep",
+    "timestamp": "2026-05-01 23:17:00.546566",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with `domain_name` set to an attacker-controlled domain that resolves to `127.0.0.1`, causing the pinger to send all transactions to localhost (where no consensus node runs), making all `Execute(client)` calls fail and halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_502b2564-a55c-488d-a680-1f765f471251?mode=deep",
+    "timestamp": "2026-05-01 23:17:13.371293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with an extremely large `nodes` array (e.g., 1 million entries), causing `fetchMirrorNodeNetwork()` to allocate a massive `network` map, exhausting memory and crashing the pinger, halting all transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa41a28e-4c9e-4458-9488-efc54338cc02?mode=deep",
+    "timestamp": "2026-05-01 23:17:25.956330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: submitWithRetry()] Can an unprivileged external user set `HIERO_MIRROR_PINGER_NETWORK` to `other` and serve a mirror REST response with a deeply nested or extremely large JSON body, causing `json.NewDecoder(resp.Body).Decode(&payload)` to consume excessive CPU/memory, causing the pinger to become unresponsive and halt transaction submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d24b3a67-42c3-4753-8c38-a79d4a5f1683?mode=deep",
+    "timestamp": "2026-05-01 23:17:39.471559",
+    "report_generated": false
+  }
+]
