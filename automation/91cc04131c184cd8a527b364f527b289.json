@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: router.getExt('/:hashOrNumber', BlockController.getByHashOrNumber)] Can an unprivileged external user supply a crafted `:hashOrNumber` path parameter that passes `validateHashOrNumber()` but resolves to a block whose `consensus_end` timestamp falls exactly on a staking-period boundary, causing the mirror node to report a stale or incorrect `pending_reward` for accounts whose reward eligibility is evaluated against that boundary, leading to theft of unpaid staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f96840a-c406-45f8-a1e3-df340984ed0a?mode=deep",
+    "timestamp": "2026-05-01 16:56:46.604959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getByHashOrNumber()] Can an unprivileged external user submit a 64-character hex hash (without `0x` prefix) to `getByHashOrNumber()` that, after the `replace('0x', '')` strip in `validateHashOrNumber()`, matches a different block than intended, causing the returned block's `consensus_end` timestamp to be used in downstream staking reward period calculations, resulting in incorrect reward attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17daaa61-95a4-4ad0-89c3-5b2753fe0698?mode=deep",
+    "timestamp": "2026-05-01 16:56:58.428831",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: validateHashOrNumber()] Can an unprivileged external user pass a value that satisfies both `utils.isValidEthHashOrHederaHash()` and `utils.isPositiveLong()` simultaneously, causing `validateHashOrNumber()` to always prefer the hash branch and skip the number branch, so that a numeric block index that corresponds to a staking-period-end block is never directly reachable, hiding reward-relevant block data from the API consumer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ba23fd1-0fd0-4a7a-8aca-789cc92dd165?mode=deep",
+    "timestamp": "2026-05-01 16:57:10.731101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getBlocks()] Can an unprivileged external user craft a `block.number` query parameter with a range operator (e.g., `block.number=gt:X`) that causes `extractSqlFromBlockFilters()` to set `orderBy` to `RecordFile.INDEX` instead of `RecordFile.CONSENSUS_END`, shifting the ordering so that blocks at staking-period boundaries are excluded from the result set, causing the caller to miss the block that triggered a staking reward payout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b09b59c-a745-43ec-8b5e-a1c8cf296d5c?mode=deep",
+    "timestamp": "2026-05-01 16:57:23.458156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.extractOrderByFromFilters()] Can an unprivileged external user send both a `block.number` and a `timestamp` filter simultaneously so that `extractOrderByFromFilters()` picks `RecordFile.INDEX` (because `block.number` appears first in the filter array), while the `timestamp` condition silently filters out the staking-period-boundary block, causing the API to return an incomplete view of blocks that contain staking reward transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1f23f7d-6582-4654-94dd-98363416d911?mode=deep",
+    "timestamp": "2026-05-01 16:57:37.118674",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.extractLimitFromFilters()] Can an unprivileged external user supply a `limit` value exactly equal to `maxLimit + 1` so that `extractLimitFromFilters()` silently falls back to `defaultLimit` (25), causing a paginated block listing to omit blocks near a staking-period boundary that would have appeared within the requested larger window, preventing detection of unpaid reward transfers in those blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_393bf79e-0f54-4f85-a266-e55152b8895e?mode=deep",
+    "timestamp": "2026-05-01 16:57:50.000272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.generateNextLink()] Can an unprivileged external user exploit `generateNextLink()` by observing that the `next` link is built from `last(blocks).index` (the last block's index), and then craft a follow-up request using that index to skip exactly the block containing a staking reward payout, causing the paginated traversal to silently omit the reward-bearing block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f8a8af5-9430-4ef6-a7ba-701369882194?mode=deep",
+    "timestamp": "2026-05-01 16:58:02.879945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.extractSqlFromBlockFilters()] Can an unprivileged external user send an empty filters array to `extractSqlFromBlockFilters()` so that the early-return path (`filters.length === 0`) is triggered, bypassing all `whereQuery` construction and returning all blocks without any timestamp constraint, allowing the attacker to enumerate all blocks and identify the exact `consensus_end` timestamps of staking-period-boundary blocks to time a reward-theft transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b250da6-e9e6-4e11-8481-92674592f8dc?mode=deep",
+    "timestamp": "2026-05-01 16:58:15.553466",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: router.getExt('/', BlockController.getBlocks)] Can an unprivileged external user issue repeated `GET /api/v1/blocks` requests with `order=asc` and incrementing `block.number=gt:X` to enumerate all blocks in order, identify the exact block whose `consensus_end` falls at a staking-period boundary, and use that timestamp to predict when unpaid staking rewards will be distributed, enabling front-running of reward claims?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a79445b-0b6c-46f9-8687-376e0e940ebf?mode=deep",
+    "timestamp": "2026-05-01 16:58:28.778305",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getBlocks()] Can an unprivileged external user supply a `timestamp=lt:T` filter where `T` is just before a staking-period boundary, causing `extractSqlFromBlockFilters()` to emit a `consensus_end < T` WHERE clause that excludes the reward-triggering block, so that the API response omits the block containing the staking reward transfer and the attacker can claim the reward was never paid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5533263c-b502-4ba0-a4d3-bb6882cfcf63?mode=deep",
+    "timestamp": "2026-05-01 16:58:42.543997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.extractOrderFromFilters()] Can an unprivileged external user send multiple `order` parameters in the query string so that `findLast(filters, {key: filterKeys.ORDER})` picks the last one, overriding an earlier `order=asc` with `order=desc`, causing the block listing to reverse order and place the staking-period-boundary block at the end of the result set where it may be cut off by the limit, hiding the reward-triggering block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9f8e868-772c-45be-8258-51cab6dbae11?mode=deep",
+    "timestamp": "2026-05-01 16:58:54.956892",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extendExpress wrap()] Can an unprivileged external user trigger an async exception inside `BlockController.getByHashOrNumber()` that is caught by the `wrap()` function in `extendExpress.js`, causing the error handler to call `next(err)` instead of sending a response, and if the error handler leaks block-level staking reward data in the error payload, the attacker gains information about reward-bearing blocks without a valid response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2070899-0fbf-4f0f-bf84-343b422b6c3b?mode=deep",
+    "timestamp": "2026-05-01 16:59:07.686255",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: extendExpress _once()] Can an unprivileged external user craft a request that causes the `_once()` wrapper around `next()` in `extendExpress.js` to be called twice (once from the async handler and once from the error path), causing a double-invocation of the next middleware that processes staking reward data, potentially leading to duplicate reward transfer records being surfaced in the API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb42377e-aced-4fde-aa16-10284cf36a48?mode=deep",
+    "timestamp": "2026-05-01 16:59:20.521724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getByHashOrNumber()] Can an unprivileged external user pass a block hash with mixed-case hex characters (e.g., `FF90773...` vs `ff90773...`) to `getByHashOrNumber()`, and since `validateHashOrNumber()` calls `replace('0x', '')` but does not normalize case, cause a case-sensitive database lookup to miss the block, returning a 404 that hides the existence of a staking-reward-bearing block at that hash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7524a225-1ebf-483d-937b-b54582432f1a?mode=deep",
+    "timestamp": "2026-05-01 16:59:33.660335",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getBlocks()] Can an unprivileged external user send a `block.number` filter with operator `=` (equality) targeting a specific block index that corresponds to a staking-period-end block, and by observing whether the response includes that block or not, infer whether a staking reward payout occurred at that block without being entitled to that information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_050e8166-b017-4036-a09b-5d3de07b264c?mode=deep",
+    "timestamp": "2026-05-01 16:59:47.022619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: StakingRewardTransferService.getRewardsQuery()] Can an unprivileged external user, by querying `/api/v1/accounts/{id}/rewards` with crafted `timestamp` IN-list parameters, cause `getRewardsQuery()` to build a SQL query with an `IN` clause containing attacker-controlled timestamp values that match blocks identified via the `/api/v1/blocks` endpoint, allowing the attacker to enumerate exact reward amounts paid at specific blocks and identify accounts with large uncollected rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5499e858-4160-48b1-b19b-ea2932c0fed9?mode=deep",
+    "timestamp": "2026-05-01 16:59:59.408659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: StakingRewardTransferService.listStakingRewardsByAccountIdQuery] Can an unprivileged external user exploit the fact that `listStakingRewardsByAccountIdQuery` uses `$1` for `account_id` and `$2` for `limit`, and by manipulating the `conditions` array passed from `extractStakingRewardsQuery()`, inject additional SQL fragments via the `conditions.join(' and ')` path in `getRewardsQuery()`, bypassing the account-scoping filter and accessing staking reward records for other accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0dd7b50-88e4-4e65-b7dd-2ef530ea7339?mode=deep",
+    "timestamp": "2026-05-01 17:00:12.197351",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: AccountController.extractStakingRewardsQuery()] Can an unprivileged external user send a `timestamp` query parameter with operator `ne` (not-equals) to `listStakingRewardsByAccountId()`, and since `extractStakingRewardsQuery()` throws `InvalidArgumentError` for `ne` on timestamp, observe the error response to confirm that a specific timestamp has a staking reward record, leaking information about when rewards were paid to a target account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32a212d1-2c7f-4826-8745-749d1e16824a?mode=deep",
+    "timestamp": "2026-05-01 17:00:25.110389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getBlocks()] Can an unprivileged external user send a `timestamp=gte:T1&timestamp=lte:T2` range that precisely brackets a staking-period boundary, causing `extractSqlFromBlockFilters()` to emit two WHERE conditions that together isolate exactly the block containing the staking reward transfer, and then use the returned block's `count` field to infer how many transactions (including reward payouts) occurred in that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a7c07a7-79fc-4a41-8fe3-28d724af75ed?mode=deep",
+    "timestamp": "2026-05-01 17:00:38.270552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.generateNextLink()] Can an unprivileged external user observe that `generateNextLink()` uses `last(blocks).index` as the cursor value in the `next` pagination link, and by comparing consecutive page cursors, calculate the exact block index gap at staking-period boundaries, revealing which blocks were skipped (e.g., due to empty blocks) and inferring the timing of unpaid reward distributions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fa485e0-e182-4797-b313-996d8df3b11b?mode=deep",
+    "timestamp": "2026-05-01 17:00:52.340625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.getByHashOrNumber()] Can an unprivileged external user pass a numeric string `0` to `getByHashOrNumber()`, which passes `utils.isPositiveLong(hashOrNumber, true)` (with `allowZero=true`), causing a lookup of block 0 (genesis block), and if the genesis block's `consensus_end` timestamp is used as a reference point in staking reward period calculations, the attacker can derive the exact staking period schedule and predict future reward distribution blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfd514c1-6139-48f7-8ca2-ef4badd137fe?mode=deep",
+    "timestamp": "2026-05-01 17:01:05.405296",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: StakingRewardTransferViewModel constructor()] Can an unprivileged external user, by querying the rewards endpoint for account `0.0.800` (the staking reward account itself), observe that `StakingRewardTransferViewModel` exposes `account_id`, `amount`, and `timestamp` fields, and use the `amount` field to calculate the total unpaid rewards held in account 800, enabling the attacker to identify high-value reward periods to target?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62bc3b58-e075-4d16-a22c-dde1f051cda5?mode=deep",
+    "timestamp": "2026-05-01 17:01:17.919925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStakingRewardTimestamps()] Can an unprivileged external user craft a transaction query that returns transactions where `crypto_transfer_list` contains a transfer from `EntityId.systemEntity.stakingRewardAccount` (account 800), causing `getStakingRewardTimestamps()` to include those timestamps in the staking reward lookup, and then cross-reference those timestamps with block data from `/api/v1/blocks` to map exact reward payouts to specific blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d07d93df-a2a7-453c-bc79-d39013d72698?mode=deep",
+    "timestamp": "2026-05-01 17:01:30.839618",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getStakingRewardTransferList()] Can an unprivileged external user, by querying the transactions endpoint with a large number of transactions that all involve account 800, cause `getStakingRewardTransferList()` to build a SQL `IN` clause with a very large number of timestamp parameters, potentially causing a query plan change that leaks timing information about which timestamps have staking reward records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e1137f7-e13c-426c-b18d-8dae2bb08f68?mode=deep",
+    "timestamp": "2026-05-01 17:01:43.570750",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/routes/blockRoute.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: BlockController.extractSqlFromBlockFilters()] Can an unprivileged external user send duplicate `block.number` filter parameters (e.g., `block.number=gt:10&block.number=gt:20`) to `extractSqlFromBlockFilters()`, causing the `whereQuery` array to contain two conditions for `index`, and if the database query planner uses the less restrictive condition, the attacker receives more blocks than intended, including blocks at staking-period boundaries that should have been filtered out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50a84368-1763-4a4a-8464-df8ffe163da0?mode=deep",
+    "timestamp": "2026-05-01 17:01:56.431125",
+    "report_generated": false
+  }
+]
