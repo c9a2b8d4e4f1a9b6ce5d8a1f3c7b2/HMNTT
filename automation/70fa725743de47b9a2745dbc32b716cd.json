@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the hardcoded `sslmode=disable` in `GetDsn()` to perform a network-level MITM attack on the unencrypted Postgres connection, intercepting balance query results returned to the Rosetta API and causing the node to report incorrect fund balances to downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86be8b56-08b3-42b5-9c76-627836f00c1e?mode=deep",
+    "timestamp": "2026-05-01 15:07:37.000431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user on the same network segment exploit `sslmode=disable` to inject forged SQL responses into the plaintext DB stream, causing `RetrieveBalanceAtBlock` to return a manipulated balance that leads an exchange or wallet to credit funds that do not exist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d765d48-686c-48f3-a828-33e4cf07b22d?mode=deep",
+    "timestamp": "2026-05-01 15:07:48.863628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the absence of TLS (`sslmode=disable` in `GetDsn()`) to sniff the Postgres wire protocol and extract the plaintext `Password` field from the DSN, then use those credentials to directly query or modify the mirror node database and alter transaction records affecting fund accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45b6d8d5-be40-4cc1-9d1b-204d01b9cd9a?mode=deep",
+    "timestamp": "2026-05-01 15:08:01.196680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that `gorm.Open` failure only calls `log.Warn(err)` without returning nil, allowing execution to continue with a potentially nil or invalid `db` object, causing a nil-pointer panic that crashes the Rosetta node and prevents legitimate fund transfer transactions from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4dddbb9a-cfcc-440a-9168-e5550e4e6210?mode=deep",
+    "timestamp": "2026-05-01 15:08:13.764452",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user trigger repeated connection failures to `gorm.Open` (e.g., via network disruption) such that `db` is nil when `db.DB()` is called on line 25, causing a panic that permanently halts the Rosetta service and blocks all fund-related API operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a01b9309-0619-4ec6-a61d-af0f97349b69?mode=deep",
+    "timestamp": "2026-05-01 15:08:26.771343",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the missing nil-guard after `gorm.Open` failure — where `log.Warn(err)` is called but execution continues — to cause `sqlDb.SetMaxIdleConns` to be called on a nil pointer, resulting in a panic that causes the node to lose its database connection and fail to record or serve fund balance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8dd806dc-1a38-4f5e-888a-1f6157779dbe?mode=deep",
+    "timestamp": "2026-05-01 15:08:41.286041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user supply a context with `statementTimeout <= 0` precondition (by triggering the code path where `d.statementTimeout <= 0`) to bypass all query timeouts, enabling unbounded long-running queries that lock database rows involved in balance calculations and cause fund balance reads to stall indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab9b3571-f55a-4ca1-895a-9fb3785645d4?mode=deep",
+    "timestamp": "2026-05-01 15:08:54.685174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the `statementTimeout <= 0` bypass in `GetDbWithContext()` — where `noop` is returned as the cancel function — to hold open a database connection indefinitely, exhausting the connection pool and denying service to legitimate balance-check requests that underpin fund transfer decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1649216-7bd2-4f3f-9b0a-f53f4b22fc0d?mode=deep",
+    "timestamp": "2026-05-01 15:09:08.101762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user craft API requests that trigger the `ctx == nil` branch in `GetDbWithContext()`, causing a `context.Background()` to be used without any deadline, allowing their query to run without timeout and monopolize a database connection needed for fund-critical balance lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56fa6d6f-39a4-42f0-aa39-87dd90f7f324?mode=deep",
+    "timestamp": "2026-05-01 15:09:21.032957",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user flood the Rosetta API with concurrent requests that each enter the `statementTimeout > 0` path in `GetDbWithContext()`, creating thousands of child contexts via `context.WithTimeout`, exhausting goroutine/memory resources, and causing the node to crash and drop in-flight fund balance queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a48741cc-8efb-4ba4-bf4a-b2e55874a0d6?mode=deep",
+    "timestamp": "2026-05-01 15:09:33.452475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDb()] Can an unprivileged external user exploit any code path that calls `GetDb()` — which returns the raw `*gorm.DB` without any access control or query restriction — to issue unrestricted database queries that read sensitive balance or transaction data, enabling fund theft by reconstructing private account states?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2129060-eb41-4bf4-8860-4c659f3ea5ba?mode=deep",
+    "timestamp": "2026-05-01 15:09:46.297645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDb()] Can an unprivileged external user exploit the fact that `GetDb()` returns the underlying `*gorm.DB` with no read/write restrictions, allowing any caller in the codebase to execute arbitrary SQL that modifies balance records, leading to direct loss of funds through corrupted accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e49b488-e19f-462c-8e65-62e94cc86cc1?mode=deep",
+    "timestamp": "2026-05-01 15:09:59.432815",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: NewDbClient()] Can an unprivileged external user exploit the fact that `NewDbClient()` accepts a `statementTimeout int` with no lower-bound validation, allowing a zero or negative value to be passed, disabling all query timeouts and enabling resource exhaustion attacks that block fund-critical database operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae1be63b-9cd5-4536-852b-34d7d3cc273c?mode=deep",
+    "timestamp": "2026-05-01 15:10:12.631327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: NewDbClient()] Can an unprivileged external user exploit the absence of upper-bound validation on `statementTimeout` in `NewDbClient()` to cause an integer overflow when `time.Duration(d.statementTimeout)*time.Second` is computed in `GetDbWithContext()`, resulting in a negative or zero timeout that bypasses query limits on balance-affecting queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fa90c10-302d-418e-9974-c712f330a784?mode=deep",
+    "timestamp": "2026-05-01 15:10:26.011589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the `Pool.MaxOpenConnections` setting applied via `sqlDb.SetMaxOpenConns(dbConfig.Pool.MaxOpenConnections)` — with no validation of the configured value — to trigger a scenario where zero open connections are allowed, causing all balance queries to fail and blocking fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_991d284d-a557-4381-818c-7d4a8e002540?mode=deep",
+    "timestamp": "2026-05-01 15:10:38.395384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the `Pool.MaxIdleConnections` value applied via `sqlDb.SetMaxIdleConns(dbConfig.Pool.MaxIdleConnections)` — with no upper-bound check — to cause connection pool exhaustion by keeping idle connections open, starving active balance-query connections and causing fund-related API calls to time out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2615ce96-393d-44e6-896b-ab4069f43c43?mode=deep",
+    "timestamp": "2026-05-01 15:10:51.094142",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the `Pool.MaxLifetime` value applied via `sqlDb.SetConnMaxLifetime(time.Duration(dbConfig.Pool.MaxLifetime) * time.Minute)` — with no validation — to set an extremely large lifetime, causing stale connections to persist and serve outdated balance data that leads to incorrect fund accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac34e41d-7d17-4cb3-861d-3cc39523e469?mode=deep",
+    "timestamp": "2026-05-01 15:11:03.606868",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDsn()] Can an unprivileged external user exploit the `sslmode=disable` hardcoded in `GetDsn()` to perform an ARP spoofing or DNS poisoning attack on the network path between the Rosetta node and Postgres, redirecting the DB connection to a rogue server that returns fabricated balance data causing fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a24c54ca-3a84-4198-9730-8b0f3342980c?mode=deep",
+    "timestamp": "2026-05-01 15:11:16.261758",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDsn()] Can an unprivileged external user exploit the plaintext DSN construction in `GetDsn()` — `fmt.Sprintf(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df27393b-8406-40a3-806e-0c2868b76eb7?mode=deep",
+    "timestamp": "2026-05-01 15:11:29.527589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that `ConnectToDb()` returns `nil` only when `db.DB()` fails (line 28-29), but not when `gorm.Open` fails, causing the caller to receive a partially-initialized `DbClient` that panics on first use and disrupts all fund-related query processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87090804-3c67-4c27-9d43-9ad0df43fdf4?mode=deep",
+    "timestamp": "2026-05-01 15:11:42.109036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the inconsistent error handling in `ConnectToDb()` — where `gorm.Open` failure logs a warning but continues, while `db.DB()` failure returns nil — to cause a race condition where the node operates with a broken DB handle and serves stale or zero balances for fund queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53eba227-f2ae-41f8-8a35-d5ad65b44e7b?mode=deep",
+    "timestamp": "2026-05-01 15:11:55.268905",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the `noop` cancel function returned when `statementTimeout <= 0` to prevent context cancellation from propagating to the database layer, causing queries that read account balances to continue running after the HTTP request is cancelled, wasting resources and potentially serving stale fund data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4abe9237-ac78-48bf-9118-d79efb2e6fdd?mode=deep",
+    "timestamp": "2026-05-01 15:12:09.016430",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the `context.WithTimeout` call in `GetDbWithContext()` — where the timeout is derived from `d.statementTimeout` with no maximum cap — to trigger a scenario where an extremely large timeout value causes the context to never expire in practice, allowing long-running balance queries to block the connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a598878a-3554-40b4-9151-0fc1d84453c7?mode=deep",
+    "timestamp": "2026-05-01 15:12:23.708745",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the absence of certificate verification in the Postgres connection (enforced by `sslmode=disable`) to perform a TLS downgrade attack, intercepting balance data returned by `RetrieveBalanceAtBlock` and feeding incorrect values to a downstream exchange that credits funds based on the Rosetta API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4ce3989-5677-43dd-bee2-2eddefddd625?mode=deep",
+    "timestamp": "2026-05-01 15:12:38.216679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/db.go -> Scope: Critical: Direct loss of funds'] [Function: ConnectToDb()] Can an unprivileged external user exploit the fact that `ConnectToDb()` does not validate the `dbConfig.Host` value before passing it to `GetDsn()`, allowing a misconfigured or attacker-influenced host value to redirect the DB connection to a rogue Postgres instance that returns manipulated balance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_565618d9-a8ac-4847-90d7-a5b9a7a343b9?mode=deep",
+    "timestamp": "2026-05-01 15:12:50.647375",
+    "report_generated": false
+  }
+]
