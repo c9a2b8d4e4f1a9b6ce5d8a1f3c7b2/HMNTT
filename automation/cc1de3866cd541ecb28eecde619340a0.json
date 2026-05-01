@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user supply a crafted `ownerId` path variable (e.g., another account's numeric ID) to retrieve hooks belonging to a different account, because `getHooks()` performs no ownership/authentication check before calling `hookService.getHooks(hooksRequest)`, causing unauthorized disclosure of another account's submitted transaction hook data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4337bae0-d5e9-4fbe-9a05-250e5d4ff1af?mode=deep",
+    "timestamp": "2026-05-01 16:39:03.220460",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHookStorage()] Can an unprivileged external user enumerate hook storage slots of any arbitrary account by supplying any valid `ownerId` and `hookId` in the path `/api/v1/accounts/{ownerId}/hooks/{hookId}/storage`, since `getHookStorage()` contains no authorization check, causing full read access to on-chain state changes recorded from submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_363d7328-cc0d-4477-ba36-dd13b4be89d1?mode=deep",
+    "timestamp": "2026-05-01 16:39:15.145530",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hooksRequest()] Can an unprivileged external user submit `hook.id=gt:0` combined with `hook.id=lt:9223372036854775807` (Long.MAX_VALUE-1) to force `lowerBound=1` and `upperBound=Long.MAX_VALUE-1` in `hooksRequest()`, effectively dumping all hooks for a target account in a single paginated scan, causing mass disclosure of transaction hook metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fddfdd3f-7541-4a25-b2fc-f47be9eb89c1?mode=deep",
+    "timestamp": "2026-05-01 16:39:27.472498",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hooksRequest()] Can an unprivileged external user submit `MAX_REPEATED_QUERY_PARAMETERS` copies of `hook.id=eq:<id>` for the same hook ID to cause the `TreeSet<Long> hookIds` in `hooksRequest()` to be populated with a single deduplicated value, bypassing any intended rate-limiting on EQ lookups and silently succeeding, causing repeated targeted probing of specific hook IDs without triggering the size validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e6205e5-5c54-4d28-87c2-42caf735a329?mode=deep",
+    "timestamp": "2026-05-01 16:39:40.301570",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply a `timestamp` parameter with `eq:<value>` which is silently rewritten to `lte:<value>` inside `Bound.of()`, causing the historical storage path (`isHistorical()=true`) to be triggered and returning all storage changes up to that timestamp, leaking the full history of submitted transaction state changes that the user may not have intended to query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc7997cf-528e-4158-b564-dd075e6ff784?mode=deep",
+    "timestamp": "2026-05-01 16:39:53.287902",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `timestamp=eq:0` to trigger `Bound.of()` rewriting it to `lte:0`, causing `isHistorical()` to return true and routing the request through `getHookStorageChange()` with a timestamp upper bound of 0, potentially returning genesis-era transaction state changes or causing unexpected query behavior against the `HOOK_STORAGE_CHANGE` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b191dc4b-89f2-49d0-a8f7-61955f1181fa?mode=deep",
+    "timestamp": "2026-05-01 16:40:06.872258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHookStorage()] Can an unprivileged external user supply two `timestamp` parameters (e.g., `timestamp=gte:1&timestamp=lte:9999999999.999999999`) to set a maximum-width timestamp window, causing `getHookStorageChange()` to return the complete history of all storage changes for a hook across all submitted transactions, leaking the full state-change timeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67fa1a49-21a1-42b7-a217-b786b9ce81a6?mode=deep",
+    "timestamp": "2026-05-01 16:40:19.557112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `key=gt:0x0000000000000000000000000000000000000000000000000000000000000000` to set `lowerBound` to the incremented byte array via `SlotRangeParameter.getInclusiveValue()`, and simultaneously `key=lt:0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff` to set `upperBound` to the decremented byte array, causing the full 32-byte key space to be scanned and all storage slots from submitted transactions to be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d10278e1-ff07-4f4e-afe6-51175b7083ea?mode=deep",
+    "timestamp": "2026-05-01 16:40:32.738955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `key=gt:0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff` (MAX_KEY_BYTES) to trigger `incrementByteArray()` overflow in `SlotRangeParameter.getInclusiveValue()`, causing the resulting `lowerBound` to wrap around to `0x00...00` or throw an exception, leading to either a full key-space scan or a denial-of-service against the storage endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16fb9582-357c-485d-b779-da7ca8583f18?mode=deep",
+    "timestamp": "2026-05-01 16:40:46.131231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `key=lt:0x0000000000000000000000000000000000000000000000000000000000000000` (MIN_KEY_BYTES) to trigger `decrementByteArray()` underflow in `SlotRangeParameter.getInclusiveValue()`, causing the resulting `upperBound` to wrap around to `0xff...ff` or throw an exception, leading to a full key-space scan or denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35d1760d-e4bd-4b47-8e67-b3a6d586aaa8?mode=deep",
+    "timestamp": "2026-05-01 16:41:00.261823",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user supply an EVM address (`0x<40-hex-chars>`) as `ownerId` that resolves to a different account than the numeric ID the user believes they are querying, because `EntityIdParameter.valueOf()` dispatches to `EntityIdEvmAddressParameter.valueOfNullable()`, causing the attacker to read hooks of an account they do not own by exploiting EVM address aliasing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ea51733-6e49-4a84-83fa-ef28b7265817?mode=deep",
+    "timestamp": "2026-05-01 16:41:14.458440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user supply a Base32 alias as `ownerId` that resolves to a victim account's entity ID via `EntityIdAliasParameter.valueOfNullable()`, causing the attacker to retrieve all hooks associated with the victim's submitted transactions without any authentication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff941c6a-5c4e-486e-af0a-1b98dfe9408c?mode=deep",
+    "timestamp": "2026-05-01 16:41:28.729100",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user supply `ownerId` in the `shard.realm.num` format with non-zero shard/realm values (e.g., `1.2.<num>`) to query hooks for accounts in different shards/realms, potentially bypassing any shard-scoped access controls and reading transaction hook data across network boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07958972-e834-4e08-9349-2178dcbe9efb?mode=deep",
+    "timestamp": "2026-05-01 16:41:42.246034",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user set `limit=100` (MAX_LIMIT) and `order=asc` with `hook.id=gte:0` to retrieve the maximum page of hooks in ascending order, then follow the `next` link in the response to paginate through all hooks for a target account, causing complete enumeration of all submitted transaction hooks with no rate limiting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b8688a3-e574-4596-acdb-23f7a5cf36cd?mode=deep",
+    "timestamp": "2026-05-01 16:41:56.918141",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHookStorage()] Can an unprivileged external user set `limit=100` and `order=asc` with no key filter to retrieve the maximum page of storage slots, then follow the `next` link to paginate through all storage slots for a hook, causing complete enumeration of all on-chain state written by submitted transactions with no authentication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_906792b9-5202-4873-a85b-e67fcbc3af34?mode=deep",
+    "timestamp": "2026-05-01 16:42:11.949111",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hooksRequest()] Can an unprivileged external user submit conflicting `hook.id` range parameters (e.g., `hook.id=gt:5&hook.id=gt:10`) where `hooksRequest()` takes `Math.max(lowerBound, hookIdFilter.getInclusiveValue())` for each, causing the most restrictive lower bound to silently win without any error, allowing the attacker to probe which bound is effective and infer the existence of hooks at specific IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4afa75dc-1bb2-4f52-917e-8a4ddf60be8b?mode=deep",
+    "timestamp": "2026-05-01 16:42:27.072587",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hooksRequest()] Can an unprivileged external user submit `hook.id=lt:1` to set `upperBound = Math.min(MAX_VALUE, 0)` (since `getInclusiveValue()` for `lt:1` returns 0), causing the query to return only hook ID 0 if it exists, allowing targeted probing of the lowest hook ID and confirming whether a specific transaction-created hook exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18f27b51-c7c9-42ef-99c0-a22539b10d3a?mode=deep",
+    "timestamp": "2026-05-01 16:42:43.701600",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hooksRequest()] Can an unprivileged external user submit `hook.id=lt:0` which causes `NumberRangeParameter.getInclusiveValue()` to return `0 - 1 = -1` (negative long), and since `upperBound` is initialized to `Long.MAX_VALUE` and `Math.min(MAX_VALUE, -1) = -1`, the resulting query uses a negative upper bound, potentially causing an invalid or unintended database query that leaks error information about the schema?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0420f23c-87a5-4188-9a54-bee08fab3b37?mode=deep",
+    "timestamp": "2026-05-01 16:42:59.277138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHookStorage()] Can an unprivileged external user supply `hookId=0` (the minimum allowed by `@Min(0)`) to query storage for hook ID 0, which may be a special or uninitialized hook, potentially returning storage data from a hook that was never properly associated with a submitted transaction and leaking internal state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_96c1a582-56ec-4b47-aa6a-a887ffc18d50?mode=deep",
+    "timestamp": "2026-05-01 16:43:13.017492",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHookStorage()] Can an unprivileged external user supply `hookId=9223372036854775807` (Long.MAX_VALUE, which passes `@Min(0)`) to query storage for the maximum possible hook ID, causing the database query to scan for a non-existent hook and potentially revealing timing differences that confirm the absence or presence of hooks near that boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32073cec-d5d4-4982-9f6f-11b7afe57697?mode=deep",
+    "timestamp": "2026-05-01 16:43:26.107749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `timestamp=gte:0.000000001&timestamp=lte:99999999999.999999999` to create a maximum-width timestamp range, causing `Bound.of()` to set `timestampLowerBound=1` and `timestampUpperBound=Long.MAX_VALUE`, and `getHookStorageChange()` to return all historical storage changes ever recorded for a hook across all submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfd0464d-13b9-42b6-9a3a-c8f42c2a6d79?mode=deep",
+    "timestamp": "2026-05-01 16:43:39.543628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply three or more `timestamp` parameters (e.g., `timestamp=gte:1&timestamp=lte:100&timestamp=eq:50`) to exceed the `@Size(max = 2)` constraint on `TimestampParameter[] timestamps`, and if validation is not enforced at the framework level before `Bound.of()` processes the array, cause unexpected bound computation that bypasses the intended two-parameter limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_957d301a-aa82-48e3-aeb6-10220eb63216?mode=deep",
+    "timestamp": "2026-05-01 16:43:53.612646",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `MAX_REPEATED_QUERY_PARAMETERS` copies of `key=eq:<same_slot>` to the `keys` list in `getHookStorage()`, causing `hookStorageChangeRequest()` to build a `keyFilters` list with `MAX_REPEATED_QUERY_PARAMETERS` duplicate entries, and `getKeysInRange()` to return a large list of duplicates that inflates the SQL `IN` clause, causing a denial-of-service via query amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef16250a-45f1-4a41-8ed7-c175b9274f4f?mode=deep",
+    "timestamp": "2026-05-01 16:44:07.916065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: hookStorageChangeRequest()] Can an unprivileged external user supply `MAX_REPEATED_QUERY_PARAMETERS` distinct `key=eq:<slot>` values to build a `keyFilters` list of maximum size, causing `getKeysInRange()` to pass all of them to `hookStorageChangeRepository.findByKeyInAndTimestampBetween()` as a large SQL `IN` clause, causing a database denial-of-service or excessive resource consumption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55638d37-2745-49e0-92a4-553cb920f94e?mode=deep",
+    "timestamp": "2026-05-01 16:44:21.143065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/HooksController.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getHooks()] Can an unprivileged external user submit `hook.id=eq:0&hook.id=eq:1&...&hook.id=eq:<MAX_REPEATED_QUERY_PARAMETERS-1>` (exactly at the size limit) to populate `hookIds` TreeSet with the maximum allowed number of distinct IDs, causing `hookRepository.findByOwnerIdAndHookIdIn()` to execute a SQL `IN` clause with `MAX_REPEATED_QUERY_PARAMETERS` entries, causing excessive database load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_145dfd32-5153-4a9b-b75e-7eed7f2d2645?mode=deep",
+    "timestamp": "2026-05-01 16:44:35.259847",
+    "report_generated": false
+  }
+]
