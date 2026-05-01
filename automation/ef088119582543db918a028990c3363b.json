@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged external user craft an ATOMIC_BATCH transaction where `this.type` is set to `TransactionType.ATOMIC_BATCH.getProtoId()` (74) but `payerAccountId` on the inner transaction is null, causing a NullPointerException in `transaction.getPayerAccountId().getId()` at line 151 that silently drops the inner transaction from `innerTransactions`, resulting in fee deduction without the intended fund transfer executing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_744cf2f3-4855-40ad-8ca3-1da906554b76?mode=deep",
+    "timestamp": "2026-05-01 17:08:03.264189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user submit an ATOMIC_BATCH transaction where `this.type` is null (Integer unboxing), causing a NullPointerException during the `this.type != TransactionType.ATOMIC_BATCH.getProtoId()` comparison at line 143, which aborts batch processing mid-flight and leaves previously debited fees unrecovered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce6c7a08-c692-4ec9-bbb3-0b7d493473e6?mode=deep",
+    "timestamp": "2026-05-01 17:08:15.150624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: toTransactionHash()] Can an unprivileged user trigger a NullPointerException in `toTransactionHash()` at line 159 by submitting a transaction where `payerAccountId` is null, causing the transaction record to be persisted without a corresponding `TransactionHash` entry, making the transaction unresolvable by hash and effectively hiding a fund movement from audit trails?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18241385-28e5-4529-9f3b-7ac0d1495a52?mode=deep",
+    "timestamp": "2026-05-01 17:08:27.452604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: isNew()] Can an unprivileged user exploit the unconditional `return true` in `isNew()` at line 139 to force duplicate INSERT operations for the same `consensusTimestamp`, causing double-counting of `chargedTxFee` or `itemizedTransfer` amounts in downstream accounting systems that aggregate persisted records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c33a253-2c22-4865-bed5-a50a0996753c?mode=deep",
+    "timestamp": "2026-05-01 17:08:40.434036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a transaction that triggers unbounded calls to `addItemizedTransfer()` with `ItemizedTransfer` entries carrying negative `amount` values, causing the persisted JSON in `itemizedTransfer` to reflect a net credit to the attacker's account while the actual on-chain debit is recorded against a victim's `entityId`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7fb16e9-da53-4028-98ff-a52f5ea30fa7?mode=deep",
+    "timestamp": "2026-05-01 17:08:53.252541",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addNftTransfer()] Can an unprivileged user submit a transaction that calls `addNftTransfer()` with a `NftTransfer` where `serialNumber` equals `NftTransfer.WILDCARD_SERIAL_NUMBER` (-1), and if the mirror node processes this wildcard without validation, does it cause all NFTs of a token to be recorded as transferred, leading to incorrect ownership state and enabling the attacker to claim NFTs they do not own?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4dd426c7-b817-4217-a2d4-180a5a636434?mode=deep",
+    "timestamp": "2026-05-01 17:09:06.910126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user submit an ATOMIC_BATCH transaction and inject a crafted inner `Transaction` where `getValidStartNs()` returns null, causing a NullPointerException at line 152 (`innerTransactions.add(transaction.getValidStartNs())`) that corrupts the `innerTransactions` list and causes the batch to be recorded with mismatched payer/timestamp pairs, enabling replay of a different user's inner transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_35f93c9b-bf4d-479a-b6fd-ce4afc996226?mode=deep",
+    "timestamp": "2026-05-01 17:09:19.457427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user craft an ATOMIC_BATCH where the same inner transaction (same `payerAccountId.getId()` and `validStartNs`) is added multiple times via repeated `addInnerTransaction()` calls, causing the `innerTransactions` list to record duplicate entries and downstream processors to execute the inner transaction's fund transfer multiple times?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a6894b5-4875-4095-a065-dd344f3b1361?mode=deep",
+    "timestamp": "2026-05-01 17:09:32.640653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: toTransactionHash()] Can an unprivileged user submit a transaction with a null `transactionHash` byte array, causing `toTransactionHash()` to build a `TransactionHash` with a null `hash` field, which then passes `hashIsValid()` returning false, allowing the transaction to be stored without a valid hash index and making it impossible to look up or dispute the fund movement?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ef03eb2-52bf-4d22-b143-8d269a4a4777?mode=deep",
+    "timestamp": "2026-05-01 17:09:46.023863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a transaction that adds an `ItemizedTransfer` with `amount` set to `Long.MIN_VALUE`, and if downstream aggregation sums these values using unchecked arithmetic, cause a signed integer overflow that flips the net transfer direction, crediting the attacker instead of debiting them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab64f9a6-873d-40f9-a7dc-5666c9fc71d9?mode=deep",
+    "timestamp": "2026-05-01 17:09:58.535620",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a CRYPTOTRANSFER transaction that populates `itemizedTransfer` with a large number of `ItemizedTransfer` entries (each with small amounts summing to zero) to pass balance checks, while individual entries carry large positive amounts to a victim's `entityId` that are offset by negative entries to the attacker, causing the mirror node to record a net-zero transfer that actually moves funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da1133dd-e405-482d-a7d7-cf1a41bd649b?mode=deep",
+    "timestamp": "2026-05-01 17:10:11.864632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addNftTransfer()] Can an unprivileged user submit a transaction that calls `addNftTransfer()` with a `NftTransfer` where both `senderAccountId` and `receiverAccountId` are set to the same `EntityId`, causing the mirror node to record a self-transfer that incorrectly increments a transfer counter used for fee rebates or airdrop eligibility, resulting in unearned financial benefit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_beb3ff7c-ddd6-4083-8b78-f3bcb7046396?mode=deep",
+    "timestamp": "2026-05-01 17:10:24.694301",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user submit an ATOMIC_BATCH transaction where `innerTransactions` grows to an unbounded size by adding thousands of inner transactions, causing the `List<Long>` serialized via `ListToStringSerializer` to exceed database column limits, triggering a persistence error that rolls back the outer batch but not the fee deduction, resulting in loss of funds for the payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_370386e9-6a2b-4c45-85c8-3ea8b13263ce?mode=deep",
+    "timestamp": "2026-05-01 17:10:37.512581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a transaction where `itemizedTransfer` is populated with entries whose `isApproval` flag is set to `true` for transfers they did not approve, causing the mirror node to record approved transfers from a victim's account to the attacker's account, leading to unauthorized fund movement reflected in the mirror state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d731712-91fd-4c08-8f01-38fc11c4009d?mode=deep",
+    "timestamp": "2026-05-01 17:10:50.404175",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: toTransactionHash()] Can an unprivileged user submit two transactions with different `consensusTimestamp` values but identical `transactionHash` bytes, and since `isNew()` always returns true causing both to be INSERTed, does the second INSERT violate the primary key constraint on `TransactionHash.hash`, causing one transaction's fund movement to be silently dropped from the hash index while fees are still charged?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fba27db-a41b-4f1c-8074-27e109ea86e1?mode=deep",
+    "timestamp": "2026-05-01 17:11:02.865375",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user submit an ATOMIC_BATCH transaction where an inner transaction's `payerAccountId` is set to `EntityId.EMPTY` (id=0), causing `innerTransactions` to record `0L` as the payer, and downstream processors to attribute the inner transaction's fee to account 0 (treasury or system account) instead of the actual payer, effectively stealing fee coverage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb2b574a-e2f0-4448-b474-77ba0bc2911a?mode=deep",
+    "timestamp": "2026-05-01 17:11:15.737199",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addNftTransfer()] Can an unprivileged user submit a TOKENWIPE transaction that populates `nftTransfer` with a `NftTransfer` entry where `senderAccountId` is a victim's account and `receiverAccountId` is null, causing the mirror node to record the NFT as burned/wiped from the victim without crediting any receiver, resulting in permanent loss of the NFT asset?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fa85b8b-917d-41f3-ac11-b3b295f63528?mode=deep",
+    "timestamp": "2026-05-01 17:11:28.718562",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a CRYPTOTRANSFER where `itemizedTransfer` contains an entry with `entityId` set to `EntityId.EMPTY` (id=0), causing the mirror node to record a debit from the victim's account with the credit going to entity 0 (an unspendable system account), effectively burning the victim's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ace322fd-1221-4fe1-b0f5-09dd946d559a?mode=deep",
+    "timestamp": "2026-05-01 17:11:42.082045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user exploit the lack of deduplication in `addInnerTransaction()` to add the same inner transaction object twice, causing `innerTransactions` to contain duplicate `[payerAccountId, validStartNs]` pairs, and if the batch executor replays each pair as a separate execution, double-spend the inner transaction's fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05f5919c-f4d5-49be-9611-14074202f67b?mode=deep",
+    "timestamp": "2026-05-01 17:11:55.836797",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a transaction with an `ItemizedTransfer` where `amount` is null (since `Long` is nullable), causing a NullPointerException during downstream aggregation of transfer amounts, which aborts the accounting update mid-way and leaves the sender's balance debited without the receiver's balance being credited?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c3c8540-f623-4385-8102-7eb33ce919a4?mode=deep",
+    "timestamp": "2026-05-01 17:12:09.809041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addNftTransfer()] Can an unprivileged user submit a TOKENAIRDROP transaction that populates `nftTransfer` with entries where `tokenId` is null, causing the mirror node to record NFT transfers without a valid token association, and if the airdrop claim logic does not re-validate `tokenId`, allow the attacker to claim an airdrop for a token they never received?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fba4b802-435b-475c-8052-b8ce61d8db85?mode=deep",
+    "timestamp": "2026-05-01 17:12:22.050981",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addInnerTransaction()] Can an unprivileged user submit an ATOMIC_BATCH where an inner transaction has `type` set to `TransactionType.ATOMIC_BATCH.getProtoId()` (nested batch), and since `addInnerTransaction()` only checks the outer transaction's type, does the nested batch bypass the type guard and cause recursive processing that executes inner fund transfers multiple times?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7dc184bc-2af4-4078-91bb-b65f0f2e55a6?mode=deep",
+    "timestamp": "2026-05-01 17:12:34.995404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: toTransactionHash()] Can an unprivileged user submit a transaction where `transactionHash` is a 48-byte array with the first 32 bytes identical to another transaction's hash, causing `TransactionHash.setHash()` to store the same 32-byte prefix for both, creating a hash collision in the `TransactionHash` table that allows the attacker to look up and potentially replay the victim's transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5edfb9e7-f05d-47c5-9e01-2d716b76d5c5?mode=deep",
+    "timestamp": "2026-05-01 17:12:48.297608",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addItemizedTransfer()] Can an unprivileged user submit a SCHEDULECREATE transaction that embeds `itemizedTransfer` entries with future-dated amounts, and since `isNew()` always returns true preventing updates, does the mirror node persist the scheduled transfer amounts without re-validating balances at execution time, allowing the attacker to schedule a transfer they cannot currently afford?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42e5cc95-9a2e-48b0-a168-f85d0bd815f5?mode=deep",
+    "timestamp": "2026-05-01 17:13:01.024367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/transaction/Transaction.java -> Scope: Critical: Direct loss of funds'] [Function: addNftTransfer()] Can an unprivileged user submit a TOKENCLAIMAIRDROP transaction that adds an `NftTransfer` with `isApproval` set to true and `senderAccountId` pointing to a victim, causing the mirror node to record the claim as an approved transfer from the victim's account, effectively stealing the victim's NFT under the guise of an airdrop claim?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9564e90d-f58a-46aa-af26-3d8f799fc78f?mode=deep",
+    "timestamp": "2026-05-01 17:13:14.935875",
+    "report_generated": false
+  }
+]
