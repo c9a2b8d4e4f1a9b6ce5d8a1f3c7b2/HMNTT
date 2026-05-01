@@ -106,7 +106,6 @@ def main():
 
             print(f"[{i}/{total}] Processing: {question[:50]}...")
             bot.index_repo(question)
-            time.sleep(4 * 60)
 
         # If we get here, processing was successful
         print(f"Successfully processed {i} questions")
