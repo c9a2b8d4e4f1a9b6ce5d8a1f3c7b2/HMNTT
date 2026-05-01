@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: shouldCompress()] Can an unprivileged external user exploit a network partition where `shouldCompress()` evaluates `config.cache.response.compress && body.length >= config.cache.response.compressThreshold`, and during partition recovery a large response body triggers synchronous `gzipSync()` in `CachedApiResponse` constructor, blocking the Node.js event loop for the duration of compression and causing all concurrent requests to stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bb1556c-df3e-4344-b888-c44d26de5eba?mode=deep",
+    "timestamp": "2026-05-01 19:41:22.671886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `cachedResponse.getUncompressedBody()` calls `unzipSync(Buffer.from(this.body, 'base64url'))` on a corrupted base64url string stored in Redis before the partition, causing `unzipSync` to throw a synchronous exception that propagates up through `responseCacheCheckHandler()` as an unhandled error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60b54f9a-7509-4239-b4bb-50061a55662b?mode=deep",
+    "timestamp": "2026-05-01 19:41:34.851165",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition recovery race where two concurrent requests for the same URL both get a cache miss (because `getSingleWithTtl()` returned `undefined` during partition), both hit the backend, and both call `setSingle()` with potentially different response bodies, causing a last-write-wins cache poisoning where one user's response overwrites another's?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea93ee97-0530-488c-9c36-f0006e16b97d?mode=deep",
+    "timestamp": "2026-05-01 19:41:47.447028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getSingleWithTtl()] Can an unprivileged external user exploit the `maxRetriesPerRequest` configuration during a network partition so that when the limit is reached, ioredis throws a `MaxRetriesPerRequestError` that is not caught by the `.catch()` in `getSingleWithTtl()`, propagating as an unhandled promise rejection that crashes the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dff63eb4-c3c8-4d5b-a00c-f351e69ae391?mode=deep",
+    "timestamp": "2026-05-01 19:42:00.853924",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `redisTtl` returned from `getSingleWithTtl()` is `-1` (key exists but has no expiry, due to Redis misconfiguration during partition recovery), causing `max-age=-1` to be set in the `Cache-Control` response header, which some HTTP clients interpret as immediately expired, breaking client-side caching for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4311a23-0c27-4e00-9436-273957dd78a1?mode=deep",
+    "timestamp": "2026-05-01 19:42:14.117708",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `redisTtl` is `-2` (key expired between TTL and GET commands in the `multi()` transaction), causing `rawValue` to be non-null but `ttl` to be `-2`, and the response is served with `Cache-Control: public, max-age=-2`, which is an invalid header value that may cause downstream proxy or CDN misbehavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ce9fcbe-0c13-407a-80b6-332ee1c2c0ef?mode=deep",
+    "timestamp": "2026-05-01 19:42:27.607052",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: negotiate()] Can an unprivileged external user exploit a network partition recovery scenario where `negotiate()` is called with a `cachedResponse` whose `compressed` field is `true` but whose `body` field was corrupted during the partition, causing `cachedResponse.getLength()` to return an incorrect `Content-Length` that causes HTTP response framing errors for all clients receiving that cached entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7fc2f4a-2534-4994-b264-14a57b41b88b?mode=deep",
+    "timestamp": "2026-05-01 19:42:41.415406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit a network partition where `ttl` parsed by `getCacheControlExpiryOrDefault()` is `0` (from a `max-age=0` header), causing the `if (ttl > 0)` check to skip caching entirely, so that after partition recovery the cache is never repopulated for responses with `max-age=0`, permanently keeping those endpoints uncached and exposing the backend to full request load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a525445c-df38-4a29-8345-a34aab7fb168?mode=deep",
+    "timestamp": "2026-05-01 19:42:56.093166",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where the `if-none-match` conditional header matches a stale ETag stored in Redis before the partition, causing `responseCacheCheckHandler()` to return a 304 response with headers from the pre-partition cache entry, serving outdated cache-control or security headers to the client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65f9313b-2028-4963-b355-b43c5b43b6f7?mode=deep",
+    "timestamp": "2026-05-01 19:43:10.330363",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `Object.assign(new CachedApiResponse(), redisValue)` assigns a Redis-stored object with attacker-influenced header values (e.g., injected via a prior cache-poisoning request before the partition), causing those headers to be re-served to all users after partition recovery without re-validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b7ad87e-a48c-4412-9628-3422659d9bca?mode=deep",
+    "timestamp": "2026-05-01 19:43:23.811156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `res.locals[requestStartTime]` is not set (because the request start time middleware failed during partition-induced overload), causing `startTime` to fall back to `Date.now()` at the point of cache check, making the elapsed time calculation in the log line meaningless and hiding the true latency impact of the partition from operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae361c0d-38ac-4b33-a66e-0db00496efa8?mode=deep",
+    "timestamp": "2026-05-01 19:43:36.565418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getSingleWithTtl()] Can an unprivileged external user exploit a network partition where the Redis `multi()` pipeline is partially executed — TTL command succeeds but GET command is lost — causing `result` to be `[[null, ttl], [null, null]]`, and `rawValue` to be `null`, so the cache miss path is taken even though the key exists, causing unnecessary backend load and potential response inconsistency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_065b61d1-3565-4609-8f97-041b8c0d0c9d?mode=deep",
+    "timestamp": "2026-05-01 19:43:49.623030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit a network partition where `res.locals[responseBodyLabel]` contains a very large response body, and `setSingle()` attempts to serialize it with `JSONStringify()` and store it in Redis, causing the Redis `setex` command to exceed the Redis `proto-max-bulk-len` limit and fail silently, leaving the cache unpopulated after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_994e4a04-2df3-4d33-b054-5a535475e1b5?mode=deep",
+    "timestamp": "2026-05-01 19:44:02.113604",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `enableAutoPipelining: true` causes multiple concurrent `multi().ttl().get().exec()` calls to be batched into a single pipeline, and a mid-pipeline network failure causes all batched commands to fail simultaneously, creating a correlated failure that drops cache availability for all concurrent users at once rather than failing gracefully per-request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f678dfb-0cbc-42b1-928c-1ee97429bb50?mode=deep",
+    "timestamp": "2026-05-01 19:44:15.036324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where the Redis sentinel failover is in progress — `sentinel.enabled` is true — causing `this.ready` to oscillate between `true` and `false` rapidly, creating a window where some requests get cached responses and others bypass the cache, leading to inconsistent API responses for the same resource across concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a03d8ea-9943-4d6d-b2a5-6eb91a475e12?mode=deep",
+    "timestamp": "2026-05-01 19:44:28.413295",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where the Redis sentinel promotes a replica that has not yet replicated the latest cache entries, causing `getSingleWithTtl()` to return `undefined` for keys that were cached on the old master, forcing all requests to bypass the cache and hit the backend simultaneously in a thundering herd?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8cd9d9a-e546-4c10-9bf0-20ed57ac4175?mode=deep",
+    "timestamp": "2026-05-01 19:44:41.498392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit a network partition where `setSingle()` queues a `setex` command in the offline queue, and upon reconnection the command is executed against the new Redis master (after sentinel failover) with a TTL derived from a stale `cache-control` header, causing the cache to be populated with an incorrect expiry that outlasts the intended freshness window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0a531cb-c03c-48a4-9e38-5b8b73f5fbb4?mode=deep",
+    "timestamp": "2026-05-01 19:44:55.774315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCacheControlExpiryOrDefault()] Can an unprivileged external user exploit a network partition where the backend returns a response without a `cache-control` header (due to backend degradation during partition), causing `getCacheControlExpiryOrDefault()` to return `DEFAULT_REDIS_EXPIRY = 1`, and the response is cached for only 1 second, effectively keeping the cache perpetually cold and sustaining backend overload after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c88f582f-45cd-4a88-b012-85a6ba3e6e5b?mode=deep",
+    "timestamp": "2026-05-01 19:45:09.037126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `cachedResponse.getBody()` returns `Buffer.from(this.body, 'base64url')` for a compressed entry, but `this.body` was stored as a plain string (not base64url) due to a serialization error during the partition, causing `Buffer.from()` to silently produce garbage bytes that are sent to the client as the response body?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e6b94ff-9eaf-4dbf-9792-59d9d6ef12ae?mode=deep",
+    "timestamp": "2026-05-01 19:45:22.238203",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where the `keepAlive: 30000` TCP keepalive setting allows a half-open connection to persist for up to 30 seconds before detection, during which `getSingleWithTtl()` calls block for the full `commandTimeout` duration, causing request handlers to hang and exhaust the Node.js async queue?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0550b5b1-4678-42da-af29-d067595b520a?mode=deep",
+    "timestamp": "2026-05-01 19:45:35.466449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `connectTimeout` is exceeded during initial connection, causing the Redis client to emit an error event that sets `this.ready = false`, and since `lazyConnect` is `false` for enabled Redis, the connection is never re-attempted until the retry strategy fires, leaving the cache unavailable for the full backoff duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a98ae6f7-f79d-4193-b325-ea2e32d1aaf4?mode=deep",
+    "timestamp": "2026-05-01 19:45:48.452969",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit a network partition where `res.locals[responseHeadersLabel]` is `null` (due to a middleware failure during partition-induced overload), causing the nullish coalescing `?? {}` to substitute an empty object, and the resulting cached headers omit security-relevant headers that were supposed to be included, serving responses without those headers to all users after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5fccf3ad-e979-4dbd-a332-4a1f3cfeb1c9?mode=deep",
+    "timestamp": "2026-05-01 19:46:01.844225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit a network partition where `cachedResponse.statusCode` is `undefined` (due to incomplete deserialization from a corrupted Redis entry), causing `res.status(undefined)` to be called, which in Express sets the status to `200` by default, potentially serving a success response for what should have been an error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0da66fd0-ba5c-4180-94b5-19b3b3d80741?mode=deep",
+    "timestamp": "2026-05-01 19:46:15.943333",
+    "report_generated": false
+  }
+]
