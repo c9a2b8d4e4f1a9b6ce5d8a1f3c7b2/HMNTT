@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `recordItem.getPayerAccountId()` returns a spoofed or unexpected `EntityId`, since `doUpdateTransaction()` calls `topicMessage.setPayerAccountId(recordItem.getPayerAccountId())` without verifying that the payer matches the transaction signer, potentially allowing payer identity misattribution in the `topic_message` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acae7181-43b0-40b7-8f19-ddbfb57dd5cf?mode=deep",
+    "timestamp": "2026-05-01 22:13:08.438794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transaction.getEntityId()` (the topic ID set on the transaction object) differs from `recordItem.getTransactionBody().getConsensusSubmitMessage().getTopicID()` (used in `getEntity()`), since `doUpdateTransaction()` uses `transaction.getEntityId()` for `topicMessage.setTopicId()` while `getEntity()` uses the body's topic ID, potentially causing a topic ID mismatch between the transaction record and the topic message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_961f09a6-e43b-42ae-8b21-86028623ef96?mode=deep",
+    "timestamp": "2026-05-01 22:13:20.772361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `chunkInfo.getNumber()` is 1 and `chunkInfo.getTotal()` is 1 (single-chunk message) but the message is submitted repeatedly with the same `initialTransactionID`, causing duplicate `TopicMessage` entries with identical `initialTransactionId` bytes to be persisted, potentially confusing chunk reassembly logic in downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cd519a0-18b5-467a-8e30-35592d12f19f?mode=deep",
+    "timestamp": "2026-05-01 22:13:33.086659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicRunningHash()` contains a byte array much larger than the expected 48 bytes (SHA-384 output), since `toBytes(receipt.getTopicRunningHash())` stores it without length validation, causing oversized data to be persisted in the `running_hash` column and potentially triggering database column size violations or silent truncation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0174fa89-6d2d-4119-bcaa-4363b58b74b9?mode=deep",
+    "timestamp": "2026-05-01 22:13:45.571298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transactionBody.hasChunkInfo()` is true but both `chunkInfo.getNumber()` and `chunkInfo.getTotal()` are 0, causing `topicMessage.setChunkNum(0)` and `topicMessage.setChunkTotal(0)` to be called, and since `TopicMessage.chunkNum` being non-null triggers chunk info display in the REST API, this could expose a chunk_info object with invalid zero values to API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_22236e71-479a-402c-8b4f-2f8580e22703?mode=deep",
+    "timestamp": "2026-05-01 22:13:58.314401",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicSequenceNumber()` is negative (e.g., -1), since `doUpdateTransaction()` calls `topicMessage.setSequenceNumber(receipt.getTopicSequenceNumber())` without non-negative validation, causing a negative sequence number to be stored that breaks ascending sequence ordering invariants relied upon by `TopicMessage.COMPARATOR`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7cc7f6b-9d12-4988-ab95-b3e378923a71?mode=deep",
+    "timestamp": "2026-05-01 22:14:11.201298",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transaction.getConsensusTimestamp()` is 0 or Long.MIN_VALUE, causing `topicMessage.setConsensusTimestamp(transaction.getConsensusTimestamp())` to store an invalid timestamp that is used as the primary key (`@Id`) of `TopicMessage`, potentially conflicting with other records or causing incorrect time-based partition routing in `TopicMessageLookupEntityListener`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcb8171e-6973-4099-a644-b1c045bd2908?mode=deep",
+    "timestamp": "2026-05-01 22:14:23.952305",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `chunkInfo.getInitialTransactionID().toByteArray()` returns a zero-length byte array (empty protobuf), causing `topicMessage.setInitialTransactionId(new byte[0])` to store an empty array, and when `ConsensusController.parseTransactionID()` calls `TransactionID.parseFrom(transactionIdBytes)` on it, it returns a default empty `TransactionID` that is then used to construct a misleading chunk info response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abe788b2-1d27-4bdc-b573-17012e39f89b?mode=deep",
+    "timestamp": "2026-05-01 22:14:37.777820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicRunningHashVersion()` is exactly `DEFAULT_RUNNING_HASH_VERSION` (3) but the running hash is computed incorrectly, since the handler skips setting `runningHashVersion` when it equals the default (leaving it null), and downstream `ConsensusController` defaults null to `DEFAULT_RUNNING_HASH_VERSION` (3), masking the incorrect hash version and preventing detection of hash chain corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b798292f-defe-498a-8e6e-ae13eeecd22e?mode=deep",
+    "timestamp": "2026-05-01 22:14:52.080633",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transactionBody.getMessage()` is a `ByteString` containing valid UTF-8 text that includes SQL injection payloads, and since `toBytes()` stores raw bytes that are later base64-encoded for REST API responses, could this cause issues if any downstream component incorrectly interprets the message bytes as a string without proper encoding?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05cfdd26-e3ad-457b-97ef-9054b274d5f7?mode=deep",
+    "timestamp": "2026-05-01 22:15:04.716140",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `entityListener.onTopicMessage(topicMessage)` throws an `ImporterException` or `RuntimeException`, and since `doUpdateTransaction()` does not wrap the call in a try-catch, the exception propagates up the call stack and potentially aborts processing of the entire record file batch, causing a denial-of-service against the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a726774d-b806-4026-97f4-4bbf0074bfd7?mode=deep",
+    "timestamp": "2026-05-01 22:15:17.315972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicRunningHashVersion()` is a value between Integer.MAX_VALUE+1 and Long.MAX_VALUE, causing the cast `(int) receipt.getTopicRunningHashVersion()` to produce a value that wraps around to a small positive integer (e.g., 1 or 2), silently storing an incorrect version that misrepresents the hash algorithm used?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27dc63ac-0f24-4f31-9a4e-0127b09652f7?mode=deep",
+    "timestamp": "2026-05-01 22:15:30.231779",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transactionBody.hasChunkInfo()` is false but the message is actually a fragment of a larger message, since `doUpdateTransaction()` only sets chunk metadata when `hasChunkInfo()` is true, causing the message to be stored as a complete standalone message and breaking the logical integrity of the fragmented message sequence for downstream consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9a8fa0e-9dde-458a-85d7-49e1c00f2bd9?mode=deep",
+    "timestamp": "2026-05-01 22:15:42.914987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `chunkInfo.getNumber()` is greater than Integer.MAX_VALUE (if the protobuf field allows it), causing integer overflow when stored as `Integer chunkNum` in `TopicMessage`, leading to a negative chunk number being persisted and breaking chunk ordering validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_398d3bb2-b451-492f-b59e-b6593b72a59e?mode=deep",
+    "timestamp": "2026-05-01 22:15:57.254443",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicRunningHash()` is a non-empty `ByteString` on a blockstream path, bypassing the `receipt.getTopicRunningHash().isEmpty()` check, and if the running hash value is crafted to be a specific byte sequence, could this cause hash chain verification to accept an invalid state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e8a800d-2d2b-4980-a0ba-00d1cf70b2c6?mode=deep",
+    "timestamp": "2026-05-01 22:16:11.624763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `transaction.getEntityId()` is `EntityId.EMPTY` (topic ID not resolved), causing `topicMessage.setTopicId(EntityId.EMPTY)` to store a null/zero topic ID, and since `TopicMessage.isNew()` always returns true, this record is always inserted without checking for existing records, potentially creating orphaned topic messages with no valid topic association?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55af2d49-d903-4436-9b3f-73ce978bcd27?mode=deep",
+    "timestamp": "2026-05-01 22:16:24.464951",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `chunkInfo.getInitialTransactionID()` is a valid protobuf `TransactionID` but with an `accountID` that does not match the actual payer, since `doUpdateTransaction()` stores the raw bytes without verifying that `initialTransactionID.getAccountID()` matches `recordItem.getPayerAccountId()`, allowing payer identity spoofing in the chunk info?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fb9ac23-a5b1-4b50-b484-7f5fa5bd96fc?mode=deep",
+    "timestamp": "2026-05-01 22:16:37.632481",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/transactionhandler/ConsensusSubmitMessageTransactionHandler.java -> Scope: '] [Function: doUpdateTransaction()] Can an unprivileged external user submit a transaction where `receipt.getTopicSequenceNumber()` is the same as a previously persisted message's sequence number for the same topic, since `TopicMessage.isNew()` always returns true (bypassing Hibernate's existence check), causing a duplicate key violation in the database or silently overwriting the existing message depending on the persistence strategy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b38aafe9-af16-4e75-979a-a2c3e5d767f5?mode=deep",
+    "timestamp": "2026-05-01 22:16:51.097010",
+    "report_generated": false
+  }
+]
