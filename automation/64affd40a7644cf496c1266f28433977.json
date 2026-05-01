@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user repeatedly call findStorage() with a unique EntityId and unique byte[] key per request, exhausting the contractStateCache (maximumSize=25000) and contractSlotsCache (maximumSize=3000) simultaneously, causing heap memory pressure that triggers OOM and shuts down the web3 node, preventing all new transaction confirmations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7d54ca5-ff6c-43f7-bdcb-a5d72512ca3e?mode=deep",
+    "timestamp": "2026-05-01 21:39:37.473517",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user trigger findStorageBatch() with a contractId that already has 3000 cached slot keys, causing findStorageBatch() to issue a SQL IN clause with 3000 byte[] parameters against the database, creating a query so large it exhausts DB connection pool resources and halts all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68d5fdc4-7576-4a5b-b9ad-233d4ae68051?mode=deep",
+    "timestamp": "2026-05-01 21:39:49.510018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that contractSlotsCache.putIfAbsent(wrappedKey, EMPTY_VALUE) is called before the batch query, by sending concurrent requests for the same contractId with different keys, causing a race condition where cachedSlotKeys grows unboundedly between putIfAbsent and getNativeCache().asMap().keySet(), leading to an oversized IN clause that crashes the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be8f972d-761c-4a5e-ad03-fd05badbeea2?mode=deep",
+    "timestamp": "2026-05-01 21:40:02.183724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user send requests for 1500 distinct contractIds (the slotsPerContract maximumSize), each with unique slot keys, causing cacheManagerSlotsPerContract to create 1500 separate CaffeineCache instances, exhausting JVM heap memory and causing a total service crash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_afe04364-a343-4ac6-8e17-14fb80ebd365?mode=deep",
+    "timestamp": "2026-05-01 21:40:15.162045",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user exploit the EMPTY_VALUE sentinel check (cachedValue != EMPTY_VALUE using reference equality) by crafting a scenario where a new byte[0] is stored in the cache instead of the EMPTY_VALUE sentinel, causing findStorage() to return Optional.of(new byte[0]) for every subsequent request and bypassing the batch fallback, leading to incorrect contract state reads that stall EVM execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c84c02fb-5c9d-4f77-a91d-d300ab4e5df2?mode=deep",
+    "timestamp": "2026-05-01 21:40:29.568333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass Long.MIN_VALUE or Long.MAX_VALUE as blockTimestamp to findStorageByBlockTimestamp(), causing the underlying SQL query (consensus_timestamp <= ?3) to perform a full table scan on contract_state_change, saturating DB I/O and blocking all other transaction-related queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4d14c97-6228-4d1c-bf02-a0dfef8e6065?mode=deep",
+    "timestamp": "2026-05-01 21:40:42.368279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user flood findStorageByBlockTimestamp() with requests using blockTimestamp=Long.MAX_VALUE and a valid contractId, causing the ORDER BY consensus_timestamp DESC LIMIT 1 query to run without an effective index range, consuming all DB CPU and preventing new transactions from being confirmed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4c52ad0-dbb0-4ee3-a9f4-c55accc50139?mode=deep",
+    "timestamp": "2026-05-01 21:40:55.215499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user pass a 32-byte key that is all zeros to findStorage(), causing ByteBuffer.wrap(new byte[32]) to be stored in contractSlotsCache, and then on subsequent batch queries the zero-filled slot is included in every IN clause, amplifying DB query cost across all concurrent requests and degrading throughput to zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05dc6ca2-39d6-47fb-8f2b-825731b1ad26?mode=deep",
+    "timestamp": "2026-05-01 21:41:08.542537",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that cachedSlots is built from contractSlotsCache.getNativeCache().asMap().keySet() without size bounding, by pre-filling the per-contract slot cache to its maximum and then triggering a batch query that sends all 3000 slots in a single SQL IN clause, causing a DB query timeout that propagates as an unhandled exception and crashes the service thread?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81ffb4e9-304e-4a98-81e9-31b204b6454e?mode=deep",
+    "timestamp": "2026-05-01 21:41:22.795947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user pass a null byte[] key to findStorage(), causing ByteBuffer.wrap(null) in findStorageBatch() to throw a NullPointerException that propagates uncaught through the EVM execution stack, halting all in-flight contract call processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1125211b-34e0-4c95-9371-78e25d852b26?mode=deep",
+    "timestamp": "2026-05-01 21:41:38.483706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user pass an empty byte[] (new byte[0]) as the key to findStorage(), causing generateCacheKey() to produce a SimpleKey that collides with other cache entries, corrupting the contractStateCache and returning wrong slot values for legitimate contract calls, causing EVM execution to produce incorrect results and halt transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f91c59c-ed7a-43f6-9933-69cb92e570a6?mode=deep",
+    "timestamp": "2026-05-01 21:41:55.941674",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user trigger a cache stampede by sending thousands of concurrent findStorage() requests for the same contractId and key before any result is cached, causing thousands of simultaneous findStorageBatch() calls each issuing a full batch DB query, overwhelming the database connection pool and causing a total network shutdown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f87a0e78-8e36-4512-90e2-b10049d4abc4?mode=deep",
+    "timestamp": "2026-05-01 21:42:10.156663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the absence of synchronization in findStorageBatch() — where contractSlotsCache.putIfAbsent() and getNativeCache().asMap().keySet() are not atomic — to cause a TOCTOU race where the key set grows between the check and the batch query, resulting in an unbounded IN clause that causes a DB crash?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bdb9522-b4b4-458b-9e45-e05cbd1b424a?mode=deep",
+    "timestamp": "2026-05-01 21:42:22.977838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user pass an oversized byte[] key (e.g., 1 MB) to findStorage(), causing it to be stored as a ByteBuffer in contractSlotsCache and then serialized into a SQL IN clause parameter, causing the DB driver to reject the query or exhaust memory, halting all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2154c4cd-307b-4e82-b89a-d9d7af5df0fa?mode=deep",
+    "timestamp": "2026-05-01 21:42:36.794227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user craft requests that cause the contractStateCache (expireAfterWrite=2s, maximumSize=25000) to be continuously filled and expired, creating a write-heavy workload that causes Caffeine's internal maintenance threads to consume excessive CPU, starving the web3 service threads and preventing transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9582b192-7838-4cd0-9462-32850b17428b?mode=deep",
+    "timestamp": "2026-05-01 21:42:51.425017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the isKeyEvictedFromCache fallback path — where findStorage() falls back to contractStateRepository.findStorage() when isKeyEvictedFromCache is true — by crafting requests that always trigger cache eviction, causing every request to bypass the batch cache and issue individual DB queries, amplifying DB load by a factor equal to the number of concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00b66e5d-a289-488d-a282-0472cd5d30db?mode=deep",
+    "timestamp": "2026-05-01 21:43:05.311001",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user send requests for a contractId with exactly maximumSize=3000 unique slot keys, then immediately send a new request with a 3001st key, causing the oldest entry to be evicted and isKeyEvictedFromCache to be set to true, triggering a fallback individual DB query on every subsequent request for that evicted key, creating a sustained DB overload?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd787772-400f-4f46-b202-d55e9b07c794?mode=deep",
+    "timestamp": "2026-05-01 21:43:19.735586",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user exploit the fact that cacheManagerSlotsPerContract.getCache(contractId.toString()) is called lazily inside a Caffeine loader lambda, by sending concurrent requests for the same contractId, causing multiple CaffeineCache instances to be created for the same contractId and stored redundantly, leading to memory exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7eefdddb-ba21-496d-ba55-355d8971d48d?mode=deep",
+    "timestamp": "2026-05-01 21:43:33.643703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageByBlockTimestamp()] Can an unprivileged external user pass a negative blockTimestamp (e.g., -1L) to findStorageByBlockTimestamp(), causing the SQL condition consensus_timestamp <= -1 to match no rows but still perform a full index scan, and by flooding with such requests, saturate DB I/O and prevent legitimate transaction queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acf096b5-fcaa-4696-b68d-ad8c4b9ba8ba?mode=deep",
+    "timestamp": "2026-05-01 21:43:46.920127",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that findStorageBatch() calls contractStateRepository.findStorageBatch(contractId.getId(), cachedSlots) with a list that includes all currently cached slot keys (not just the requested one), causing a single user request to trigger a DB query that reads data for hundreds of other users' slots, amplifying DB read load and causing a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b13e65e2-366c-4f4e-b633-afa1dc9d27c1?mode=deep",
+    "timestamp": "2026-05-01 21:44:00.933820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user exploit the 2-second contractStateCache expiry (expireAfterWrite=2s) by timing requests to always arrive just after cache expiry, ensuring every request misses the cache and triggers a fresh findStorageBatch() DB query, creating a sustained high-frequency DB load that prevents transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff911e6a-757c-4824-9608-bb631be491f0?mode=deep",
+    "timestamp": "2026-05-01 21:44:16.239076",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user pass a byte[] key whose content is identical to another contract's slot key but for a different contractId, causing generateCacheKey(contractId, slotKey) to produce a SimpleKey that is semantically correct but, due to byte[] equality semantics in SimpleKey, collides with a different entry, corrupting cached slot values and causing incorrect EVM state reads that halt transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfcc2eea-40cb-4e6b-971b-2dd57951e1b2?mode=deep",
+    "timestamp": "2026-05-01 21:44:32.175882",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the fact that ((ByteBuffer) slot).array() is called on cached ByteBuffer keys in findStorageBatch(), and if the ByteBuffer was created with a non-zero offset (e.g., ByteBuffer.wrap(array, offset, length)), the .array() call returns the full backing array including bytes outside the intended range, causing incorrect slot keys to be sent to the DB query and corrupting contract state lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acaf9cb9-aeab-49c3-a6ad-a3dc43ab6c94?mode=deep",
+    "timestamp": "2026-05-01 21:44:51.261827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorage()] Can an unprivileged external user send requests with EntityId values that encode to id=0 (EMPTY EntityId), causing findStorage() to query contractStateRepository.findStorage(0L, key), which may match unintended rows in the contract_state table and return incorrect storage values, corrupting EVM execution for all contracts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92635ed0-9854-4877-9f0b-91efacbefc15?mode=deep",
+    "timestamp": "2026-05-01 21:45:08.303097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/service/ContractStateService.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findStorageBatch()] Can an unprivileged external user exploit the unbounded growth of cachedSlots ArrayList in findStorageBatch() — which is sized to cachedSlotKeys.size() but then iterated without bounds — by pre-filling the per-contract cache to its maximum size, causing the ArrayList to allocate a large contiguous memory block on every request, leading to GC pressure and eventual OOM?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc43cf96-3666-4dc8-bbdc-c6a7cf76f3a2?mode=deep",
+    "timestamp": "2026-05-01 21:45:23.587709",
+    "report_generated": false
+  }
+]
