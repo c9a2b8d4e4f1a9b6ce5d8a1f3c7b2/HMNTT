@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48b10c15-c104-4475-97ea-182be7304ef8?mode=deep",
     "timestamp": "2026-04-28 18:43:05.362893",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user flood the web3 endpoint with concurrent contract-call requests during a DB network partition, causing all 9 retryTemplate retries to exhaust against an unreachable fileDataRepository.getFileAtTimestamp(), forcing a silent fallback to systemFile.genesisFile() for exchange rates, resulting in all fee calculations using genesis-era rates and enabling the attacker to underpay transaction fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_548b81ed-9a17-4720-8a3c-2c55be3cdd63?mode=deep",
+    "timestamp": "2026-05-01 22:27:47.668324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user trigger a network partition by exhausting the DB connection pool through high-volume requests, causing cacheManager.getCache(CACHE_NAME) to return null and bypassing the cache entirely, forcing every subsequent request to call loadFromDB() directly against the partitioned DB, amplifying the partition impact into a full denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82e1c252-5f06-4508-ae7e-e3ac460612ca?mode=deep",
+    "timestamp": "2026-05-01 22:27:59.814221",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user exploit the fact that retryTemplate only retries on InvalidFileException (predicate: e instanceof InvalidFileException) but NOT on DB connection exceptions (e.g., DataAccessException), so that during a network partition the first DB failure propagates uncaught past the retry logic, causing the caller to receive an unexpected exception rather than the genesis fallback, leading to inconsistent error handling across callers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d836850d-6f12-42b2-9959-2be842c7c7f8?mode=deep",
+    "timestamp": "2026-05-01 22:28:12.192417",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user time a contract call to arrive just after the exchangeRatesCacheManager TTL (expireAfterWrite=60m) expires during a network partition, causing load() to call loadFromDB() which fails silently and returns null, resulting in the caller receiving a null File for the exchange rate file and causing a NullPointerException or incorrect fee computation in downstream EVM execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_652bbfb4-271c-436a-b399-a2b4c910b19c?mode=deep",
+    "timestamp": "2026-05-01 22:28:25.134068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: roundDownToHour()] Can an unprivileged external user exploit the roundDownToHour() timestamp bucketing so that during a network partition lasting less than one hour, all requests within the same hour bucket receive the same stale cached exchange rate (ExchangeRateSet), allowing the attacker to submit transactions that are priced using an exchange rate that is up to 59 minutes stale, potentially underpaying fees if the HBAR/USD rate moved significantly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c51a6d1-f757-40ec-a5eb-9680b8e80240?mode=deep",
+    "timestamp": "2026-05-01 22:28:38.262477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user cause a network partition that makes fileDataRepository.getFileAtTimestamp() hang indefinitely (no query timeout configured), causing loadWithRetry() threads to block permanently, exhausting the web3 thread pool and causing a complete service denial for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1fadd87-b888-4b9b-97f3-2f760652df51?mode=deep",
+    "timestamp": "2026-05-01 22:28:51.205231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user exploit the nanoSeconds.set(fileData.getConsensusTimestamp() - 1) timestamp walk-back in loadWithRetry() during a partition where the DB returns partially-written corrupt data, causing the retry loop to walk the timestamp all the way back to genesis and ultimately return the genesis ThrottleDefinitions, allowing the attacker to bypass current throttle limits that were tightened after genesis?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bb449c4-34f1-47c4-b775-9894ff172506?mode=deep",
+    "timestamp": "2026-05-01 22:29:04.275349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: createMockAddressBook()] Can an unprivileged external user trigger a network partition that causes the address book files (101/102) to be unavailable from the DB, causing loadWithRetry() to fall back to the hardcoded mockAddressBook (127.0.0.3:3), which is a loopback address, resulting in the EVM using a fake single-node address book that misrepresents the real network topology and could affect consensus-dependent logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d213e3d-027a-44d6-bde9-8f9806b1d7b4?mode=deep",
+    "timestamp": "2026-05-01 22:29:17.411707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadAll()] Can an unprivileged external user trigger a network partition at the exact moment the lazy-initialized systemFiles map (loadAll()) is first computed, causing loadAll() to build the map with genesis-only fallback files for all system entities, and since the map is cached in a final field via @Getter(lazy=true), the partition-era genesis-only map persists for the entire lifetime of the JVM process, permanently degrading system file resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ee603b5-76ff-4d58-89b3-70352b820e32?mode=deep",
+    "timestamp": "2026-05-01 22:29:30.158335",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the absence of a circuit breaker in load() so that during a sustained network partition, every cache miss triggers a new call to loadFromDB() -> loadWithRetry() -> fileDataRepository.getFileAtTimestamp() (up to 10 DB calls per request), causing the DB connection pool to be exhausted by retry storms and preventing recovery even after the partition heals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_876184c1-3a44-466d-82a4-25a7e5c0390e?mode=deep",
+    "timestamp": "2026-05-01 22:29:43.117724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the fact that when loadFromDB() returns null (DB unreachable during partition), the result is NOT cached (cache.put() is only called when result != null), causing every subsequent request for the same CacheKey to bypass the cache and hammer the partitioned DB repeatedly, amplifying the partition into a thundering-herd denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09674cdf-d5d3-42c1-b655-3269d886327d?mode=deep",
+    "timestamp": "2026-05-01 22:29:56.576193",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user cause a network partition that results in fileDataRepository.getFileAtTimestamp() returning an empty Optional, causing loadWithRetry() to return systemFile.genesisFile() silently without any exception, so that the caller (e.g., FileReadableKVState) receives genesis-era ThrottleDefinitions and the attacker can submit transactions at rates that exceed the current network throttle limits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14df087e-9e22-403e-ba96-a940b69bf38f?mode=deep",
+    "timestamp": "2026-05-01 22:30:09.956355",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the two separate CacheManager instances (exchangeRatesCacheManager vs defaultSystemFileCacheManager) so that during a partial network partition affecting only one cache backend, the exchange rate file is served from a stale cache while the fee schedule file is loaded fresh from DB (or vice versa), creating an inconsistent state where fee calculations use mismatched exchange rate and fee schedule versions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11b44ef7-444d-4c2e-9678-741d007d5795?mode=deep",
+    "timestamp": "2026-05-01 22:30:23.057752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: maxExpiry()] Can an unprivileged external user exploit a network partition that causes Instant.now() to return a skewed time (e.g., NTP desync during partition), causing maxExpiry() to compute an incorrect expirationSecond for genesis files loaded via load(EntityId, Bytes), resulting in system files with incorrect expiry that downstream EVM logic may reject as expired, causing contract calls to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5d7316e-e31a-4345-bef2-f2706afda245?mode=deep",
+    "timestamp": "2026-05-01 22:30:36.898660",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user craft a sequence of requests that causes the AtomicLong nanoSeconds to be mutated across concurrent retry executions (since nanoSeconds is shared within a single loadWithRetry() invocation but retryTemplate.execute() may be called from multiple threads), causing race conditions in the timestamp walk-back logic that result in incorrect historical file versions being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d5d2e0d-628c-4e15-a724-8ca18231cc97?mode=deep",
+    "timestamp": "2026-05-01 22:30:49.715917",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the fact that during a network partition, load() returns null for non-genesis system files (when loadFromDB returns null), and the caller FileReadableKVState.readFromDataSource() passes this null to downstream EVM components that do not null-check, causing a NullPointerException that crashes the EVM execution context and denies service to all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00a8723c-0272-4df4-81a4-9c967d72c0f4?mode=deep",
+    "timestamp": "2026-05-01 22:31:02.854123",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user trigger a network partition that causes all 10 attempts (1 initial + 9 retries) in retryTemplate to fail with RetryException, causing loadWithRetry() to silently return systemFile.genesisFile() for the feeSchedulesFileId, so that all contract calls during the partition use genesis-era fee schedules that may have drastically lower gas costs, enabling the attacker to execute expensive operations at genesis prices?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dba9dfba-f701-4ae7-9a25-1793a353fd77?mode=deep",
+    "timestamp": "2026-05-01 22:31:15.731504",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the exchangeRatesCacheManager TTL of 60 minutes (fee=expireAfterWrite=60m) so that by inducing a brief network partition at the start of an hour boundary, the stale genesis exchange rate gets cached for the entire next hour, causing all fee calculations for that hour to use incorrect rates and allowing the attacker to underpay fees for up to 60 minutes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1542593a-4ced-4698-849d-ecfcaa6be82b?mode=deep",
+    "timestamp": "2026-05-01 22:31:28.819590",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadAll()] Can an unprivileged external user exploit a network partition during application startup (when loadAll() is lazily triggered) to cause the systemFiles map to be populated with genesis-only fallback files for addressBookFile101 and addressBookFile102, resulting in the mock address book (127.0.0.3) being used as the canonical address book for the entire process lifetime, affecting any EVM logic that depends on the real node address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_864530b8-fabb-4504-840a-80852db4a6c2?mode=deep",
+    "timestamp": "2026-05-01 22:31:42.180734",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the fact that genesisNetworkProperties always bypasses the DB (the fileId equality check at line 105), so that during a network partition the network property file is always served from the in-memory genesis value regardless of any updates that occurred after genesis, causing the EVM to operate with outdated network properties that may have been changed to fix security issues?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f72fe9ff-6dec-4dd0-a877-c604f5319ca8?mode=deep",
+    "timestamp": "2026-05-01 22:31:56.236131",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user cause a network partition that makes fileDataRepository.getFileAtTimestamp() return a non-empty Optional with empty fileData bytes, which is filtered out by ArrayUtils.isNotEmpty(fileData.getFileData()), causing loadWithRetry() to return systemFile.genesisFile() silently, and since this result IS returned (not null), it gets cached by load(), poisoning the cache with genesis data for up to 10 minutes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f17789ac-fc34-41f7-87ea-cb8230adfd2f?mode=deep",
+    "timestamp": "2026-05-01 22:32:09.340445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the CacheKey record (FileID + consensusTimestamp) so that during a network partition, a genesis file fallback is cached under a specific CacheKey, and after partition recovery, requests with the same CacheKey (same fileId + same hour-rounded timestamp) continue to receive the stale genesis file from cache for up to 60 minutes, preventing recovery of correct exchange rates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65cbed30-192e-4708-a230-3232850d7dff?mode=deep",
+    "timestamp": "2026-05-01 22:32:23.717118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadWithRetry()] Can an unprivileged external user exploit the fact that during a network partition, the retryTemplate executes up to 10 sequential DB queries per request (each calling fileDataRepository.getFileAtTimestamp()), and by sending N concurrent requests, cause N*10 simultaneous DB connection attempts that overwhelm the connection pool and prevent the partition from healing even after the underlying network issue is resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2bf199e-666f-48bb-aa12-a429267e4579?mode=deep",
+    "timestamp": "2026-05-01 22:32:38.103501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: createMockAddressBook()] Can an unprivileged external user exploit the hardcoded mock address book (nodeId=3, IP=127.0.0.3, port=3) returned by createMockAddressBook() during a network partition, where the address book DB is unavailable, causing the EVM to use a single-node loopback address book that could affect any EVM precompile or system contract that reads node addresses, potentially causing incorrect behavior in node-stake or address-book-dependent computations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d165cb0-8572-4883-b07f-6dadb7fc9b5b?mode=deep",
+    "timestamp": "2026-05-01 22:32:51.759985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: web3/src/main/java/org/hiero/mirror/web3/state/SystemFileLoader.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user exploit the absence of a fallback-to-cache-on-DB-failure mechanism in load(), where if the DB is partitioned and the cache has expired, load() returns null instead of returning the last known good cached value, causing downstream NullPointerExceptions and denying service rather than gracefully degrading?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fceb4da3-5846-4bfc-b418-f2c17297a68c?mode=deep",
+    "timestamp": "2026-05-01 22:33:06.248269",
+    "report_generated": false
   }
 ]
