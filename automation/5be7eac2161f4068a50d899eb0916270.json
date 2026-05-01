@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user exploit the safetyCheck Flux (which fires after 1 second if topicContext.isComplete() is false) by subscribing with a filter that never completes, causing repeated missingMessages() gap-recovery queries to the database every second indefinitely, creating a sustained high-frequency DB polling attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aef01c7b-7cc6-4ab6-9d71-a7134a6eaf39?mode=deep",
+    "timestamp": "2026-05-01 22:58:13.996098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: missingMessages()] Can an unprivileged external user trigger the safety check path in missingMessages() (where current==null) by subscribing to a topic with no recent messages, causing the server to issue a retrieve() call with the original filter's startTime (potentially epoch zero), resulting in a full table scan of the topic_message table that degrades database performance for all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8c2965e-0a0e-4695-8db5-bf380b8498d5?mode=deep",
+    "timestamp": "2026-05-01 22:58:26.349989",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user subscribe to a topic with a very old startTime, causing the historical Flux to retrieve millions of transaction records, and then immediately cancel the stream via the gRPC cancel mechanism, only to re-subscribe repeatedly, causing repeated large DB reads that constitute a denial-of-service against the transaction history retrieval system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8369a52e-8c67-417b-8b86-1cbb2df7edea?mode=deep",
+    "timestamp": "2026-05-01 22:58:39.109399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getNodes()] Can an unprivileged external user send an AddressBookQuery with limit=0 to NetworkController.getNodes(), causing the server to stream the entire address book without bound via Flux.take(Long.MAX_VALUE), exposing all node IP addresses, public keys, and stake information that could be used to target network nodes for attacks that tamper with transaction routing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe16c966-35a7-4863-a133-8978eb46d3bc?mode=deep",
+    "timestamp": "2026-05-01 22:58:52.145995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toFilter() in NetworkController] Can an unprivileged external user send an AddressBookQuery without a fileId field, causing toFilter() to build an AddressBookFilter with a null fileId, which then fails the getValidFileIds().contains(null) check and throws an IllegalArgumentException that reveals the INVALID_FILE_ID error message, confirming the existence of the file ID validation mechanism to an attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9fc2f31-3960-4a4f-9121-a4968aea7318?mode=deep",
+    "timestamp": "2026-05-01 22:59:05.174821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user exploit the subscriberCount AtomicLong metric exposed via the 'hiero.mirror.grpc.subscribers' gauge to monitor the number of active subscribers in real time, using this information to time transaction submission attacks when subscriber counts are low and monitoring is reduced?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4df4be29-0be9-4bd6-858b-3eee18eb769d?mode=deep",
+    "timestamp": "2026-05-01 22:59:18.788367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: recordMetric()] Can an unprivileged external user submit HCS transactions with a consensusTimestamp set far in the future, causing the latency calculation in recordMetric() (System.currentTimeMillis() - consensusTimestamp/1000000) to produce a negative value that is silently ignored (latency > 0 check), preventing accurate latency monitoring and masking transaction processing anomalies?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ade4b16-ff28-4026-af77-01bbd1526d64?mode=deep",
+    "timestamp": "2026-05-01 22:59:33.306215",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: listen() in CompositeTopicListener] Can an unprivileged external user exploit the fact that listenerProperties.isEnabled() is checked at listen() time rather than at subscription time, and by timing their subscription to coincide with a listener disable/enable cycle, receive transaction messages that bypass the topic ID and timestamp filter checks applied only in filterMessage()?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2187df9-2a36-42df-8715-19c7a86a00fe?mode=deep",
+    "timestamp": "2026-05-01 22:59:48.591310",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: poll() in PollingTopicListener] Can an unprivileged external user subscribe with a filter where limit is set to a value that causes (filter.getLimit() - context.getCount().get()) to underflow to a negative number when cast to int, causing Math.min(limit, listenerProperties.getMaxPageSize()) to return a negative pageSize that corrupts the database query and potentially returns unintended transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d3877eab-9be5-4160-a243-8c0e18118700?mode=deep",
+    "timestamp": "2026-05-01 23:00:02.894757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user craft a ConsensusTopicQuery with consensusStartTime set to the current time minus one nanosecond (just passing isValidStartTime()) and consensusEndTime set to current time plus one nanosecond, creating an extremely narrow time window that causes the server to repeatedly poll for transactions in a tight loop via the pastEndTime() mechanism, generating excessive load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e726d5c-eed5-492e-8e76-b2cadabe9d83?mode=deep",
+    "timestamp": "2026-05-01 23:00:15.771516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toResponse()] Can an unprivileged external user submit an HCS transaction with a crafted payerAccountId that, when converted via payerAccountEntity.toAccountID(), produces a protobuf AccountID with unexpected shard/realm/account values, causing downstream clients that rely on the gRPC stream to misidentify the transaction payer and attribute transaction costs to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_652efffa-7423-44b2-a445-b9c3f08da2a0?mode=deep",
+    "timestamp": "2026-05-01 23:00:28.734975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toResponse()] Can an unprivileged external user submit an HCS transaction with a validStartTimestamp that, when converted via ProtoUtil.toTimestamp(), produces a Timestamp with negative seconds or nanos values, causing the ConsensusMessageChunkInfo.initialTransactionID to contain an invalid TransactionID that corrupts chunk reassembly for all subscribers monitoring that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b6b8823-f821-4c9f-a167-3712ba76c7fb?mode=deep",
+    "timestamp": "2026-05-01 23:00:41.830459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user open thousands of gRPC connections (each with up to 5 concurrent calls via maxConcurrentCallsPerConnection), each subscribing to a different topic with no endTime and no limit, exhausting the applicationTaskExecutor thread pool configured in GrpcConfiguration and preventing the server from accepting new transaction-related gRPC calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7237760-fcce-44ed-a9c5-e0317e7f8bf4?mode=deep",
+    "timestamp": "2026-05-01 23:00:55.564910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: isComplete()] Can an unprivileged external user set consensusEndTime to a value that is less than the filter's startTime (which would normally be caught by isValidEndTime()), but exploit a race condition in isComplete() where filter.getEndTime() < startTime returns true immediately, causing the stream to complete before any transaction messages are delivered and masking the existence of transactions in that time range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b077ea9b-3b42-4a05-8a77-24469d75bfc6?mode=deep",
+    "timestamp": "2026-05-01 23:01:10.017315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribe() in RedisTopicListener] Can an unprivileged external user cause the Redis connection to fail by flooding the Redis pub/sub channel with malformed serialized TopicMessage objects, triggering the retryWhen(Retry.backoff(Long.MAX_VALUE, interval)) loop indefinitely and preventing legitimate transaction messages from being delivered to all subscribers of that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c991ca7-8734-49c4-b7f0-dd59bfec74fe?mode=deep",
+    "timestamp": "2026-05-01 23:01:25.014998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getSharedListener() in RedisTopicListener] Can an unprivileged external user exploit the computeIfAbsent pattern in the topicMessages ConcurrentHashMap to create a race condition where two threads simultaneously create subscriptions for the same topic key, resulting in duplicate message delivery to subscribers and causing the sequence number deduplication logic in missingMessages() to incorrectly drop valid transaction messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99890383-226b-4463-9d27-3198cfc7a60f?mode=deep",
+    "timestamp": "2026-05-01 23:01:41.410060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: finished() in TopicContext] Can an unprivileged external user craft a subscription that causes the finished() log message to include a subscriberId (randomly generated via RandomStringUtils) that collides with another subscriber's ID, causing log correlation attacks where an attacker can monitor log output to track another user's subscription activity and infer their transaction monitoring patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8f134559-4e1a-471b-9b0e-a1cf0e93f566?mode=deep",
+    "timestamp": "2026-05-01 23:01:56.196281",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toFilter()] Can an unprivileged external user send a ConsensusTopicQuery with a topicID containing shard=0, realm=0, topicNum=0 (the zero entity ID), causing EntityId.of() to create a special zero-value EntityId that bypasses topic existence checks or matches unintended database records, leaking transaction data from system-level topics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0a0b3ac-b3e3-4f54-ac70-c101b7b92f04?mode=deep",
+    "timestamp": "2026-05-01 23:02:11.831159",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user exploit the Mono.fromCallable(() -> toFilter(request)) wrapping to cause a synchronous exception in toFilter() that propagates through onErrorMap(ProtoUtil::toStatusRuntimeException), and by observing the specific gRPC status code and message returned, enumerate which topic IDs exist and which validation rules are enforced on submitted transaction filters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_583a0448-829c-440e-baff-2a02f3be09ad?mode=deep",
+    "timestamp": "2026-05-01 23:02:27.107553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: incomingMessages()] Can an unprivileged external user exploit the limit recalculation in incomingMessages() (limit = filter.getLimit() - topicContext.getCount().get()) by subscribing with a limit of 1 and then rapidly cancelling and resubscribing, causing the server to repeatedly query for single transaction messages and generating excessive per-query overhead that degrades database performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95422609-dee6-4bc6-b694-b8b6ae004a85?mode=deep",
+    "timestamp": "2026-05-01 23:02:42.294640",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: poll() in SharedPollingTopicListener] Can an unprivileged external user exploit the shared PollingContext.lastConsensusTimestamp in SharedPollingTopicListener, which is updated by onNext() for all subscribers, to observe that subscribing to a topic causes the shared poll's timestamp to advance, allowing the attacker to infer when other users' transactions are being processed without directly accessing those transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63e279c8-d842-4866-8e19-4430ec4b5297?mode=deep",
+    "timestamp": "2026-05-01 23:02:56.604693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onStart() in SharedPollingTopicListener.PollingContext] Can an unprivileged external user trigger a new subscription to the SharedPollingTopicListener at a precise moment to reset the lastConsensusTimestamp to DomainUtils.now(), causing the shared poller to skip all transaction messages that arrived between the previous poll and the reset, creating a gap in transaction delivery for all existing subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85c4d4ee-0395-4eef-bf1b-0253922293a7?mode=deep",
+    "timestamp": "2026-05-01 23:03:10.857285",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: subscribeTopic()] Can an unprivileged external user submit HCS transactions with message payloads at the maximum allowed size repeatedly to a topic, causing the historical retrieval Flux to emit extremely large TopicMessage objects that, when serialized to ConsensusTopicResponse protobuf, exceed gRPC message size limits and cause stream errors that terminate legitimate subscribers' connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b9ae55b-9100-4719-9a0c-4c585a99f2ea?mode=deep",
+    "timestamp": "2026-05-01 23:03:25.739389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toResponse()] Can an unprivileged external user submit an HCS transaction with a message field containing binary data that, when wrapped in ProtoUtil.toByteString() and included in ConsensusTopicResponse, causes protobuf deserialization issues in downstream clients that incorrectly assume the message field contains valid UTF-8 text, leading to client-side crashes that disrupt transaction monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b40a978-1687-4cf1-bf8b-d332d725dab5?mode=deep",
+    "timestamp": "2026-05-01 23:03:42.705975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/GrpcApplication.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: toResponse()] Can an unprivileged external user submit an HCS transaction with a runningHash field containing all-zero bytes, causing the ConsensusTopicResponse to include a zeroed running hash that downstream clients use to verify transaction integrity, effectively making it impossible for clients to detect that the running hash chain has been broken or tampered with?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ba02924-388b-463c-a894-3073dc21210e?mode=deep",
+    "timestamp": "2026-05-01 23:03:57.280178",
+    "report_generated": false
+  }
+]
