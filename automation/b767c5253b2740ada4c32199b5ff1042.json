@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: formatTransactionRows()] Can an unprivileged external user cause the `transaction_hash` field to be exported as an incorrect base64 value in the mirror node response by submitting a transaction with a binary hash that contains characters that differ between standard base64 and base64url encoding, since `formatTransactionRows()` uses `utils.encodeBase64(row.transaction_hash)` without specifying URL-safe encoding, potentially exporting a hash that doesn't match the original?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5bf5d45-ca59-4569-b4cf-ade62a4ee214?mode=deep",
+    "timestamp": "2026-05-01 15:48:41.267178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: formatTransactionRows()] Can an unprivileged external user cause the `bytes` field to be exported as `null` in the mirror node response when `transaction_bytes` is an empty buffer (not null), since `formatTransactionRows()` calls `utils.encodeBase64(row.transaction_bytes)` and if `encodeBase64` treats empty buffers as null, the exported record incorrectly omits the transaction bytes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_724324d3-976d-4b40-9c14-4ec1dcbd428e?mode=deep",
+    "timestamp": "2026-05-01 15:48:53.497514",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: formatTransactionRows()] Can an unprivileged external user cause the `high_volume` field to be exported as `false` instead of the correct value in the mirror node response, since `formatTransactionRows()` uses `row.high_volume ?? false`, and if the DB returns `null` for `high_volume` (meaning unknown/not set), the exported record incorrectly reports `false` rather than the true state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e53d198-b0cd-425d-b9e7-6883a5a7337e?mode=deep",
+    "timestamp": "2026-05-01 15:49:06.282047",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user cause transactions to be duplicated in the mirror node export by supplying an `account.id` filter, since `getTransactionTimestampsQuery()` performs a full outer join between `transactionOnlyQuery`, `cryptoTransferQuery`, and `tokenTransferQuery`, and if a transaction appears in multiple subqueries, the `coalesce` logic may not fully deduplicate, resulting in duplicate records exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc07f62b-fa4a-490d-ade6-fcf94a728dd2?mode=deep",
+    "timestamp": "2026-05-01 15:49:20.269469",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user cause NFT-only transactions (no crypto or token transfers) to be missing from the mirror node export by supplying an `account.id` filter, since `getTransactionTimestampsQuery()` uses `EntityTransaction` table in `nftTransfersUnion` but the outer query deduplicates on `(consensus_timestamp, payer_account_id)` using `distinct on`, and if the EntityTransaction entry has a different payer than the transaction table, the deduplication may drop the record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce2abbde-1759-45bd-8072-2fdd244f092a?mode=deep",
+    "timestamp": "2026-05-01 15:49:33.777713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user cause transfer records to be missing from the mirror node export by supplying a `timestamp` filter, since `getTransferDistinctTimestampsQuery()` replaces `t.consensus_timestamp` with `${tableAlias}.consensus_timestamp` in `timestampQuery` using a regex, and if the timestamp query contains additional references to `t.consensus_timestamp` in subexpressions, the replacement may be incomplete, causing incorrect filtering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47ae5cb5-a47d-465d-a72c-556631d58201?mode=deep",
+    "timestamp": "2026-05-01 15:49:46.750253",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user cause transaction records to be missing from the mirror node export when both `resultTypeQuery` and `transactionTypeQuery` are set with an `account.id` filter, since `getTransferDistinctTimestampsQuery()` only adds the `join` to the transaction table when `resultTypeQuery || transactionTypeQuery` is truthy, but the join condition `using (consensus_timestamp, payer_account_id)` may exclude transfers where the payer in the transfer table differs from the transaction table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e844c7d7-2fee-4a0a-9c32-ed7fb1a04959?mode=deep",
+    "timestamp": "2026-05-01 15:50:00.139286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user cause stale/incorrect transaction records to be served from cache to mirror node consumers by querying a `SCHEDULECREATE` transaction that has `elapsed < maxScheduledTransactionConsensusTimestampRangeNs`, since `getTransactionsByIdOrHashCacheControlHeader()` sets `SHORTER_CACHE_CONTROL_HEADER` (5 seconds) but the scheduled execution may occur within those 5 seconds, causing consumers to receive a cached response missing the scheduled transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4aa17269-ad0a-4f65-b489-2191784ae131?mode=deep",
+    "timestamp": "2026-05-01 15:50:14.005424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user cause incorrect cache control headers to be exported with transaction records by querying a transaction that has `transaction.type === scheduleCreateProtoId` but `transaction.result` is not in `SUCCESS_PROTO_IDS`, since `getTransactionsByIdOrHashCacheControlHeader()` only sets the shorter cache header for successful schedule creates, potentially causing failed schedule creates to be cached longer and served as stale records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6bc9416-b2c9-41cb-b9cd-4bc564967424?mode=deep",
+    "timestamp": "2026-05-01 15:50:27.587349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: transactionByPayerExcludeSyntheticCondition] Can an unprivileged external user cause synthetic transaction records to be incorrectly included in or excluded from the mirror node export by querying with an `account.id` filter that matches a synthetic transaction's payer, since `transactionByPayerExcludeSyntheticCondition` excludes transactions where `nonce != 0` AND `parent_consensus_timestamp is null` AND type not in `precedingTransactionTypes`, potentially including synthetic transactions that should be excluded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fdad9d0-3a5b-4b11-8cfb-91a3185222b4?mode=deep",
+    "timestamp": "2026-05-01 15:50:41.637386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user cause preceding-type transaction records to be incorrectly included in the mirror node export when `precedingTransactionTypes` is empty, since `transactionByPayerExcludeSyntheticCondition` omits the `or type in (...)` clause when `precedingTransactionTypes.length === 0`, potentially changing which synthetic transactions are excluded and causing incorrect records to be exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b1436f8-0c33-492f-9ddc-feaa91b25829?mode=deep",
+    "timestamp": "2026-05-01 15:50:56.560568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user cause transaction records to be missing from the mirror node export by querying a transaction hash that maps to multiple consensus timestamps, since `extractSqlFromTransactionsByIdOrHashRequest()` uses only `rows[0].payer_account_id` as the payer for all lookup keys, and if different rows have different payers, the SQL condition `payer_account_id = $X and consensus_timestamp = $Y` will miss transactions from non-first payers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ddf1622-721e-4b2a-90c5-177bd2411233?mode=deep",
+    "timestamp": "2026-05-01 15:51:09.562642",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user cause transaction records to be exported with an incorrect timestamp range by querying a transaction ID where `maxConsensusTimestamp` is computed as `transactionKeys[transactionKeys.length - 1]` (the last element of the array) when `timestampField === Transaction.CONSENSUS_TIMESTAMP`, but the array's last element is a timestamp (not a payer), potentially using a wrong upper bound and missing transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c640dfa-526f-4b63-8f59-ff0757a4c26a?mode=deep",
+    "timestamp": "2026-05-01 15:51:23.303466",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionQuery()] Can an unprivileged external user cause assessed custom fee records to be missing from the mirror node export by querying a transaction by ID, since `getTransactionQuery()` uses `subQueryCondition` for the `assessed_custom_fees` subquery but `subqueryConditions` in `getTransactionsByTransactionIdsSql()` only includes `payer_account_id in (...)` and timestamp range conditions (not the exact payer-timestamp pair), potentially including fees from wrong transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_155ce369-90ca-449c-ae4b-885b8074809d?mode=deep",
+    "timestamp": "2026-05-01 15:51:38.681115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionQuery()] Can an unprivileged external user cause token transfer records to be missing from the mirror node export by querying a transaction by ID where the token transfer's `payer_account_id` differs from the transaction's `payer_account_id`, since `getTransactionQuery()` filters token transfers by `payer_account_id = t.payer_account_id`, and if the token transfer was recorded with a different payer, it is excluded from the exported record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c43bd62-4332-4552-a218-22abb7991b68?mode=deep",
+    "timestamp": "2026-05-01 15:51:52.916934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionQuery()] Can an unprivileged external user cause crypto transfer records to be missing from the mirror node export by querying a transaction by ID where the crypto transfer's `payer_account_id` differs from the transaction's `payer_account_id`, since `getTransactionQuery()` filters crypto transfers by `CryptoTransfer.PAYER_ACCOUNT_ID = t.payer_account_id`, excluding transfers recorded under a different payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_873822a3-426f-4cd8-8ef9-90292a66789b?mode=deep",
+    "timestamp": "2026-05-01 15:52:07.326510",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: assessedCustomFeeJsonAgg] Can an unprivileged external user cause assessed custom fee records to be exported in an incorrect order in the mirror node response, since `assessedCustomFeeJsonAgg` orders by `collector_account_id, amount`, and if two fees have the same collector and amount but different `token_id` or `effective_payer_account_ids`, the ordering is non-deterministic, causing inconsistent records exported across different mirror node queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a53eb34-407e-4294-8404-a77664d962c3?mode=deep",
+    "timestamp": "2026-05-01 15:52:21.917676",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: cryptoTransferJsonAgg] Can an unprivileged external user cause crypto transfer records to be exported in an incorrect order in the mirror node response, since `cryptoTransferJsonAgg` orders by `entity_id, amount`, and if two transfers have the same `entity_id` and `amount` but different `is_approval` values, the ordering is non-deterministic, potentially causing inconsistent records exported to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be63ba10-26a4-471b-8ee9-b3a580bafe8e?mode=deep",
+    "timestamp": "2026-05-01 15:52:35.187318",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionTimestamps()] Can an unprivileged external user cause transaction records to be missing from the mirror node export by supplying a timestamp range that `bindTimestampRange()` modifies to be empty or inverted, since `getTransactionTimestamps()` reassigns `timestampRange.range` from `bindTimestampRange()` without validating the returned range, potentially causing the subsequent `buildTimestampQuery` to produce a condition that matches no rows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7647d44-e185-4fda-b5d3-3d98bda0758d?mode=deep",
+    "timestamp": "2026-05-01 15:52:49.149910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getTransactionTimestamps()] Can an unprivileged external user cause transaction records to be missing from the mirror node export by supplying a timestamp range where `timestampRange.range?.isEmpty()` returns true, since `getTransactionTimestamps()` returns `{rows: []}` in this case with no error, silently exporting zero records to mirror node consumers who may not detect the empty response as anomalous?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1941387a-e1b0-4f50-8d78-9dce6895bfc9?mode=deep",
+    "timestamp": "2026-05-01 15:53:04.383246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: formatTransactionRows()] Can an unprivileged external user cause the `staking_reward_transfers` field to be exported as `[]` instead of the correct transfers in the mirror node response, since `formatTransactionRows()` uses `stakingRewardMap.get(row.consensus_timestamp) || []`, and if `convertStakingRewardTransfers()` stores the timestamp as a different type (e.g., string vs BigInt), the Map lookup fails and staking rewards are silently omitted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f432e83a-781a-439d-acdb-544d8448b633?mode=deep",
+    "timestamp": "2026-05-01 15:53:19.023465",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: createStakingRewardTransferList()] Can an unprivileged external user cause staking reward transfer records to be missing from the mirror node export by submitting a transaction where the staking reward account transfer is in the `token_transfer` table rather than `crypto_transfer`, since `getStakingRewardTimestamps()` only checks `crypto_transfer_list` for the staking reward account entity ID, missing staking rewards recorded as token transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_817763dc-7858-4cb0-b558-bd8df9dcd012?mode=deep",
+    "timestamp": "2026-05-01 15:53:34.216477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getStakingRewardTransferList()] Can an unprivileged external user cause staking reward transfer records to be missing from the mirror node export by querying a large number of transactions simultaneously, since `getStakingRewardTransferList()` queries `StakingRewardTransfer.tableName` with `consensus_timestamp in ($1, $2, ...)` using positional parameters, and if the parameter count exceeds the DB limit, the query fails and staking rewards are silently dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d0d73de-7694-4679-bf9d-b10b1e6068e6?mode=deep",
+    "timestamp": "2026-05-01 15:53:49.877962",
+    "report_generated": false
+  }
+]
