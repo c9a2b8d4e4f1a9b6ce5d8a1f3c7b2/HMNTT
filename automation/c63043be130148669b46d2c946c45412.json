@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user inject arbitrary SQL by supplying a crafted `filter.operator` value (e.g., `; DROP TABLE schedule; --`) since line 192 interpolates `filter.operator` directly into the WHERE clause string as `${filterColumnMap[filter.key]}${filter.operator}$${paramCount}` without parameterization, causing full database compromise?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15922d84-9d5a-4b52-8258-b99ca656b3ba?mode=deep",
+    "timestamp": "2026-05-01 20:49:36.670707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user inject SQL via the `order` filter value since `scheduleOrderQuery` at line 68 interpolates `order` directly as `order by s.schedule_id ${order}` without sanitization, and `filterQuery.order` is set from `filter.value` at line 179, allowing ORDER BY injection to exfiltrate data or cause errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_400be5a8-0392-4079-9510-e64b6d283161?mode=deep",
+    "timestamp": "2026-05-01 20:49:48.548863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user inject SQL into the `entityQuery` at line 254 (`order by id ${order}`) by supplying a crafted `order` query parameter, since the `order` value from `extractSqlFromScheduleFilters` is interpolated directly into the secondary entity lookup query without parameterization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8081bc4-1006-45b9-8b74-e0e4ed5e609b?mode=deep",
+    "timestamp": "2026-05-01 20:50:01.152611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user inject SQL into the `signatureQuery` at line 258 (`order by entity_id ${order}`) by supplying a crafted `order` query parameter, since the same unparameterized `order` value is reused in the transaction_signature lookup query, leading to SQL injection in a second query path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c13e0c77-024e-4f44-a31f-a064c1e61fff?mode=deep",
+    "timestamp": "2026-05-01 20:50:13.982305",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user bypass the `acceptedSchedulesParameters` whitelist by supplying a `schedule.id` filter with a crafted operator (e.g., `gt:0 OR 1=1--`) that passes `buildAndValidateFilters` operator parsing but injects SQL when `filter.operator` is interpolated at line 192, since operator values are not parameterized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9460534-113e-4fe2-b720-3ee99d54a470?mode=deep",
+    "timestamp": "2026-05-01 20:50:27.230682",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause a denial-of-service by supplying `limit=25000` (or the maximum allowed integer) to force the server to fetch and serialize an extremely large number of schedule rows, entities, and signatures in three concurrent DB queries, exhausting memory and CPU?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2865bed9-364b-4523-88f9-fefad9f60048?mode=deep",
+    "timestamp": "2026-05-01 20:50:40.340632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user trigger unbounded `json_agg` aggregation in `transactionSignatureJsonAgg` (lines 39-45) by querying a schedule with a very large number of transaction signatures, causing the DB to aggregate and return megabytes of signature data per schedule row, leading to memory exhaustion on the server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67e0cb01-44cc-44ec-918a-3379db77b192?mode=deep",
+    "timestamp": "2026-05-01 20:50:53.326939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user trigger unbounded `json_agg` aggregation in `getScheduleByIdQuery` (lines 46-64) for a single schedule with thousands of signatures, since there is no LIMIT on the `json_agg` in the GROUP BY query, causing the server to allocate unbounded memory for a single API response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec8c6ac6-4f06-4ba5-a84e-01ba676dbdac?mode=deep",
+    "timestamp": "2026-05-01 20:51:06.269704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: mergeScheduleEntities()] Can an unprivileged external user cause prototype pollution by triggering a DB response where `entity.id` equals `__proto__` or `constructor`, since `entityMap[entity.id] = omit(entity, ['id'])` at line 215 uses the raw DB `id` value as an object key, and `Object.assign(schedule, entityMap[schedule.schedule_id] ?? {})` at line 224 would then pollute the Object prototype?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ecee3fc-d72e-490b-88fb-1a7800cf2dbe?mode=deep",
+    "timestamp": "2026-05-01 20:51:20.425033",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: mergeScheduleEntities()] Can an unprivileged external user cause prototype pollution via the `signatureMap` at line 219 where `signatureMap[signature.entity_id]` uses the raw DB `entity_id` as an object key, and if `entity_id` is `__proto__`, `Object.assign` at line 224 would merge attacker-influenced signature properties into the Object prototype, affecting all subsequent objects?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af150a6f-6674-4e19-9378-eff57ac21e5b?mode=deep",
+    "timestamp": "2026-05-01 20:51:34.069431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user obtain the full raw `transaction_body` of any schedule by calling `GET /api/v1/schedules/{id}`, since `transaction_body` is base64-encoded via `utils.encodeBase64(row.transaction_body)` at line 104 and returned in the response, potentially exposing sensitive scheduled transaction details to any unauthenticated caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c31fb0c6-dbc1-498f-9938-171c23c37f7d?mode=deep",
+    "timestamp": "2026-05-01 20:51:47.931853",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user enumerate all `public_key_prefix` and `signature` values for every signer of any schedule by calling `GET /api/v1/schedules/{id}`, since the `signatures` array at lines 85-91 returns `public_key_prefix` and `signature` fields base64-encoded without any access control, enabling cryptographic material harvesting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef5b7fe1-90af-4f41-b089-e3f401d3bc08?mode=deep",
+    "timestamp": "2026-05-01 20:52:02.014849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user obtain the `admin_key` of any schedule entity by calling `GET /api/v1/schedules/{id}`, since `utils.encodeKey(row.key)` at line 94 returns the full key material, enabling an attacker to identify key types and potentially target weak keys?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2713ec84-bda7-4bea-82fb-ceb2fc4afaca?mode=deep",
+    "timestamp": "2026-05-01 20:52:15.641292",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user enumerate all schedules created by a specific account by supplying `account.id=<target>` as a query parameter, since `creator_account_id` is directly filterable via `filterColumnMap` at line 24, exposing the full schedule history of any account without authentication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2b76af7-7435-42c6-be56-4c97c94a035a?mode=deep",
+    "timestamp": "2026-05-01 20:52:29.024696",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user perform a full table scan of the `schedule` table by issuing repeated paginated requests with no filters, since `getSchedules` with no `filterQuery` produces `select ... from schedule s order by s.schedule_id asc limit N` with no WHERE clause, allowing complete data exfiltration of all schedules?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_438eab94-e7b5-4689-acfe-2ca44dfdd948?mode=deep",
+    "timestamp": "2026-05-01 20:52:42.157802",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user cause a sensitive schedule response (containing `transaction_body`, `admin_key`, `signatures`) to be cached by public CDN/proxy infrastructure for up to 3600 seconds by querying a schedule that has `executed_timestamp` set, since `LONGER_SCHEDULE_CACHE_CONTROL_HEADER` returns `public, max-age=3600` at line 14, making sensitive data publicly cacheable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a928669d-15d6-4887-9a88-88952c21b159?mode=deep",
+    "timestamp": "2026-05-01 20:52:54.645550",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user manipulate cache behavior by querying a schedule whose `expiration_time` is null and `consensus_timestamp` is old enough that `nowNs >= consensusTimestamp + THIRTY_ONE_MINUTES * NANOS_PER_SECOND` evaluates to true at line 138, causing the response to be served with `public, max-age=3600` and cached by intermediaries, exposing stale sensitive data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52303595-bcfd-4348-a09a-9585599ebe03?mode=deep",
+    "timestamp": "2026-05-01 20:53:07.178918",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause a resource exhaustion attack by supplying the maximum allowed `limit` value, triggering three concurrent DB queries (`schedulesQuery`, `entityQuery`, `signatureQuery`) each operating on up to `limit` rows, multiplying DB load by 3x per request and enabling amplified DoS with minimal request rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2709188f-d27d-42fc-a541-25a06ca54f1f?mode=deep",
+    "timestamp": "2026-05-01 20:53:20.304579",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getSchedules()] Can an unprivileged external user cause the `positions` string at line 252 to grow unboundedly by supplying a large `limit` value, generating a SQL `IN (${positions})` clause with hundreds of positional parameters in both `entityQuery` and `signatureQuery`, causing query plan degradation and DB CPU exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fc1d60c-87df-4e7c-9507-0a68bc409ab5?mode=deep",
+    "timestamp": "2026-05-01 20:53:33.424462",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply multiple `schedule.id` filters (e.g., `schedule.id=gt:100&schedule.id=lt:200`) to generate a multi-condition WHERE clause, and by crafting the operator values injected at line 192, bypass intended range restrictions or inject SQL fragments between the `and` conjunctions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c8b408d-2c4a-4fa4-9b41-d44eb8d109bb?mode=deep",
+    "timestamp": "2026-05-01 20:53:45.834509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply multiple `account.id` filters to generate multiple `creator_account_id` conditions in the WHERE clause at line 192, and by crafting operator values, inject SQL that changes query semantics (e.g., `OR 1=1`) to return all schedules regardless of account filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8dcf469-a74f-4376-9140-5052e582b861?mode=deep",
+    "timestamp": "2026-05-01 20:53:58.847113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user cause an information disclosure by supplying a `scheduleId` path parameter that is a valid encoded entity ID resolving to a system entity (e.g., `0.0.2`, `0.0.800`), since `EntityId.parseString` at line 118 with `allowEvmAddress: false` still accepts numeric IDs, potentially exposing system entity schedule data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfbdb938-859e-4168-ae10-f0cba18cae16?mode=deep",
+    "timestamp": "2026-05-01 20:54:12.737084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: getScheduleById()] Can an unprivileged external user trigger a `NotFoundError` (404) for any arbitrary `scheduleId` to enumerate which schedule IDs exist vs. do not exist, since the check `rows.length !== 1` at line 121 throws `NotFoundError` for non-existent IDs, enabling schedule ID enumeration via timing/response differences?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eaac5886-6cdc-4f97-ab62-71baea97c109?mode=deep",
+    "timestamp": "2026-05-01 20:54:27.318535",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user obtain the `memo` field of any schedule by calling `GET /api/v1/schedules/{id}`, since `memo` is returned directly from `row.memo` at line 100 without any access control, potentially exposing sensitive business logic or PII embedded in schedule memos?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8d0726b-1d4b-433a-a8f1-c18b7ea51fbe?mode=deep",
+    "timestamp": "2026-05-01 20:54:41.020369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: '] [Function: formatScheduleRow()] Can an unprivileged external user determine whether a schedule has been deleted by reading the `deleted` field at line 95, and use this to infer network state or target schedules for replay/timing attacks based on their lifecycle status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e336716-8253-4a3a-83d4-3ee864d301f5?mode=deep",
+    "timestamp": "2026-05-01 20:54:54.382285",
+    "report_generated": false
+  }
+]
