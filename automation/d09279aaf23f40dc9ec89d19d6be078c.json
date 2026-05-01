@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `sum(e.balance)` aggregation—which operates over all entity rows matching the ID ranges—to cause a `bigint` overflow if the sum of balances exceeds `Long.MAX_VALUE` (9,223,372,036,854,775,807), resulting in a negative `unreleasedSupply` value that causes `NetworkSupply.releasedSupply()` to return a value greater than `TOTAL_SUPPLY`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e6646d5-8ad2-4fe0-b90f-2bf941b3c9f6?mode=deep",
+    "timestamp": "2026-05-01 15:21:03.964228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `cast(coalesce(sum(e.balance), 0) as bigint)` in `getSupply` by triggering a scenario where `sum(e.balance)` returns a value that overflows the `bigint` cast, causing PostgreSQL to throw an arithmetic overflow error that propagates as an unhandled exception to the HTTP response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20f864b3-7ec6-4e9b-9f4e-787086c14e02?mode=deep",
+    "timestamp": "2026-05-01 15:21:16.025835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's lack of a `WHERE deleted <> true` filter (unlike `findByAlias` and `findByEvmAddress`) to cause the supply calculation to include balances from soft-deleted entities, resulting in an inflated `unreleasedSupply` value that misrepresents the network's circulating supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_008df72b-4fd7-4e6a-967d-9b55aa663be3?mode=deep",
+    "timestamp": "2026-05-01 15:21:28.618031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `join unnest(...)` with overlapping ID ranges in `lowerBounds`/`upperBounds` to cause the same entity's balance to be counted multiple times in `sum(e.balance)`, resulting in an artificially inflated `unreleasedSupply` value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc1bbe85-5bbc-4589-852a-8d374bf08a64?mode=deep",
+    "timestamp": "2026-05-01 15:21:41.815993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user submit a `lowerBounds` string containing a negative bigint value (e.g., `'-1'`) to `getSupply`, causing the `e.id BETWEEN -1 AND ranges.max_val` condition to match entity IDs that would not normally be in scope, potentially including system entities with negative IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e19ad3f7-1c35-45b9-a59d-e76e570bd33f?mode=deep",
+    "timestamp": "2026-05-01 15:21:55.402132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `max(e.balance_timestamp)` aggregation to infer the most recent balance update timestamp across all unreleased supply accounts, leaking timing information about when system accounts last received or sent funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f475ff9-1e84-4ea2-821c-828b96f2fbe4?mode=deep",
+    "timestamp": "2026-05-01 15:22:08.473997",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user trigger repeated calls to `getSupply` via the `/api/v1/network/supply` endpoint without any timestamp parameter, causing `entityRepository.getSupply(lowerBounds, upperBounds)` to execute a full aggregation query on the `entity` table on every request, resulting in a CPU/IO exhaustion denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2aa82b5-38d7-404e-b04b-ce3b00146172?mode=deep",
+    "timestamp": "2026-05-01 15:22:21.060548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the absence of a `LIMIT` clause in the `getSupply` native query to cause PostgreSQL to scan and aggregate an unbounded number of entity rows when the configured ID ranges are very wide, leading to a slow query denial-of-service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b03aaf5-e2e5-47c7-ae75-63651ba4effd?mode=deep",
+    "timestamp": "2026-05-01 15:22:33.681904",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's use of `string_to_array` with a comma delimiter to inject a string containing only commas (e.g., `','`) as `lowerBounds`, causing `string_to_array` to produce an array of empty strings that fail the `bigint` cast, resulting in a database error that leaks SQL error messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3196e75-0275-44ab-9b05-46d407c87d96?mode=deep",
+    "timestamp": "2026-05-01 15:22:46.828200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `cast(coalesce(max(e.balance_timestamp), 0) as bigint) as consensus_timestamp` to cause a scenario where `consensus_timestamp` returns 0, triggering the `NetworkServiceImpl` check `if (networkSupply.consensusTimestamp() == 0L)` to throw `EntityNotFoundException`, effectively causing a denial-of-service for the supply endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef140647-9db1-4869-aa92-773a0a695ec3?mode=deep",
+    "timestamp": "2026-05-01 15:23:00.148274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's lack of explicit transaction isolation level to cause a dirty-read scenario where the aggregation reads partially-committed balance updates, resulting in an inconsistent `unreleasedSupply` value being returned to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fdd2db5-bf81-4690-af82-286698c5011b?mode=deep",
+    "timestamp": "2026-05-01 15:23:13.511714",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `unnest` of two parallel arrays to cause a misaligned range pairing—where `lowerBounds[i] > upperBounds[i]`—resulting in `e.id BETWEEN max_val AND min_val` which matches no rows in PostgreSQL, silently zeroing out the supply contribution for that range without any error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f035c874-f7b7-4d01-9ad1-324370db08e2?mode=deep",
+    "timestamp": "2026-05-01 15:23:26.609593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's `sum(e.balance)` to infer the approximate total balance held by system accounts (unreleased supply accounts 2, 42, 44-71, 73-87, 99-100, 200-349, 400-750) by repeatedly calling the supply endpoint and correlating the returned `unreleasedSupply` with known account ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c9c4711-42bf-4a7a-879f-7767e896b397?mode=deep",
+    "timestamp": "2026-05-01 15:23:39.492849",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `NetworkSupply.releasedSupply()` method—which computes `TOTAL_SUPPLY - unreleasedSupply` using unchecked long arithmetic—to cause a negative `releasedSupply` value if `unreleasedSupply` exceeds `5_000_000_000_000_000_000L`, leading to incorrect supply data being served to all API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e970b0d-61a4-4c03-92d8-07673fc4fdf7?mode=deep",
+    "timestamp": "2026-05-01 15:23:52.758965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: getSupply(String, String)] Can an unprivileged external user exploit the `getSupply` query's use of named parameters (`:lowerBounds`, `:upperBounds`) in a native query to test whether Spring Data JPA's parameter binding for `nativeQuery = true` performs any sanitization, and if not, whether a specially crafted string value could escape the `string_to_array` function context and inject SQL fragments?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d197abe-ee4a-4a30-ac99-d0d0fa6bbebf?mode=deep",
+    "timestamp": "2026-05-01 15:24:05.490204",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the fact that `findByAlias` returns only the entity `id` (not the full entity object) to use the returned ID as input to `CrudRepository.findById(Long)` (inherited by `EntityRepository`) to retrieve the complete `Entity` object including all sensitive fields, bypassing any field-level access controls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d3d65d1f-5fdf-4499-b007-4ab48e08e126?mode=deep",
+    "timestamp": "2026-05-01 15:24:18.777058",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the fact that `findByEvmAddress` returns only the entity `id` to chain it with `CrudRepository.findById(Long)` (inherited by `EntityRepository`) to retrieve the full `Entity` record, including fields like `key`, `memo`, `auto_renew_account_id`, that are not filtered by the `findByEvmAddress` query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1dac078-81dc-4d1d-a2f6-6a7897075aed?mode=deep",
+    "timestamp": "2026-05-01 15:24:32.063987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findById(Long) (inherited from CrudRepository)] Can an unprivileged external user call `findById(Long)` (inherited from `CrudRepository<Entity, Long>`) with a sequential numeric ID to enumerate all entities in the system, since unlike `findByAlias` and `findByEvmAddress`, the inherited `findById` does not apply a `deleted <> true` filter, returning deleted entities as well?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28dd834d-b79f-4da3-bb50-ebf21d357b59?mode=deep",
+    "timestamp": "2026-05-01 15:24:45.068644",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findById(Long) (inherited from CrudRepository)] Can an unprivileged external user exploit the absence of a `deleted <> true` filter in the inherited `CrudRepository.findById(Long)` method to retrieve the full `Entity` object for a soft-deleted account, obtaining sensitive data (keys, memos, balances) that should no longer be accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f81ca186-661f-4cab-9b39-b9a5bdefe4ab?mode=deep",
+    "timestamp": "2026-05-01 15:24:57.792883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findAll() (inherited from CrudRepository)] Can an unprivileged external user trigger a call to the inherited `CrudRepository.findAll()` method (if exposed through any service or controller) to retrieve all entities in the database without pagination, causing a massive data dump and denial-of-service due to unbounded result set size?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a99d737-129f-48e2-bc42-c7bde24f8af8?mode=deep",
+    "timestamp": "2026-05-01 15:25:11.619105",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the `Optional<Long>` return type of `findByAlias` to distinguish between 'alias not found' and 'alias found but entity deleted' states, since both return `Optional.empty()`, and use this indistinguishability to confirm that a specific alias was once registered (even if now deleted) by observing that the alias cannot be re-registered?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9d3f2a4-b503-4d21-a41e-d1e051b03945?mode=deep",
+    "timestamp": "2026-05-01 15:25:25.777595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the `Optional<Long>` return type of `findByEvmAddress` to perform a boolean oracle attack—submitting known EVM addresses from public blockchain data to confirm which Ethereum addresses have corresponding Hedera entity registrations, leaking cross-chain identity information?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08ceebae-3e25-4b3c-b870-16e1423d147f?mode=deep",
+    "timestamp": "2026-05-01 15:25:39.941925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByAlias(byte[])] Can an unprivileged external user exploit the native query `select id from entity where alias = ?1 and deleted <> true` by submitting a byte array that matches multiple rows (if the alias column lacks a unique constraint), causing the query to return multiple results and triggering an unexpected exception in the `Optional<Long>` return handling?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc7e1add-f042-442e-9a29-449a2e85ece6?mode=deep",
+    "timestamp": "2026-05-01 15:25:54.039857",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: '] [Function: findByEvmAddress(byte[])] Can an unprivileged external user exploit the native query `select id from entity where evm_address = ?1 and deleted <> true` by submitting a byte array that matches multiple rows (if the `evm_address` column lacks a unique constraint for non-deleted entities), causing the query to return multiple results and triggering an `IncorrectResultSizeDataAccessException` that leaks internal error details?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f7328a2-5dcf-40de-a2ae-06cf582e08d1?mode=deep",
+    "timestamp": "2026-05-01 15:26:08.902645",
+    "report_generated": false
+  }
+]
