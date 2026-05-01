@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that when statementTimeout > 0, GetDbWithContext() uses time.Duration(d.statementTimeout)*time.Second, and if statementTimeout is set to a very large value (e.g., math.MaxInt32), the resulting duration is approximately 68 years, effectively making the timeout useless during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_498a0ced-8f4f-43cb-8816-4bbe779658b7?mode=deep",
+    "timestamp": "2026-05-01 16:56:30.098259",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user send a burst of requests that all hit GetDbWithContext() simultaneously during a brief network partition window, causing all goroutines to block on DB queries with no timeout (statementTimeout <= 0), and when the partition resolves, the accumulated backlog of goroutines all attempt to execute simultaneously, causing a thundering herd that overwhelms the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a572654-3bf7-40c5-a925-5acb3b1bb1ac?mode=deep",
+    "timestamp": "2026-05-01 16:56:42.458690",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not check whether the passed ctx is already Done (ctx.Err() != nil) before creating a child context or returning the db, so a cancelled context is silently passed to gorm, which may or may not respect it depending on the gorm version, leading to unpredictable behavior during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b2a7cc6-3393-41e1-9a0b-193fa6e3b8aa?mode=deep",
+    "timestamp": "2026-05-01 16:56:54.960080",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the design where GetDbWithContext() with statementTimeout <= 0 returns noop as the cancel function, and callers that use the pattern 'db, cancel := client.GetDbWithContext(ctx); defer cancel()' will never release any context resources, causing a slow memory leak in long-running partition scenarios?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfe746fb-96df-4f1f-9482-d67648c18d97?mode=deep",
+    "timestamp": "2026-05-01 16:57:07.315224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user trigger a scenario where the statementTimeout context fires (context deadline exceeded) during a network partition, but gorm's underlying sql.DB does not immediately return the connection to the pool because the TCP connection is still in a half-open state, causing the connection pool to appear full while no connections are actually usable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2a67bed-8f06-47ca-a599-9cec4169c621?mode=deep",
+    "timestamp": "2026-05-01 16:57:19.765404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() creates a new context.WithTimeout for every call (when statementTimeout > 0), and by sending thousands of concurrent requests, cause thousands of timer goroutines to be created in the Go runtime, consuming memory and CPU even before the network partition causes the queries to hang?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84098831-e381-4bce-8b54-a135a644563d?mode=deep",
+    "timestamp": "2026-05-01 16:57:33.107809",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not implement any circuit-breaker or backoff logic, so during a sustained network partition, every incoming request immediately attempts a DB connection that will hang, rather than fast-failing once the partition is detected, allowing the attacker to amplify the impact of the partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ed08fb1-a79f-4cc4-9fd2-5d277eb628d0?mode=deep",
+    "timestamp": "2026-05-01 16:57:45.865170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the absence of connection health checks in GetDbWithContext() — it simply calls d.db.WithContext() without verifying the connection is alive — so during a network partition, stale connections from the pool are handed out to callers who then block indefinitely waiting for a response from an unreachable database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_54e02cc4-028e-43ee-9d68-368f6bfe7849?mode=deep",
+    "timestamp": "2026-05-01 16:57:58.709979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() with statementTimeout <= 0 and a non-nil ctx returns d.db.WithContext(ctx) where the context cancellation is the only protection, and by sending requests via a client that never closes the connection (persistent HTTP/1.1 keep-alive), ensure the context is never cancelled and the DB query hangs indefinitely during a partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58ddec47-43c4-4fcc-b0a3-65b416a17185?mode=deep",
+    "timestamp": "2026-05-01 16:58:12.485005",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not log or emit metrics when it detects statementTimeout <= 0, so operators have no visibility into the fact that timeout protection is disabled, and during a network partition the service silently hangs with no alerting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a37d7ca-3bbd-4a82-8675-e6fd19bfd980?mode=deep",
+    "timestamp": "2026-05-01 16:58:25.736227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user trigger a scenario where GetDbWithContext() is called with a context that has a very short deadline (e.g., 1 millisecond), causing the context to expire before the DB query even starts, and gorm returns a 'context deadline exceeded' error — but the underlying connection is not immediately returned to the pool during a network partition, causing a connection leak?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7dd9029-1e92-4df9-b9e1-072cdf5507e3?mode=deep",
+    "timestamp": "2026-05-01 16:58:38.591419",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() returns a *gorm.DB that shares the underlying *sql.DB connection pool with all other callers, so during a network partition where connections are held by blocked queries, a new caller receiving a *gorm.DB from GetDbWithContext() will block waiting for a pool connection rather than immediately failing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_063a728e-98a2-4adf-ab4b-2918883326e2?mode=deep",
+    "timestamp": "2026-05-01 16:58:52.289649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() with statementTimeout > 0 creates a context.WithTimeout but the timeout only cancels the context — it does not call sqlDB.Close() or force-close the TCP connection — so during a network partition, even after the timeout fires, the underlying TCP connection may remain in the OS network stack consuming resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2579e821-6c29-4b5c-849b-17b821a07ecf?mode=deep",
+    "timestamp": "2026-05-01 16:59:05.178222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user send requests that cause GetDbWithContext() to be called in a tight loop (e.g., via a pagination endpoint), where each iteration creates a new context.WithTimeout child context, and during a network partition each iteration blocks until timeout, causing the total request time to be N * statementTimeout seconds, effectively creating a slow-drain denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76f4bc26-0b62-4623-a3a1-89e6479b1f4a?mode=deep",
+    "timestamp": "2026-05-01 16:59:19.662433",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not implement retry logic with exponential backoff, so during a transient network partition, every request immediately fails or hangs rather than retrying after a brief delay, causing a thundering herd when the partition resolves?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1553e818-f0e9-4623-992e-1a882124fe70?mode=deep",
+    "timestamp": "2026-05-01 16:59:33.389124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() with statementTimeout <= 0 returns noop as the cancel function, and if the caller's code path has a bug where cancel is called multiple times (which is safe for real cancel functions), the noop function silently absorbs these calls, masking the fact that no real cancellation is occurring during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7283c85f-5d41-414c-8ece-8d1bcbe09ada?mode=deep",
+    "timestamp": "2026-05-01 16:59:47.770486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not validate that d.db is not nil before calling d.db.WithContext(), so if a network partition during initialization caused ConnectToDb() to return a partially initialized client, subsequent calls to GetDbWithContext() will panic with a nil pointer dereference?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8892e49f-3725-4aad-ac43-27e838c1c4ac?mode=deep",
+    "timestamp": "2026-05-01 17:00:00.559204",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() creates a context.WithTimeout using the wall clock (time.Duration), and if the system clock is adjusted (NTP sync, leap second) during a network partition, the timeout may fire earlier or later than expected, causing either premature query cancellation or extended hangs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_060a86aa-6e87-469b-aa3b-a95800232f43?mode=deep",
+    "timestamp": "2026-05-01 17:00:13.710797",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not implement any rate limiting on context creation, so during a network partition an attacker can send thousands of requests per second, each causing a new context.WithTimeout to be allocated, exhausting heap memory and triggering garbage collection pressure that further degrades service performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_84b473d2-b318-4adf-a23c-b0cf86e2a972?mode=deep",
+    "timestamp": "2026-05-01 17:00:27.623663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() with statementTimeout <= 0 and nil ctx returns d.db (without even calling WithContext), meaning the returned gorm.DB has no context at all, and any query on it will run with the default background context — making it completely immune to any upstream cancellation during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3fcf574d-e1bc-4471-ab66-6af522321eba?mode=deep",
+    "timestamp": "2026-05-01 17:00:40.959036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not check whether the connection pool has available connections before returning a *gorm.DB, so during a network partition where all connections are occupied, the caller will block inside gorm waiting for a connection from the pool, with no timeout if statementTimeout <= 0?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63337427-3c02-4646-b617-05167a825855?mode=deep",
+    "timestamp": "2026-05-01 17:00:54.243433",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() returns a *gorm.DB that is not safe to use after the associated context is cancelled, and if callers cache or reuse the returned *gorm.DB across multiple operations during a network partition, subsequent operations may use a context that has already expired, leading to immediate failures or undefined behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be5851dd-baea-4afa-80fd-f27094fdb83d?mode=deep",
+    "timestamp": "2026-05-01 17:01:08.446842",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not implement any jitter or randomization in the timeout value, so during a network partition all concurrent requests will have their contexts expire at exactly the same time (statementTimeout seconds after the request started), causing a synchronized thundering herd of retries that overwhelms the database when the partition resolves?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_737acaae-e7af-4f64-a4ba-1fc870b26020?mode=deep",
+    "timestamp": "2026-05-01 17:01:23.203643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() does not distinguish between a network partition (transient error) and a permanent DB failure, so the caller always receives the same error type, preventing the application from implementing appropriate recovery strategies and leaving the service in a degraded state indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c7c1fc1-4f00-4be8-9f3f-6cb0cd9f6263?mode=deep",
+    "timestamp": "2026-05-01 17:01:36.811254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetDbWithContext()] Can an unprivileged external user exploit the fact that GetDbWithContext() with statementTimeout > 0 creates a child context from the passed ctx, and if the passed ctx already has a shorter deadline than statementTimeout, the effective timeout is the shorter one — but if the passed ctx has a longer deadline, the statementTimeout is used — meaning the actual timeout behavior is non-deterministic from the caller's perspective during a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d519998a-fbd4-4bb9-b400-fa7b90489e9d?mode=deep",
+    "timestamp": "2026-05-01 17:01:51.332675",
+    "report_generated": false
+  }
+]
