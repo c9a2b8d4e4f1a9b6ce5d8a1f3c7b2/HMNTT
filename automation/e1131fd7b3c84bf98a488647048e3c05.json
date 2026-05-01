@@ -1,0 +1,134 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxSubscribeAttempts] Can an unprivileged external user exploit the fact that the errors AtomicInteger in BlockNode is shared across all concurrent calls to streamBlocks(), and if multiple threads simultaneously call onError(), the errors counter could reach maxSubscribeAttempts faster than expected, prematurely marking a healthy node as inactive and causing fund-transfer blocks to be routed to a less reliable or malicious node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e58832e8-ebd4-4fad-ae68-f0f3f7862a2f?mode=deep",
+    "timestamp": "2026-05-01 21:51:23.675032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: readmitDelay] Can an unprivileged external user exploit the tryReadmit(true) force-activation path in BlockNodeSubscriber.getNode() which sets active=true without resetting the errors counter, allowing a node that was deactivated due to maxSubscribeAttempts errors to be immediately re-activated and used for block streaming, where a single additional error immediately re-deactivates it, creating a rapid oscillation that prevents stable block processing and causes fund-transfer transactions to be missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5573060c-c072-447a-b6b4-fe6bc4f7ff5b?mode=deep",
+    "timestamp": "2026-05-01 21:51:35.736049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxBlockItems] Can an unprivileged external user send an empty BlockItemSet (blockItems.isEmpty() == true) to trigger the warning log in BlockAssembler.onBlockItemSet() without advancing the block assembly, then send a valid EndOfBlock message, causing onEndOfBlock() to process a block with no items (pending contains only the initial BLOCK_HEADER set), potentially creating a zero-transaction block that is accepted by the verifier and causes the block number sequence to advance, skipping legitimate fund-transfer transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f52a42d-0544-4020-8fc6-0097854c86a5?mode=deep",
+    "timestamp": "2026-05-01 21:51:48.118362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: responseTimeout] Can an unprivileged external user exploit the fact that BlockAssembler.timeout() uses a Stopwatch that starts on the first call and measures elapsed time against the commonDownloaderProperties timeout (not responseTimeout), and if the block node deliberately delays sending the first BlockItemSet until just before the timeout, the remaining timeout for subsequent reads becomes near-zero or negative, causing grpcCall.read() to return null and terminate the stream mid-block, dropping fund-transfer transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f577cf1-0632-4383-a076-4254fd05a9e8?mode=deep",
+    "timestamp": "2026-05-01 21:52:01.180680",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxStreamResponseSize] Can an unprivileged external user exploit the DataSizeUnit(DataUnit.MEGABYTES) annotation on maxStreamResponseSize, which means the value is interpreted as megabytes, and if the configuration is set to a very small value (e.g., 1MB) through environment variable injection, legitimate blocks larger than 1MB are rejected by the gRPC channel, triggering onError() and eventually deactivating all nodes, causing fund-transfer blocks to be permanently unprocessable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a0c3ac6-846e-41b3-9bf4-388a8ac66ad6?mode=deep",
+    "timestamp": "2026-05-01 21:52:14.014216",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxSubscribeAttempts] Can an unprivileged external user exploit the fact that BlockNodeSubscriber.getNode() iterates through inactive nodes and calls tryReadmit(true) to force-activate the first one that hasBlock(), but if the malicious node reports having the requested block via getBlockRange() but then fails to deliver it, the forced re-activation followed by immediate failure counts as another error, and since errors were reset to 0 on deactivation, the node gets maxSubscribeAttempts more chances to serve fraudulent data before being deactivated again?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f62696ba-bd27-4f96-b95d-23eb1233d4a8?mode=deep",
+    "timestamp": "2026-05-01 21:52:27.718353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: readmitDelay] Can an unprivileged external user exploit the minimum readmitDelay constraint of @DurationMin(seconds=10) by setting readmitDelay to exactly 10 seconds, and then causing maxSubscribeAttempts errors every 10 seconds across all nodes in a coordinated attack, ensuring that nodes are always in their readmit window when the next block is requested, creating a perpetual denial-of-service that prevents fund-transfer blocks from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af403e2d-23d3-4e99-93b8-d033a3be85c0?mode=deep",
+    "timestamp": "2026-05-01 21:52:41.132424",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxBlockItems] Can an unprivileged external user exploit the fact that pendingCount is an int (not long) in BlockAssembler, and send exactly Integer.MAX_VALUE - maxBlockItems + 1 items in the first BlockItemSet (which passes the maxBlockItems check since pendingCount starts at 0), then send one more item in a second BlockItemSet, causing pendingCount to overflow to a negative value that is less than maxBlockItems, bypassing the guard and allowing unbounded block assembly that exhausts JVM heap and crashes the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8480a6a-8439-4f35-97b0-57878c8ca323?mode=deep",
+    "timestamp": "2026-05-01 21:52:54.607389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: responseTimeout] Can an unprivileged external user exploit the fact that responseTimeout is used only for the serverStatus() call in getBlockRange() but not for the actual streamBlocks() subscription, allowing a malicious block node to pass the status check quickly (within responseTimeout) but then stall the block stream indefinitely, holding the BlockNodeSubscriber thread blocked on grpcCall.read() and preventing any other blocks from being processed, causing fund-transfer transactions to be permanently delayed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e36af91-665a-4a1a-8be5-3c296dfd0af1?mode=deep",
+    "timestamp": "2026-05-01 21:53:07.742561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxStreamResponseSize] Can an unprivileged external user exploit the fact that maxStreamResponseSize controls the gRPC maxInboundMessageSize but not the number of messages, allowing a malicious block node to send a stream of messages each exactly at the maxStreamResponseSize limit (36MB), causing the BlockAssembler to accumulate up to maxBlockItems * 36MB = ~28.8TB of data in memory before the maxBlockItems check triggers, crashing the JVM and halting all fund-transfer block processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_368395d9-1b2e-4083-a0ab-6b16d771ecb3?mode=deep",
+    "timestamp": "2026-05-01 21:53:21.297265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxSubscribeAttempts] Can an unprivileged external user exploit the synchronized getBlockNodes() method in BlockNodeSubscriber, which recreates all BlockNode objects when node properties change, resetting all error counters and active states, by repeatedly triggering node property changes (e.g., via DNS manipulation of block node hostnames) to continuously reset the error state and prevent nodes from ever being marked inactive, while simultaneously injecting errors that corrupt block data containing fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65ea4a3a-cc55-4bd8-b608-c3d7c16e1e19?mode=deep",
+    "timestamp": "2026-05-01 21:53:35.291231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: readmitDelay] Can an unprivileged external user exploit the fact that when all block nodes are inactive and BlockNodeSubscriber.getNode() throws BlockStreamException, the CompositeBlockSource catches this as a Throwable and calls sourceHealth.onError(), incrementing the FILE source error counter instead of the BLOCK_NODE counter, causing the system to incorrectly assess the FILE source as unhealthy and switch away from it, leaving no valid source for fund-transfer blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34ffd62a-155e-4736-88dc-700538a032b8?mode=deep",
+    "timestamp": "2026-05-01 21:53:48.988308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxBlockItems] Can an unprivileged external user exploit the fact that BlockAssembler.pending is a List<List<BlockItem>> that grows unboundedly until maxBlockItems is reached, and by sending many small BlockItemSets each containing 1 item, force the creation of up to maxBlockItems (800,000) separate List<BlockItem> objects in pending, causing excessive garbage collection pressure that degrades JVM performance and causes responseTimeout violations, triggering node deactivation and preventing fund-transfer blocks from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5564432c-ad3b-4b37-897b-eae532be21c7?mode=deep",
+    "timestamp": "2026-05-01 21:54:02.535221",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: responseTimeout] Can an unprivileged external user exploit the fact that BlockNode.getBlockRange() returns Range.closed(firstBlockNumber, response.getLastAvailableBlock()) where lastAvailableBlock could be set to Long.MAX_VALUE by a malicious block node, causing hasBlock() in BlockNodeSubscriber to always return true for any requested block number, forcing the system to always use this malicious node which then serves fraudulent blocks with manipulated fund-transfer data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef555c82-702b-4294-ae64-40305855854e?mode=deep",
+    "timestamp": "2026-05-01 21:54:16.061883",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxStreamResponseSize] Can an unprivileged external user exploit the fact that maxStreamResponseSize is validated with @NotNull but has no @Min constraint, allowing it to be set to DataSize.ofBytes(0) or DataSize.ofBytes(-1) through configuration, causing the gRPC channel to be created with maxInboundMessageSize of 0 or a negative value, which in gRPC-java means unlimited message size, allowing a malicious block node to send arbitrarily large messages that exhaust JVM heap and crash the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ab6ba46-f5e3-4157-a7fd-82d175105393?mode=deep",
+    "timestamp": "2026-05-01 21:54:30.905651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxSubscribeAttempts] Can an unprivileged external user exploit the fact that the @Min(1) constraint on maxSubscribeAttempts allows it to be set to 1, combined with the fact that BlockNode.onError() is called for any exception including transient network errors, so that a single packet loss or brief network interruption immediately deactivates a node, and with readmitDelay at minimum 10 seconds, creates a 10-second window every time there is any network hiccup where fund-transfer blocks cannot be processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f823ecc8-95ad-4d53-a9f0-c4c78507f2a0?mode=deep",
+    "timestamp": "2026-05-01 21:54:44.758431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: readmitDelay] Can an unprivileged external user exploit the fact that readmitDelay is applied uniformly to all nodes regardless of the type of error, so that even a node that returns a valid SUCCESS status (ending the stream gracefully) does not trigger readmitDelay, but a node that causes a single exception does, allowing an attacker to selectively trigger exceptions on legitimate nodes while keeping a malicious node active by always returning SUCCESS, ensuring the malicious node is always selected for fund-transfer block delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f7f665d-9c03-47eb-afe4-8bfe16731b88?mode=deep",
+    "timestamp": "2026-05-01 21:54:58.538681",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxBlockItems] Can an unprivileged external user exploit the fact that BlockAssembler.onEndOfBlock() calls Utility.handleRecoverableError() (which may not throw) when block numbers mismatch between BlockHeader and EndOfBlock, and then proceeds to assemble and deliver the block with the wrong block number to blockStreamConsumer, causing BlockStreamVerifier.verifyBlockNumber() to detect a non-consecutive block number and throw InvalidStreamFileException, which propagates as a BlockStreamException and counts toward maxSubscribeAttempts, deactivating the node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d4409a4-210a-49ea-8605-2f4e952c3146?mode=deep",
+    "timestamp": "2026-05-01 21:55:13.212547",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: responseTimeout] Can an unprivileged external user exploit the fact that responseTimeout has a minimum of 100ms (@DurationMin(millis=100)) and is used as a gRPC deadline in getBlockRange(), and by operating a block node in a high-latency network region, cause consistent deadline-exceeded exceptions that return EMPTY_BLOCK_RANGE, making the node appear to have no blocks, while the actual blocks containing fund transfers are available but never requested due to the timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aeadffe9-1fc3-480d-985e-1070e97cc5c8?mode=deep",
+    "timestamp": "2026-05-01 21:55:28.889128",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxStreamResponseSize] Can an unprivileged external user exploit the fact that maxStreamResponseSize is set as the gRPC channel's maxInboundMessageSize at channel creation time in BlockNode constructor, and since channels are only recreated when nodesChanged() returns true, a change to maxStreamResponseSize in the configuration does not take effect until node properties change, creating a window where the old (potentially too-small) size limit is still in effect and legitimate blocks are rejected, causing fund-transfer transactions to be missed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b79cf728-63d1-4111-86ac-2c5a5fdf4ef8?mode=deep",
+    "timestamp": "2026-05-01 21:55:43.206300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: maxSubscribeAttempts] Can an unprivileged external user exploit the fact that BlockNodeSubscriber.getNode() first tries active nodes and then falls back to inactive nodes with tryReadmit(true), and by controlling a block node that reports having the requested block but always fails to deliver it, ensure that this malicious node is always force-activated as the fallback, getting maxSubscribeAttempts chances per readmitDelay cycle to serve fraudulent blocks with manipulated fund-transfer data before being deactivated again?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f96d3b68-d3b7-4c85-b089-b321631bc0ae?mode=deep",
+    "timestamp": "2026-05-01 21:55:56.727242",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/downloader/block/StreamProperties.java -> Scope: Critical: Direct loss of funds'] [Function: readmitDelay] Can an unprivileged external user exploit the fact that readmitTime.set(Instant.now().plus(streamProperties.getReadmitDelay())) in BlockNode.onError() uses the current readmitDelay value at the time of the error, and if readmitDelay is changed to a very large value (e.g., Duration.ofDays(365)) between when a node is deactivated and when it would normally be readmitted, the node remains inactive for an extremely long time, causing permanent loss of fund-transfer block processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8353ed4-66cf-48dd-880a-60d55370e69b?mode=deep",
+    "timestamp": "2026-05-01 21:56:11.218050",
+    "report_generated": false
+  }
+]
