@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can an unprivileged user pass an `inConditions` array where `condition.value` is an array itself (e.g., `[1, 2, 3]`), causing `tokenIdInParams.push(condition.value)` to push an array into `tokenIdInParams`, and the resulting `${tokenIdInParams}` interpolation to produce `1,2,3` (JavaScript array-to-string coercion) — effectively injecting multiple unparameterized values into the SQL IN clause and bypassing intended single-token filtering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8e83351-8d7c-4137-828c-b11cabf3884f?mode=deep",
+    "timestamp": "2026-05-01 19:09:23.874120",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can an unprivileged user supply `inConditions[].value` as a negative number or zero to cause the `ta.token_id in (0)` or `ta.token_id in (-1)` condition to match system/treasury tokens with special fee schedules, leaking or misrepresenting fee parameters for privileged token IDs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_426b3811-1117-4943-a2b2-b51462028af9?mode=deep",
+    "timestamp": "2026-05-01 19:09:35.945369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can a no-permission attacker supply `conditions` with a `key` value that resolves to a column not in the SELECT list (e.g., `custom_fee_amount`) via `TokenAccount.getFullName()`, causing the query to filter on fee-related columns that are not intended to be user-filterable, effectively allowing the attacker to probe fee schedule values through boolean-based inference?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c676e19e-aad6-4afe-8082-6c65954e8262?mode=deep",
+    "timestamp": "2026-05-01 19:09:48.659006",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can an unprivileged user supply a `conditions` array with hundreds of entries, each adding a parameter via `params.push(condition.value)`, causing the parameterized query to exceed the database's maximum parameter count limit and trigger an error that leaks internal query structure including fee-related table names?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f83bde7-b367-423f-8c5c-d6f354352ae1?mode=deep",
+    "timestamp": "2026-05-01 19:10:01.639347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can a no-permission attacker supply `inConditions` with a very large number of entries, causing `getInClauseSubQuery()` to build an enormous unparameterized IN clause string that triggers a DB query plan change (full table scan) and allows timing-based inference of fee-related token data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a56b89a5-937c-4b43-aa64-b5fd7aae0fe0?mode=deep",
+    "timestamp": "2026-05-01 19:10:14.793434",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: putTokenCache()] Can an unprivileged user who can influence the `token` object passed to `putTokenCache()` supply a `token_id` of type string (e.g., `'300'`) when the cache uses BigInt keys, causing `tokenCache.has(tokenId)` to return false (type mismatch) and a duplicate cache entry to be created with a different `decimals` value, leading to cache key collision and incorrect fee data being served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b6166ff-db68-4203-91ee-3d277376eafd?mode=deep",
+    "timestamp": "2026-05-01 19:10:28.857512",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCachedTokens()] Can an unprivileged user exploit the fact that `tokenCache` is a module-level singleton (not per-request) to perform a cache poisoning attack across user sessions — by triggering a request that caches a token with wrong `decimals`, all subsequent users querying that token receive the poisoned fee-relevant data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6532122-df6a-4962-9f3c-05c1a40bb93d?mode=deep",
+    "timestamp": "2026-05-01 19:10:42.829427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenAccounts()] Can a no-permission attacker cause `getTokenAccounts()` to return a `TokenAccount` with `decimals = null` by ensuring the token is not in the DB (no row returned from `tokenCacheQuery`) and not in the cache, so `cachedTokens.get(row.token_id)` returns `undefined` and `row.decimals` is never set, causing fee amount display to fail or default to zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_280539d9-4424-4b36-95b5-cd55dcde29ed?mode=deep",
+    "timestamp": "2026-05-01 19:10:56.393910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenAccounts()] Can an unprivileged user exploit the `rows.reduce((result, row) => result.add(row.token_id), new Set())` deduplication in `getTokenAccounts()` — if `row.token_id` values have inconsistent types (BigInt vs Number) across rows — to cause some token IDs to be deduplicated incorrectly, resulting in missing cache lookups and `decimals = null` for affected tokens?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d95fee23-d7f3-49f4-937d-16e67a259f21?mode=deep",
+    "timestamp": "2026-05-01 19:11:09.793020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: tokenRelationshipsQuery] Can an unprivileged user exploit the static `tokenRelationshipsQuery` which does not include a `decimals` column in its SELECT list, meaning `row.decimals` is always `undefined` from the initial query, and the entire decimals value (used in fee calculations) depends solely on the cache — making cache poisoning the only source of truth for fee-relevant precision data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc0fa5e5-3e1d-4ebf-94a5-bd9722c50339?mode=deep",
+    "timestamp": "2026-05-01 19:11:22.993260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCachedTokens()] Can a no-permission attacker send concurrent requests for the same uncached token ID, causing multiple simultaneous executions of `super.getRows(TokenService.tokenCacheQuery, [uncachedTokenIds])` before any of them complete and populate the cache, resulting in redundant DB reads and a race condition where the last writer wins in `tokenCache.set()`, potentially storing a different `decimals` value than expected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baa180f8-e515-45c3-9ad9-d0d83666d628?mode=deep",
+    "timestamp": "2026-05-01 19:11:36.101735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can an unprivileged user pass `inConditions[].value` as `NaN` or `Infinity`, which JavaScript coerces to the strings `'NaN'` or `'Infinity'` in the template literal `${tokenIdInParams}`, producing invalid SQL like `ta.token_id in (NaN)` that may cause a DB error revealing internal query structure related to fee data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8797a68c-352c-4985-a921-a825b6544baf?mode=deep",
+    "timestamp": "2026-05-01 19:11:49.358706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can an unprivileged user pass `inConditions[].value` as an empty string `''`, causing `tokenIdInParams` to contain `['']` and the resulting SQL to be `ta.token_id in ()` — an invalid SQL expression — triggering a DB error that may expose schema information about fee-related tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fe5bb594-cf37-4702-afad-f6b1e3fc53a4?mode=deep",
+    "timestamp": "2026-05-01 19:12:03.003588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can a no-permission attacker pass `inConditions[].value` as `null`, causing `tokenIdInParams` to contain `[null]` and the SQL to become `ta.token_id in (null)` — which in SQL matches no rows — effectively suppressing all token results and hiding fee schedule data that should be visible to the requesting user?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d38e2d85-655f-4fe4-bccd-0755385c3787?mode=deep",
+    "timestamp": "2026-05-01 19:12:18.347196",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can an unprivileged user supply `conditions[].value` as a JavaScript object with a custom `toString()` that returns SQL injection payload, since `params.push(condition.value)` stores the object and the DB driver may call `.toString()` during query execution, injecting SQL that modifies fee-related query results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06f8dae2-23e3-4808-8475-6fa89c83cf1f?mode=deep",
+    "timestamp": "2026-05-01 19:12:31.406469",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCachedTokens()] Can an unprivileged user exploit the `quickLru` LRU eviction policy by sending requests that cycle through `maxSize + 1` distinct token IDs, ensuring that a specific token's cached `decimals` entry is always evicted before the next request for it, forcing perpetual DB reads and creating a window for race conditions that serve incorrect fee-relevant decimals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5ea684f-d9dd-4841-aa88-08d7990ede40?mode=deep",
+    "timestamp": "2026-05-01 19:12:45.379120",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenAccounts()] Can a no-permission attacker cause `new TokenAccount(row)` to be constructed with `decimals = undefined` (when `cachedToken` exists but `cachedToken.decimals` is `undefined`) since `row.decimals = cachedToken.decimals` unconditionally assigns `undefined`, and `TokenAccount` constructor uses `tokenRelationship.decimals ?? null` which would then store `null`, misrepresenting the token's fee denomination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c13939a-3c17-43ff-b092-d1eb7be95699?mode=deep",
+    "timestamp": "2026-05-01 19:12:59.412210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: putTokenCache()] Can an unprivileged user who can trigger `putTokenCache()` with a token object where `token.token_id` is `undefined` cause `tokenCache.has(undefined)` to return false and `tokenCache.set(undefined, cachedToken)` to store a cache entry under the key `undefined`, which could then be retrieved by any subsequent lookup for a token whose ID resolves to `undefined`, poisoning fee data for an indeterminate token?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_782956ac-2a0b-46eb-8fd7-6368ce7153cc?mode=deep",
+    "timestamp": "2026-05-01 19:13:12.764448",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can an unprivileged user supply `inConditions` with a `value` that is a very long string (e.g., 1MB), causing the unparameterized SQL string built in `getInClauseSubQuery()` to exceed the DB's maximum query length, triggering an error that reveals internal fee-related query structure or causes a denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46bf40f7-de19-40a9-aefc-198dc1fe13ad?mode=deep",
+    "timestamp": "2026-05-01 19:13:27.418651",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCachedTokens()] Can an unprivileged user supply a `tokenIds` Set containing a token ID that maps to a DB row where `decimals` is a very large number (e.g., `2^53`), which gets cached and then used in fee calculations, causing integer overflow or precision loss in downstream fee amount computations outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9af5b26c-f693-4cd8-b690-a6922cc74249?mode=deep",
+    "timestamp": "2026-05-01 19:13:41.096650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenAccounts()] Can a no-permission attacker exploit the fact that `getTokenAccounts()` calls `this.getCachedTokens(tokenIds)` with a Set built from DB rows, and if the DB returns a row with a `token_id` that is a string representation of a number (e.g., `'300'`) while the cache stores BigInt keys, cause a type mismatch in `cachedTokens.get(row.token_id)` that always returns `undefined`, leaving `decimals` unset for all tokens?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d52b201-5a89-49a1-b9ac-6a00b870be63?mode=deep",
+    "timestamp": "2026-05-01 19:13:55.367323",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getInClauseSubQuery()] Can an unprivileged user pass multiple `inConditions` entries with the same `value`, causing `tokenIdInParams` to contain duplicates and the SQL `ta.token_id in (X, X, X)` to be generated, which while functionally equivalent, could be used to probe whether the DB query planner behaves differently and leak timing information about fee-related token data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c334dff-9f57-4f56-a260-64a8b760cb79?mode=deep",
+    "timestamp": "2026-05-01 19:14:08.550294",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenRelationshipsQuery()] Can an unprivileged user supply `conditions` and `inConditions` simultaneously in a way that the combined SQL WHERE clause becomes contradictory (e.g., `token_id > 100 AND token_id in (50)`), causing the query to return zero rows and `getTokenAccounts()` to return an empty array, effectively hiding fee-relevant token relationships from legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cff2a361-f00e-4e65-b921-43baf2f007fe?mode=deep",
+    "timestamp": "2026-05-01 19:14:22.067682",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getCachedTokens()] Can a no-permission attacker exploit the absence of a TTL (time-to-live) on the `quickLru` cache — entries never expire unless evicted by size — to cause the service to permanently serve stale `decimals` values for tokens whose fee schedules were updated on-chain, with no mechanism for cache invalidation short of service restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04718757-0cbe-44f2-a10d-17a08c553a79?mode=deep",
+    "timestamp": "2026-05-01 19:14:36.933710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenService.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenAccounts()] Can an unprivileged user trigger a scenario where `rows` from `super.getRows(sqlQuery, params)` contains a token ID that is not in the `token` table (orphaned `token_account` row), causing `getCachedTokens()` to return no entry for that ID, and `getTokenAccounts()` to return a `TokenAccount` with `decimals = null`, misrepresenting the fee denomination for that token?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ea3a6e1-e05f-4fe0-9703-e75ae15c6822?mode=deep",
+    "timestamp": "2026-05-01 19:14:50.366241",
+    "report_generated": false
+  }
+]
