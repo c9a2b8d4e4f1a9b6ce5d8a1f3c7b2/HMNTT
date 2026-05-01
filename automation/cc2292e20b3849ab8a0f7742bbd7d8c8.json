@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction and then trigger a context propagation bug by passing a context with a value key that collides with an internal GORM context key, causing `GetDbWithContext` to use incorrect DB settings and return a tampered transaction record as valid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1f08bf9-bb7f-4d61-b973-8706ae8b09cd?mode=deep",
+    "timestamp": "2026-05-01 18:01:18.039885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDb()] Can an unprivileged external user exploit the lack of a statement timeout in `GetDb()` to submit a tampered transaction and then issue a block range query that holds a shared lock on the transaction table, preventing the mirror node from writing the correct transaction record and causing the tampered version to persist?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76bfc07b-7cee-4c41-9fad-182fe949318a?mode=deep",
+    "timestamp": "2026-05-01 18:01:29.863362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction with a manipulated `SignedTransaction` hex string that causes the DB hash lookup via `GetDbWithContext` to match a different, legitimate transaction record, causing the Rosetta API to return the wrong transaction identifier and confirming the tampered transaction as valid?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27fd3de0-ec5d-4218-9ef4-656348a2e367?mode=deep",
+    "timestamp": "2026-05-01 18:01:42.133857",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: client struct] Can an unprivileged external user exploit the fact that the `client` struct holds a single `*gorm.DB` connection pool shared across all goroutines, submitting a tampered transaction that triggers a DB error causing GORM to mark the connection as bad, forcing all subsequent transaction verification queries to fail and masking the tampering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e4eb8e1-1221-43ab-9115-db423b9b1fae?mode=deep",
+    "timestamp": "2026-05-01 18:01:54.208787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction and then send a request with a context carrying a very large timeout value (e.g., `math.MaxInt64` nanoseconds), causing `context.WithTimeout` to create a child context with an overflow deadline, effectively disabling the statement timeout and allowing tampered transaction queries to run indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f7ef96f-b7cb-473c-ac67-b2fba7a746c1?mode=deep",
+    "timestamp": "2026-05-01 18:02:06.833327",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: noop()] Can an unprivileged external user exploit the `noop` cancel function returned when `statementTimeout <= 0` to submit a tampered transaction, knowing that the DB connection will never be explicitly released, and use this to cause a slow-drain DoS that prevents honest transaction records from being written?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76d8d693-53db-45d1-b03f-277e0ba39952?mode=deep",
+    "timestamp": "2026-05-01 18:02:19.412734",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then send a request whose context is derived from a parent context that gets cancelled by a concurrent request, causing `GetDbWithContext` to propagate the cancellation to the child context and abort the transaction verification query, leaving the tampered transaction unverified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c7ea65a-b581-4922-b304-1dcb164e4a5a?mode=deep",
+    "timestamp": "2026-05-01 18:02:32.137678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDb()] Can an unprivileged external user exploit `GetDb()` returning the raw `*gorm.DB` to submit a tampered transaction and then use a block lookup endpoint that calls `GetDb()` directly, bypassing the `statementTimeout` protection and reading a stale transaction record that does not reflect the tampered content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4e05b4c-531d-43b7-8fec-12103a31f8ab?mode=deep",
+    "timestamp": "2026-05-01 18:02:44.630180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction with a crafted `validStartNanos` far in the future, causing the DB query via `GetDbWithContext` to scan a timestamp range that does not yet exist, timing out and returning an empty result that is misinterpreted as a successful submission of the tampered transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce9afea0-33aa-4ba6-888a-975d350f58e7?mode=deep",
+    "timestamp": "2026-05-01 18:02:58.262531",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: NewDbClient()] Can an unprivileged external user exploit the absence of input validation in `NewDbClient` for the `statementTimeout` parameter to trigger a scenario where the timeout is set to `1` second, causing legitimate transaction verification queries to time out while a tampered transaction submitted with a fast-path exploit completes successfully?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e4ed4fb8-fbbf-4e28-ac96-4f734d8f1882?mode=deep",
+    "timestamp": "2026-05-01 18:03:10.678664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then send a burst of requests that each create a new `context.WithTimeout` child context via `GetDbWithContext`, exhausting the Go runtime's timer heap and causing context deadlines to fire prematurely, aborting honest transaction verification queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_439fcc21-6fd7-489d-b364-cdfe8dcb32ef?mode=deep",
+    "timestamp": "2026-05-01 18:03:23.656715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDb()] Can an unprivileged external user exploit the fact that `GetDb()` does not enforce any row-level locking to submit a tampered transaction and then read it back via a concurrent `GetDb()` call, observing a phantom read where the tampered transaction appears in one query but not another, causing inconsistent transaction state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63a650a1-3cb7-400f-9e40-10df72e8627e?mode=deep",
+    "timestamp": "2026-05-01 18:03:36.011384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction with a manipulated memo field containing SQL-like characters that, when passed to `GetDbWithContext` and used in a raw GORM query, causes a query plan change that bypasses the `statementTimeout` enforcement at the DB level?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d16e775b-414f-4e73-bab3-0e6f2849d070?mode=deep",
+    "timestamp": "2026-05-01 18:03:48.655308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: client struct] Can an unprivileged external user exploit the fact that the `client` struct does not implement any transaction-level isolation (e.g., `BEGIN`/`COMMIT`) around multi-step transaction verification, submitting a tampered transaction that is read between two queries in the verification pipeline, causing the Rosetta API to confirm an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81d6c489-a526-449d-8b25-56c229fde9ee?mode=deep",
+    "timestamp": "2026-05-01 18:04:01.750553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then send a request with a context that carries a deadline shorter than the DB round-trip time, causing `GetDbWithContext` to always return a timeout error for that transaction, effectively making the tampered transaction invisible to the verification layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e22e0e6c-985a-4d45-8d0a-82b3bbdfe44a?mode=deep",
+    "timestamp": "2026-05-01 18:04:13.963936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: noop()] Can an unprivileged external user exploit the `noop` cancel function to submit a tampered transaction and then trigger a goroutine leak by causing many `GetDbWithContext` calls with `statementTimeout <= 0` to accumulate open DB connections, eventually causing the DB server to reject new connections and preventing honest transaction records from being written?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bb5145a-315b-460a-b280-5fd682fc7575?mode=deep",
+    "timestamp": "2026-05-01 18:04:26.455446",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a transaction and then exploit the fact that `GetDbWithContext` creates a new child context for every call (via `context.WithTimeout`) to cause a context tree explosion under high concurrency, degrading the performance of transaction verification and creating a window for tampered transactions to be submitted undetected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5661064-c10e-43b4-a93a-a9e5c1aa40ed?mode=deep",
+    "timestamp": "2026-05-01 18:04:40.053639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDb()] Can an unprivileged external user exploit `GetDb()` being used in persistence layers without a timeout to submit a tampered transaction and then trigger a long-running aggregate query that holds a table-level lock, preventing the mirror node from inserting the correct transaction record and causing the tampered version to be the only one visible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6143d671-3702-4e8f-b94d-604ababa248d?mode=deep",
+    "timestamp": "2026-05-01 18:04:53.723711",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction with a hash that collides with an existing transaction hash in the DB, and then exploit the `GetDbWithContext` query to return the existing (legitimate) transaction record instead of the tampered one, causing the Rosetta API to confirm the tampered transaction as if it were the legitimate one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6cbbe2a2-6902-4b4b-a308-42bd2e1f7027?mode=deep",
+    "timestamp": "2026-05-01 18:05:06.031283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: NewDbClient()] Can an unprivileged external user exploit the fact that `NewDbClient` wraps a `*gorm.DB` that may have been configured with `PrepareStmt: true`, causing prepared statement caching to return stale transaction data for a tampered transaction that was submitted after the statement was cached?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94dcb4cf-27a4-4056-8759-34dcec9571d2?mode=deep",
+    "timestamp": "2026-05-01 18:05:18.718492",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then send a request with a context that has a very large value attached (e.g., a multi-megabyte blob), causing `GetDbWithContext` to propagate this context to the DB driver, triggering a memory allocation spike that degrades transaction verification performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60d801b6-5374-4a2f-8e50-3177f743a4b8?mode=deep",
+    "timestamp": "2026-05-01 18:05:31.905207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDb()] Can an unprivileged external user exploit the absence of a read-committed isolation level in `GetDb()` to submit a tampered transaction and then read it back via a non-repeatable read, causing the Rosetta API to return different transaction states for the same hash in consecutive calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f9039a15-32e1-4025-8059-80ad1d597d82?mode=deep",
+    "timestamp": "2026-05-01 18:05:43.841571",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then send a request that causes `GetDbWithContext` to be called with a context whose cancellation is triggered by a concurrent HTTP request timeout, aborting the transaction verification query and causing the tampered transaction to be reported as 'pending' indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd7ab477-b6c1-485b-940d-4392000c3b30?mode=deep",
+    "timestamp": "2026-05-01 18:05:56.441634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: client struct] Can an unprivileged external user exploit the fact that the `client` struct does not implement any retry logic for failed DB queries to submit a tampered transaction during a transient DB error, causing the verification query to fail and the tampered transaction to be accepted without confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6e46f1b-b34c-4930-83b2-262a1b82cae2?mode=deep",
+    "timestamp": "2026-05-01 18:06:09.040052",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/db/client.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: GetDbWithContext()] Can an unprivileged external user submit a tampered transaction and then exploit the `time.Duration(d.statementTimeout)*time.Second` conversion in `GetDbWithContext` by triggering a scenario where `statementTimeout` is set to a value that causes integer overflow in the duration calculation, resulting in a negative timeout that immediately cancels the verification query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_254670e0-aa77-450d-abfe-b9e2c925d61a?mode=deep",
+    "timestamp": "2026-05-01 18:06:22.151664",
+    "report_generated": false
+  }
+]
