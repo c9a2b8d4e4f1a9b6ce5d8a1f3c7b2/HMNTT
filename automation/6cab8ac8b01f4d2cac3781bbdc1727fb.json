@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user subscribe with a startTime set to the exact current nanosecond boundary so that the isValidStartTime() check passes but the first poll window misses messages whose consensus timestamps fall within that nanosecond, causing those records to be permanently skipped from the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_737624a3-b807-4c3e-8899-c7e2962721d0?mode=deep",
+    "timestamp": "2026-05-01 16:40:56.722055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user trigger the throttled=true path by subscribing to a topic with a very large historical backlog, causing PollingContext.isComplete() to return true prematurely when pageSize.get() < retrieverProperties.getMaxPageSize() even though more messages exist in the database, resulting in missing records in the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_02a2dc08-69b9-4e82-b90a-cfff1f181d98?mode=deep",
+    "timestamp": "2026-05-01 16:41:09.291955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1)) retry loop combined with the timeout(retrieverProperties.getTimeout()) to cause the retriever to silently terminate mid-stream after 60 seconds, dropping all messages that had not yet been polled, leading to incomplete records exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94082448-0a7d-423d-9b59-94150ebfe3c9?mode=deep",
+    "timestamp": "2026-05-01 16:41:21.903572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a TopicMessageFilter with a limit value such that the expression (int)(filter.getLimit() - context.getTotal().get()) overflows to a negative integer when total approaches Long.MAX_VALUE, causing Math.min(limit, context.getMaxPageSize()) to produce an incorrect pageSize and skip records in subsequent polls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_92a946d5-4d62-4bb0-a474-2cf836285a93?mode=deep",
+    "timestamp": "2026-05-01 16:41:34.819261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user subscribe with a startTime that causes last.getConsensusTimestamp() + 1 to overflow a long when the last message has consensusTimestamp equal to Long.MAX_VALUE, resulting in the next poll using a wrapped-around startTime that skips all remaining messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2896ba72-828b-4d1d-9741-71dae741f3aa?mode=deep",
+    "timestamp": "2026-05-01 16:41:48.903873",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user exploit the fact that poll() rebuilds the filter via filter.toBuilder().limit(pageSize).startTime(startTime).build() without preserving the original endTime, causing the repository query to return messages beyond the requested endTime and export incorrect records to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_303fb397-eef9-4e61-8e88-7e507a31d0b9?mode=deep",
+    "timestamp": "2026-05-01 16:42:02.880521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: isComplete()] Can an unprivileged external user subscribe with throttled=true and a limit exactly equal to maxPageSize so that isComplete() evaluates pageSize.get() < retrieverProperties.getMaxPageSize() as false even when the last page was exactly full and no more messages exist, causing the retriever to issue unnecessary extra polls that may return duplicate or incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71c3f5dc-7b3a-4916-8cb4-e870161b3482?mode=deep",
+    "timestamp": "2026-05-01 16:42:18.284674",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: isComplete()] Can an unprivileged external user exploit the unthrottled path where isComplete() only checks limitHit and never checks pageSize, causing the retriever to continue polling indefinitely via numRepeats=unthrottled.getMaxPolls() even after all historical messages are returned, potentially exporting duplicate records on each extra poll?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d02ca71b-906b-4654-ba8d-565bccc723e3?mode=deep",
+    "timestamp": "2026-05-01 16:42:32.185234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: onNext(TopicMessage topicMessage)] Can an unprivileged external user trigger a race condition between the AtomicReference<TopicMessage> last and AtomicLong pageSize in PollingContext.onNext() by subscribing concurrently from multiple sessions, causing pageSize to be incremented while last is not yet updated, leading isComplete() to make an incorrect decision and skip messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_497dfde4-3f43-4a0e-bea7-bab973f4fcef?mode=deep",
+    "timestamp": "2026-05-01 16:42:46.833912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user set limit=0 in the TopicMessageFilter (which passes the @Min(0) constraint and hasLimit() returns false) to bypass the limit-based completion check entirely, causing the retriever to run until timeout and potentially export an unbounded number of records or miss records due to timeout termination?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfb854b3-ed83-4805-bec4-e251f79188cf?mode=deep",
+    "timestamp": "2026-05-01 16:43:01.355594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the jitter(0.1) applied to the RepeatSpec polling interval to cause two concurrent polls to overlap in their time windows, resulting in the same message being fetched twice and exported as a duplicate record to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73ff8780-b140-484a-b009-0f098f2e0184?mode=deep",
+    "timestamp": "2026-05-01 16:43:15.010226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user subscribe with throttled=false and set maxPolls to the minimum value of 4 (via unthrottled.getMaxPolls()) so that the retriever terminates after only 4 polls even when the historical backlog requires more polls to fully retrieve all messages, causing missing records in the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9594792-d14d-4f54-aa36-38e636b981c8?mode=deep",
+    "timestamp": "2026-05-01 16:43:28.469742",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a filter where the computed pageSize via Math.min(limit, context.getMaxPageSize()) equals 0 due to total.get() already equaling filter.getLimit(), causing findByFilter() to be called with limit=0 and potentially returning all records without a limit, exporting incorrect data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d50a970-f669-48aa-a655-2813f3c79ecb?mode=deep",
+    "timestamp": "2026-05-01 16:43:41.550274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the doOnCancel(context::onComplete) handler to trigger premature completion logging without actually stopping the underlying Flux, causing the retriever to continue emitting messages after the cancel signal while the system believes retrieval is complete, leading to missing records in the exported view?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_df607239-e668-4a6a-8836-e16b19a7c943?mode=deep",
+    "timestamp": "2026-05-01 16:43:55.382901",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user subscribe to a topic with a startTime in the distant past, causing the unthrottled retriever to exhaust its maxPolls budget before reaching the current time, silently dropping all messages between the last polled timestamp and the present from the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8fc22614-c56c-413f-992c-45716a634f41?mode=deep",
+    "timestamp": "2026-05-01 16:44:08.401935",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user exploit the fact that context.getPageSize().set(0L) is called at the start of each poll before messages are received, so if the Flux from findByFilter() is cancelled mid-stream, pageSize remains partially incremented and isComplete() makes an incorrect decision, causing subsequent polls to skip messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d3d6128b-b407-4b2e-8aa8-0b6e8ca247d0?mode=deep",
+    "timestamp": "2026-05-01 16:44:21.851171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the Retry.backoff(Long.MAX_VALUE, ...) combined with a transient database error to cause the retriever to restart from the original filter.getStartTime() rather than from last.getConsensusTimestamp() + 1, causing already-exported messages to be re-exported as duplicates to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a3955a5-00fc-4deb-bdf4-295e72c31881?mode=deep",
+    "timestamp": "2026-05-01 16:44:35.183841",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: isComplete()] Can an unprivileged external user subscribe with throttled=true and a limit set to exactly retrieverProperties.getMaxPageSize() so that when the last page is exactly full, isComplete() returns false (pageSize.get() is not less than maxPageSize) and limitHit is also false (total hasn't reached limit yet due to off-by-one), causing an extra poll that may return incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8f8896a-a8f7-4c3c-a928-1fec22d1dba3?mode=deep",
+    "timestamp": "2026-05-01 16:44:48.942776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the scheduler = Schedulers.boundedElastic() shared across all retrieve() calls to exhaust the bounded elastic thread pool, causing new retrieve() calls to queue indefinitely and miss their polling windows, resulting in missing records exported to the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bee4f0a5-1e41-4bae-8133-546a09908efc?mode=deep",
+    "timestamp": "2026-05-01 16:45:03.257155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user subscribe to a topic where the database returns messages out of consensus timestamp order from findByFilter(), causing the startTime for the next poll to be set to an earlier timestamp than expected via last.getConsensusTimestamp() + 1, resulting in duplicate or missing records in the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_764f9958-5177-41ac-b23c-c5c4085426fa?mode=deep",
+    "timestamp": "2026-05-01 16:45:18.379200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user set endTime to null and limit to 0 (no limit, no end time) in the throttled path, causing the retriever to run indefinitely with numRepeats=Long.MAX_VALUE until the 60-second timeout fires, at which point all messages after the timeout are silently dropped from the exported stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ee8877e-9ee8-4882-b12a-cd876f6d5542?mode=deep",
+    "timestamp": "2026-05-01 16:45:32.868225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: onNext(TopicMessage topicMessage)] Can an unprivileged external user trigger a scenario where onNext() increments both total and pageSize atomically but last.set() is not atomic with respect to the next poll() invocation, causing poll() to read a stale last value and compute an incorrect startTime that overlaps with already-exported messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce1f2828-ec53-4d02-9a72-4eda82b2ecc0?mode=deep",
+    "timestamp": "2026-05-01 16:45:45.669049",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the fact that retrieverProperties.isEnabled() is checked only once at the start of retrieve() and not re-checked on each poll, so if the property is toggled to false mid-stream, the retriever continues exporting records that should have been suppressed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18bb79d7-5b09-4b4e-bcec-0f9c31e52775?mode=deep",
+    "timestamp": "2026-05-01 16:45:58.862792",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a TopicMessageFilter with a very small limit (e.g., limit=1) so that the computed pageSize is 1, and if the database returns the message with a consensus timestamp that is the maximum long value, the next startTime computation last.getConsensusTimestamp() + 1 wraps around, causing all subsequent polls to return incorrect records from the beginning of time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d464a25-8d1d-4f74-89e4-a2e931c22980?mode=deep",
+    "timestamp": "2026-05-01 16:46:12.674816",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user open many concurrent subscriptions to the same topic with throttled=true, each consuming threads from Schedulers.boundedElastic(), causing thread starvation that delays polling intervals beyond the configured pollingFrequency, resulting in messages being missed during the extended polling gaps?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b37c5dc-2a92-442d-8840-a764ba039bc4?mode=deep",
+    "timestamp": "2026-05-01 16:46:27.043609",
+    "report_generated": false
+  }
+]
