@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user supply a negative cfg.amountTinybar value (config.go only rejects == 0, not < 0) so that AddHbarTransfer(toID, hiero.HbarFromTinybar(cfg.amountTinybar)) becomes a debit against toID without its signing key, causing every transaction to permanently fail with INVALID_SIGNATURE and freezing all outbound fund movement?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b1b4ba2-59e4-49eb-8b1d-c8417922008b?mode=deep",
+    "timestamp": "2026-05-01 21:41:53.325344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to point to a Hedera account that has been frozen (ACCOUNT_FROZEN status) so that every call to cryptoTransfer.Execute(client) returns a permanent network error, and the retry loop exhausts all attempts without ever succeeding, permanently halting fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aeead278-8bfd-4610-8a75-8d018c047171?mode=deep",
+    "timestamp": "2026-05-01 21:42:05.455392",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to a deleted account so that every TransferTransaction submitted via cryptoTransfer.Execute(client) is rejected with ACCOUNT_DELETED, causing the retry loop to exhaust all cfg.maxRetries attempts and permanently freeze the pinger's ability to move funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63b9a32a-9a6a-4273-8723-dcf57102267d?mode=deep",
+    "timestamp": "2026-05-01 21:42:17.986891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.amountTinybar to a value exceeding the operator account's balance so that every Execute(client) call fails with INSUFFICIENT_ACCOUNT_BALANCE, and since the retry loop retries on all errors without distinguishing permanent failures, funds are permanently frozen in the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad7b9d5c-6560-46a1-a8f8-a6ea40d180e6?mode=deep",
+    "timestamp": "2026-05-01 21:42:30.739848",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that receipt.Status is only logged but never checked against hiero.StatusSuccess, so that a transaction that lands on-chain with status ACCOUNT_FROZEN is silently treated as success (rerr == nil), masking a permanent fund-freeze condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bc3c508-a183-4557-ade7-bea09eb4933e?mode=deep",
+    "timestamp": "2026-05-01 21:42:43.448950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user trigger a scenario where Execute(client) succeeds (no error) but GetReceipt(client) returns a receipt with a non-SUCCESS status (e.g., ACCOUNT_FROZEN), and because the code only checks rerr == nil without inspecting receipt.Status, the frozen-account condition is never detected and funds remain permanently locked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc89294b-3878-4df2-8d42-5b85fd7fa3d6?mode=deep",
+    "timestamp": "2026-05-01 21:42:56.360643",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.toAccountID equal to the operator account ID so that AddHbarTransfer(client.GetOperatorAccountID(), -amount) and AddHbarTransfer(toID, amount) cancel each other out, but transaction fees are still deducted on every tick, gradually draining the operator account until it can no longer pay fees and all future transfers are permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e24a8ff-fd05-4d3b-abcb-44fe8bf7133f?mode=deep",
+    "timestamp": "2026-05-01 21:43:09.374143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.maxRetries to math.MaxInt32 and cfg.baseBackoff to 1ns so that on a permanent error (e.g., ACCOUNT_FROZEN), the retry loop runs for an astronomically long time, consuming all operator HBAR through repeated transaction fees and permanently freezing the account balance at zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d7709fe-0598-47f6-8ec3-e93ec7ab07e8?mode=deep",
+    "timestamp": "2026-05-01 21:43:22.609264",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: backoff()] Can an unprivileged external user set cfg.maxRetries to a value >= 64 so that the expression 1<<(attempt-1) in backoff() overflows a signed integer, producing a zero or negative duration, causing time.NewTimer(sleep) to fire immediately and the retry loop to hammer the network with rapid-fire transactions that drain the operator account through fees, permanently freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33ab4a76-00ec-4af9-a2af-86d253fa3688?mode=deep",
+    "timestamp": "2026-05-01 21:43:35.392732",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.amountTinybar to int64 maximum value (9223372036854775807) so that hiero.HbarFromTinybar(-cfg.amountTinybar) overflows to a positive value, causing the TransferTransaction to have mismatched debit/credit amounts that are rejected by the network, permanently halting all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7ea43cb-9564-44c2-afde-714666727ec1?mode=deep",
+    "timestamp": "2026-05-01 21:43:48.369385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of SetMaxTransactionFee() on the NewTransferTransaction() so that the SDK uses an unexpectedly high default fee, and a misconfigured or adversarial node charges the maximum allowed fee on every retry, draining the operator account and permanently freezing its ability to send funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_250091c4-8457-4229-9491-ea535f814681?mode=deep",
+    "timestamp": "2026-05-01 21:44:01.109970",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to a valid but receiver-signature-required account (receiverSigRequired=true) without providing the receiver's signature, so that every TransferTransaction is rejected with INVALID_SIGNATURE, and the retry loop exhausts all attempts, permanently freezing fund movement?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1af77ece-d38c-4f8e-9543-c3502fb2d20a?mode=deep",
+    "timestamp": "2026-05-01 21:44:14.247722",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the lack of a pre-flight balance check before calling cryptoTransfer.Execute(client) so that when the operator account balance drops below cfg.amountTinybar plus fees, every subsequent transfer fails permanently with INSUFFICIENT_ACCOUNT_BALANCE, freezing all outbound funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6739dbe8-be4d-48f6-b37e-ca8996464cf7?mode=deep",
+    "timestamp": "2026-05-01 21:44:27.033179",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.interval to an extremely small value (e.g., 1ns) so that the ticker fires faster than transactions can complete, causing concurrent Execute(client) calls that each deduct fees, rapidly draining the operator account and permanently freezing its balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac99f421-f58b-4e60-a45c-87ea72a314a1?mode=deep",
+    "timestamp": "2026-05-01 21:44:40.861184",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that on a context cancellation after Execute(client) succeeds but before GetReceipt(client) completes, the transaction is submitted to the network but the pinger never confirms it, leading to an unknown fund state where the operator balance is debited but the transfer is never verified, effectively freezing accountability of those funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cd2cfdb-3f0c-4755-886d-9f08fd9c8362?mode=deep",
+    "timestamp": "2026-05-01 21:44:53.745162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to an account on a different shard/realm (e.g., 1.2.3) that does not exist on the target network, causing every TransferTransaction to fail with INVALID_ACCOUNT_ID, and since the retry loop does not distinguish permanent from transient errors, all attempts are exhausted and funds are permanently frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ed7721a-26e1-4649-acd5-581a8957001a?mode=deep",
+    "timestamp": "2026-05-01 21:45:06.654803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of transaction validity window configuration on NewTransferTransaction() so that a submitted transaction remains valid for the SDK default window (180 seconds), and if the same transaction is replayed by a malicious node within that window, the operator account is double-debited, potentially draining it below the threshold needed for future transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8052b9b6-6936-4081-86e1-87de684bbc72?mode=deep",
+    "timestamp": "2026-05-01 21:45:19.554041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.amountTinybar to a value just below the operator's balance so that after paying transaction fees the operator balance reaches exactly zero, causing all subsequent transfers to fail with INSUFFICIENT_ACCOUNT_BALANCE and permanently freezing the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_593f4b0d-ca6e-4e85-8d4b-e1ac2ca047e8?mode=deep",
+    "timestamp": "2026-05-01 21:45:32.478739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to an account that has a custom fee schedule requiring additional HBAR payments, so that the actual cost per transfer exceeds cfg.amountTinybar plus the expected fee, rapidly draining the operator account and permanently freezing its ability to send funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d507f04e-707b-4023-89bb-0ef25536f805?mode=deep",
+    "timestamp": "2026-05-01 21:45:45.517971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the retry loop's unconditional retry on all errors so that when the operator account is frozen by the network (ACCOUNT_FROZEN), the pinger continues submitting transactions that all fail, and each failed attempt still incurs a network fee deduction attempt, worsening the frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_829a5cf6-9470-4553-b1ef-2e212396916a?mode=deep",
+    "timestamp": "2026-05-01 21:45:58.573888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.baseBackoff to 0 (which config.go resets to 1s, but via direct env manipulation to a sub-millisecond value that passes toDuration()) so that backoff() returns near-zero durations, causing the retry loop to fire rapidly and exhaust the operator account through fees before any human intervention is possible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78f05ad6-1f2b-40ea-a60d-6aa8e661f2e2?mode=deep",
+    "timestamp": "2026-05-01 21:46:11.517300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that NewTransferTransaction() does not set a transaction memo, making it impossible to distinguish pinger transactions from other transactions in the operator account's history, so that a fund-freeze incident cannot be traced or reversed in time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0235650e-959b-4621-9b16-4cbe83d3bfe8?mode=deep",
+    "timestamp": "2026-05-01 21:46:24.563792",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user configure cfg.toAccountID to an account that is in the process of being deleted (pending expiry), so that some transactions succeed and some fail with ACCOUNT_DELETED, causing partial fund transfers that leave the operator account in an inconsistent state with funds effectively frozen mid-transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b52c989d-a2b1-497e-b8eb-8699eaa43818?mode=deep",
+    "timestamp": "2026-05-01 21:46:37.318534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of a node selection strategy in NewTransferTransaction() so that if all configured consensus nodes are unresponsive, Execute(client) always times out, the retry loop exhausts all attempts, and funds remain permanently frozen in the operator account with no transfer ever completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4cd7ebb-4275-467e-83b4-33adcedf3ba8?mode=deep",
+    "timestamp": "2026-05-01 21:46:50.742019",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.amountTinybar to a negative value (config.go only rejects == 0) so that AddHbarTransfer(client.GetOperatorAccountID(), hiero.HbarFromTinybar(-cfg.amountTinybar)) adds a positive credit to the operator, while AddHbarTransfer(toID, hiero.HbarFromTinybar(cfg.amountTinybar)) adds a negative debit to toID, but since toID has no signing key in the client, the transaction fails with INVALID_SIGNATURE on every attempt, permanently freezing the transfer mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4fd17273-3469-4f37-9145-703bf3b2e6cc?mode=deep",
+    "timestamp": "2026-05-01 21:47:03.214746",
+    "report_generated": false
+  }
+]
