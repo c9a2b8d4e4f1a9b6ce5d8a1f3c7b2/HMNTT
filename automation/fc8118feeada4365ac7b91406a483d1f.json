@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa843d26-4eb9-4077-a193-83e077a25e8a?mode=deep",
     "timestamp": "2026-04-29 01:22:44.729980",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] Can an unprivileged external user trigger a network partition scenario by flooding the gRPC endpoint with concurrent topic subscriptions, causing the `.share()` Flux to error-terminate and drop all active subscriber sessions simultaneously, resulting in a complete denial of service for all consumers of that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18b4e31b-302c-42b0-b1f3-385622a18492?mode=deep",
+    "timestamp": "2026-05-01 22:38:23.737556",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] During a Redis network partition, the `doOnError` callback only logs the error but does NOT call `unsubscribe(topic)`, meaning the stale broken Flux remains cached in `topicMessages` indefinitely — can an unprivileged user exploit this by subscribing after partition recovery and receiving a permanently dead Flux that never emits messages, causing silent message loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_593a6e7e-f14b-4cc2-8367-43cc3df9a0ea?mode=deep",
+    "timestamp": "2026-05-01 22:38:35.785379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RedisTopicListener()] The `container` Mono uses `.cache()` after `retryWhen`, meaning once a `ReactiveRedisMessageListenerContainer` is successfully created it is cached forever — during a network partition that corrupts the connection state, can an unprivileged user trigger a scenario where all new subscriptions receive the cached broken container, causing all topic listeners to silently fail without triggering reconnection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_342b98d0-061b-4dca-b768-6d6228402623?mode=deep",
+    "timestamp": "2026-05-01 22:38:48.177933",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getSharedListener()] The `topicMessages.computeIfAbsent(topic.getTopic(), key -> subscribe(topic))` call stores a shared Flux per topic — during a network partition, if the stored Flux enters a terminal error state, can an unprivileged user subscribing to the same topic receive the already-terminated Flux from the map, causing immediate subscription failure with no retry path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f78f7cca-5642-457f-8720-e46aaf5cd229?mode=deep",
+    "timestamp": "2026-05-01 22:39:00.728479",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `retryWhen(Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(4L)))` in `subscribe()` retries infinitely — during a prolonged network partition, can an unprivileged user with many open subscriptions cause a thundering herd of simultaneous Redis reconnection attempts that exhausts connection pool resources and prevents legitimate recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dec70373-8c18-4e5d-9fac-4c1e1d287e63?mode=deep",
+    "timestamp": "2026-05-01 22:39:14.525869",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `.share()` operator multicasts to all subscribers of a topic — during a network partition, when the shared Flux emits an error, all subscribers receive the error simultaneously; can an unprivileged user exploit this by subscribing to a high-traffic topic and then inducing a partition, causing a mass subscriber eviction that overwhelms the gRPC server with simultaneous reconnection requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_982f9f30-c8da-487e-9e79-9860ab85010d?mode=deep",
+    "timestamp": "2026-05-01 22:39:27.565344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: unsubscribe()] `unsubscribe()` is triggered by `doOnCancel` and `doOnComplete` but NOT by `doOnError` — during a network partition that causes an error signal, the topic entry is never removed from `topicMessages`, so can an unprivileged user cause a permanent map poisoning where the broken Flux entry blocks all future subscribers from getting a fresh working subscription?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fb93996-818c-499b-9ba9-54801714e01d?mode=deep",
+    "timestamp": "2026-05-01 22:39:41.449858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] There is no message replay or buffering in `subscribe()` — during a network partition, all messages published to Redis are permanently lost; can an unprivileged user exploit this gap by timing their subscription to resume just after partition recovery, receiving a stream that silently skips messages published during the outage, violating message delivery guarantees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4ee8a83-0e25-45f7-b98a-8b04d2ca983a?mode=deep",
+    "timestamp": "2026-05-01 22:39:55.155752",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RedisTopicListener()] The constructor creates a new `ReactiveRedisMessageListenerContainer(connectionFactory)` inside `Mono.defer()` on each retry attempt — during repeated partition/recovery cycles, can an unprivileged user trigger resource exhaustion by causing rapid retry cycles that create many `ReactiveRedisMessageListenerContainer` instances without properly closing previous ones?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_031c90cc-4af0-4327-a2c5-cfad0560c8fa?mode=deep",
+    "timestamp": "2026-05-01 22:40:09.279126",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `onBackpressureBuffer(listenerProperties.getMaxBufferSize(), BufferOverflowStrategy.ERROR)` in the parent `SharedTopicListener.listen()` — during partition recovery when Redis delivers a burst of buffered messages, can an unprivileged user with a slow consumer cause the buffer to overflow and trigger `BufferOverflowStrategy.ERROR`, terminating their subscription with an error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea8f1ec2-d9f8-4cf5-aed3-3c874a3aef7f?mode=deep",
+    "timestamp": "2026-05-01 22:40:22.710548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getSharedListener()] `computeIfAbsent` is not atomic with respect to the Flux lifecycle — during a network partition, two concurrent unprivileged users subscribing to the same topic simultaneously could race through `computeIfAbsent`, potentially creating two separate `subscribe(topic)` calls and two competing shared Flux instances, causing message duplication or split delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_250ae7f7-e45a-4145-8040-aa9f193ac5f8?mode=deep",
+    "timestamp": "2026-05-01 22:40:36.134636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `retryWhen` in `subscribe()` uses `interval.multipliedBy(4L)` as max backoff — during a network partition, can an unprivileged user with many subscriptions across many topics cause the retry scheduler to be overwhelmed with concurrent backoff timers, degrading the JVM thread pool and preventing recovery for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4247ee7a-2d07-484e-a013-33187e2f5a6b?mode=deep",
+    "timestamp": "2026-05-01 22:40:49.295467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RedisTopicListener()] The container `Mono` uses `Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(8))` — during a network partition, can an unprivileged user exploit the infinite retry loop to cause the container reconnection to consume unbounded CPU and memory resources, degrading service for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_595e51be-6992-46ef-9185-2ff7a7730274?mode=deep",
+    "timestamp": "2026-05-01 22:41:02.524561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `container.flatMapMany(r -> r.receive(...))` call reuses the cached container — if the container's underlying Redis connection is silently broken during a network partition (TCP half-open), can an unprivileged user trigger a scenario where `receive()` never emits items and never errors, causing subscriber goroutines to hang indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9715801d-c8b1-4e27-ae76-05b99b2ad105?mode=deep",
+    "timestamp": "2026-05-01 22:41:16.782381",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTopic()] `getTopic()` formats the channel as `topic.%d` using `filter.getTopicId().getId()` — during a network partition and reconnection, can an unprivileged user subscribe to a topic ID that maps to a channel name that was previously cached in `topicMessages` with a broken Flux, causing them to receive the stale broken subscription instead of a fresh one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b001de4-f75b-45ec-be1d-99ffd4ce0a53?mode=deep",
+    "timestamp": "2026-05-01 22:41:30.539389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `.share()` operator means the Flux is reference-counted — during a network partition, if all current subscribers cancel (triggering `doOnCancel` -> `unsubscribe()`), the topic is removed from `topicMessages`, but a new subscriber arriving during the partition window gets a fresh `subscribe()` call that immediately fails; can this create a rapid subscribe/fail/remove cycle that causes CPU spin?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55ac5b04-863e-401f-9319-a7475efc3706?mode=deep",
+    "timestamp": "2026-05-01 22:41:44.662068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: unsubscribe()] `unsubscribe()` calls `topicMessages.remove(topic.getTopic())` — during a network partition, if `doOnCancel` and `doOnComplete` fire concurrently for the same topic (e.g., due to partition-induced race), can an unprivileged user trigger a double-remove that leaves the map in an inconsistent state, causing subsequent subscribers to create orphaned subscriptions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c0d1ccee-cced-4bf6-addb-289ddba6396f?mode=deep",
+    "timestamp": "2026-05-01 22:41:57.825806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] There is no circuit breaker wrapping the `retryWhen` logic — during an extended network partition, can an unprivileged user with subscriptions to many distinct topic IDs cause the system to maintain `Long.MAX_VALUE` retry loops per topic, exhausting JVM heap memory through accumulated retry state objects?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4df03752-0748-4705-84a2-a05cc92e3159?mode=deep",
+    "timestamp": "2026-05-01 22:42:11.686975",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RedisTopicListener()] The `.cache()` on the container Mono caches the first successful result permanently — during a network partition that causes the Redis connection to become a zombie (connected but non-functional), can an unprivileged user trigger a scenario where the cached zombie container is returned to all new `subscribe()` calls, causing all new subscriptions to silently hang?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_beaee62d-9add-41df-92a9-2dee88fcc6d7?mode=deep",
+    "timestamp": "2026-05-01 22:42:25.435083",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `doOnError(t -> log.error(...))` in `subscribe()` only logs but does not propagate cleanup — during a network partition, can an unprivileged user exploit the fact that error handling does not remove the topic from `topicMessages`, causing all subsequent subscribers to the same topic to receive the error-state Flux and immediately fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d125152-86de-4314-a28c-eb35a0af0932?mode=deep",
+    "timestamp": "2026-05-01 22:42:39.375653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `retryWhen` in `subscribe()` retries the entire `container.flatMapMany(r -> r.receive(...))` chain — during a network partition, each retry creates a new `receive()` call on the same cached (potentially broken) container; can an unprivileged user cause unbounded accumulation of pending `receive()` calls on the broken container, exhausting Redis subscription slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88ea7ada-3712-4fa0-8de0-5198ac5056a6?mode=deep",
+    "timestamp": "2026-05-01 22:42:53.907861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getSharedListener()] During a network partition, the `topicMessages` ConcurrentHashMap may hold stale Flux entries for topics whose subscriptions have errored — can an unprivileged user exploit this by subscribing to a topic immediately after partition, receiving the stale errored Flux, and causing their gRPC stream to terminate with an error that is not retried at the gRPC layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_718c0299-fe24-4c17-b5e4-54b130d37f0b?mode=deep",
+    "timestamp": "2026-05-01 22:43:09.592648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `Retry.backoff(Long.MAX_VALUE, interval)` has no jitter configuration — during a network partition affecting many mirror node instances simultaneously, can an unprivileged user's subscriptions across multiple instances cause synchronized retry storms that overwhelm Redis upon partition recovery, preventing successful reconnection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_436812eb-b059-4123-b3ae-85e2a8ed45f2?mode=deep",
+    "timestamp": "2026-05-01 22:43:24.624098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: subscribe()] The `doOnCancel(() -> unsubscribe(topic))` fires when a subscriber cancels — during a network partition, if the partition causes the gRPC layer to cancel all subscriptions, `unsubscribe()` removes the topic from `topicMessages`; but if a new subscriber arrives before the retry completes, can they get a fresh broken subscription that immediately errors, creating a subscription storm?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e143d1dc-e33a-4502-9290-9bed35b89229?mode=deep",
+    "timestamp": "2026-05-01 22:43:38.955572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RedisTopicListener()] The `Mono.defer(() -> Mono.just(new ReactiveRedisMessageListenerContainer(connectionFactory)))` creates a new container on each retry — during a network partition with rapid retry cycles, can an unprivileged user cause the system to create many `ReactiveRedisMessageListenerContainer` instances that are never properly closed, leaking file descriptors and TCP connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e30c278-6965-473e-9dd5-995518988055?mode=deep",
+    "timestamp": "2026-05-01 22:43:53.748436",
+    "report_generated": false
   }
 ]
