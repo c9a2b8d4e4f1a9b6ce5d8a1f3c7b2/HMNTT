@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an input where `EntityId.isValidEntityId()` returns false but `AccountAlias.isValid()` returns true, and the alias resolves via `getAccountIdFromAlias()` to an entity ID that corresponds to a deleted account (since `entityFromAliasQuery` uses `coalesce(deleted, false) <> true` but the returned `entity.id` is not re-validated for current state), allowing token operations on a deleted account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43fcc249-1dc5-4a24-8829-bdb38da33b66?mode=deep",
+    "timestamp": "2026-05-01 20:24:10.790990",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address where `entityId.evmAddress` contains valid hex characters but represents an all-zeros address (`0x0000...0000`), causing `Buffer.from()` to produce a 20-byte zero buffer that matches no entity, returning `NotFoundError` and blocking token operations for any account that uses this address format?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_987f9498-0099-4fec-9247-34d72744b2fc?mode=deep",
+    "timestamp": "2026-05-01 20:24:22.830899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting a shard.realm.num string where `num=0`, causing `EntityId.isAllZero()` to return true and `toEvmAddress()` to return null, but `getEncodedId()` still returns `entityId.getEncodedId()` (line 123) which is 0, potentially routing token operations to the zero-ID system account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15056c71-4955-4034-98e7-cb3a59d3d697?mode=deep",
+    "timestamp": "2026-05-01 20:24:35.096071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getAccountIdFromAlias()] Can an unprivileged external user cause permanent fund freezing by submitting an alias string that passes `AccountAlias.isValid()` but whose `base32.decode()` produces binary bytes that match a system entity (e.g., treasury account 0.0.2), causing token operations to be routed to a system account where user funds become permanently inaccessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76c1d7f6-f8f4-4961-8098-8e0199f63752?mode=deep",
+    "timestamp": "2026-05-01 20:24:47.259124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address that `EntityId.isValidEntityId()` accepts with `evmAddress` non-null, where `getEntityIdFromEvmAddress()` is called with `requireResult=false` (if the caller passes this), returning `null`, and the caller silently treats `null` as a valid no-op, causing token freeze state to be applied to no account or the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d59e27b-3410-4775-8156-94d63791abb1?mode=deep",
+    "timestamp": "2026-05-01 20:24:59.878581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by exploiting the fact that `entityFromEvmAddressQuery` does not check `freeze_status` or `type` columns, so it can return the ID of a contract entity (not an account), causing downstream token freeze operations to target a contract that cannot be unfrozen through normal account unfreeze flows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa1604b9-fa92-406b-8f20-52089cf2f377?mode=deep",
+    "timestamp": "2026-05-01 20:25:12.889544",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting a realm.evmAddress format (two-part with EVM address) that passes `evmAddressShardRealmRegex`, where `EntityId.parseString()` uses `systemShard` as default shard, causing the EVM address lookup to succeed for a different shard's entity than intended, routing token operations to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef8380ba-6326-4443-a4d6-bb1bf11b0a53?mode=deep",
+    "timestamp": "2026-05-01 20:25:25.706480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getAccountFromAlias()] Can an unprivileged external user cause permanent fund freezing by submitting an alias that resolves to an entity via `getAccountFromAlias()`, where the returned `Entity` object (line 52) has an `id` field that is a BigInt, and downstream code that receives this ID performs integer comparison using `==` instead of `===`, causing type coercion that matches a different numeric account ID and freezing the wrong account's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf7b8ed5-7f6f-483a-a023-c01ab53cf8e9?mode=deep",
+    "timestamp": "2026-05-01 20:25:39.847147",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an entity ID string that is a valid encoded ID (matching `encodedEntityIdRegex`) representing a negative BigInt, where `parseFromEncodedId()` extracts shard/realm/num via bitwise operations, producing a valid-looking but non-existent account ID that `getEncodedId()` returns without DB verification, causing tokens to be sent to an unreachable account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_144d7d8c-9ed1-4d20-a3fa-1b0b9c491ede?mode=deep",
+    "timestamp": "2026-05-01 20:25:53.151123",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address that is exactly 40 hex characters but contains uppercase letters, where `Buffer.from(entityId.evmAddress, 'hex')` (line 91) is case-insensitive for hex decoding but the database stores the address in a specific case, causing a case-mismatch that returns zero rows and throws `NotFoundError` for a valid account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2acf83ec-f67a-462a-b20f-74ff09ff0efe?mode=deep",
+    "timestamp": "2026-05-01 20:26:06.195469",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting a shard.realm.num entity ID where `shard > 0` and `realm > maxSafeRealm (32767)`, causing `getEncodedId()` to return a BigInt encoded ID (via the BigInt.asIntN path in `getEncodedId()`) without DB verification, where the resulting ID maps to a non-existent account and tokens sent there are permanently lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_deea5fc9-8888-445c-be83-b7b678185937?mode=deep",
+    "timestamp": "2026-05-01 20:26:20.104659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getAccountIdFromAlias()] Can an unprivileged external user cause permanent fund freezing by submitting an alias where `AccountAlias.fromString()` succeeds but `base32.decode()` produces bytes that match a deleted entity's alias (since `entityFromAliasQuery` uses `coalesce(deleted, false) <> true` which should exclude deleted entities), but a race condition between deletion and alias reuse causes the query to return the new entity's ID while the old entity's funds remain frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d3d4515-5345-4493-baeb-9aba6adf29c6?mode=deep",
+    "timestamp": "2026-05-01 20:26:32.850576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address that passes `EntityId.isValidEntityId()` and is classified as having a non-null `evmAddress`, but the `getEntityIdFromEvmAddress()` call with `requireResult=true` throws `NotFoundError` because the entity was deleted between the time the user initiated the transaction and the time the lookup executes (TOCTOU), causing the token operation to fail and funds to remain in a frozen state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0156018a-ef47-4922-8407-789e3909f565?mode=deep",
+    "timestamp": "2026-05-01 20:26:44.990406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address where `entityId.evmAddress` is a 40-character string of all 'f' characters (`ffffffffffffffffffffffffffffffffffffffff`), which is a valid hex string but may match a special or reserved address in the entity table, causing token operations to be routed to an unintended system entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1267b95f-0a06-4e93-beb3-bfcfba8fbb1a?mode=deep",
+    "timestamp": "2026-05-01 20:26:58.137515",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an entity ID string that passes `EntityId.isValidEntityId()` with `evmAddress=null`, where `getEncodedId()` returns `entityId.getEncodedId()` (line 123) for an account that exists but is currently frozen, and the caller uses this ID to initiate a token transfer that gets permanently blocked because the freeze status is not checked at the `getEncodedId()` layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b2963a5-09c3-4e68-8dda-c72d622cdd5c?mode=deep",
+    "timestamp": "2026-05-01 20:27:10.270803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getAccountFromAlias()] Can an unprivileged external user cause permanent fund freezing by submitting an alias that resolves to an entity via `getAccountFromAlias()`, where the entity's `id` is returned (line 80) but the entity type is `CONTRACT` rather than `ACCOUNT`, causing downstream token freeze operations to be applied to a contract entity that has no unfreeze mechanism accessible to the user?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b210472a-4ddb-44f7-b6b1-68d16e3a074f?mode=deep",
+    "timestamp": "2026-05-01 20:27:23.156964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting a shard.realm.evmAddress string where the EVM address portion is a long-form alias that `isEvmAddressAlias()` returns false for (because `prefix === longFormEvmAddressPrefix` and `num <= maxNum`), causing `EntityId.parseString()` to set `evmAddress=null` and `num` to the parsed value, returning an encoded ID without DB verification for a potentially non-existent account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4074f54f-5e29-41f9-8af0-96c23977393e?mode=deep",
+    "timestamp": "2026-05-01 20:27:35.823228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address that matches an entity in the database but the entity has `deleted=false` explicitly set (not NULL), while a different entity with the same EVM address has `deleted=NULL`, causing the query to return only the explicitly non-deleted entity, potentially routing operations to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6d29f4f-cb12-4562-80cf-db3076113546?mode=deep",
+    "timestamp": "2026-05-01 20:27:48.529795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting an input string that fails both `EntityId.isValidEntityId()` and `AccountAlias.isValid()` checks, causing `getEncodedId()` to throw `InvalidArgumentError.forParams(paramName)` (line 136), which if not properly handled by the caller, causes a token operation to be aborted mid-execution, leaving funds in a frozen intermediate state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff837771-c8eb-4d08-ac00-993b31144e55?mode=deep",
+    "timestamp": "2026-05-01 20:28:01.231947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEntityIdFromEvmAddress()] Can an unprivileged external user cause permanent fund freezing by submitting an EVM address where `Buffer.from(entityId.evmAddress, 'hex')` produces a 20-byte buffer that, when compared against the database's binary EVM address column, fails due to encoding differences (e.g., bytea vs hex string storage), causing zero rows to be returned and `NotFoundError` to be thrown for a valid account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd2498b5-a2ef-4823-9c86-606d1d87a2bb?mode=deep",
+    "timestamp": "2026-05-01 20:28:14.627576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/entityService.js -> Scope: Critical: Unintended permanent freezing of funds'] [Function: getEncodedId()] Can an unprivileged external user cause permanent fund freezing by submitting a valid entity ID string that resolves via `getEncodedId()` to an account ID, where the LRU cache in `EntityId` (`parseCached()`) returns a stale cached `EntityId` object for a recently deleted account, causing token operations to target a deleted account and permanently locking the funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b591c884-2fcc-4bc8-a9d0-67420b190d77?mode=deep",
+    "timestamp": "2026-05-01 20:28:28.396624",
+    "report_generated": false
+  }
+]
