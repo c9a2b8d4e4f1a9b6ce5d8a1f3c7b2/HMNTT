@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_126959ce-cfb3-436b-9e2d-b12a189f28e4?mode=deep",
     "timestamp": "2026-04-29 01:31:53.163965",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: negotiate()] Can an unprivileged external user send a request with a malformed `Accept-Encoding` header (e.g., `Accept-Encoding: gzip;q=0, *;q=0`) to cause `negotiate()` to return `false` (no compression), but the cached response was stored compressed, causing `getUncompressedBody()` to call `unzipSync` on potentially corrupted base64url data and return garbled mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_adbab1fa-8758-422c-8a24-49930b1c0d3f?mode=deep",
+    "timestamp": "2026-05-01 20:14:11.411713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: shouldCompress()] Can an unprivileged external user craft a request that returns a response body exactly at `config.cache.response.compressThreshold` bytes, causing `shouldCompress()` to return `true` and the body to be gzip-compressed and stored as base64url in Redis, but if `config.cache.response.compress` is toggled between requests, subsequent cache hits will attempt to decompress an uncompressed body, returning corrupted mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_493b84ca-1cfe-4b64-9b2c-6e4e13ac584d?mode=deep",
+    "timestamp": "2026-05-01 20:14:23.200770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: shouldCompress()] Can an unprivileged external user exploit the `body.length >= config.cache.response.compressThreshold` check in `shouldCompress()` by triggering a response with a body just below the threshold, causing it to be stored uncompressed, and then later when `config.cache.response.compressThreshold` is lowered, the cached uncompressed entry is served with incorrect `compressed: false` metadata, causing `getUncompressedBody()` to return raw base64url data as mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09ab8530-8732-434d-8b8e-6691231732fd?mode=deep",
+    "timestamp": "2026-05-01 20:14:35.436596",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getCache()] Can an unprivileged external user exploit the singleton pattern of `getCache()` (using a closure-captured `cache` variable) to cause a single poisoned cache entry to persist across all requests, since there is no per-request cache isolation, meaning one attacker-triggered cache write affects all users querying that mirror node endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e7edda8-918a-4758-a77f-412f515e33ec?mode=deep",
+    "timestamp": "2026-05-01 20:14:47.947422",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `logger.info` call that logs `req.ip` (which may be spoofed via `X-Forwarded-For`) to inject log-forging payloads into the mirror node access logs, obscuring the true source of cache poisoning attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44a42164-d1b8-4811-978c-3ac9f18a1bbf?mode=deep",
+    "timestamp": "2026-05-01 20:15:00.110032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a request to a mirror node endpoint immediately after a record update, receive a cached stale response (since `redisTtl` could be up to the original TTL), and then use the `cache-control: public, max-age=${redisTtl}` header to instruct their browser to cache the stale record locally, causing them to miss the updated mirror node record for the full TTL duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_323491d6-8a75-4d19-ad74-a406886f34c9?mode=deep",
+    "timestamp": "2026-05-01 20:15:12.701124",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the `await getCache().setSingle(responseCacheKey, ttl, cachedResponse)` call by flooding the endpoint with requests that each generate a unique cache key (via unique query parameters), exhausting Redis memory and causing the `maxmemory-policy` eviction to remove legitimate cached mirror node records, forcing subsequent users to receive inconsistent DB reads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63e6a5e7-3ceb-49ed-8298-89a5573f290e?mode=deep",
+    "timestamp": "2026-05-01 20:15:25.227090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `res.locals[requestStartTime] || Date.now()` fallback in `responseCacheCheckHandler` to cause timing discrepancies in the elapsed time log, obscuring the actual cache hit latency and making it harder to detect cache poisoning attacks through log analysis?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b204374-8e28-4984-9495-124134f0f6ae?mode=deep",
+    "timestamp": "2026-05-01 20:15:38.205171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the use of MD5 (a cryptographically broken hash function) in `crypto.createHash('md5').update(req.originalUrl).digest('hex')` to find two different mirror node API URLs that hash to the same value, causing one endpoint's cached response to be served for a different endpoint's request, resulting in completely wrong records being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4b805be-fb3b-472f-ba42-fd308fdb71e5?mode=deep",
+    "timestamp": "2026-05-01 20:15:51.183342",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a request with both `if-none-match` matching the cached ETag and `Accept-Encoding: gzip`, causing the code to enter the `clientCached` branch which calls `delete headers[contentTypeHeader]` but does NOT call `negotiate()`, resulting in a 304 response with no `content-type` but also no `vary: accept-encoding` header, causing downstream caches to incorrectly cache the 304 for all encodings?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc067f56-3af9-4762-9ac1-ff37448d57a1?mode=deep",
+    "timestamp": "2026-05-01 20:16:04.296438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `res.end()` path (when `body === undefined`) for HEAD requests to cause the response to be sent without a body but with headers from a stale cached entry, causing clients to believe mirror node records exist with certain properties (e.g., content-length) when the actual records have since been deleted or modified?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b5e70ca7-dc72-4051-ac13-69cbbd28fe0a?mode=deep",
+    "timestamp": "2026-05-01 20:16:17.813443",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the `res.getHeaders()` call in `responseCacheUpdateHandler` to capture and cache response headers that include sensitive information (e.g., internal server details, debug headers) set by upstream middleware, causing these headers to be served to all subsequent users querying that mirror node endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06906e6c-a3c7-4444-a4a3-d1b1e74155b9?mode=deep",
+    "timestamp": "2026-05-01 20:16:30.185778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the spread operator `{...cachedResponse.headers, ...{[CACHE_CONTROL_HEADER]: ...}}` to have a cached response with a `cache-control` key in `cachedResponse.headers` overridden by the new value, but if `cachedResponse.headers` contains other cache-related headers (e.g., `pragma`, `expires`), these are passed through unmodified, causing clients to apply conflicting caching directives to mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_126ae8e4-e86c-4c29-916c-4bc25eb25a93?mode=deep",
+    "timestamp": "2026-05-01 20:16:44.014132",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: CachedApiResponse.getLength()] Can an unprivileged external user exploit the inaccurate `getLength()` formula `Math.floor((this.body.length * 3) / 4)` (which approximates base64 decoded length) to receive a `content-length` header that does not match the actual gzip-compressed body length, causing HTTP clients to truncate or over-read mirror node record responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5088aa32-0958-4d28-a30c-2c697df5374a?mode=deep",
+    "timestamp": "2026-05-01 20:16:58.067460",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: CachedApiResponse.getUncompressedBody()] Can an unprivileged external user trigger a scenario where `cachedResponse.compressed` is `true` but the stored `body` in Redis has been corrupted or truncated (e.g., due to Redis memory pressure), causing `unzipSync(Buffer.from(this.body, 'base64url'))` to throw an exception that propagates as an unhandled error, resulting in missing mirror node records for all users hitting that cache entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3283ae7d-2c82-4e2b-a8ea-2838960a6eec?mode=deep",
+    "timestamp": "2026-05-01 20:17:11.679999",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `Object.assign(new CachedApiResponse(), redisValue)` pattern where `redisValue` is a plain object from `JSONParse`, causing `cachedResponse.getBody()`, `cachedResponse.getUncompressedBody()`, etc. to be the prototype methods of `CachedApiResponse` but `this.compressed`, `this.body`, `this.length` to be from the plain object, and if `redisValue` has `compressed: true` but no `length` field, `getUncompressedLength()` returns `undefined`, causing a `content-length: undefined` header in mirror node responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c363a67-c2f2-4379-b257-94cf78ec1a72?mode=deep",
+    "timestamp": "2026-05-01 20:17:24.522572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the `isUnmodified` branch that merges `config.response.headers.default` into cached headers, causing the default headers (which may include a generic `content-type: application/json`) to override the actual response content-type, leading clients to misparse binary or non-JSON mirror node record responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55683b20-30d3-4616-a427-6355e88b9431?mode=deep",
+    "timestamp": "2026-05-01 20:17:37.862398",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the fact that `req.originalUrl` includes the full path and query string (but not the hostname or protocol) to craft requests to different virtual hosts that share the same path and query, causing cross-tenant cache pollution where one user's mirror node records are served to another user on a different virtual host?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d807346-ad6a-4490-8f1b-15f2782ba69d?mode=deep",
+    "timestamp": "2026-05-01 20:17:50.832419",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user send a high volume of requests with unique `if-none-match` headers that never match any cached ETag, causing `responseCacheCheckHandler` to always proceed past the conditional check and serve the full cached body, effectively bypassing the 304 optimization and increasing bandwidth consumption while also revealing the full content of cached mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44c37537-4bc6-4c5b-8dce-262483269d68?mode=deep",
+    "timestamp": "2026-05-01 20:18:03.666246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the `await getCache().setSingle(responseCacheKey, ttl, cachedResponse)` call where `ttl` is derived from `getCacheControlExpiryOrDefault` to store a mirror node response with an extremely large TTL (e.g., by manipulating the `cache-control` header to `max-age=2147483647`), causing stale records to persist in Redis indefinitely and be served to all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6e4214c-1ce5-454d-8556-f034a23f49e2?mode=deep",
+    "timestamp": "2026-05-01 20:18:16.930230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: negotiate()] Can an unprivileged external user send a request with `Accept-Encoding: identity` (explicitly refusing compression) to a mirror node endpoint where the cached response has `compressed: true`, causing `negotiate()` to return `false` and `getUncompressedBody()` to decompress the body, but if the decompression fails silently, the raw compressed bytes are served as mirror node records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_accb0791-cfe3-4bda-bc7a-e903bd4e0609?mode=deep",
+    "timestamp": "2026-05-01 20:18:31.013846",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `res.send(body)` call where `body` is either `cachedResponse.getBody()` (Buffer) or `cachedResponse.getUncompressedBody()` (Buffer/string) to cause Express to set an incorrect `content-type` header based on the body type, overriding the cached `content-type` and causing clients to misinterpret mirror node record data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36e8ee84-533e-4e13-bf90-38c169f08be8?mode=deep",
+    "timestamp": "2026-05-01 20:18:45.235670",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheUpdateHandler()] Can an unprivileged external user exploit the `responseBody && responseCacheKey` check in `responseCacheUpdateHandler` where `responseBody` is taken from `res.locals[responseBodyLabel]` to cause an empty string body (`''`) to be falsy and skip caching, while a body of `'null'` or `'0'` would be truthy and get cached, leading to inconsistent caching behavior for edge-case mirror node record responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5cf2e3c4-56f0-40d9-bc4c-b47de62f31ed?mode=deep",
+    "timestamp": "2026-05-01 20:18:57.835178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: responseCacheCheckHandler()] Can an unprivileged external user exploit the `res.locals[responseCacheKeyLabel] = responseCacheKey` assignment on cache miss to observe that subsequent requests to the same URL do NOT set this local (because they hit the cache), allowing the attacker to fingerprint cache state and determine when mirror node records were last updated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b6c4ecf9-6871-4680-8100-90eb66a3cfb4?mode=deep",
+    "timestamp": "2026-05-01 20:19:10.621386",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/responseCacheHandler.js -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: cacheKeyGenerator()] Can an unprivileged external user exploit the absence of request method (GET vs POST) in the cache key generated by `cacheKeyGenerator` (which only hashes `req.originalUrl`) to cause a POST request's response to be cached under the same key as a GET request, serving incorrect mirror node records to GET users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c645e59-c020-46b3-9b0f-bcee1f8c2326?mode=deep",
+    "timestamp": "2026-05-01 20:19:23.411957",
+    "report_generated": false
   }
 ]
