@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a CryptoCreate transaction with an alias that is a valid ECDSA secp256k1 public key (35 bytes), and then immediately submit a CryptoDelete transaction, causing a race condition where findByAlias() returns the entity ID after deletion but before the deleted flag is committed, leading to the subsequent gossiped transaction being processed against a deleted entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90ea03ee-f0e3-49c1-b9b7-8de13a90f924?mode=deep",
+    "timestamp": "2026-05-01 21:49:15.783090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a ContractCreate transaction that produces a contract with an EVM address identical to a previously deleted contract's EVM address, and since findByEvmAddress() uses 'deleted <> true' (not 'deleted IS NOT TRUE'), if the old entity has deleted=NULL, cause findByEvmAddress() to return the old entity's ID instead of the new contract's ID, preventing the new contract's gossiped transactions from being correctly processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4208a8a1-c92e-4fd1-a3a5-03daae319316?mode=deep",
+    "timestamp": "2026-05-01 21:49:27.904422",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a transaction with an alias byte array that is identical to another entity's evm_address bytes, causing findByAlias() to return that entity's ID (since the alias column is matched exactly), leading to incorrect entity resolution in EntityIdServiceImpl and preventing the gossiped transaction from being attributed to the correct account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ad53ac5-b243-48db-9350-8b358858677f?mode=deep",
+    "timestamp": "2026-05-01 21:49:40.295485",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findEvmAddressesByIds(Iterable<? extends Long>)] Can an unprivileged external user trigger a gossiped transaction that causes findEvmAddressesByIds() to be called with a null Iterable parameter, causing a NullPointerException in the native query execution that propagates up through SyntheticLogListener.onEnd() and aborts the record file processing, preventing all gossip in that file from being committed to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94ac1f46-6aca-4ccf-86af-033e0480f250?mode=deep",
+    "timestamp": "2026-05-01 21:49:53.169678",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: updateContractType(Iterable<Long>)] Can an unprivileged external user submit a ContractCreate transaction with a sidecar record containing a ContractID with shard/realm/num values that encode to a negative Long ID, causing updateContractType() to attempt to UPDATE entity rows with a negative ID, silently affecting zero rows and leaving the entity type as non-CONTRACT, causing subsequent gossiped contract transactions to fail type checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21215d96-9efb-46a3-85be-d2bd75559f35?mode=deep",
+    "timestamp": "2026-05-01 21:50:06.446168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a transaction with an alias that matches an entity where the deleted column is NULL (not explicitly set to false), exploiting the 'deleted <> true' predicate to retrieve that entity, and then use the returned entity ID to craft a follow-up gossiped transaction that references a supposedly non-existent entity, causing the importer to process it against an entity in an indeterminate deletion state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_229b061e-43f5-4639-a55a-41365b029c65?mode=deep",
+    "timestamp": "2026-05-01 21:50:19.781408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a gossiped EthereumTransaction with an EVM address that is exactly 20 bytes of 0xFF, causing findByEvmAddress() to scan the entity table for a matching evm_address, and if the database has a partial index that does not cover this value, cause a full sequential scan that degrades performance and delays gossip processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb7fe8ab-c657-46f8-b915-be6af81556a7?mode=deep",
+    "timestamp": "2026-05-01 21:50:32.588089",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a CryptoCreate transaction with an alias that is a 20-byte EVM address (triggering the EVM address path in EntityIdServiceImpl.lookup()), and then submit another transaction with the same bytes as a non-EVM alias (triggering the alias path), causing findByAlias() and findByEvmAddress() to return different entity IDs for the same byte sequence, creating an inconsistency that prevents one of the gossiped transactions from being correctly processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4afc6f0-514a-4d90-8b0e-03b195f345db?mode=deep",
+    "timestamp": "2026-05-01 21:50:46.287615",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findEvmAddressesByIds(Iterable<? extends Long>)] Can an unprivileged external user trigger a gossiped transaction that causes SyntheticLogListener to call findEvmAddressesByIds() with a batch of IDs where all entities have null evm_address, causing the query 'length(evm_address) > 0' to return an empty list, and if the caller does not handle this empty result correctly, cause synthetic log topics to remain as long-zero addresses, corrupting the gossip-derived event log data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04832694-385b-4902-a75b-04a596a2241f?mode=deep",
+    "timestamp": "2026-05-01 21:50:59.170104",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: updateContractType(Iterable<Long>)] Can an unprivileged external user submit a ContractCreate transaction that causes updateContractType() to be called concurrently with another gossip transaction that is reading the entity type, creating a read-write race condition where the reading transaction sees the old type (non-CONTRACT) and makes incorrect routing decisions for the gossiped transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1aff9d7-a004-4f74-9a88-3abbdd997139?mode=deep",
+    "timestamp": "2026-05-01 21:51:12.971168",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a transaction with an alias that is a valid Ed25519 public key (33 bytes with proto prefix), causing findByAlias() to return an entity ID, and then exploit the fact that EntityIdServiceImpl.findByAliasEvmAddress() also tries to recover an EVM address from the same alias bytes, causing two different entity IDs to be cached for the same alias and corrupting the entity resolution for subsequent gossiped transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9cbb913-9722-4519-aadb-79ed7802cc12?mode=deep",
+    "timestamp": "2026-05-01 21:51:25.742244",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a gossiped ContractCall transaction targeting an EVM address that belongs to a system account (ID < 1000), causing findByEvmAddress() to return that system account's ID, and if the system account has no evm_address set in the entity table, cause findByEvmAddress() to return empty and trigger a recoverable error that prevents the gossiped transaction from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b22aa310-3ac2-4164-8295-6c9a8169633a?mode=deep",
+    "timestamp": "2026-05-01 21:51:38.969394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a CryptoCreate transaction with an alias that is a byte array of length 1 (a single byte), causing findByAlias() to execute a native query that matches against any entity with a single-byte alias, and if such an entity exists, return its ID and cause the gossiped transaction to be attributed to the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16af8196-79b7-44f5-8532-e96f97ab808b?mode=deep",
+    "timestamp": "2026-05-01 21:51:51.744503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findEvmAddressesByIds(Iterable<? extends Long>)] Can an unprivileged external user trigger a gossiped transaction that causes findEvmAddressesByIds() to be called with an Iterable that, when iterated multiple times (as some JPA implementations may do), produces different results (e.g., a non-repeatable Iterable), causing the native query to bind incorrect parameters and return wrong EVM address mappings that corrupt synthetic log data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca41650d-f88e-4c55-9961-7af9a6197380?mode=deep",
+    "timestamp": "2026-05-01 21:52:04.717513",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: updateContractType(Iterable<Long>)] Can an unprivileged external user submit a sidecar migration transaction that causes updateContractType() to be called with an Iterable<Long> that is modified concurrently (e.g., a shared HashSet being cleared by SidecarContractMigration.updateContractType()), causing the IN clause to bind an empty or partial list and silently skip updating some entity types, leaving contracts with incorrect types that cause subsequent gossiped transactions to be misprocessed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e7182dd-940d-4792-b8a7-6645ec0fb53d?mode=deep",
+    "timestamp": "2026-05-01 21:52:18.366679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a transaction with an alias that is a null byte array (byte[0] or null), causing findByAlias() to pass null to the native SQL query parameter, resulting in a 'WHERE alias = NULL' condition (which never matches in SQL) or a JDBC exception, and if the exception propagates, abort the gossip transaction processing pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c5aecc4-182b-481b-9878-d648df5c7aae?mode=deep",
+    "timestamp": "2026-05-01 21:52:32.144986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByEvmAddress(byte[])] Can an unprivileged external user submit a gossiped transaction with an EVM address that is a valid long-zero address (first 12 bytes zero, last 8 bytes encode a valid entity ID), causing DomainUtils.fromEvmAddress() to return a non-null EntityId before findByEvmAddress() is even called, and if that entity ID does not exist in the database, cause the gossiped transaction to reference a non-existent entity without triggering any error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2343e0b8-ace6-4893-bdd8-f3025a59cd78?mode=deep",
+    "timestamp": "2026-05-01 21:52:45.113292",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a CryptoCreate transaction with an alias that is a byte-for-byte duplicate of an existing non-deleted entity's alias, causing findByAlias() to return the existing entity's ID, and since the importer does not create a new entity for the duplicate alias, cause the gossiped CryptoCreate to be silently merged with the existing entity, preventing the new account from being tracked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9837f303-1e17-41a8-8ef1-65a659a6d545?mode=deep",
+    "timestamp": "2026-05-01 21:52:58.133484",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findEvmAddressesByIds(Iterable<? extends Long>)] Can an unprivileged external user trigger a gossiped transaction that causes SyntheticLogListener to call findEvmAddressesByIds() with a set of IDs that includes IDs of entities that were deleted between the time the IDs were collected and the time the query executes, causing the query to return EVM addresses for deleted entities and corrupt the synthetic log topics for that gossip batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e65b78a-4f9e-4429-b191-6abb3ed9dce8?mode=deep",
+    "timestamp": "2026-05-01 21:53:11.081000",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: updateContractType(Iterable<Long>)] Can an unprivileged external user submit a ContractCreate transaction that causes updateContractType() to be called with an entity ID that belongs to a TOKEN or TOPIC entity type, causing the UPDATE to change that entity's type to CONTRACT, corrupting the entity type invariant and causing subsequent gossiped transactions targeting that token or topic to be misrouted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93c60b96-8269-42e3-a0ec-5790df0dac19?mode=deep",
+    "timestamp": "2026-05-01 21:53:24.456261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: High: Preventing gossip of a transaction or multiple transactions'] [Function: findByAlias(byte[])] Can an unprivileged external user submit a transaction with an alias that is a valid protobuf-serialized AccountID (shard.realm.num), causing findByAlias() to match an entity whose alias column contains those bytes, and if that entity is a different account than intended, cause the gossiped transaction to be attributed to the wrong entity and prevent correct gossip processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9ad129b-3027-4435-b9d6-22d9c09b5b3f?mode=deep",
+    "timestamp": "2026-05-01 21:53:38.857340",
+    "report_generated": false
+  }
+]
