@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user repeatedly submit crafted signed transactions to ConstructionSubmit() while the Hiero network is partially partitioned, exploiting the sdkClient.SetMaxAttempts(1) no-retry policy to cause all in-flight transactions to silently fail with ErrTransactionSubmissionFailed, effectively denying service to all legitimate users without any attacker-side cost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3800a67-3860-419d-885b-a65f2f5fcffa?mode=deep",
+    "timestamp": "2026-05-01 20:18:14.981248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user craft a valid signed transaction targeting a specific node account ID that is currently partitioned from the network, causing hiero.TransactionExecute() to always fail and the error detail to be leaked in the ErrTransactionSubmissionFailed response, exposing internal network topology to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cce67cb0-61f7-4c1b-8207-84d84620c20d?mode=deep",
+    "timestamp": "2026-05-01 20:18:27.182322",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getRandomNodeAccountId()] Can an unprivileged external user trigger a network partition that causes c.sdkClient.GetNetwork() to return an empty map, making getRandomNodeAccountId() return ErrNodeAccountIdsEmpty and blocking all ConstructionMetadata() calls, causing a complete denial of service for the construction workflow without any privileged access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ade31d5-aee0-4ae2-be5a-e61c459c90a3?mode=deep",
+    "timestamp": "2026-05-01 20:18:39.934697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getRandomNodeAccountId()] Can an unprivileged external user exploit the fallback path in getRandomNodeAccountId() where rand.Int() failure causes nodeAccountIds[0] to always be returned, combined with a network partition isolating that specific node, to deterministically route all transactions to a partitioned node and cause 100% submission failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d96640e-0ab6-4478-b167-e0f824dee652?mode=deep",
+    "timestamp": "2026-05-01 20:18:52.983265",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionMetadata()] Can an unprivileged external user flood ConstructionMetadata() with valid requests during a network partition event, causing getRandomNodeAccountId() to repeatedly iterate over a stale sdkClient.GetNetwork() map that still contains partitioned nodes, resulting in all returned node_account_id metadata values pointing to unreachable nodes and making all subsequent ConstructionPayloads()/ConstructionSubmit() calls fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e53726f9-353a-4b93-a617-8adbfc06c362?mode=deep",
+    "timestamp": "2026-05-01 20:19:05.962709",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionMetadata()] Can an unprivileged external user exploit the validUntilNanos value computed as time.Now().UnixNano() + maxValidDurationNanos during a network partition, where the 180-second window expires before the partition resolves, causing all transactions built from this metadata to be permanently invalid and unsubmittable even after the partition heals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba42d04b-76d6-4c92-9968-f730c1aa21bc?mode=deep",
+    "timestamp": "2026-05-01 20:19:19.854044",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply a metadataKeyValidUntilNanos value that is exactly at the boundary of the current time plus maxValidDurationNanos during a network partition, causing validStartNanos to be computed as a value that expires before the partition resolves, making the transaction permanently unsubmittable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f289fd71-7ae2-4b89-8072-da6ea5ed66f0?mode=deep",
+    "timestamp": "2026-05-01 20:19:33.023352",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user submit a metadataKeyValidUntilNanos value of maxValidDurationNanos+1 (just above the partition-safe window), causing validStartNanos = validUntil - maxValidDurationNanos to be set to a past timestamp, and then exploit the partition to delay submission until the transaction is expired, causing a permanent loss of the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_177f1feb-5df8-4455-bbaa-6cb933daa1dc?mode=deep",
+    "timestamp": "2026-05-01 20:19:46.484636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: transactionSetNodeAccountId()] Can an unprivileged external user supply a metadataKeyNodeAccountId in ConstructionPayloads() that corresponds to a node known to be partitioned, bypassing the random node selection in getRandomNodeAccountId() and deterministically routing the transaction to an unreachable node, causing guaranteed submission failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a49651ec-15a5-40f8-bb3a-9432acc8b103?mode=deep",
+    "timestamp": "2026-05-01 20:19:59.286714",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getTransactionNodeAccountId()] Can an unprivileged external user supply an arbitrary string as metadataKeyNodeAccountId that parses as a valid hiero.AccountID but corresponds to a non-existent or partitioned node, causing ConstructionSubmit() to always fail with ErrTransactionSubmissionFailed and leaking the node routing logic in error messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_177c3a56-f582-42d3-8f81-2f1479ca4925?mode=deep",
+    "timestamp": "2026-05-01 20:20:13.014996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user exploit the fact that sdkClient.SetMaxAttempts(1) disables all SDK-level retries, combined with a transient network partition, to cause a race condition where a transaction is accepted by the Hiero node but the response is lost in transit, resulting in the client receiving ErrTransactionSubmissionFailed while the transaction was actually committed, causing double-spend attempts on retry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c327b35f-2842-4fbc-bbf9-ca6ad6aac0cf?mode=deep",
+    "timestamp": "2026-05-01 20:20:26.663440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user exploit the no-retry policy (SetMaxAttempts(1)) during a brief network partition to cause hiero.TransactionExecute() to fail, then resubmit the same signed transaction after the partition heals, resulting in a duplicate transaction submission that the Hiero network may process twice if the transaction ID window has not expired?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3385d283-fe15-4b46-aed5-b49ab90ce665?mode=deep",
+    "timestamp": "2026-05-01 20:20:39.710817",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: NewConstructionAPIService()] Can an unprivileged external user trigger conditions that cause the sdkClient network address book to become stale during a partition (since SetNetworkUpdatePeriod is only set in online mode with no custom nodes), resulting in the service continuing to route transactions to partitioned nodes long after the partition has resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_398be340-9561-4325-9eba-35c30b04f66d?mode=deep",
+    "timestamp": "2026-05-01 20:20:53.068708",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: NewConstructionAPIService()] Can an unprivileged external user exploit the offline mode client initialization path (hiero.ClientFromConfig with only network name, no mirror network) to cause the sdkClient to have a permanently empty or stale node list, making getRandomNodeAccountId() always return ErrNodeAccountIdsEmpty and blocking all metadata requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f98e6a5-9fdf-4fe2-b8b0-fca1f26184da?mode=deep",
+    "timestamp": "2026-05-01 20:21:06.808723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: resolveAccountAliases()] Can an unprivileged external user supply a large number of account aliases in optionKeyAccountAliases during a network partition, causing resolveAccountAliases() to make repeated c.accountRepo.GetAccountId() calls that all block or fail, exhausting connection pool resources and causing a denial of service for all concurrent users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7070a98e-7dd5-4af8-ab13-7882de88cca1?mode=deep",
+    "timestamp": "2026-05-01 20:21:20.076499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: resolveAccountAliases()] Can an unprivileged external user exploit a network partition affecting the account repository backend to cause c.accountRepo.GetAccountId() to hang indefinitely inside resolveAccountAliases(), blocking the ConstructionMetadata() goroutine and exhausting the server's goroutine pool if no timeout is enforced on the context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08785c23-8123-4108-a6d9-461406df5a98?mode=deep",
+    "timestamp": "2026-05-01 20:21:33.481787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionMetadata()] Can an unprivileged external user send concurrent ConstructionMetadata() requests during a partition where c.sdkClient.GetNetwork() returns a single-node map, causing all requests to receive the same partitioned node_account_id, and then all subsequent ConstructionSubmit() calls to fail simultaneously, amplifying the partition's impact?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec10520f-850a-4f8f-8483-e1b4de078891?mode=deep",
+    "timestamp": "2026-05-01 20:21:47.659785",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getRandomNodeAccountId()] Can an unprivileged external user exploit the seen map deduplication logic in getRandomNodeAccountId() during a partition where all unique node account IDs map to partitioned nodes, causing the function to return a valid but unreachable node ID with no error, silently routing all transactions to failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3999a3f-8589-41e7-877e-14d55cbf1463?mode=deep",
+    "timestamp": "2026-05-01 20:22:00.897097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user exploit the error detail exposure in errors.AddErrorDetails(errors.ErrTransactionSubmissionFailed, 'reason', fmt.Sprintf('%s', err)) during a network partition to extract internal node addresses, SDK error messages, or network topology information from the error response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09437130-de7d-489b-ba59-783ed07baeec?mode=deep",
+    "timestamp": "2026-05-01 20:22:15.510139",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionSubmit()] Can an unprivileged external user exploit a network partition to cause hiero.TransactionGetTransactionHash() to fail before TransactionExecute(), resulting in ErrTransactionHashFailed being returned instead of a submission error, causing the client to incorrectly conclude the transaction was malformed rather than network-failed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e992429-d37e-4afe-8efb-b570156b9828?mode=deep",
+    "timestamp": "2026-05-01 20:22:30.433968",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: transactionSetTransactionId()] Can an unprivileged external user supply a validStartNanos of 0 to force hiero.TransactionIDGenerate(payer) to use the current server time, and then exploit a network partition that lasts longer than maxValidDurationSeconds (180s) to cause the transaction to expire before it can be submitted, permanently losing the transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83cfdae4-93d1-4286-b365-f526c7d80a63?mode=deep",
+    "timestamp": "2026-05-01 20:22:45.076803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: transactionSetValidDuration()] Can an unprivileged external user supply a validDurationSeconds of 1 (minimum valid value per isValidTransactionValidDuration) to create a transaction with a 1-second validity window, then exploit any network latency or micro-partition to cause the transaction to expire in transit, causing guaranteed submission failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_99852dd7-fcd5-471f-b09e-72ea2b3f3833?mode=deep",
+    "timestamp": "2026-05-01 20:22:59.031729",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: isValidTransactionValidDuration()] Can an unprivileged external user supply validDurationSeconds=0 to trigger the defaultValidDurationSeconds=180 fallback in transactionSetValidDuration(), and then exploit a network partition lasting exactly 180 seconds to cause all transactions built during the partition to expire simultaneously upon partition resolution, causing a thundering-herd of failed submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8dd74dcb-8263-420f-8b56-ecb46b3cdd49?mode=deep",
+    "timestamp": "2026-05-01 20:23:14.513411",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionPayloads()] Can an unprivileged external user craft a ConstructionPayloads() request with a metadataKeyNodeAccountId pointing to a partitioned node, causing the transaction to be frozen with that node's ID embedded in the body bytes, making the transaction permanently bound to the partitioned node and unsubmittable even after the partition heals (since the node ID is in the signed body)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f98ed8d7-34e9-4d0c-bb6d-b9c378d5905d?mode=deep",
+    "timestamp": "2026-05-01 20:23:28.909720",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/construction_service.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: ConstructionPayloads()] Can an unprivileged external user exploit the fact that transactionSetNodeAccountId() embeds the node account ID into the frozen transaction body, combined with a network partition, to create a scenario where the signed transaction cannot be rerouted to a healthy node without invalidating the signature, causing permanent transaction loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b020e1c-68d9-4a04-b0d4-dfb383c6c797?mode=deep",
+    "timestamp": "2026-05-01 20:23:42.363571",
+    "report_generated": false
+  }
+]
