@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: FindByHash()] Can an unprivileged external user submit a hash string that matches a record_file row whose index is below genesisBlock.Index, causing findBlockByHash() to silently suppress that block and return ErrBlockNotFound, resulting in a missing record that should be visible to mirror node consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6db469bd-d381-4db3-96dc-7ac3390ef2b4?mode=deep",
+    "timestamp": "2026-05-01 22:05:28.056299",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findBlockByHash()] Can an unprivileged external user trigger a scenario where rb.Index < br.genesisBlock.Index check incorrectly filters out a legitimate block because genesisBlock.Index was cached with a stale or incorrect value via sync.Once, causing that block to be permanently missing from mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0247c8bb-a4e6-45a0-a5f0-5e454c297a8c?mode=deep",
+    "timestamp": "2026-05-01 22:05:40.073765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: initGenesisRecordFile()] Can an unprivileged external user race two concurrent requests to initGenesisRecordFile() such that the sync.Once fires with a partially-initialized recordBlock (e.g., zero-value ConsensusStart), permanently caching incorrect genesis data and causing all subsequent block lookups to export wrong consensus boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_472fab49-f194-407d-b879-7168e8e5252d?mode=deep",
+    "timestamp": "2026-05-01 22:05:52.431092",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: initGenesisRecordFile()] Can an unprivileged external user exploit the condition br.genesisBlock.ConsensusStart != genesisConsensusStartUnset (-1) by triggering a database state where the genesis record file has ConsensusStart == -1, causing initGenesisRecordFile() to re-query on every call and potentially return inconsistent genesis data across requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3267a14c-4822-422c-92d5-26b0e457088f?mode=deep",
+    "timestamp": "2026-05-01 22:06:04.959310",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: ToBlock()] Can an unprivileged external user cause ToBlock() to produce a block where ParentHash is set to rb.Hash (self-referential) for a non-genesis block by crafting a scenario where rb.Index == genesisBlock.Index but the block is not actually the genesis block, leading to incorrect parent chain data exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0c6725ba-bf0a-4a68-8fe9-942492f52266?mode=deep",
+    "timestamp": "2026-05-01 22:06:18.933274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: ToBlock()] Can an unprivileged external user trigger the genesis block edge case in ToBlock() where consensusStart is overridden with genesisBlock.ConsensusStart, causing the exported block to report a ConsensusStartNanos that differs from the actual record_file.consensus_start, resulting in incorrect timestamp records on mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba19877d-3eb3-4bf4-a926-92a050165c79?mode=deep",
+    "timestamp": "2026-05-01 22:06:32.490384",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectGenesis SQL query] Can an unprivileged external user cause the selectGenesis query to select the wrong genesis block by manipulating the account_balance table state (e.g., inserting a balance record with a very early consensus_timestamp for treasury_entity_id), causing all downstream block exports to use an incorrect genesis anchor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81e15fa6-66d5-48d1-891f-f815c2f8c5f0?mode=deep",
+    "timestamp": "2026-05-01 22:06:46.390263",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectGenesis SQL query] Can an unprivileged external user exploit the CASE expression in selectGenesis (when genesis.timestamp >= rf.consensus_start then genesis.timestamp + 1) to produce an off-by-one consensus_start value that is exported as the genesis block's ConsensusStartNanos, causing mirror nodes to receive an incorrect start boundary?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0da125aa-d027-41a2-a7ce-f4e2691a2c90?mode=deep",
+    "timestamp": "2026-05-01 22:06:58.970759",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectByHashWithIndex SQL query] Can an unprivileged external user exploit the COALESCE in selectByHashWithIndex (coalesce((select c.consensus_start - 1 from record_file c where c.index = p.index + 1), consensus_end)) to receive a consensus_end value that is consensus_start - 1 of the next block rather than the actual consensus_end, causing incorrect block boundary records to be exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0255b9c8-d21b-4799-84e3-ff85c099324d?mode=deep",
+    "timestamp": "2026-05-01 22:07:12.022468",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectRecordBlockByIndex SQL query] Can an unprivileged external user trigger the COALESCE fallback in selectRecordBlockByIndex (coalesce((select consensus_start-1 from record_file where index = @index + 1::bigint), consensus_end)) to return consensus_end instead of the computed value when no next block exists, causing the last block to export a different consensus_end than intermediate blocks use, creating inconsistent records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e629607b-c336-49bf-ba0a-48b367459c69?mode=deep",
+    "timestamp": "2026-05-01 22:07:25.199110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveLatest()] Can an unprivileged external user cause RetrieveLatest() to return a block with rb.Index < br.genesisBlock.Index check at line 203 to be bypassed if genesisBlock.Index is 0 (default int64 zero value) due to a failed or skipped genesis initialization, causing a pre-genesis block to be exported as the latest block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ada6ebda-6664-477a-8c6b-9a47cbb8ab97?mode=deep",
+    "timestamp": "2026-05-01 22:07:38.905071",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveLatest()] Can an unprivileged external user cause selectLatestWithIndex to return a stale or incorrect latest block because the query uses ORDER BY index DESC without filtering by consensus_end validity, causing mirror nodes to receive a block whose consensus_end is NULL or zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac138bce-6045-4c8b-a6af-a21f9b043bfd?mode=deep",
+    "timestamp": "2026-05-01 22:07:51.349219",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: FindByIdentifier()] Can an unprivileged external user submit a valid hash that belongs to block N but pair it with index M (M != N) to receive ErrBlockNotFound, and then use this oracle to enumerate which (index, hash) pairs are valid, leaking internal block structure that could be used to craft targeted missing-record attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71476c62-6d85-4d1a-97e9-d2129b0fe5d0?mode=deep",
+    "timestamp": "2026-05-01 22:08:04.257439",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: FindByIdentifier()] Can an unprivileged external user pass index=0 and a valid hash to FindByIdentifier() when the genesis block has index > 0, causing the function to look up the hash (which may match a pre-genesis block), then fail the block.Index != index check and return ErrBlockNotFound, hiding a record that exists in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e21c5f05-df90-4afa-84fb-9d79cbda9560?mode=deep",
+    "timestamp": "2026-05-01 22:08:17.143187",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: FindByIndex()] Can an unprivileged external user pass index=0 to FindByIndex() when the genesis block index is > 0, causing findBlockByIndex() to return ErrBlockNotFound for a block that exists in record_file but is before genesis, resulting in a missing record from the mirror node's perspective?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72685448-2bd4-4cbf-b54d-1c88a1af2734?mode=deep",
+    "timestamp": "2026-05-01 22:08:30.347451",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: findBlockByIndex()] Can an unprivileged external user exploit the condition index < br.genesisBlock.Index in findBlockByIndex() where genesisBlock.Index is cached incorrectly (e.g., due to a race in sync.Once), causing valid blocks with indices between the incorrect and correct genesis index to be permanently suppressed from mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9467ddc6-a964-4911-b42a-3b3aac6c5383?mode=deep",
+    "timestamp": "2026-05-01 22:08:44.097486",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectGenesis SQL query] Can an unprivileged external user cause the selectGenesis query to return no rows (ErrNodeIsStarting) by ensuring the account_balance table has no entry for treasury_entity_id, effectively blocking all block record exports to mirror nodes until the condition is resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_163f135a-ae78-4838-b785-d1e5fdc7e41d?mode=deep",
+    "timestamp": "2026-05-01 22:08:57.122774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: initGenesisRecordFile()] Can an unprivileged external user trigger a persistent denial of genesis initialization by causing the account_balance table to have a treasury_entity_id balance record with a consensus_timestamp that is after all record_file.consensus_end values, causing selectGenesis to return no rows and all block exports to fail with ErrNodeIsStarting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ac6cc6e-d9a2-4b3b-9baa-109be251bcd6?mode=deep",
+    "timestamp": "2026-05-01 22:09:09.430533",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectGenesis SQL query] Can an unprivileged external user exploit the ORDER BY rf.consensus_end LIMIT 1 in selectGenesis to cause the wrong record_file to be selected as genesis if two record files share the same consensus_end value, resulting in an incorrect genesis block being cached and exported?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6378baa-9c13-4613-9c7d-e5e6a94bf2ab?mode=deep",
+    "timestamp": "2026-05-01 22:09:22.531731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: ToBlock()] Can an unprivileged external user cause ToBlock() to produce a block with parentIndex = rb.Index - 1 that underflows to a negative value (when rb.Index == 0 and it is not the genesis block), resulting in an invalid parent index being exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d51d46dd-601d-4810-887a-c3f0a5403c56?mode=deep",
+    "timestamp": "2026-05-01 22:09:36.067342",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectByHashWithIndex SQL query] Can an unprivileged external user submit a hash with a specific collation value that bypasses the 'collate \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d7481f3e-3530-46df-ae63-cc67bc9f53b5?mode=deep",
+    "timestamp": "2026-05-01 22:09:49.303483",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: FindByHash()] Can an unprivileged external user submit a hash string containing special SQL characters or Unicode sequences that, despite parameterized query usage, causes the collate \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33f391fc-4e17-4af5-a7e9-70f7bc5438a9?mode=deep",
+    "timestamp": "2026-05-01 22:10:02.665110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: handleDatabaseError()] Can an unprivileged external user trigger a database error that is not gorm.ErrRecordNotFound (e.g., a timeout or connection reset), causing handleDatabaseError() to return ErrDatabaseError instead of the block data, resulting in a block record being reported as unavailable to mirror nodes when it actually exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9892c567-b275-4ee0-b4e6-1c69d8c7e17c?mode=deep",
+    "timestamp": "2026-05-01 22:10:16.079467",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: RetrieveGenesis()] Can an unprivileged external user exploit the sync.Once caching in initGenesisRecordFile() such that after the genesis block is cached, a subsequent database update that changes the genesis record (e.g., reorg) is never reflected, causing mirror nodes to permanently export stale genesis block data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9abf411-469f-43a5-b9c5-4f08c9277ca0?mode=deep",
+    "timestamp": "2026-05-01 22:10:28.399295",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/block.go -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: selectGenesis SQL query] Can an unprivileged external user cause the genesis.timestamp + 1 arithmetic in selectGenesis to overflow if genesis.timestamp is at int64 max, producing a negative or wrapped consensus_start value that is exported as the genesis block's ConsensusStartNanos to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e534a451-62f5-41ab-bf6c-ff8a9edaf019?mode=deep",
+    "timestamp": "2026-05-01 22:10:41.519869",
+    "report_generated": false
+  }
+]
