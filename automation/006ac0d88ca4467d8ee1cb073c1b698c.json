@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94594ef5-03a1-4e29-94f2-b770e55ae4db?mode=deep",
     "timestamp": "2026-05-01 21:53:21.537133",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user supply a crafted `hiero.mirror.importer.network` value (e.g., 'MAINNET' with mixed case) to the Spring environment that causes `HederaNetwork.MAINNET.equalsIgnoreCase(importerProperties.getNetwork())` to return true on a non-mainnet node, injecting the mainnet `topicRunningHashV2AddedTimestamp` (1592499600000000000L) into the Flyway placeholder, causing the V1.23.1 migration to assign `running_hash_version=1` to topic messages that should be version 2, permanently corrupting the Hashgraph topic running-hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b42c075c-0db5-4635-8875-6cb45a83039c?mode=deep",
+    "timestamp": "2026-05-01 22:25:55.331763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user inject a crafted `hiero.mirror.importer.topicRunningHashV2AddedTimestamp` property value of `0` via an externally-readable configuration source, causing the Flyway placeholder `topicRunningHashV2AddedTimestamp` to be set to `0`, so that the V1.23.1 migration assigns `running_hash_version=2` to ALL historical topic messages regardless of their actual consensus timestamp, making every pre-v2 topic message hash unverifiable and corrupting the entire topic running-hash history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9aaf24f0-d623-4878-8584-b54f0f1fa395?mode=deep",
+    "timestamp": "2026-05-01 22:26:07.466459",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user set `hiero.mirror.importer.topicRunningHashV2AddedTimestamp` to `9999999999999999999` (Long.MAX_VALUE-like value) via an externally-exposed configuration endpoint, causing the Flyway migration V1.23.1 to assign `running_hash_version=1` to ALL topic messages including those that should be version 2, silently invalidating all post-upgrade topic message running hashes stored in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9eec84a3-79e4-4f78-bdeb-5c9c75c406d2?mode=deep",
+    "timestamp": "2026-05-01 22:26:19.877795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that `importerProperties.getNetwork()` strips a prefix delimiter (e.g., 'mainnet-custom' becomes 'mainnet') to craft a network string like 'mainnet-attacker' that passes the `equalsIgnoreCase` check, causing the mainnet-specific `topicRunningHashV2AddedTimestamp` to be injected into a non-mainnet deployment's Flyway migration, corrupting the running_hash_version boundary for all topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f9bb329-dcb7-4036-b6e0-116679272594?mode=deep",
+    "timestamp": "2026-05-01 22:26:32.619638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user who can influence the Spring Boot external configuration (e.g., via environment variable `HIERO_MIRROR_IMPORTER_TOPICRUNNINGHASHV2ADDEDTIMESTAMP`) set a negative timestamp value, causing the Flyway SQL placeholder substitution in V1.23.1 to produce an invalid `CASE WHEN consensus_timestamp < <negative> THEN 1 ELSE 2 END` expression that assigns `running_hash_version=2` to all records, corrupting the historical hash version assignment for all topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_286723a7-40cc-497b-91c4-ac8d6952f6a4?mode=deep",
+    "timestamp": "2026-05-01 22:26:45.145383",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the absence of validation on `topicRunningHashV2AddedTimestamp` in `ImporterProperties` (the field has no `@Min`/`@Max` constraint) to supply a value that is exactly 1 nanosecond off from the true network upgrade timestamp, causing the migration to misclassify exactly the boundary topic messages, introducing an undetectable single-record running-hash version corruption in the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40a70335-7017-40b3-a3a4-acf712506672?mode=deep",
+    "timestamp": "2026-05-01 22:26:58.587833",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user trigger a re-run of Flyway repeatable migrations (by manipulating the `hiero.mirror.importer.migration.<name>.checksum` property) while simultaneously having set a malicious `topicRunningHashV2AddedTimestamp`, causing the V1.23.1 migration to re-execute with the wrong timestamp and overwrite previously correct `running_hash_version` values in the `topic_message` table, permanently corrupting the Hashgraph topic history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4068df63-9214-4855-95d2-c6c6f10a7858?mode=deep",
+    "timestamp": "2026-05-01 22:27:13.049692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the mutable `configuration.getPlaceholders()` map returned by Flyway's configuration object to inject additional SQL-injection-style content into the `topicRunningHashV2AddedTimestamp` placeholder value (e.g., `0 OR 1=1`), causing the V1.23.1 migration SQL `CASE WHEN consensus_timestamp < ${topicRunningHashV2AddedTimestamp}` to execute unintended SQL logic that corrupts running_hash_version assignments across all topic messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca1ef94c-ab44-4fbe-bb0b-f197ff1aa5e9?mode=deep",
+    "timestamp": "2026-05-01 22:27:27.018715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user who can set `hiero.mirror.importer.network` to a value that is neither 'mainnet' nor any recognized network (e.g., 'other') cause the `flywayConfigurationCustomizer()` to always use the non-mainnet default timestamp `1588706343553042000L`, and if this is deployed against a mainnet mirror node, cause all topic messages between the two timestamps to receive the wrong `running_hash_version`, corrupting the running hash chain for that time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f60dac7-f77d-47d9-a930-1e486bd3bd07?mode=deep",
+    "timestamp": "2026-05-01 22:27:40.730150",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `setInitializationFailTimeout(-1)` setting on `flywayHikariConfig` to cause the Flyway DataSource to silently connect to a rogue database (by influencing the JDBC URL via `JdbcConnectionDetails`) without failing at startup, allowing Flyway migrations to run against a tampered database schema that corrupts the Hashgraph history tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57d82cb2-93b3-402f-a4cd-406daf6a0668?mode=deep",
+    "timestamp": "2026-05-01 22:27:54.325494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user who can influence the `JdbcConnectionDetails` bean (e.g., via a cloud metadata service SSRF or environment variable injection) supply a malicious JDBC URL to `connectionDetails.getJdbcUrl()`, redirecting the Flyway owner-level DataSource to a rogue PostgreSQL server that returns tampered migration results, causing the importer to believe schema migrations succeeded while the actual Hashgraph history tables are corrupted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3245f0ab-0a0f-45f4-aaa3-37c66103cee8?mode=deep",
+    "timestamp": "2026-05-01 22:28:07.306753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `hikariConfig.copyStateTo(flywayHikariConfig)` call to inherit a pre-configured `connectionInitSql` from `DBProperties` that executes arbitrary SQL on the owner-level Flyway connection at pool initialization, allowing manipulation of the `flyway_schema_history` table to mark history-corrupting migrations as already applied, bypassing Flyway's integrity checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b944642d-2095-44ab-bc3c-ea659d1b1e82?mode=deep",
+    "timestamp": "2026-05-01 22:28:20.007477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `dbWaiter.waitForDatabase(jdbcUrl, dbProperties.getOwner(), dbProperties.getOwnerPassword())` call—which uses `DriverManager.getConnection()` with the owner password—to perform a timing-based credential oracle attack by observing the retry interval behavior, eventually recovering the owner-level database password and gaining direct write access to Hashgraph history tables?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65febd71-3261-4e6a-abcc-3e1bc4647de7?mode=deep",
+    "timestamp": "2026-05-01 22:28:33.383785",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user cause a pool exhaustion denial-of-service by triggering repeated application restarts (e.g., via a public health endpoint) that each create a new `HikariDataSource` with `setMaximumPoolSize(10)` Flyway connections, exhausting the PostgreSQL connection limit and preventing legitimate Flyway migrations from running, leaving the Hashgraph history schema in a partially-migrated corrupt state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a35f510-4750-48bc-89f2-2d2ba6297ce5?mode=deep",
+    "timestamp": "2026-05-01 22:28:47.167582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the fact that `flywayHikariConfig.setIdleTimeout(60000)` keeps Flyway owner-level connections alive for 60 seconds after use, and if the application is running in a shared environment, use a side-channel to hijack an idle owner-level connection and execute DDL statements that alter the `topic_message` table's `running_hash_version` column, corrupting the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c2ff1cdb-af71-4f6b-8bd0-6116b2c406ce?mode=deep",
+    "timestamp": "2026-05-01 22:29:00.159827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `dataSourceProperties.determineUrl()` fallback (used when `connectionDetails` is null) to inject a JDBC URL containing additional PostgreSQL connection parameters (e.g., `?options=-c%20search_path%3Dattacker_schema`) that redirect Flyway migrations to a different schema, causing Hashgraph history tables to be created in an attacker-controlled schema while the legitimate schema remains uninitialized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61bd8dd7-a57f-4b13-955a-f52d005c7eca?mode=deep",
+    "timestamp": "2026-05-01 22:29:13.058155",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: init()] Can an unprivileged external user exploit the `@PostConstruct init()` check—which only validates `blockProperties.isEnabled() && recordDownloaderProperties.isEnabled()` at startup—by triggering a runtime property refresh (via Spring Cloud Config or Actuator) that enables both block and record downloaders simultaneously after startup, causing dual-ingestion of Hashgraph stream files that produces duplicate or conflicting history records in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4e9159b-6f63-4dcc-887f-9c2e24cbf7e7?mode=deep",
+    "timestamp": "2026-05-01 22:29:26.365343",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: init()] Can an unprivileged external user exploit the fact that `init()` throws `IllegalStateException` when both block and record downloaders are enabled to cause a repeated application crash-loop (by ensuring both are enabled via environment variables), preventing the importer from ever processing legitimate Hashgraph stream files and creating a persistent denial-of-service against history ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_464c1724-b013-4fb2-91d4-9772a0c50e61?mode=deep",
+    "timestamp": "2026-05-01 22:29:39.425624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: init()] Can an unprivileged external user who can set `hiero.mirror.importer.block.enabled=false` and `hiero.mirror.importer.downloader.record.enabled=false` simultaneously bypass the `init()` guard entirely, causing the importer to start with no stream source active, silently halting all Hashgraph history ingestion without any error, leading to a stale/incomplete mirror node history that consumers treat as authoritative?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d696bae8-ed0e-49f6-a69f-55ca46db225c?mode=deep",
+    "timestamp": "2026-05-01 22:29:51.762893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the fact that `configuration.getPlaceholders()` returns a mutable map and that `flywayConfigurationCustomizer()` is a Spring bean (potentially called multiple times in certain Spring contexts) to register a second `FlywayConfigurationCustomizer` bean that overwrites the `topicRunningHashV2AddedTimestamp` placeholder with a malicious value after `ImporterConfiguration`'s customizer runs, corrupting the migration timestamp used for hash version assignment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6604c380-b270-46fd-a9bd-7f7da5655cdb?mode=deep",
+    "timestamp": "2026-05-01 22:30:05.382340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the Spring Boot `@ConfigurationProperties` binding for `hiero.mirror.importer.topicRunningHashV2AddedTimestamp` via a YAML/properties file placed in a Spring-scanned location (e.g., `./config/application.yml`) to override the timestamp to a value that causes the Flyway V1.23.1 migration to assign incorrect `running_hash_version` values, corrupting the topic message running hash chain used to verify Hashgraph consensus history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_724f4249-0025-4230-931a-2cd52cd7c459?mode=deep",
+    "timestamp": "2026-05-01 22:30:18.555628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `Long.toString()` conversion of the timestamp in `configuration.getPlaceholders().put('topicRunningHashV2AddedTimestamp', timestamp.toString())` to inject a value that, when substituted into the Flyway SQL `CASE WHEN consensus_timestamp < ${topicRunningHashV2AddedTimestamp}`, causes a PostgreSQL type coercion error that silently skips the `running_hash_version` update, leaving all topic messages with NULL hash versions and breaking hash chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f915528d-0581-4a33-9ae4-082e9cd02d3c?mode=deep",
+    "timestamp": "2026-05-01 22:30:31.210377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.sslMode` defaulting to `SslMode.DISABLE` to perform a man-in-the-middle attack on the Flyway owner-level database connection, intercepting and modifying Flyway migration SQL in transit to alter the `running_hash_version` assignment logic in V1.23.1, causing the migration to corrupt the Hashgraph topic message hash history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52d601f8-790f-4858-91b6-2a795a9861ec?mode=deep",
+    "timestamp": "2026-05-01 22:30:44.368290",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayDataSource()] Can an unprivileged external user exploit the `DBProperties.loadBalance=true` default to redirect the Flyway owner-level connection to a secondary/replica database node that has stale or tampered `flyway_schema_history` records, causing Flyway to skip critical migrations (including those that set `running_hash_version`) and leaving the Hashgraph history tables in a corrupted state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f3d0b401-e3fb-4519-bb59-5f5a3ae7b355?mode=deep",
+    "timestamp": "2026-05-01 22:30:57.216744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/config/ImporterConfiguration.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: flywayConfigurationCustomizer()] Can an unprivileged external user exploit the `@AutoConfigureBefore(FlywayAutoConfiguration.class)` ordering to register a competing `FlywayConfigurationCustomizer` bean with higher precedence (via `@Order` or `@Primary`) that runs before `ImporterConfiguration`'s customizer and sets `topicRunningHashV2AddedTimestamp` to a malicious value, which then gets overwritten—but if the attacker's customizer runs after, it permanently corrupts the hash version boundary used in Flyway migrations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c9443edd-b55c-4f41-9505-3ebf85d6cd62?mode=deep",
+    "timestamp": "2026-05-01 22:31:10.064783",
+    "report_generated": false
   }
 ]
