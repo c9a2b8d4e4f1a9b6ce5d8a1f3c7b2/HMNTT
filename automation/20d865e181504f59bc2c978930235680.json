@@ -1,0 +1,116 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `isOwner` boolean flag in `NftAllowanceRequest` (default `true`) by setting it to `false` and supplying a known spender account ID, causing `getBaseCondition` to pivot the query to `NFT_ALLOWANCE.SPENDER = spenderId`, revealing all NFT token collections for which the spender has `approvedForAll`, enabling the attacker to enumerate all tokens they (or a target) can drain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82fe6fd3-7f50-4ea5-946c-c2ec85aa4a29?mode=deep",
+    "timestamp": "2026-05-01 15:12:58.836037",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `APPROVAL_CONDITION = NFT_ALLOWANCE.APPROVED_FOR_ALL.isTrue()` hardcoded filter in `getBaseCondition` to confirm that only `approvedForAll=true` records are returned, and then use the absence of results for a given `(owner, tokenId)` pair to infer that no blanket approval exists, enabling them to identify accounts where only serial-specific allowances exist and craft targeted serial-number theft attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9543d53-4378-4370-b310-c1007bd46cf2?mode=deep",
+    "timestamp": "2026-05-01 15:13:10.936788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `EntityServiceImpl.lookup()` path for `EntityIdAliasParameter` where `entityRepository.findByAlias()` returns an `EntityId` for a deleted or recycled account, causing `findAll` to return allowances associated with the old account's numeric ID that now belongs to a different entity, leaking another account's NFT allowance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_998e66b9-707d-424c-8ccd-5a58d15cf009?mode=deep",
+    "timestamp": "2026-05-01 15:13:23.195735",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `EntityServiceImpl.lookup()` path for `EntityIdEvmAddressParameter` where `entityRepository.findByEvmAddress()` resolves an EVM address to a numeric entity ID, and if the EVM address is a CREATE2-deployed contract address that has been redeployed to a different entity, the lookup returns the wrong entity ID, causing `findAll` to return allowances for the wrong account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_742e7041-7c1f-47d0-a006-81134a63a088?mode=deep",
+    "timestamp": "2026-05-01 15:13:35.746112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `EntityIdNumParameter` path in `EntityServiceImpl.lookup()` which directly returns `p.id()` without any database validation (as noted in the comment 'Valid numeric account IDs are not looked up in the entity table'), allowing the attacker to query allowances for any numeric account ID including non-existent or system accounts, leaking allowance data for accounts that should not be queryable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65799a2b-38fc-44e0-8704-b849dc8779e8?mode=deep",
+    "timestamp": "2026-05-01 15:13:48.145872",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `getBounds()` method in `NftAllowanceRequest` where `primaryBound = !ownerOrSpenderIds.isEmpty() ? ownerOrSpenderIds : tokenIds`, causing the primary sort field to be `tokenIds` when `ownerOrSpenderIds` is empty, and the resulting `getBoundConditions` logic to generate a condition that does not restrict by spender/owner at all beyond the base condition, leaking all allowances for the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d4f0763-bb31-4134-8a0a-0c827a7696f5?mode=deep",
+    "timestamp": "2026-05-01 15:14:00.869900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `checkOwnerSpenderParamValidity` logic in `NftAllowanceServiceImpl` where the condition `!ownerOrSpenderParams.hasLowerAndUpper() && tokenParams.getAdjustedLowerRangeValue() > tokenParams.adjustUpperBound()` is only checked when `ownerOrSpenderParams` does NOT have both bounds, meaning an attacker can supply an inverted token range (lower > upper) alongside a full owner/spender range to bypass the range validation and generate a contradictory SQL condition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ccb3c2f-5f36-47af-b37c-60c71a9d082a?mode=deep",
+    "timestamp": "2026-05-01 15:14:13.985128",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `verifyRangeId` method in `NftAllowanceServiceImpl` which calls `ids.verifyUnsupported(RangeOperator.NE)` but does not block `NE` at the `Bound` constructor level, meaning if the service-layer validation is bypassed (e.g., via direct repository access or a missing controller validation), a `NE` operator could be passed to `getCondition` and generate an unexpected SQL `!=` condition that returns all allowances except one specific account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95d69b81-6c13-496b-a9a7-b6527a02594d?mode=deep",
+    "timestamp": "2026-05-01 15:14:27.139924",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `verifySingleOccurrence` method in `Bound` which only throws if cardinality > 1 for the same operator group, but does not prevent supplying both `GT` and `GTE` simultaneously (they are checked together as a group), meaning an attacker could supply `GT=X` and `GTE=Y` where only one is stored as `lower`, silently discarding one bound and producing a weaker filter than intended?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da364836-d321-493b-87a2-8d74f2b0282b?mode=deep",
+    "timestamp": "2026-05-01 15:14:39.866000",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `Bound` constructor logic where `for (var param : params)` iterates and the last `hasLowerBound()` param wins for `lower` and last `hasUpperBound()` param wins for `upper`, meaning if two `GTE` params are supplied (before `verifySingleOccurrence` throws), the second one silently overwrites the first, potentially bypassing a tighter lower bound set by the first parameter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_68f1264c-2953-481b-97c4-de66b57998a9?mode=deep",
+    "timestamp": "2026-05-01 15:14:52.763371",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `NftAllowanceMapper.map()` method which maps `timestampRange` to `timestamp` in the REST response, leaking the full `Range<Long>` (lower and upper bounds of the consensus timestamp) for each allowance record, enabling the attacker to correlate allowance grants with specific Hedera transactions and reconstruct the full history of NFT delegation for a victim account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_217171da-d070-48e6-9a11-66d3484721ad?mode=deep",
+    "timestamp": "2026-05-01 15:15:06.366645",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `AbstractNftAllowance.getId()` method which constructs an `Id` object from `owner`, `spender`, and `tokenId` fields, and use the `CrudRepository.findById(Id)` inherited method to directly look up a specific allowance by its composite key without going through the service-layer validation in `NftAllowanceServiceImpl`, bypassing the `checkOwnerSpenderParamValidity` checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa2298ee-5a10-4bd2-975f-01fd5779c5d0?mode=deep",
+    "timestamp": "2026-05-01 15:15:19.861522",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the absence of any authentication or authorization check in `NftAllowanceRepositoryCustomImpl.findAll()` to query NFT allowances for any arbitrary account ID, including accounts belonging to other users, leaking the complete set of `approvedForAll` delegations for any account in the system without needing to prove ownership of that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2bd8c896-dcfc-4e84-b9d1-9cfcb33480b2?mode=deep",
+    "timestamp": "2026-05-01 15:15:32.419725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `dslContext.selectFrom(NFT_ALLOWANCE).where(condition).orderBy(...).limit(request.getLimit()).fetchInto(NftAllowance.class)` query chain in `findAll` by supplying `limit=Integer.MAX_VALUE` (if no cap is enforced), causing the database to attempt to return billions of rows, exhausting memory and causing an out-of-memory crash that disrupts the mirror node service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_061c6e8c-cd2c-43d9-bf9e-fcf236235d84?mode=deep",
+    "timestamp": "2026-05-01 15:15:46.474734",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `fetchInto(NftAllowance.class)` call in `findAll` which maps all result rows into `NftAllowance` objects in memory at once (no streaming), combined with a large `limit` value, to cause a heap exhaustion attack that crashes the JVM process and creates a prolonged service outage preventing NFT owners from managing their allowances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac368cbb-201a-4a47-b8f5-3cbe80a94763?mode=deep",
+    "timestamp": "2026-05-01 15:15:59.497308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `ownerOrSpenderIds` `Bound` with a range spanning the entire `long` space (`GTE=Long.MIN_VALUE`, `LTE=Long.MAX_VALUE`) to cause `getBoundConditions` to generate a condition that is always true for the secondary field, effectively removing the spender/owner range filter and returning all `approvedForAll` allowances for the target account across all spenders or owners?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b6a2dc4-4252-4283-bb77-e08c3be4d1ad?mode=deep",
+    "timestamp": "2026-05-01 15:16:11.835949",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `tokenIds` `Bound` with a range spanning the entire `long` space to cause the token-ID filter in `getBoundConditions` to be always true, combined with a specific `ownerOrSpenderIds` EQ filter, to retrieve all `approvedForAll` allowances for a specific spender-owner pair across every token ID, fully mapping the delegation scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8345917d-9f39-4815-bd23-1cce8829e97c?mode=deep",
+    "timestamp": "2026-05-01 15:16:24.262762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `NftAllowanceRequest.getBounds()` method returning `List.of(primaryBound, tokenIds)` when `tokenIds` is not empty, causing `getBoundConditions` to be called with two bounds, and if the recursive logic in `JooqRepository.getBoundConditions` has an off-by-one error in the lower/upper outer condition generation, it could return records outside the intended range, leaking additional allowance data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf8889d0-6bd2-47bd-8a15-05c9b2c4207a?mode=deep",
+    "timestamp": "2026-05-01 15:16:36.788934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NftAllowanceRepository.java -> Scope: Critical: Direct loss of funds'] [Function: findAll(NftAllowanceRequest, EntityId)] Can an unprivileged external user exploit the `Bound.toLower()` and `Bound.toUpper()` methods which create new `Bound` objects with only one of the range parameters, and if these are used in `getBoundConditions` without the `primarySortField=true` flag, the range validation (lower > upper check) is skipped, allowing an inverted range to pass through and generate a contradictory SQL condition that returns no rows or all rows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_246a190c-693e-4b93-8f82-ea592ad5ebfd?mode=deep",
+    "timestamp": "2026-05-01 15:16:49.907023",
+    "report_generated": false
+  }
+]
