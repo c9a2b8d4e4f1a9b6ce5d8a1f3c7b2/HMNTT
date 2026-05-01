@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user exploit a network partition during `getCryptoEntity()` that causes `db.Raw(query, args...).Scan(&entities)` to succeed but return an empty slice (due to partial scan), causing `getCryptoEntity()` to return `nil, nil`, and `RetrieveBalanceAtBlock()` to use `accountId.GetId()` (potentially 0) as the balance lookup ID?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18316092-4918-4564-9f6f-78a6d51e4742?mode=deep",
+    "timestamp": "2026-05-01 16:46:43.135078",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetAccountId()] Can an unprivileged external user send a large number of alias-based `GetAccountId()` requests during a network partition, causing `selectCurrentCryptoEntityByAlias` to repeatedly fail and return `ErrDatabaseError`, exhausting error-handling capacity and masking the partition from monitoring systems?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed3cdaff-b4fe-45cd-b710-1f6f17e94680?mode=deep",
+    "timestamp": "2026-05-01 16:46:55.123619",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit a network partition that causes the `selectPreviousPartitionLowerBound` CTE query to time out mid-execution, leaving `partitionLowerBound = 0`, and then the subsequent `latestBalanceBeforeConsensus` query runs with an unbounded lower range, returning a balance from a partition that predates the intended lookup window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a898e32-c8b2-498a-915d-9fb5399e91e5?mode=deep",
+    "timestamp": "2026-05-01 16:47:07.336659",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition that occurs after `entity.GetModifiedTimestamp()` is called (line 183) but before `getLatestBalanceSnapshot()` executes, causing `balanceSnapshotEndTimestamp = balanceChangeEndTimestamp - 1` to be computed from a stale deletion timestamp, and the snapshot query to look up a balance at the wrong point in time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b3f5f4e-9234-4fc3-8ea7-00fc90da50c3?mode=deep",
+    "timestamp": "2026-05-01 16:47:20.213611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit a network partition during `getBalanceChange()` where the `balanceChangeBetween` query uses `errata <> 'DELETE'` filter, such that a partition causes the filter to be evaluated against stale index data, including errata-deleted transfers in the sum and returning an inflated balance change?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf891576-6753-49b0-98eb-b2f3beac8e49?mode=deep",
+    "timestamp": "2026-05-01 16:47:33.063097",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause a network partition that makes `db.Raw(latestBalanceBeforeConsensus, ...).First(ab)` return `gorm.ErrRecordNotFound` (no balance snapshot found), causing `getLatestBalanceSnapshot()` to return `ErrDatabaseError` (line 301) instead of a more specific error, hiding the partition from the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7a52b5a-8283-4d07-a039-2a5ced6dea26?mode=deep",
+    "timestamp": "2026-05-01 16:47:45.476152",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user send concurrent requests that each open three DB connections (one per sub-call in `RetrieveBalanceAtBlock()`), multiplying connection usage by 3x and causing a network partition by exhausting the DB connection pool faster than a single-connection design would?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c976b87-39bb-4383-9a6d-ba1eb35de8cf?mode=deep",
+    "timestamp": "2026-05-01 16:47:58.529723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user exploit a network partition during `selectCryptoEntityById` — which uses `timestamp_range @> @consensus_end` with `getInclusiveInt8Range(consensusEnd, consensusEnd)` — such that the partition causes the range operator to be evaluated against an outdated index, returning an entity whose `timestamp_range` no longer contains `consensusEnd`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64f2682f-e2c5-401a-afb4-e0442ef327e6?mode=deep",
+    "timestamp": "2026-05-01 16:48:11.546682",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit the fact that `getLatestBalanceSnapshot()` does not retry or validate `partitionLowerBound` after a partition-induced error in `selectPreviousPartitionLowerBound`, causing the function to proceed with `lower_bound = 0` and return a balance that spans an unintended historical range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e1cccab2-ea30-49ca-902d-6373cd9704e9?mode=deep",
+    "timestamp": "2026-05-01 16:48:24.100697",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition between `getLatestBalanceSnapshot()` and `getBalanceChange()` calls in `RetrieveBalanceAtBlock()`, where the snapshot timestamp returned by the first call is used as `consensusStart` in the second call, but the second call fails due to partition, causing the caller to receive `ErrDatabaseError` with no indication of partial success?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_107b48ba-ff61-4e50-ba4a-6a85c60d86f1?mode=deep",
+    "timestamp": "2026-05-01 16:48:36.663822",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: GetAccountAlias()] Can an unprivileged external user trigger a network partition during `GetAccountAlias()` that causes `db.Raw(selectCryptoEntityWithAliasById, ...).First(&entity)` to return a context deadline exceeded error (from `GetDbWithContext` timeout), which is then returned as `ErrDatabaseError`, causing the Rosetta API to report a database error instead of a network partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40745623-5c49-4f4d-b112-6a32594e8299?mode=deep",
+    "timestamp": "2026-05-01 16:48:49.731583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit a network partition that causes `selectPreviousPartitionLowerBound` to return a negative or zero `partitionLowerBound`, which is then passed as `lower_bound` to `latestBalanceBeforeConsensus`, causing the query to scan `account_balance` rows from before the intended partition window and return a stale balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14da88b3-c9cf-4e3c-9844-4eb49305222e?mode=deep",
+    "timestamp": "2026-05-01 16:49:02.391209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user exploit a network partition during the `entity_history` portion of `selectCryptoEntityByAlias` UNION ALL, causing only the `entity` table rows to be returned, and the `order by timestamp_range desc` to select a current entity that does not match the historical `consensusEnd` requested, returning wrong entity data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ddb5f96d-ffb9-4f46-89ee-b34bf2b8e89a?mode=deep",
+    "timestamp": "2026-05-01 16:49:14.797993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition that causes `getCryptoEntity()` to return `nil, nil` for a non-alias account ID, causing `RetrieveBalanceAtBlock()` to proceed with `id = accountId.GetId()` (which may be 0 for a default value), and `getLatestBalanceSnapshot()` to return the treasury account's balance instead?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9aef1e3f-2001-4ffb-b52f-2f24312f5d41?mode=deep",
+    "timestamp": "2026-05-01 16:49:27.371621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit a network partition during `getBalanceChange()` where `consensusStart` equals `consensusEnd` (same block), causing `balanceChangeBetween` to scan a zero-width range and return 0 via `coalesce`, while the partition prevents the query from verifying whether transfers actually exist in that range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ff1a7f5-d79e-458c-92e7-a6af751d3cfe?mode=deep",
+    "timestamp": "2026-05-01 16:49:40.276456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user cause a network partition that makes `latestBalanceBeforeConsensus` return `ab.ConsensusTimestamp = 0` and `ab.Balance = 0` (zero-value struct), triggering `ErrNodeIsStarting` (line 305) and causing the Rosetta node to appear unavailable to all clients, not just the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_027c7cde-f99f-4942-8a4f-b9d12c879560?mode=deep",
+    "timestamp": "2026-05-01 16:49:53.123795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition that causes `getLatestBalanceSnapshot()` to return `ErrNodeIsStarting` (when `ab.ConsensusTimestamp == 0`), which propagates up through `RetrieveBalanceAtBlock()` and causes the Rosetta API to report the node as starting, blocking all balance queries for the duration of the partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baa93439-c13c-4a92-8efb-82d3a77debbb?mode=deep",
+    "timestamp": "2026-05-01 16:50:06.191417",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user exploit a network partition during `getCryptoEntity()` that causes `db.Raw(query, args...).Scan(&entities)` to partially scan `entity_history` and return rows with incorrect `timestamp_range` values, causing `RetrieveBalanceAtBlock()` to compute `balanceSnapshotEndTimestamp` from a wrong deletion timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efbfc035-49d2-467b-89e3-5e268d266524?mode=deep",
+    "timestamp": "2026-05-01 16:50:19.258729",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit a network partition that causes the `mirror_node_time_partitions` table scan in `selectPreviousPartitionLowerBound` to return only one partition instead of two (the CTE `last_two` limit), causing `partitionLowerBound` to be set to the wrong partition boundary and `latestBalanceBeforeConsensus` to miss the correct balance snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_771f3435-c515-4aa4-b49b-fa9ff4f7bfe7?mode=deep",
+    "timestamp": "2026-05-01 16:50:32.695210",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition between the `getCryptoEntity()` call and the `id = entity.Id.EncodedId` assignment (line 190), where the entity returned has a different `EncodedId` than expected due to stale cache, causing `getLatestBalanceSnapshot()` to fetch the balance for a different account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_071bf396-aeef-493e-9171-0a3119a27f9f?mode=deep",
+    "timestamp": "2026-05-01 16:50:45.665693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getBalanceChange()] Can an unprivileged external user exploit a network partition that causes `getBalanceChange()` to fail after `getLatestBalanceSnapshot()` succeeds, and the error returned is `ErrDatabaseError` (line 335), which is a retryable error (`retriable: true`), causing clients to retry and amplify load on the already-partitioned DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a862b32d-09a7-47da-af32-47f753578b6b?mode=deep",
+    "timestamp": "2026-05-01 16:50:58.021995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getCryptoEntity()] Can an unprivileged external user exploit a network partition during `selectCryptoEntityByAlias` that causes the `timestamp_range @> @consensus_end` predicate to be evaluated against stale statistics, causing the query planner to choose a full table scan on `entity_history`, holding the DB connection long enough to exhaust the pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1a6bcdc7-0615-4486-bca0-c5939c6ad767?mode=deep",
+    "timestamp": "2026-05-01 16:51:10.596798",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit a network partition that causes `selectPreviousPartitionLowerBound` to fail silently (error logged, not returned), and then `latestBalanceBeforeConsensus` also fails, causing `getLatestBalanceSnapshot()` to return `ErrDatabaseError` — but the root cause (partition in the first query) is never surfaced to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81f6db37-8887-49dc-9b38-345db3ce5fc9?mode=deep",
+    "timestamp": "2026-05-01 16:51:22.902782",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit a network partition that causes `getCryptoEntity()` to return a non-nil entity with `entity.Deleted = nil` (null pointer, not false), bypassing the deletion check at line 178, and causing `balanceSnapshotEndTimestamp` to remain equal to `consensusEnd` even though the entity was deleted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3d6f09a-99cb-4ee0-b0b4-7d4d1f468573?mode=deep",
+    "timestamp": "2026-05-01 16:51:35.897356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit a network partition that causes `db.Raw(latestBalanceBeforeConsensus, ...).First(ab)` to return a context cancellation error (from the `cancel()` defer in `GetDbWithContext`), which is then returned as `ErrDatabaseError`, masking the partition as a generic database error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2469948a-ff22-412e-897f-049b594cb423?mode=deep",
+    "timestamp": "2026-05-01 16:51:48.111248",
+    "report_generated": false
+  }
+]
