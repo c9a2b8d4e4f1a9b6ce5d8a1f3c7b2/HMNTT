@@ -82,5 +82,89 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2407a4d2-8e5c-427e-81a5-bfbe3bb29d51?mode=deep",
     "timestamp": "2026-04-28 15:47:59.178051",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=eq:100&receiver.id=gte:50` to create a `Bound` with both EQ and range operators, and since `verifyEqualOrRange()` is not called in the `Bound` constructor (only in explicit validation calls), the inconsistent state passes through to the DB query, generating a SQL condition like `receiver_account_id = 100 AND receiver_account_id >= 50` that may return unexpected results outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5e5e596-e707-4c9a-ad95-bcb89b3a548c?mode=deep",
+    "timestamp": "2026-05-01 19:36:27.723154",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `token.id=eq:100&token.id=lte:200` to create a `Bound` for `tokenIds` with both EQ and LTE operators, bypassing the `verifyEqualOrRange()` check (not called in constructor), causing the DB query to use both conditions simultaneously and potentially return records outside the intended token ID scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f04c03e5-df6d-4102-81cd-e261fae3b8f5?mode=deep",
+    "timestamp": "2026-05-01 19:36:39.818152",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `receiver.id=gte:1&receiver.id=gte:2` (two lower-bound operators) to cause `Bound` to overwrite `lower` with the second value (since both `hasLowerBound()` returns true for GTE), and since `verifySingleOccurrence()` is not called in the constructor, the cardinality map records 2 GTE operators but only the last value is used, silently discarding the first constraint and widening the query range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e55c2e20-6cb4-4452-8801-d0d2a33a4436?mode=deep",
+    "timestamp": "2026-05-01 19:36:52.278870",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=lte:100&receiver.id=lte:200` (two upper-bound operators) to cause `Bound` to overwrite `upper` with the second value, silently using the wider upper bound (200) instead of the narrower one (100), causing the query to return more records than the user's visible parameters suggest, outside the design fee model?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9987777-f8f5-4319-ad2d-fc99ab5f2565?mode=deep",
+    "timestamp": "2026-05-01 19:37:04.950794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `receiver.id=gt:9223372036854775806` (Long.MAX_VALUE - 1) to cause `EntityIdRangeParameter.getInclusiveValue()` to compute `value + 1` which overflows to `Long.MIN_VALUE`, and this overflowed value is then used in the DB query as a receiver account ID condition, potentially matching system accounts with negative IDs or causing undefined query behavior?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff85e552-0890-4ec6-be30-a78efe51b7f3?mode=deep",
+    "timestamp": "2026-05-01 19:37:18.168960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=lt:0` to cause `EntityIdRangeParameter.getInclusiveValue()` to compute `value - 1 = -1` for a value of 0, and since `EntityIdRangeParameter.getEntityId()` filters out negative numbers, the parameter may be constructed with value 0 but the inclusive value becomes -1, causing the DB query to use a negative account ID that matches no records but still executes a full table scan?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c9db557-39cb-493b-84f7-04d6ab2d10be?mode=deep",
+    "timestamp": "2026-05-01 19:37:32.449137",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send a `receiver.id` value using the 3-part entity ID format `0.0.1000` vs the 1-part format `1000` to test whether `EntityIdRangeParameter.getEntityId()` resolves them to different internal IDs based on `CommonProperties.getInstance()` shard/realm defaults, causing the same logical account to be queried differently and potentially bypassing account-scoped fee constraints?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cea8dae5-a95d-48a3-9060-3832ccf4187e?mode=deep",
+    "timestamp": "2026-05-01 19:37:46.649395",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=1.0.1000` (2-part format using `realm.num`) to `getOutstandingAirdrops()`, causing `EntityIdRangeParameter.getEntityId()` to use `properties.getShard()` as the shard component, and if the shard is non-zero, the resulting entity ID differs from `0.1.1000`, potentially querying a different account's airdrops outside the intended scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_27f0a933-e470-4a7e-b172-368e029d9ef7?mode=deep",
+    "timestamp": "2026-05-01 19:38:03.193650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user send `receiver.id=:1000` (with a leading colon) to `EntityIdRangeParameter.valueOf()`, causing `splitVal` to have length 2 with `splitVal[0]=\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_57abb0d5-637a-428a-badd-dd31136dddd1?mode=deep",
+    "timestamp": "2026-05-01 19:38:19.928084",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `token.id=gte:0` without any `receiver.id` filter to `getOutstandingAirdrops()`, causing `getBounds()` to use `tokenIds` as the primary bound (since `entityIds` is empty), and the resulting DB query to have no receiver ID constraint, returning all airdrops for the sender account across all tokens — a much wider result set than the design fee model intends for a single scoped query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b136fc0-32cf-400b-b930-b443028673ee?mode=deep",
+    "timestamp": "2026-05-01 19:38:34.553738",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getOutstandingAirdrops()] Can an unprivileged external user rapidly send repeated requests to `/api/v1/accounts/{id}/airdrops/outstanding` with `limit=100` and no filters, with no visible rate limiting at the controller level, to enumerate all outstanding airdrops for any account ID, consuming server resources at a rate outside the design fee model for read operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1ee87e2-ef0b-44a4-8cf5-6fb08dc75cef?mode=deep",
+    "timestamp": "2026-05-01 19:38:48.216876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getPendingAirdrops()] Can an unprivileged external user send `sender.id=gte:0` to `getPendingAirdrops()` without any other filters, causing `getBounds()` to use `entityIds` (senderIds) as the primary bound with a range from 0 to Long.MAX_VALUE, and the DB query to return all pending airdrops for the receiver account across all senders, far exceeding the intended per-request data scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7e05b64-60b6-4e1e-af3a-a84faad3236b?mode=deep",
+    "timestamp": "2026-05-01 19:39:01.368276",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user exploit the fact that `processRequest()` is annotated with `@SuppressWarnings(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_25b04ea3-8e25-4d11-a1a4-ca4b3e452369?mode=deep",
+    "timestamp": "2026-05-01 19:39:14.522287",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/controller/TokenAirdropsController.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: processRequest()] Can an unprivileged external user send `receiver.id=gte:1&token.id=gte:1&serialnumber=gte:1` to `getOutstandingAirdrops()`, causing `getBounds()` to return `List.of(entityIds, tokenIds, serialNumbers)` (all three bounds), and the resulting multi-bound DB query to execute with three simultaneous range conditions that the query optimizer handles inefficiently, consuming more server resources than the design fee model anticipates?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7a9702b-5b87-4933-958c-4230357d6207?mode=deep",
+    "timestamp": "2026-05-01 19:39:27.796662",
+    "report_generated": false
   }
 ]
