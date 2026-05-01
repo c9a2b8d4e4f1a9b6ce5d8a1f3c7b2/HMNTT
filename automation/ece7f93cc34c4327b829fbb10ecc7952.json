@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a short hash prefix (e.g., a single hex character) to the `recordFileBlockDetailsFromHashQuery` LIKE clause (`where hash like $1`) so that multiple record files match, causing `getSingleRow()` to return null and downstream block-based transaction authorization to silently skip the block boundary check, allowing transactions to be treated as authorized without a valid signer-approved block context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf658914-0705-420f-a862-832baeabf54a?mode=deep",
+    "timestamp": "2026-05-01 19:34:50.170161",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getByHashOrNumber()] Can an unprivileged external user submit a hash prefix that matches more than one `record_file` row, causing `getSingleRow()` to return null (due to `rows.length > 1` check in `baseService.getSingleRow()`), so that the caller treats the block as non-existent and bypasses signer/owner approval checks that depend on a valid block being resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa832f79-1d22-4e1f-8406-8fe86fc415b0?mode=deep",
+    "timestamp": "2026-05-01 19:35:01.951073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBlocks()] Can an unprivileged external user inject SQL into the `order by ${filters.orderBy} ${filters.order}` clause of `blocksQuery` by supplying a crafted `orderBy` or `order` value through the public API, causing the query to return manipulated block ordering that misrepresents which record file contains a given transaction, thereby bypassing signer-based authorization tied to block sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c757db0-5dfa-4f3e-827e-467bc2f79d28?mode=deep",
+    "timestamp": "2026-05-01 19:35:13.986245",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBlocks()] Can an unprivileged external user inject SQL via the `limit ${filters.limit}` interpolation in `getBlocks()` (since `filters.limit` is embedded directly into the query string without parameterization), causing arbitrary SQL execution that exposes or manipulates block data used to authorize transactions without owner approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4676a46-9a38-467a-a0b4-8a75832abd14?mode=deep",
+    "timestamp": "2026-05-01 19:35:26.346907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: buildWhereSqlStatement()] Can an unprivileged external user supply a crafted `whereQuery[i-1].query` string (which is directly interpolated as `${whereQuery[i-1].query} $${i}`) to inject SQL into the WHERE clause of `blocksQuery`, causing the service to return a record file for a block the attacker does not own, enabling transaction authorization without legitimate signer approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aefdb728-fdf8-417e-a2ce-887c5d2505b1?mode=deep",
+    "timestamp": "2026-05-01 19:35:39.480627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user submit a deliberately unsorted or adversarially ordered `timestamps` array to `getRecordFileBlockDetailsFromTimestampArray()` so that `getTimestampArrayContext()` computes an incorrect `order`, `minTimestamp`, and `maxTimestamp`, causing the inner loop to map attacker-controlled timestamps to wrong record files and authorizing transactions as belonging to a block they do not actually belong to?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca4c6521-86f5-4d67-bf5e-79b89142fa81?mode=deep",
+    "timestamp": "2026-05-01 19:35:52.846206",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getTimestampArrayContext()] Can an unprivileged external user pass a two-element `timestamps` array where `timestamps[0] === timestamps[timestamps.length - 1]` (equal values) to `getTimestampArrayContext()`, causing the `first > last` branch to fall to ASC with both `maxTimestamp` and `minTimestamp` equal, and then exploit the resulting narrow query window to force a null result that bypasses block-based transaction authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1721d822-7c7b-44ab-9383-f5f19a634aa1?mode=deep",
+    "timestamp": "2026-05-01 19:36:05.659608",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array containing a single extreme BigInt value (e.g., `BigInt(2^63 - 1)`) so that `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` overflows or wraps, causing the upper bound `$3` in `recordFileBlockDetailsFromTimestampArrayQuery` to be less than `$2`, returning an empty result set and making all transactions in that range appear unauthorized or unresolvable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43229e81-66d2-433a-ae07-e4828beda075?mode=deep",
+    "timestamp": "2026-05-01 19:36:18.927577",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user supply a timestamp value of `0` or a negative BigInt to `getRecordFileBlockDetailsFromTimestamp()`, causing `recordFileBlockDetailsFromTimestampQuery` (`where consensus_end >= $1`) to return the very first record file in the database, associating any transaction with the genesis block and bypassing per-block signer authorization checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_195a6bc5-e056-4b29-af70-96184733da26?mode=deep",
+    "timestamp": "2026-05-01 19:36:31.245794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestamp()] Can an unprivileged external user exploit the `where consensus_end >= $1 order by consensus_end limit 1` logic in `recordFileBlockDetailsFromTimestampQuery` by supplying a timestamp that falls between two record files (i.e., after one block's `consensus_end` but before the next block's `consensus_start`), causing the service to return the next block's record file and falsely associating the transaction with a block it does not belong to, undermining signer-based authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88bdf74e-16cd-46fe-b410-6764867316df?mode=deep",
+    "timestamp": "2026-05-01 19:36:44.317380",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply an empty string as the `hash` parameter to `getRecordFileBlockDetailsFromHash()`, causing the query `where hash like '%'` to match every record file, and since `getSingleRow()` returns null when `rows.length > 1`, the caller receives null and treats the block as missing, bypassing any authorization check that requires a valid block hash to be resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5d1feee-8c5d-4291-a8b6-fad638e368f6?mode=deep",
+    "timestamp": "2026-05-01 19:36:57.879803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getByHashOrNumber()] Can an unprivileged external user pass `hash = null` and `number = null` to `getByHashOrNumber()`, causing the else branch to execute `where index = $1` with a null parameter, potentially matching unexpected rows or causing a type error that results in a null return, which downstream callers may interpret as a missing authorization check rather than an error?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3136cc83-98f6-46bd-a337-e71e896b6069?mode=deep",
+    "timestamp": "2026-05-01 19:37:11.422241",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user pass a very large array of timestamps (e.g., tens of thousands of entries) to `getRecordFileBlockDetailsFromTimestampArray()`, causing the `unnest($1::bigint[])` expansion in `recordFileBlockDetailsFromTimestampArrayQuery` to generate a massive subquery that exhausts database CPU/memory, creating a denial-of-service that prevents legitimate transaction authorization from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f277fce3-1c08-4489-8014-9d884fd4d770?mode=deep",
+    "timestamp": "2026-05-01 19:37:23.692683",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply duplicate timestamps in the `timestamps` array to `getRecordFileBlockDetailsFromTimestampArray()`, causing the `group by consensus_end` in the subquery to deduplicate them while the outer loop still iterates over all duplicates, resulting in some timestamps being mapped to the wrong record file and authorizing transactions under an incorrect block context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b6add8b-6515-46dc-8819-1c3da4333f36?mode=deep",
+    "timestamp": "2026-05-01 19:37:36.676428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user exploit the inner loop logic at lines 109-119 where `index` is never reset between `rows`, causing timestamps that span multiple record files to be incorrectly skipped (the `break` exits the inner loop but `index` is not rewound), resulting in some timestamps never being mapped to any record file and their transactions being treated as unauthorized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_455787c1-2d06-41bd-9c5b-8936a9e59503?mode=deep",
+    "timestamp": "2026-05-01 19:37:49.489385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBlocks()] Can an unprivileged external user supply a `filters.order` value of `'; DROP TABLE record_file; --` or similar SQL fragment that is directly interpolated into `order by ${filters.orderBy} ${filters.order}` without parameterization, causing destructive SQL execution that permanently destroys the block authorization chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1300e5df-4cdf-4c4f-8081-ac4af4efce9a?mode=deep",
+    "timestamp": "2026-05-01 19:38:01.970627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBlocks()] Can an unprivileged external user supply a `filters.orderBy` value containing a SQL subquery (e.g., `(SELECT hash FROM record_file LIMIT 1)`) that is directly interpolated into `order by ${filters.orderBy}`, causing the database to execute attacker-controlled SQL and potentially leaking block hash data used in transaction authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4dc640ef-6ef9-4f32-991e-31f665efb849?mode=deep",
+    "timestamp": "2026-05-01 19:38:15.207545",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromHash()] Can an unprivileged external user supply a hash value containing SQL wildcard characters (`%` or `_`) to `getRecordFileBlockDetailsFromHash()`, which appends `%` to form `${hash}%`, causing the LIKE pattern to match unintended record files and returning a wrong block context that authorizes transactions under a block the attacker does not control?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48dfef9c-b0b8-42f5-842d-4df441d658bb?mode=deep",
+    "timestamp": "2026-05-01 19:38:28.238949",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getByHashOrNumber()] Can an unprivileged external user supply a hash containing SQL LIKE wildcards (`%`, `_`) to `getByHashOrNumber()`, where `hash.toLowerCase()` does not sanitize wildcards before `hash + '%'` is used in `where hash like $1`, causing the LIKE pattern to match multiple blocks and `getSingleRow()` to return null, bypassing block-based transaction authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1917aa32-1ce4-4643-94ab-cf6ba4f0fecc?mode=deep",
+    "timestamp": "2026-05-01 19:38:40.866237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: pool()] Can an unprivileged external user trigger a code path that calls `pool()` (which references the undefined variable `primaryPool` instead of an imported pool), causing a ReferenceError that crashes the service and prevents all transaction authorization checks from executing, effectively creating a denial-of-service on the authorization layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69a2ee50-d307-4983-91e8-17b02a9d8b6c?mode=deep",
+    "timestamp": "2026-05-01 19:38:53.711494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a mixed-type `timestamps` array (e.g., mixing `BigInt` and `Number` types) to `getRecordFileBlockDetailsFromTimestampArray()`, causing `getTimestampArrayContext()` to compute an incorrect order due to JavaScript's `>` operator behaving differently for BigInt vs Number comparisons, resulting in wrong block-to-timestamp mappings that authorize transactions under incorrect blocks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4708a40a-11b3-4337-bdd2-e5ee4cab708c?mode=deep",
+    "timestamp": "2026-05-01 19:39:06.366635",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromTimestampArray()] Can an unprivileged external user supply a `timestamps` array where `BigInt(maxTimestamp) + config.query.maxRecordFileCloseIntervalNs` produces a value that wraps around the PostgreSQL `bigint` range (max 9223372036854775807), causing the query to fail or return unexpected results that make legitimate transactions appear to have no associated block, bypassing authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bee73472-cb73-4063-b3bf-e863370db821?mode=deep",
+    "timestamp": "2026-05-01 19:39:19.527070",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a negative index value to `getRecordFileBlockDetailsFromIndex()`, causing `where index = $1` to match no rows (returning null), and if the caller treats a null result as a valid 'no block' state rather than an error, bypass block-index-based transaction authorization checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_514a089f-ddb5-4d8d-a4e2-a13f6fedfc88?mode=deep",
+    "timestamp": "2026-05-01 19:39:34.006188",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getRecordFileBlockDetailsFromIndex()] Can an unprivileged external user supply a floating-point number as the `index` parameter to `getRecordFileBlockDetailsFromIndex()`, causing PostgreSQL type coercion to truncate or round the value and match a different block than intended, associating a transaction with the wrong block and bypassing per-block signer authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab75fa40-f634-4218-b164-8c0df9ed8fcf?mode=deep",
+    "timestamp": "2026-05-01 19:39:46.817693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/recordFileService.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getBlocks()] Can an unprivileged external user supply `filters.limit = 0` to `getBlocks()`, causing `limit 0` in the SQL query to return zero rows, and if the caller interprets an empty result as 'no blocks exist', bypass block-existence checks that gate transaction authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7de9f6dc-c1d3-4108-aac8-90071e4552cf?mode=deep",
+    "timestamp": "2026-05-01 19:40:02.301744",
+    "report_generated": false
+  }
+]
