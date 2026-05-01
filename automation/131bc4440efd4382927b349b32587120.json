@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that generate synthetic contract logs with topic1 and topic2 fields set to long-zero addresses of entities that do not exist in the database, causing `findEvmAddressesByIds` to return empty results for all IDs, leaving the synthetic log topics unresolved and causing downstream log processing to fail with an exception that aborts the record-file commit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_12ff23fa-839a-4037-add8-d5619447e1ba?mode=deep",
+    "timestamp": "2026-05-01 20:57:16.497641",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions with alias byte arrays containing null bytes (0x00), exploiting the fact that PostgreSQL bytea comparison with null bytes may behave differently than expected, causing `findByAlias` to either return incorrect results or throw a database exception that propagates through the importer and halts transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a58f6a92-b659-4dec-bc39-cf7dec785f99?mode=deep",
+    "timestamp": "2026-05-01 20:57:28.469906",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit a transaction with an EVM address of exactly 20 bytes that collides with a long-zero address derivable by `DomainUtils.fromEvmAddress`, causing `EntityIdServiceImpl.findByEvmAddress` to return the long-zero-derived entity ID without hitting the database, but the actual entity in the database has a different type or state, leading to incorrect entity resolution that corrupts transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b4150964-2116-4a7e-b8fb-4c722a4069fc?mode=deep",
+    "timestamp": "2026-05-01 20:57:41.014347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user trigger a race condition between `updateContractType` (which issues a bulk UPDATE) and concurrent `findByAlias` or `findByEvmAddress` reads within the same `@Transactional` context, causing a PostgreSQL deadlock that results in a transaction rollback exception propagating to the importer's record-stream processing loop and halting all new transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7524e366-5492-4a25-b89c-aeab8a7da915?mode=deep",
+    "timestamp": "2026-05-01 20:57:54.378382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions that cause `EntityIdServiceImpl.lookup(AccountID... accountIds)` to call `findByAlias` for each account ID in a variadic array, and by crafting transactions with many alias-based account IDs, amplify the number of database queries per transaction to the point where the importer's database connection pool is exhausted and new transactions cannot be processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00f93b74-8909-4e91-97cf-4af1bf7a0bf0?mode=deep",
+    "timestamp": "2026-05-01 20:58:08.342941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit a contract transaction where the `ContractID` uses the `EVM_ADDRESS` case with a byte array that is not exactly 20 bytes, causing `EntityIdServiceImpl.lookup(ContractID)` to call `findByEvmAddress` with a malformed byte array that triggers a PostgreSQL type cast error, propagating an uncaught exception through the importer's transaction handler and crashing the processing thread?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2bc05c9f-1d57-4ab3-ba34-a14fea5254d7?mode=deep",
+    "timestamp": "2026-05-01 20:58:21.469028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause `SyntheticLogListener` to accumulate a `parserContext` with `evmAddressLookupIds` containing negative or zero entity IDs, causing `findEvmAddressesByIds` to execute a query with invalid IDs that returns unexpected results or throws a constraint violation, aborting the `onEnd` record-file processing and preventing the record file from being committed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93406572-cbd9-4fa5-93aa-a0d819d45221?mode=deep",
+    "timestamp": "2026-05-01 20:58:36.726070",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user exploit the `Cache.ValueRetrievalException` handling in `EntityIdServiceImpl.cacheLookup` by submitting transactions that cause `findByAlias` to throw a database exception, which is caught and logged as a recoverable error, but if this happens repeatedly for every transaction in a record file, the cumulative recoverable errors trigger a fatal error condition that shuts down the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caf1ea89-e2c1-4406-ba51-86f32092dd08?mode=deep",
+    "timestamp": "2026-05-01 20:58:51.470759",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit Ethereum transactions at a rate that causes the `entity` table's `evm_address` index to become a hot spot, with `findByEvmAddress` queries competing for index page locks, causing lock contention that degrades query performance to the point where the importer falls behind the network's transaction rate and eventually cannot confirm new transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fc4a1a17-6d01-41da-9d0b-8a61c04e8168?mode=deep",
+    "timestamp": "2026-05-01 20:59:05.675778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user submit contract transactions that trigger `SidecarContractMigration.migrate` with a `contractBytecodes` list containing duplicate contract IDs, causing `updateContractType` to be called with a `HashSet` that still contains many IDs, and the resulting bulk UPDATE to hold row locks for an extended period, blocking the importer's main transaction processing thread from completing entity lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56759415-6548-4459-afe4-4b9a537c50da?mode=deep",
+    "timestamp": "2026-05-01 20:59:20.476650",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit a transaction with an alias that is a valid ECDSA public key but whose derived EVM address matches an existing entity with `deleted = NULL`, causing `EntityIdServiceImpl.findByAliasEvmAddress` to call `findByEvmAddress` which returns the NULL-deleted entity due to the `deleted <> true` predicate, caching an invalid entity ID and corrupting all future alias lookups for that key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06165dc1-9605-42bc-90ae-f6aaec7d9595?mode=deep",
+    "timestamp": "2026-05-01 20:59:36.383059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause `SyntheticLogListener.getCacheMisses` to call `findEvmAddressesByIds` with a key set of exactly `MAX_CACHE_LOAD_ENTRIES + 1 = 30001` IDs, triggering the batching code path that splits the query into two separate database calls, and if the first call succeeds but the second fails, leaving the `LoadingCache` in a partially populated state that causes incorrect EVM address resolution for all subsequent synthetic logs?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_616c338f-111c-45a7-a007-a6ad0bf6202b?mode=deep",
+    "timestamp": "2026-05-01 20:59:49.908565",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions that cause the alias cache in `EntityIdServiceImpl` to grow unboundedly (if the cache has no size limit configured), by referencing a large number of unique aliases, eventually causing an out-of-memory error in the importer JVM that crashes the transaction processing service and halts all new transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ecba170-f2d5-4282-8793-3691a4cc8045?mode=deep",
+    "timestamp": "2026-05-01 21:00:03.445431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByEvmAddress(byte[] evmAddress)] Can an unprivileged external user submit a contract call transaction where the `ContractID.evm_address` field contains a byte array that is all zeros (the zero address), causing `EntityIdServiceImpl.findByEvmAddress` to call `DomainUtils.fromEvmAddress` which may return a valid long-zero entity ID, bypassing the database lookup entirely and resolving to an incorrect system entity that corrupts the contract result record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53dcc21a-3ee3-45ba-b346-3585bed8d850?mode=deep",
+    "timestamp": "2026-05-01 21:00:16.409765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: updateContractType(Iterable<Long> ids)] Can an unprivileged external user submit a contract transaction that causes `updateContractType` to be called with an `Iterable<Long>` containing `Long.MAX_VALUE` or other boundary values, causing the `WHERE id IN (:ids)` clause to generate a query that triggers a PostgreSQL integer overflow or type error, throwing a database exception that propagates through `SidecarContractMigration` and aborts the record-file processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dcdad540-aa0c-45d2-888b-15a25723e3c8?mode=deep",
+    "timestamp": "2026-05-01 21:00:30.402824",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit transactions with alias byte arrays of length exactly 20 bytes that are not valid EVM addresses, causing `EntityIdServiceImpl.lookup(AccountID)` to route to `findByEvmAddress` (due to the `alias.length == EVM_ADDRESS_LENGTH` check), which then calls `DomainUtils.fromEvmAddress` and potentially returns a valid long-zero entity ID for an entity that does not actually have that EVM address, causing incorrect entity resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e759dd9d-18ba-4223-9d9e-8745d5fb29d4?mode=deep",
+    "timestamp": "2026-05-01 21:00:43.785122",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findEvmAddressesByIds(Iterable<? extends Long> ids)] Can an unprivileged external user submit transactions that cause `SyntheticLogListener` to call `findEvmAddressesByIds` with an empty `Iterable`, and if the underlying Spring Data JPA implementation generates a malformed `IN ()` clause (empty IN list), trigger a PostgreSQL syntax error that propagates as an uncaught exception and aborts the record-file commit, halting all transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4b74d4c-3ab2-421a-8e91-b823155d3597?mode=deep",
+    "timestamp": "2026-05-01 21:00:57.544788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/repository/EntityRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findByAlias(byte[] alias)] Can an unprivileged external user submit a transaction with an alias that matches an entity row where `deleted` is set to `false` (not NULL, not true), confirming the entity is active, but then immediately submit a deletion transaction that sets `deleted = NULL` (instead of `true`) due to a bug in the deletion handler, causing `findByAlias` to continue returning that entity as active indefinitely and corrupting the entity state used for transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2453a87-913f-47e2-bfe4-12e09dae627b?mode=deep",
+    "timestamp": "2026-05-01 21:01:12.000305",
+    "report_generated": false
+  }
+]
