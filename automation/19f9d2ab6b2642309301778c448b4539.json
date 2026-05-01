@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user submit a crafted `request.TransactionIdentifier.Hash` that collides with a different transaction's hash in the same block's `[consensusStart, consensusEnd]` window, causing `FindByHashInBlock()` to return a different transaction's operations and thus misrepresent the submitted transaction's effects to a Rosetta client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4918baaa-3195-46de-a2da-0b390227d3da?mode=deep",
+    "timestamp": "2026-05-01 18:08:09.361072",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user supply a `request.BlockIdentifier.Hash` with a crafted `0x`-prefixed string that after `tools.SafeRemoveHexPrefix()` resolves to a valid but different block hash, causing `FindByIdentifier()` to return a block whose `[ConsensusStartNanos, ConsensusEndNanos]` range contains a different transaction than intended, effectively redirecting transaction lookup to a tampered context?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_940dc65b-beec-4fdc-b222-789dcfaac6c4?mode=deep",
+    "timestamp": "2026-05-01 18:08:21.439952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user provide a mismatched `request.BlockIdentifier.Index` and `request.BlockIdentifier.Hash` pair to `FindByIdentifier()` such that the block returned has a consensus window that contains a transaction with the same hash as a different block, causing the wrong transaction record to be returned and the submitted transaction's true state to be hidden?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a4dbf01-5c43-4245-90d1-912889a9fa23?mode=deep",
+    "timestamp": "2026-05-01 18:08:33.652919",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user trigger cache poisoning in `entityCache` by submitting a transaction whose operation's `AccountId.GetId()` collides with a legitimate account's encoded ID, causing `s.entityCache.Set(result.GetId(), result)` to overwrite the cached alias for the legitimate account and subsequently serve tampered account identity data for all future `/block` and `/block/transaction` responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_21df9c8e-8407-4479-9c69-4784cffdcbc6?mode=deep",
+    "timestamp": "2026-05-01 18:08:46.174572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user exploit the LRU cache (`entityCache`) eviction behavior by flooding `/block/transaction` requests with transactions referencing many distinct `AccountId` values, evicting legitimate cached aliases and forcing re-fetches from `accountRepo.GetAccountAlias()`, creating a window where stale or inconsistent alias data is served for submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_39e98dcc-a0e5-464b-9c56-59fb4eebae62?mode=deep",
+    "timestamp": "2026-05-01 18:08:58.754170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user craft a `BlockRequest` with a `BlockIdentifier` that resolves to a block with a very large `[ConsensusStartNanos, ConsensusEndNanos]` range, causing `FindBetween()` to return an unbounded number of transactions, exhausting server memory before the `maxTransactionsInBlock` truncation at line 61 is applied, and thereby causing a denial-of-service that prevents legitimate submitted transactions from being queried?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40760b18-da61-4007-836f-5e21af4cd477?mode=deep",
+    "timestamp": "2026-05-01 18:09:11.303462",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user exploit the `otherTransactions` pagination logic at lines 61-67 by requesting a block where `len(block.Transactions) > s.maxTransactionsInBlock`, causing transactions beyond the limit to be returned only as `TransactionIdentifier` hashes in `OtherTransactions` without their operations, allowing a tampered transaction to be hidden in the truncated tail while appearing to be included in the block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea49ea36-ad52-423f-aa52-bce633f6ecfb?mode=deep",
+    "timestamp": "2026-05-01 18:09:24.168418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user submit a transaction that, when included in a block, causes `block.Transactions[s.maxTransactionsInBlock:]` to contain only that transaction's hash in `otherTransactions`, while the full operations (including tampered amounts or account IDs) are never exposed via the `/block` endpoint, effectively concealing the transaction's true impact from Rosetta reconciliation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f53fd5c1-7228-4926-8c30-2aa9118e134d?mode=deep",
+    "timestamp": "2026-05-01 18:09:37.189094",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user submit a transaction hash containing only the `0x` prefix (empty hex body) to `BlockTransaction()`, causing `tools.SafeRemoveHexPrefix()` to return an empty string that is then passed to `FindByHashInBlock()`, potentially matching a null/empty hash record in the database and returning an unintended transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3bf37cc-6dd2-41c7-a07f-8c08a87a682e?mode=deep",
+    "timestamp": "2026-05-01 18:09:50.457663",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user supply a transaction hash with mixed-case hex characters to `request.TransactionIdentifier.Hash` that, after being passed directly to `FindByHashInBlock()` without normalization, matches a different case-variant of the same hash stored in the database, causing a different transaction's record to be returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbf6a949-e6fa-48d8-b948-e15a29f25fc0?mode=deep",
+    "timestamp": "2026-05-01 18:10:03.063189",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user cause `s.accountRepo.GetAccountAlias()` to be called with a zero-value `AccountId` (where `GetId()` returns 0) by submitting a transaction with an operation referencing account ID 0, and then have the result cached under key 0 via `s.entityCache.Set(result.GetId(), result)`, poisoning the cache entry for the zero account and corrupting alias resolution for all subsequent transactions referencing that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9cb39334-8a0c-40a4-9565-fd349c1c7121?mode=deep",
+    "timestamp": "2026-05-01 18:10:15.496087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user send concurrent `/block` requests for the same block identifier, triggering a race condition in `updateOperationAccountAlias()` where multiple goroutines simultaneously check `s.entityCache.Get()` (miss), call `s.accountRepo.GetAccountAlias()`, and then call `s.entityCache.Set()`, causing one goroutine's stale result to overwrite a fresher result and serve incorrect account alias data for submitted transaction operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5178a272-2c70-40e3-b60a-c25e7d3705f7?mode=deep",
+    "timestamp": "2026-05-01 18:10:28.697799",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user provide a `request.BlockIdentifier.Index` of `-1` or `math.MinInt64` to `FindByIdentifier()`, causing an integer underflow or unexpected database query that returns a genesis or sentinel block, and then use the resulting `[ConsensusStartNanos, ConsensusEndNanos]` to look up a transaction hash that exists in that block, bypassing the intended block-scoped transaction isolation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03040a3b-8da7-40fb-b259-edb070c678fa?mode=deep",
+    "timestamp": "2026-05-01 18:10:41.284535",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user request a block by hash only (with `bIdentifier.Index == nil`) using a hash that matches multiple blocks due to a prefix collision after `tools.SafeRemoveHexPrefix()`, causing `blockRepo.FindByHash()` to return an unintended block and expose transactions from a different consensus window as if they belonged to the requested block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3142640-e9f3-4cbd-9a02-3aa4013c17a5?mode=deep",
+    "timestamp": "2026-05-01 18:10:54.168153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user submit a transaction with an operation whose `AccountId` has a valid `GetId()` that maps to a different account's alias in `accountRepo`, causing `s.entityCache.Set(result.GetId(), result)` to cache the wrong alias under the original account's ID, and then have `operations[index].AccountId = cached` replace the correct account identity with the wrong one in all subsequent responses for that account's transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58d82051-5b6e-4a60-8552-8298a470e638?mode=deep",
+    "timestamp": "2026-05-01 18:11:07.243959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user craft a `BlockRequest` where `bIdentifier.Hash` is a valid hex string but `bIdentifier.Index` points to a different block, causing `blockRepo.FindByIdentifier()` to return an error or an unexpected block, and then exploit the error path to infer internal block structure and enumerate valid block hashes for subsequent transaction tampering attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dbd27726-e7c3-4b43-938a-8fe2f7b77a36?mode=deep",
+    "timestamp": "2026-05-01 18:11:20.100859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user submit a `request.TransactionIdentifier.Hash` that is a valid hash of a transaction in a different block than specified by `request.BlockIdentifier`, and if `FindByHashInBlock()` does not strictly enforce the consensus window boundary, retrieve that out-of-block transaction and present it as belonging to the specified block, tampering with the block's apparent transaction set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9d549f9-729e-41d3-a4a2-783dc6d033df?mode=deep",
+    "timestamp": "2026-05-01 18:11:32.881212",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user trigger repeated cache misses in `entityCache` by submitting transactions with operations referencing account IDs that are just above the LRU `MaxSize` threshold, causing the cache to continuously evict and re-fetch aliases, and during the re-fetch window, serve stale or inconsistent `AccountId` data for operations in submitted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_930723ce-49d7-4eb0-b267-18c43e8edf6a?mode=deep",
+    "timestamp": "2026-05-01 18:11:45.715078",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user exploit the fact that `block.Transactions` is sliced in-place at line 66 (`block.Transactions = block.Transactions[0:s.maxTransactionsInBlock]`) before `updateOperationAccountAlias()` is called at line 69, meaning alias updates are only applied to the first `maxTransactionsInBlock` transactions, while transactions in `otherTransactions` have their hashes exposed without alias normalization, creating an inconsistency that can be exploited to correlate raw account IDs with aliases?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ab0fa91-10dd-4713-8f36-1e4f28cd2100?mode=deep",
+    "timestamp": "2026-05-01 18:11:59.705789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user send a `/block/transaction` request with a transaction hash that contains SQL injection or special characters that are not sanitized before being passed to `FindByHashInBlock()`, potentially causing the underlying database query to return unintended transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6b783fd-9f83-4bb2-8002-534236aa4e32?mode=deep",
+    "timestamp": "2026-05-01 18:12:11.990156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user request a block with `bIdentifier.Index = 0` and `bIdentifier.Hash = nil`, causing `blockRepo.FindByIndex()` to return the genesis block, and then observe that the genesis block's `ConsensusStartNanos` is 0, which when passed to `FindBetween()` returns all transactions from the beginning of time, exposing the full transaction history and enabling analysis of submitted transaction patterns?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_addd3283-dfee-4fd1-9485-02f794eb3592?mode=deep",
+    "timestamp": "2026-05-01 18:12:24.580254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: updateOperationAccountAlias()] Can an unprivileged external user submit a transaction with an operation whose `AccountId.GetId()` returns `math.MaxInt64`, causing an integer overflow when used as a cache key in `entityCache`, resulting in the alias being stored under a wrapped key that collides with a legitimate account's cache entry and corrupting that account's alias in subsequent transaction responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73c35723-569d-4c01-afc0-6f325f92db08?mode=deep",
+    "timestamp": "2026-05-01 18:12:37.540042",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user send a high volume of concurrent `/block` requests each triggering `updateOperationAccountAlias()` for blocks with many operations, causing the `entityCache` LRU to thrash and `accountRepo.GetAccountAlias()` to be called at a rate that exhausts database connection pool resources, denying service to legitimate transaction queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b287c792-abd1-4b6d-9c14-e10bd3c1123a?mode=deep",
+    "timestamp": "2026-05-01 18:12:50.290730",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: BlockTransaction()] Can an unprivileged external user provide a `request.BlockIdentifier.Hash` that is an all-zeros hex string (e.g., `0x0000...0000`) to `BlockTransaction()`, which after `tools.SafeRemoveHexPrefix()` becomes a valid-looking hash passed to `FindByIdentifier()`, potentially matching a sentinel or default block record and returning transactions that should not be accessible?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38f36a63-c2a5-48c4-ba66-4717dd7ab760?mode=deep",
+    "timestamp": "2026-05-01 18:13:03.144353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: Block()] Can an unprivileged external user exploit the `ToRosetta()` conversion at line 73 where `block.ToRosetta()` is called after `updateOperationAccountAlias()` modifies `operations[index].AccountId` in-place, such that a race condition between concurrent requests sharing the same `block` object causes one request's alias update to corrupt another request's transaction operation data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_128805eb-36b9-4e7f-a658-646e69f6ddf5?mode=deep",
+    "timestamp": "2026-05-01 18:13:16.241505",
+    "report_generated": false
+  }
+]
