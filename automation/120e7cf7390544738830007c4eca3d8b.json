@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSpec()] Can an unprivileged external user send a GET request to `/api/v1/${config.openapi.swaggerUIPath}/${config.openapi.specFileName}.yml` without any authentication and receive the full raw YAML OpenAPI spec, exposing all internal route structures, parameter names, and schema definitions to an attacker performing reconnaissance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7233fdb-f08b-40a4-af69-e49fe0a63bbc?mode=deep",
+    "timestamp": "2026-05-01 18:17:21.759910",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSpec()] Can an unprivileged external user repeatedly call the unauthenticated `serveSpec` endpoint to enumerate all documented API paths, parameter names, and response schemas from the served YAML, enabling targeted fuzzing of every documented endpoint without any prior knowledge of the API surface?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_012c3329-6097-4a3b-922f-4a5fa712e9c1?mode=deep",
+    "timestamp": "2026-05-01 18:17:33.805230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSpec()] Can an unprivileged external user exploit the fact that `serveSpec` calls `getV1OpenApiFile()` with no `apiVersion` argument (making it `undefined`), causing `isInValidVersionRange(undefined)` to return false and silently falling back to 'v1', to confirm the exact API version in use and tailor version-specific attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_427ac63d-4015-406d-8886-7a2b63558c66?mode=deep",
+    "timestamp": "2026-05-01 18:17:46.099743",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getSpecPath()] Can an unprivileged external user, if `config.openapi.specFileName` is ever sourced from an environment variable or user-influenced config, craft a value containing path traversal sequences (e.g., `../../etc/passwd`) to cause `getSpecPath()` to construct a path pointing outside the intended `api/v1/` directory, leading to arbitrary file read via `getV1OpenApiFile()`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_432b68c0-4007-4414-ac00-0914de6ec7b8?mode=deep",
+    "timestamp": "2026-05-01 18:17:58.848739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getV1OpenApiFile()] Can an unprivileged external user trigger a denial-of-service by causing the server process to read an extremely large file from disk if `config.openapi.specFileName` resolves to a large file, since `fs.readFileSync` blocks the Node.js event loop and the result is cached permanently in the module-level `v1OpenApiFile` variable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5c32e2e-db9b-4145-9ca0-7c3bd37a1701?mode=deep",
+    "timestamp": "2026-05-01 18:18:11.488985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getV1OpenApiFile()] Can an unprivileged external user exploit the fact that `v1OpenApiFile` is a module-level variable that is never invalidated after first load, meaning if the spec file is updated to fix a security issue, the old (vulnerable) spec continues to be served and used for validation until the server restarts, allowing exploitation of a known-patched vulnerability window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17bb602c-efee-4074-a6a8-a31e57b136dd?mode=deep",
+    "timestamp": "2026-05-01 18:18:24.128025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiSpecObject()] Can an unprivileged external user, if the YAML spec file is writable or replaceable (e.g., via a symlink attack or misconfigured volume mount), cause `yaml.load()` to parse a maliciously crafted YAML document that exploits js-yaml deserialization gadgets, leading to remote code execution on the server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0625624-bd37-4cc1-84e0-12572ea33f62?mode=deep",
+    "timestamp": "2026-05-01 18:18:36.790024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiSpecObject()] Can an unprivileged external user trigger a ReDoS (Regular Expression Denial of Service) or CPU exhaustion by causing `yaml.load()` to parse a deeply nested or extremely large YAML structure if the spec file path is influenced, since `yaml.load()` with `js-yaml` processes the entire document synchronously on the event loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71d4c35c-fdf6-4693-a7e8-538be0cb5e2d?mode=deep",
+    "timestamp": "2026-05-01 18:18:49.540779",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getV1OpenApiObject()] Can an unprivileged external user exploit the module-level singleton caching of `v1OpenApiDocument` to cause all subsequent requests to use a stale or corrupted OpenAPI document if the first parse of the YAML file fails partially, leading to incorrect parameter defaults being applied to all API requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_897f1c89-add1-4e36-8b27-358cd61a5b89?mode=deep",
+    "timestamp": "2026-05-01 18:19:02.345704",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiMap()] Can an unprivileged external user exploit the module-level singleton caching of `openApiMap` — which is populated once and never refreshed — to cause the server to permanently use incorrect parameter default values if the map is initialized with a corrupted or attacker-influenced spec, affecting all subsequent requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab9ce70a-c572-4dda-bfa9-c6933a9d549d?mode=deep",
+    "timestamp": "2026-05-01 18:19:15.039195",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiParameters()] Can an unprivileged external user exploit prototype pollution by crafting a `$ref` value in the OpenAPI spec that resolves to `__proto__` or `constructor` in `openApiObject.components.parameters[p]`, causing `getOpenApiParameters()` to pollute the JavaScript object prototype and affect all downstream parameter processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06171249-74d1-4fd8-b80d-0384541a50a4?mode=deep",
+    "timestamp": "2026-05-01 18:19:27.573625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiParameters()] Can an unprivileged external user cause a null pointer dereference crash by triggering a code path where `openApiObject.components.parameters[p]` returns `undefined` (e.g., a `$ref` pointing to a non-existent component), causing the subsequent `.filter((p) => p.in !== 'path')` to throw a TypeError and crash the request handler?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb7541e0-be91-4049-a429-1c7cada5c907?mode=deep",
+    "timestamp": "2026-05-01 18:19:39.938330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiParameters()] Can an unprivileged external user exploit the `p.$ref.substring(OPEN_API_PARAMETER_LOCATION.length)` extraction to cause an out-of-bounds substring operation if a `$ref` value exactly equals `#/components/parameters/` with no trailing name, resulting in an empty string key being used to look up `openApiObject.components.parameters['']`, potentially returning unexpected data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59f69fed-5d3d-4218-9650-8a9bf31dc4b5?mode=deep",
+    "timestamp": "2026-05-01 18:19:52.687921",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getOpenApiParameters()] Can an unprivileged external user exploit the fact that `getOpenApiParameters()` returns `{}` (an empty object, not an empty array) when `parameters === undefined`, causing downstream code that iterates over the result as an array to throw a TypeError, leading to a denial-of-service for all requests to paths without GET parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75213e90-88e4-4c67-b70a-a23eec162cca?mode=deep",
+    "timestamp": "2026-05-01 18:20:05.053007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSwaggerDocs()] Can an unprivileged external user exploit the hardcoded external image URL in `customCss` (`https://camo.githubusercontent.com/...`) to perform a timing-based side-channel attack, inferring server-side network connectivity or firewall rules by observing whether the Swagger UI loads the external image?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_249d37f0-a3ee-413b-8cca-7477b177f45d?mode=deep",
+    "timestamp": "2026-05-01 18:20:17.662712",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSwaggerDocs()] Can an unprivileged external user exploit the `customCss` string in `serveSwaggerDocs()` — which injects a `content:url(...)` CSS property — to perform a CSS injection attack if any part of the CSS string is ever made configurable, causing the browser to load attacker-controlled resources and leak information via CSS-based exfiltration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1e991e0-0e5b-4dd1-8a18-a2a90ab05b8f?mode=deep",
+    "timestamp": "2026-05-01 18:20:30.033830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSwaggerDocs()] Can an unprivileged external user access the Swagger UI at `/api/v1/${config.openapi.swaggerUIPath}` without authentication to interactively explore and execute all documented API endpoints directly from the browser, effectively using the Swagger UI as an unauthenticated API testing tool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f0aae68-0b59-428f-b077-2c2d199ee2ce?mode=deep",
+    "timestamp": "2026-05-01 18:20:43.675286",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSwaggerDocs()] Can an unprivileged external user exploit the `swaggerUi.setup(getV1OpenApiObject(), options)` call to cause the Swagger UI to render attacker-controlled content if the OpenAPI spec contains XSS payloads in description fields (e.g., `<script>` tags in `info.description`), leading to stored XSS in the Swagger UI?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c954521-f512-445b-a8cb-2b05542142b7?mode=deep",
+    "timestamp": "2026-05-01 18:20:55.974146",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: serveSwaggerDocs()] Can an unprivileged external user exploit the dual `.yml` and `.yaml` spec endpoints registered in `serveSwaggerDocs()` to bypass any WAF or rate-limiting rules that only block one extension, accessing the full spec via the alternate extension?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb2d106f-7c88-4dfe-b6a2-928843a92758?mode=deep",
+    "timestamp": "2026-05-01 18:21:08.571653",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: openApiValidator()] Can an unprivileged external user exploit `validateRequests: false` in `openApiValidator()` to send malformed, oversized, or type-mismatched request bodies and query parameters to any endpoint without triggering OpenAPI schema validation, bypassing the first layer of input validation entirely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6c70aec-cba9-4560-8527-6094453ca3f0?mode=deep",
+    "timestamp": "2026-05-01 18:21:21.926233",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: openApiValidator()] Can an unprivileged external user exploit `ignoreUndocumented: true` in `openApiValidator()` to access any undocumented routes (routes not listed in the OpenAPI spec) without any schema validation being applied, potentially reaching internal or debug endpoints that were intentionally left undocumented?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a57b4a2-4f8e-48f4-8472-00f5a3a5b8f8?mode=deep",
+    "timestamp": "2026-05-01 18:21:34.860370",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: openApiValidator()] Can an unprivileged external user exploit the fact that `validateResponses` is set to `false` in production (only `{allErrors: true}` in test environments via `isTestEnv()`) to receive responses containing sensitive data that would otherwise be stripped by response validation, since no response schema enforcement occurs in production?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d759524-1c8f-46fa-90d1-2c665102b851?mode=deep",
+    "timestamp": "2026-05-01 18:21:47.318156",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: openApiValidator()] Can an unprivileged external user exploit the dynamic `import('express-openapi-validator')` inside `openApiValidator()` to cause a race condition if the validator is not fully initialized before requests arrive, allowing requests to bypass validation during the startup window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42359273-1550-42ad-8495-b5b861d8d7f8?mode=deep",
+    "timestamp": "2026-05-01 18:22:00.481192",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: openApiValidator()] Can an unprivileged external user exploit the `ignoreUndocumented: true` setting combined with `validateRequests: false` to send arbitrary HTTP methods (PUT, DELETE, PATCH) to documented paths without any validation, since undocumented methods on documented paths may also be ignored?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ed9aa0d-b34c-49d6-849e-b8dece96c9d0?mode=deep",
+    "timestamp": "2026-05-01 18:22:14.456779",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/openapiHandler.js -> Scope: '] [Function: getSpecPath()] Can an unprivileged external user exploit the template literal construction `api/${apiVersionPath}/${config.openapi.specFileName}.yml` in `getSpecPath()` to cause a null byte injection if `config.openapi.specFileName` contains a null byte, potentially truncating the file path on some OS-level file operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45569294-b0fc-4b4e-8ee8-d4b99fe15322?mode=deep",
+    "timestamp": "2026-05-01 18:22:28.894908",
+    "report_generated": false
+  }
+]
