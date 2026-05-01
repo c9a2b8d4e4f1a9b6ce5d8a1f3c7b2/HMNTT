@@ -1,0 +1,110 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user repeatedly call `getNftAllowances()` with alternating `order=ASC` and `order=DESC` requests using the same account ID, and by comparing the two result sets, identify gaps in the allowance history (records present in one ordering but not the other due to pagination), effectively reconstructing a reorganized view of the history that differs from the canonical sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_377a26e0-dd8f-4286-81e9-b453057843ff?mode=deep",
+    "timestamp": "2026-05-01 15:40:26.218068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findAll()] Can an unprivileged user exploit the fact that `getBaseCondition()` always ANDs `APPROVAL_CONDITION` (approvedForAll=true) to craft a sequence of requests that, by observing which (owner, spender, tokenId) tuples appear and disappear across time-separated queries, infer the history of allowance grants and revocations in an order that reorganizes the apparent sequence of on-chain events?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9855fbc3-eeec-4203-859c-0cd837a96ccb?mode=deep",
+    "timestamp": "2026-05-01 15:40:38.943805",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user craft a `NftAllowanceRequest` with `isOwner=true` and a `ownerOrSpenderIds` bound using `GTE` on a spender ID that is numerically close to the account ID, causing the query to return allowances where the spender is near the owner's ID, and by iterating through these results, reconstruct a reorganized view of which spenders were granted allowances in which order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e04a338b-e398-4a74-b5a4-cdb43a8fcdeb?mode=deep",
+    "timestamp": "2026-05-01 15:40:50.914769",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getBounds()] Can an unprivileged user exploit the `getBounds()` logic where `primaryBound = !ownerOrSpenderIds.isEmpty() ? ownerOrSpenderIds : tokenIds` to craft a request where `ownerOrSpenderIds` is non-empty but `tokenIds` is empty, causing `getBounds()` to return only `List.of(ownerOrSpenderIds)`, which then causes `getBoundConditions()` to apply only the account-level filter and return all token IDs for that account in the default sort order, potentially exposing the full token allowance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c507f57d-5206-4659-a7d5-830e16d35e53?mode=deep",
+    "timestamp": "2026-05-01 15:41:02.897916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getOuterCondition()] Can an unprivileged user craft a request where the primary bound has only a lower range (no upper), causing `getOuterCondition()` with `isUpper=true` to call `getPrimaryCondition(primary, true)` which returns `noCondition()` since `primary.getUpper()` is null, effectively removing the upper boundary from the SQL query and returning all allowance records above the lower bound in an unbounded manner, reorganizing the visible history window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e5ef46f-5ef2-4824-b708-243edf7c470a?mode=deep",
+    "timestamp": "2026-05-01 15:41:15.429947",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getOuterCondition()] Can an unprivileged user craft a request where the primary bound has only an upper range (no lower), causing `getOuterCondition()` with `isUpper=false` to call `getPrimaryCondition(primary, false)` which calls `primary.adjustLowerRange()` returning null, resulting in `noCondition()` and removing the lower boundary from the SQL query, returning all allowance records below the upper bound and reorganizing the visible history window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05a475ce-e25b-4e59-8d09-fe6439c4cfce?mode=deep",
+    "timestamp": "2026-05-01 15:41:29.080400",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: removeRanges()] Can an unprivileged user craft a request with both primary and secondary bounds set, causing `removeRanges()` to create new `Bound` objects via `b.toLower()` or `b.toUpper()` that strip one side of the range, and then the recursive `getBoundConditions()` call to generate SQL conditions that include records outside the originally intended range, returning allowance history in an order that includes records the user should not see?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e0defe1-e357-49c6-a21a-54aa042d4ab7?mode=deep",
+    "timestamp": "2026-05-01 15:41:41.286341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user supply a `tokenIds` bound with `LTE` operator and `ownerOrSpenderIds` with `EQ` operator, which passes all validation checks in `checkOwnerSpenderParamValidity()`, and then use the resulting query to retrieve all NFT allowances for a specific account up to a given token ID, effectively paginating through the allowance history in reverse and reorganizing the visible sequence of token grants?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee90f5be-cca5-4482-b294-13d6c9dd5700?mode=deep",
+    "timestamp": "2026-05-01 15:41:54.513198",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user supply a `tokenIds` bound with `GTE` operator and `ownerOrSpenderIds` with `EQ` operator, which passes all validation checks, and then use the resulting query to retrieve all NFT allowances for a specific account starting from a given token ID, effectively paginating through the allowance history forward and reorganizing the visible sequence of token grants from an arbitrary starting point?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a58332c-0f14-4749-aa7e-88efa0b00ebe?mode=deep",
+    "timestamp": "2026-05-01 15:42:08.716561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: checkOwnerSpenderParamValidity()] Can an unprivileged user exploit the gap in validation where `checkOwnerSpenderParamValidity()` only checks cardinality of `LT`/`LTE` against `EQ`/`LTE` for account IDs (lines 46-48) but does not validate the relationship between the token range and the account range, allowing a user to supply a token range that is entirely disjoint from the account range, causing the query to return an empty result set that hides the existence of allowance records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82f738e2-3060-45fd-ad4d-e02a6d1d007c?mode=deep",
+    "timestamp": "2026-05-01 15:42:21.110899",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user craft a request with `isOwner=false` and a `ownerOrSpenderIds` bound targeting a specific owner ID range, causing the query to sort by `OWNER.asc()` and `TOKEN_ID.asc()` instead of `SPENDER`, and by comparing results with an `isOwner=true` query, reconstruct a cross-referenced view of the allowance history that reveals the ordering of grants from both perspectives simultaneously?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1812f00a-1265-48ae-9d94-2ce07b11813d?mode=deep",
+    "timestamp": "2026-05-01 15:42:34.406777",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: map()] Can an unprivileged user exploit the `NftAllowanceMapper.map()` which maps `timestampRange` to `timestamp` in the response, and by making repeated requests with different range parameters, reconstruct the full `timestampRange` of each allowance record, thereby determining the exact chronological ordering of allowance grants and revocations and reorganizing the history by timestamp rather than by the default sort order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ca1191d-962e-4599-a0d4-a097ddfc11b9?mode=deep",
+    "timestamp": "2026-05-01 15:42:48.038300",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user make concurrent requests to `getNftAllowances()` with different `order` directions (ASC and DESC) and different `limit` values, and by comparing the overlapping records in the two result sets, identify the exact position of each record in the full allowance history, effectively reconstructing the complete ordered history through set intersection analysis?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d88bf122-b2c1-46af-abc8-c18c2a292c5f?mode=deep",
+    "timestamp": "2026-05-01 15:43:01.111886",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: findAll()] Can an unprivileged user exploit the fact that `findAll()` in `NftAllowanceRepositoryCustomImpl` does not apply any timestamp-based filtering, allowing them to retrieve the current state of all NFT allowances without any historical context, and then by making repeated requests over time, reconstruct a reorganized timeline of when allowances were granted or revoked based on when records appear or disappear?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_585db0c3-2b1d-42c3-967c-dd65fd9a2013?mode=deep",
+    "timestamp": "2026-05-01 15:43:13.627457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user supply an `accountId` as `EntityIdNumParameter` with a numeric ID of `0` or negative value, which may not be validated before being passed to `entityService.lookup()`, causing an unexpected entity resolution that returns allowance history for a system account, reorganizing the visible history to include system-level allowance records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf1db61e-73d3-43d9-981a-62682327d0d1?mode=deep",
+    "timestamp": "2026-05-01 15:43:26.187136",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getBaseCondition()] Can an unprivileged user craft a request where `accountId` resolves to an entity ID that is shared between multiple accounts (e.g., due to entity ID reuse after account deletion), causing `getBaseCondition()` to match allowance records from both the old and new account, returning a merged history that reorganizes the allowance records from two different accounts as if they belong to one?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41e8f104-9dd2-44f1-8d0c-d2b43528e6de?mode=deep",
+    "timestamp": "2026-05-01 15:43:38.497778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user exploit the `EntityIdAliasParameter` path in `entityService.lookup()` by supplying an alias that matches multiple entities (if alias uniqueness is not enforced at the DB level), causing `findByAlias()` to return the first matching entity, and the resulting allowance history to be attributed to the wrong account, reorganizing history attribution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_426bc23b-b269-489d-bbe5-cbae6417006a?mode=deep",
+    "timestamp": "2026-05-01 15:43:50.891675",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NftAllowanceService.java -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getNftAllowances()] Can an unprivileged user exploit the `EntityIdEvmAddressParameter` path in `entityService.lookup()` by supplying an EVM address that is the zero address (`0x0000...0000`), causing `findByEvmAddress()` to return an unexpected entity or throw an error that leaks information about the allowance history structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41659120-8565-48e2-888d-9f7a69e22df8?mode=deep",
+    "timestamp": "2026-05-01 15:44:03.570701",
+    "report_generated": false
+  }
+]
