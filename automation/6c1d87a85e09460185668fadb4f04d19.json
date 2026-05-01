@@ -64,5 +64,71 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06a821b0-90ea-4646-9216-cb25e4a8de77?mode=deep",
     "timestamp": "2026-04-28 21:45:44.586760",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions to a topic with a topicId of 0 or a reserved system entity ID so that `TopicMessageLookup.from()` creates a lookup entry with `topicId=0`, which when stored in `topic_message_lookup` with `primary key (topic_id, partition)` could collide with or overwrite legitimate system-level lookup entries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fefa86f-d6b6-46a9-b144-3af2534939fe?mode=deep",
+    "timestamp": "2026-05-01 19:17:55.008712",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with a consensus timestamp that causes `Instant.ofEpochSecond(0, topicMessage.getConsensusTimestamp())` to throw an exception (e.g., if the nanosecond value is outside the valid range for `Instant`), causing an unhandled exception in `onTopicMessage` that aborts processing of the entire record file and halts the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cb227dc0-e8b5-48b6-ad73-80db0de64ead?mode=deep",
+    "timestamp": "2026-05-01 19:18:07.172499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with a sequence number of 0 so that `TopicMessageLookup.from()` creates `Range.closedOpen(0, 1)`, and when merged via `mergeTopicMessageLookup` with a legitimate entry starting at sequence 1, the `span()` operation produces `[0, N)` which includes sequence 0 (an invalid sequence number), causing REST API consumers to incorrectly believe a message with sequence 0 exists?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c316976-2932-46cc-8de0-6d607701432c?mode=deep",
+    "timestamp": "2026-05-01 19:18:19.559700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions to many different topics within a single record file so that `parserContext.merge()` inserts a large number of distinct `TopicMessageLookup` objects into the `DomainContext.inserts` list, causing the batch upsert to the database to time out or fail, rolling back the entire record file processing and causing the importer to re-process the file indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6adcadae-05c5-4377-87f9-1af312a27d3f?mode=deep",
+    "timestamp": "2026-05-01 19:18:32.514233",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with timestamps that cause `fromTimestamp > toTimestamp` (e.g., if `fromSeconds + FILE_CLOSE_INTERVAL_SECS` overflows to a negative value), so that `TimePartitionServiceImpl.queryForOverlappingTimePartitions` returns an empty list due to the `toTimestamp < fromTimestamp` guard, causing the message to be silently dropped from `topic_message_lookup`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a1b70ab-13af-470c-9b3c-192e9152cfd2?mode=deep",
+    "timestamp": "2026-05-01 19:18:45.601638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with timestamps that are far in the future (beyond the last existing partition's range) so that `getOverlappingTimePartitions` returns an empty list, causing the message to be silently omitted from `topic_message_lookup`, and when the partition is eventually created, the historical lookup entry is never backfilled, making the message permanently unfindable via the lookup index?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6af7a42e-6d84-4e17-b2d6-7104f285ff1a?mode=deep",
+    "timestamp": "2026-05-01 19:18:59.762779",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: mergeTopicMessageLookup()] Can an unprivileged external user submit ConsensusSubmitMessage transactions to a topic with timestamps that, after `span()` merging, produce a `timestampRange` that spans multiple partitions (e.g., `[partition1_start, partition2_end)`), causing the REST API's `timestamp_range && $3::int8range` query to match this topic in both partitions and return duplicate or incorrect results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5dfa594d-f69c-4690-97d6-541d02151d66?mode=deep",
+    "timestamp": "2026-05-01 19:19:13.443237",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with a consensus timestamp that causes `seconds - (seconds % FILE_CLOSE_INTERVAL_SECS)` to produce a value of 0 (epoch), so that `DomainUtils.convertToNanosMax(0, 0L)` returns 0 for `fromTimestamp`, causing `getOverlappingTimePartitions` to be called with `fromTimestamp=0` and potentially matching the very first partition even for messages that should belong to a later partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f68d801d-23a9-4d86-8bf0-4d7624d60ad8?mode=deep",
+    "timestamp": "2026-05-01 19:19:26.357021",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions to a topic with a very large topicId (close to Long.MAX_VALUE) so that `TopicMessageLookup.getId()` creates an `Id` with `topicId=Long.MAX_VALUE`, and when used as a key in `parserContext.merge()` with a `HashMap`, causes hash collisions with other topic IDs, leading to incorrect merging of lookup entries from different topics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c174b795-be03-4c06-bfad-b2e0269184f3?mode=deep",
+    "timestamp": "2026-05-01 19:19:39.314934",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with timestamps that cause the same `fromTimestamp`/`toTimestamp` window to be computed for messages in different partitions, so that the `cacheTimePartitionOverlap` cache returns a stale partition list for the second message, routing it to the wrong partition and creating a `topic_message_lookup` entry in an incorrect partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1fe0d2a-443e-4f83-ad0f-ea432e20818e?mode=deep",
+    "timestamp": "2026-05-01 19:19:52.345828",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: onTopicMessage()] Can an unprivileged external user submit ConsensusSubmitMessage transactions with a consensus timestamp that is exactly at the lower boundary of a partition (`partition.getTimestampRange().lowerEndpoint()`) so that `partition.getTimestampRange().contains()` returns true (since the range is closed on the lower end), but the computed `fromTimestamp` window starts before this partition, causing `getOverlappingTimePartitions` to return a previous partition first, and the `break` causes the message to be assigned to the wrong partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_256eb928-9977-4385-a773-9467906169ed?mode=deep",
+    "timestamp": "2026-05-01 19:20:05.855799",
+    "report_generated": false
   }
 ]
