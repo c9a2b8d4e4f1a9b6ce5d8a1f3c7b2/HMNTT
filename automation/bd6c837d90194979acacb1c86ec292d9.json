@@ -1,0 +1,104 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that causes `DomainUtils.convertToNanosMax(fromSeconds + FILE_CLOSE_INTERVAL_SECS, 0L)` to return `Long.MAX_VALUE` (the clamped max), so that `toTimestamp` is always `Long.MAX_VALUE` and `getOverlappingTimePartitions()` returns all partitions, causing the lookup entry to be written to the first partition in the list regardless of where the staking reward transaction actually resides?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0868a642-2593-4f12-9a72-bb1ad3d6b08c?mode=deep",
+    "timestamp": "2026-05-01 15:15:03.014309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: mergeTopicMessageLookup()] Can an unprivileged user submit a topic message with sequence number 1 to a topic that already has a cached lookup with sequence number range `[1000, 2000)`, so that `span()` produces `[1, 2000)`, and the persisted entry now covers sequence numbers 1-999 that were never in this partition, causing the REST API to route staking reward queries for those sequence numbers to the wrong partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eaacffad-efaa-4ec6-bf16-537dd0b3c639?mode=deep",
+    "timestamp": "2026-05-01 15:15:15.265404",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp in a partition that has already been pruned (deleted via `TopicMessageLookupRepository.prune()`), so that `getOverlappingTimePartitions()` returns the pruned partition, a new lookup entry is written for it, but the underlying `topic_message` data no longer exists, causing staking reward queries to return a partition reference with no actual data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2ab9ed79-48b7-4e31-8c43-676aff862c0d?mode=deep",
+    "timestamp": "2026-05-01 15:15:27.787750",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that is exactly equal to the upper endpoint of a partition's timestamp range so that `partition.getTimestampRange().contains()` returns false (since Guava ranges are half-open `[lower, upper)`), the loop finds no matching partition, no lookup entry is written, and staking reward transactions at that exact timestamp are permanently unindexed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b45cb35-f49b-4797-b27d-aa316b93063b?mode=deep",
+    "timestamp": "2026-05-01 15:15:40.795865",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that causes `fromSeconds % FILE_CLOSE_INTERVAL_SECS` to produce a rounding that places `fromTimestamp` in a different calendar day than the actual message timestamp, causing the lookup entry to be associated with the wrong staking period partition and making staking reward queries for the correct period return no results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e9b9e25-e344-4ddf-aafc-1d1c756225a1?mode=deep",
+    "timestamp": "2026-05-01 15:15:54.378875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a burst of topic messages that causes `parserContext.merge()` to hold a very large number of in-memory `TopicMessageLookup` objects, exhausting heap memory and causing an OutOfMemoryError that aborts the record file processing, leaving staking reward payout transactions in that file permanently unindexed in the lookup table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d1fc4d2-7868-4c62-ad27-f6e3a2445edd?mode=deep",
+    "timestamp": "2026-05-01 15:16:08.145056",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: isEnabled()] Can an unprivileged user trigger repeated calls to `timePartitionService.getTimePartitions(TOPIC_MESSAGE_TABLE_NAME)` by submitting many topic messages, causing a cache stampede or database contention that makes `getTimePartitions()` intermittently return an empty list, disabling the listener for certain record files and causing staking reward transactions in those files to be unindexed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_131912ea-bd36-4c76-80dd-c0019e13c9c5?mode=deep",
+    "timestamp": "2026-05-01 15:16:21.571516",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that is exactly `FILE_CLOSE_INTERVAL_SECS - 1` seconds into a partition, so that `fromSeconds` rounds down to the start of the interval but `toTimestamp` extends exactly to the partition boundary, causing `getOverlappingTimePartitions()` to return the current partition but `contains()` to fail for the actual timestamp, silently dropping the lookup entry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fd995e7-5846-453a-9af3-48aacfc6f9ee?mode=deep",
+    "timestamp": "2026-05-01 15:16:34.463891",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: mergeTopicMessageLookup()] Can an unprivileged user submit a topic message with a timestamp range that, when merged via `span()` with an existing entry, produces a range that spans across a staking period boundary (midnight UTC), causing the REST API to return staking reward data from the wrong staking period and allowing an attacker to claim rewards that belong to a different epoch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32b20ccb-dc1b-4125-acfd-66fc54352f28?mode=deep",
+    "timestamp": "2026-05-01 15:16:47.974153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that causes `DomainUtils.convertToNanosMax(fromSeconds, 0L)` to return a value that is less than the partition's lower bound, so that `getOverlappingTimePartitions()` returns a partition that does not actually overlap with the message's timestamp, and the lookup entry is written to the wrong partition, misdirecting staking reward queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0075db7f-6af4-4ca2-991d-80fdb795bc43?mode=deep",
+    "timestamp": "2026-05-01 15:17:02.086664",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that is exactly at the boundary between two `FILE_CLOSE_INTERVAL_SECS` windows, so that the computed `fromTimestamp` and `toTimestamp` straddle a partition boundary, `getOverlappingTimePartitions()` returns two partitions, but the `break` after the first match causes the lookup to be written to the wrong partition, making staking reward transactions in the second partition unresolvable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28fd0013-d99d-4f7f-884c-07f2d252eba3?mode=deep",
+    "timestamp": "2026-05-01 15:17:15.569880",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a very large sequence number (e.g., Long.MAX_VALUE / 2) to a topic that has no existing lookup entry, so that `TopicMessageLookup.from()` creates a range `[Long.MAX_VALUE/2, Long.MAX_VALUE/2 + 1)`, and when a legitimate message with sequence number 1 is later processed, `span()` produces a range `[1, Long.MAX_VALUE/2 + 1)` that covers billions of sequence numbers, causing the REST API to route all staking reward queries for that topic to this single partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2f39d7f-92d8-422a-8077-ac0be61dffc8?mode=deep",
+    "timestamp": "2026-05-01 15:17:29.100658",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that causes `timePartitionService.getOverlappingTimePartitions()` to return partitions in an unexpected order, so that the first partition in the list does not actually contain the message's timestamp, the `contains()` check fails for it, the loop continues to the correct partition, but the `break` is never reached because the correct partition is last, causing the lookup to be written to the last partition regardless of the `break` logic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0dbe7d7-392a-46b7-b7f4-639fc2926dd4?mode=deep",
+    "timestamp": "2026-05-01 15:17:43.684499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that is in a partition that overlaps with the staking reward account's (0.0.800) transaction history, so that the lookup entry for that partition is corrupted and queries for staking reward transfers from account 800 are routed to the wrong partition, returning incorrect pending reward amounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cf14a74-e684-4187-ae9a-24a7fffb9cf2?mode=deep",
+    "timestamp": "2026-05-01 15:17:57.662399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: mergeTopicMessageLookup()] Can an unprivileged user submit a topic message with a sequence number that is lower than the current minimum in the cached `sequenceNumberRange`, so that `span()` extends the lower bound of the range, and the persisted entry now claims to contain sequence numbers that were processed in a previous record file, causing duplicate or incorrect staking reward data to be returned for queries in that range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64bef627-74c5-4761-a66d-c055e5972d2e?mode=deep",
+    "timestamp": "2026-05-01 15:18:11.128471",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that is in a partition whose `timestampRange` has a null lower or upper bound, causing `partition.getTimestampRange().contains()` to throw a NullPointerException that propagates as an `ImporterException`, aborting the record file processing and leaving staking reward transactions in that file permanently unindexed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1905108-64a6-4f34-a229-b9d738f17ed8?mode=deep",
+    "timestamp": "2026-05-01 15:18:23.776181",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/entity/topic/TopicMessageLookupEntityListener.java -> Scope: Medium: Theft of unpaid staking rewards'] [Function: onTopicMessage()] Can an unprivileged user submit a topic message with a consensus timestamp that causes `Instant.ofEpochSecond(0, topicMessage.getConsensusTimestamp())` to produce an `Instant` in a different timezone-adjusted day than expected, so that the computed `fromSeconds` maps to a different staking period partition, and the lookup entry is written to the wrong partition, causing staking reward queries for the correct period to return no results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdf4c9f9-ad10-44aa-926d-44762dc20c57?mode=deep",
+    "timestamp": "2026-05-01 15:18:37.645866",
+    "report_generated": false
+  }
+]
