@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleById()] Can an unprivileged external user query any arbitrary scheduleId via GET /schedules/:scheduleId without any authentication check, retrieve the full transaction_body and all collected signatures, and use that information to determine exactly which signers have not yet signed, enabling targeted social-engineering or replay attacks to push the schedule to execution without legitimate owner approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56aa14fc-bbe0-4b89-b104-ec93266f4c17?mode=deep",
+    "timestamp": "2026-05-01 22:55:13.416595",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleById()] Can an unprivileged external user enumerate all schedule IDs by iterating numeric scheduleId values in GET /schedules/:scheduleId, with no rate-limiting or auth check visible in the handler, and discover pending scheduled transactions that lack required signer approvals, then exploit that knowledge to front-run or interfere with the approval process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6899f734-0fdb-4f62-91d6-2c30250cc4b0?mode=deep",
+    "timestamp": "2026-05-01 22:55:25.490087",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user receive the full base64-encoded transaction_body via utils.encodeBase64(row.transaction_body) in the API response, decode it to reconstruct the exact scheduled transaction payload, and use that payload to craft a duplicate or replayed transaction submission that bypasses the normal signer-approval flow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0c37eeb-e536-436e-b694-db7866b0871a?mode=deep",
+    "timestamp": "2026-05-01 22:55:38.071017",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the fact that formatScheduleRow() exposes public_key_prefix for every collected signature via encode(ts.public_key_prefix, 'base64'), allowing the attacker to identify which specific public keys have signed, map those to known accounts, and determine the minimum remaining signatures needed to authorize the transaction without any of those owners' consent?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b09147d7-5bb3-42af-9fb8-107ca3ccc705?mode=deep",
+    "timestamp": "2026-05-01 22:55:51.019581",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user receive the admin_key field via utils.encodeKey(row.key) in the formatted response, and use the exposed key material to understand the schedule's authorization structure, enabling targeted attacks against the remaining required signers to force unauthorized execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a1a01b07-fbf0-48a8-85ec-b1cb5135d08c?mode=deep",
+    "timestamp": "2026-05-01 22:56:04.139594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: mergeScheduleEntities()] Can an unprivileged external user trigger a condition where the signatureMap reduce() overwrites a prior entry when multiple signatures share the same entity_id, causing the API to silently drop valid signer approvals from the response, making a schedule appear to have fewer authorizations than it actually does and misleading downstream consumers about the true approval state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cab18c7-67af-40f9-9ac1-ba82cbb40d6a?mode=deep",
+    "timestamp": "2026-05-01 22:56:17.218106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: mergeScheduleEntities()] Can an unprivileged external user exploit the fact that mergeScheduleEntities() uses the nullish coalescing operator (??) so that if signatureMap[schedule.schedule_id] is undefined (no signatures found), the schedule object is merged with an empty object, causing the signatures field to be absent entirely from the merged result and hiding the true authorization state of the schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4de28fd2-5f69-46bf-9b13-acca9c354d27?mode=deep",
+    "timestamp": "2026-05-01 22:56:29.897568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the LONGER_SCHEDULE_CACHE_CONTROL_HEADER (public, max-age=3600) being set when hasExecuted is true, causing a CDN or proxy to cache a schedule response showing it as executed for up to one hour, while in reality the schedule was deleted and re-created, leading downstream systems to incorrectly believe the transaction was authorized and executed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bd9b391-7de4-4992-9976-1bbad4c16778?mode=deep",
+    "timestamp": "2026-05-01 22:56:43.123322",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the hasAutoExpired logic that uses nowInNs() >= consensusTimestamp + THIRTY_ONE_MINUTES * NANOS_PER_SECOND to trigger the long cache header prematurely by querying a schedule just after the 31-minute window, causing the response to be cached as 'expired/authorized' for 3600 seconds even if the schedule is still pending signer approvals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d33e8b4-151a-4e13-8f21-d148e0d332f5?mode=deep",
+    "timestamp": "2026-05-01 22:56:56.204274",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the hasExpired check (expirationTime !== null && nowNs >= expirationTime + SIXTY_SECONDS * NANOS_PER_SECOND) where the 60-second grace window means a schedule that just expired is served with a long cache header, causing consumers to treat it as finalized/authorized when it may have expired without collecting all required signatures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f5de05c-906c-401d-8cd5-5ea3e0709c00?mode=deep",
+    "timestamp": "2026-05-01 22:57:08.853249",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleByIdQuery] Can an unprivileged external user exploit the LEFT JOIN on transaction_signature (left join transaction_signature ts on ts.entity_id = s.schedule_id) so that a schedule with zero collected signatures still returns a valid row with an empty signatures array, and the API response gives no indication that no signers have approved, allowing the attacker to present this response to a third party as proof of a 'valid' schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c57574c-cef2-4150-be78-86c2e61e1b6d?mode=deep",
+    "timestamp": "2026-05-01 22:57:22.203922",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleByIdQuery] Can an unprivileged external user observe that the getScheduleByIdQuery does not filter or validate the number of signatures against the schedule's required threshold, meaning the API returns a schedule as a normal result regardless of whether 0 or N signers have approved, providing no signal to consumers about whether the transaction is authorized?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1954889e-615b-4068-bc75-e4e20cd78f2c?mode=deep",
+    "timestamp": "2026-05-01 22:57:35.610502",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the signature filter (.filter((signature) => signature.consensus_timestamp !== null)) to cause signatures with null consensus_timestamp to be silently dropped from the response, hiding the fact that certain signers have submitted approvals that are not yet finalized, and making the schedule appear to have fewer authorizations than it truly has?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_acc4ef45-5da4-47e7-ad13-1219f582f802?mode=deep",
+    "timestamp": "2026-05-01 22:57:49.117912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSchedules()] Can an unprivileged external user call GET /schedules with account.id filter mapped to creator_account_id only (via filterColumnMap), enumerate all schedules created by a specific account, and identify pending scheduled transactions that are close to execution threshold, then time an attack to interfere with the final signer approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c87b2d33-5659-44fb-9c0d-06f87b7dcf65?mode=deep",
+    "timestamp": "2026-05-01 22:58:03.249834",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply a very large limit parameter to extractSqlFromScheduleFilters() to retrieve a massive number of schedule records in a single response, exposing bulk transaction_body and signature data for all pending schedules, enabling mass analysis of which scheduled transactions are close to unauthorized execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_baaec032-d100-4fbf-9a4a-158c1e791bb0?mode=deep",
+    "timestamp": "2026-05-01 22:58:16.259801",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSchedules()] Can an unprivileged external user use the schedule.id filter in GET /schedules to enumerate schedules in ascending or descending order, systematically harvesting all pending scheduled transactions and their partial signature sets, to identify which ones can be pushed to execution with the fewest additional unauthorized signatures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7da34594-e4c6-4bb8-ae0a-23f122f385a3?mode=deep",
+    "timestamp": "2026-05-01 22:58:30.709789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user receive the wait_for_expiry boolean field in the API response and use it to identify schedules where wait_for_expiry is false, meaning those schedules execute as soon as the signature threshold is met without waiting for expiry, making them higher-priority targets for signature-injection attacks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa04bfec-e0a6-4fe6-b3d8-1b068edec108?mode=deep",
+    "timestamp": "2026-05-01 22:58:43.195702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleByIdQuery] Can an unprivileged external user exploit the json_agg with 'order by ts.consensus_timestamp' in transactionSignatureJsonAgg to observe the chronological order in which signers approved a schedule, enabling the attacker to predict the pattern of remaining approvals and time a malicious signature submission to coincide with the final legitimate approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbda2984-2bfc-4bf2-a634-28bb85bccf63?mode=deep",
+    "timestamp": "2026-05-01 22:58:56.381639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleById()] Can an unprivileged external user call GET /schedules/:scheduleId with no authentication, receive the payer_account_id in the response, and use that information to identify the account that will pay for the scheduled transaction, enabling targeted attacks against the payer to drain funds or block the transaction from executing with proper authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e4d8228-0da0-4d28-89e8-3795a809d89a?mode=deep",
+    "timestamp": "2026-05-01 22:59:10.078685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSchedules()] Can an unprivileged external user exploit the fact that filterColumnMap maps account.id to creator_account_id but NOT to payer_account_id, meaning filtering by account.id does not return schedules where the target account is the payer, creating a blind spot that allows an attacker to enumerate schedules by creator while missing payer-controlled schedules that may have different authorization requirements?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6ab3da2-3251-48d6-808a-545041cc33f0?mode=deep",
+    "timestamp": "2026-05-01 22:59:22.646836",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: formatScheduleRow()] Can an unprivileged external user decode the base64 transaction_body returned by utils.encodeBase64(row.transaction_body) to extract the exact transaction type, amounts, and recipient accounts of a pending scheduled transaction, and use that information to front-run the transaction or manipulate the recipient account state before the scheduled transaction executes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d449536-0ea5-497b-8c03-8745d502e9d8?mode=deep",
+    "timestamp": "2026-05-01 22:59:35.682903",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getScheduleByIdQuery] Can an unprivileged external user exploit the fact that the getScheduleByIdQuery joins entity table via LEFT JOIN (left join entity e on e.id = s.schedule_id) and the entity.key field is returned as admin_key, meaning if the entity row is missing the admin_key is null, and the attacker can use this null admin_key signal to identify schedules with no administrative key protection, making them easier targets for unauthorized execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9364a9c7-2975-44a5-8234-b81617e563ed?mode=deep",
+    "timestamp": "2026-05-01 22:59:48.744770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSchedules()] Can an unprivileged external user use pagination via the next link (which embeds the last schedule_id as a cursor) to systematically walk through all schedules in the system, harvesting schedule IDs and transaction bodies at scale without any authentication, enabling a comprehensive map of all pending authorized transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74f92fb6-6f3a-4012-a572-60332d84bdc4?mode=deep",
+    "timestamp": "2026-05-01 23:00:01.322029",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: mergeScheduleEntities()] Can an unprivileged external user trigger a race condition between the two parallel pool.queryQuietly calls (entityQuery and signatureQuery via Promise.all) where a new signature is inserted between the two queries, causing the merged result to show an inconsistent state where the entity data and signature data are from different points in time, misrepresenting the true authorization state of the schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4cb409af-1be3-4033-881e-d8dc8aba4826?mode=deep",
+    "timestamp": "2026-05-01 23:00:14.340805",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: getSchedules()] Can an unprivileged external user exploit the fact that the signatureQuery in getSchedules() uses json_agg without filtering null consensus_timestamps (unlike formatScheduleRow which does filter), causing the list endpoint to return different signature counts than the single-schedule endpoint for the same schedule, creating an inconsistency that could be exploited to confuse authorization state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a8f5e815-7b17-4e90-8ecc-cd9a9bfa0bbc?mode=deep",
+    "timestamp": "2026-05-01 23:00:27.536261",
+    "report_generated": false
+  }
+]
