@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user repeatedly call the public /api/v1/network/supply endpoint to trigger the unbounded aggregation query (sum(e.balance), max(e.balance_timestamp)) over the entire entity table with no result caching in EntityRepository, causing sustained DB CPU and I/O consumption exceeding 30% above baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37623e12-58ae-467e-993b-276e8fb54d11?mode=deep",
+    "timestamp": "2026-05-01 15:10:50.549008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the absence of any @Cacheable annotation on getSupply() (unlike the web3 EntityRepository) to issue concurrent requests to /api/v1/network/supply, each independently executing the full entity-table aggregation join, multiplying DB load by the number of concurrent connections and raising node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74b9b462-848f-4863-90ab-a4048f9c1746?mode=deep",
+    "timestamp": "2026-05-01 15:11:02.775347",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user trigger the unnest(cast(string_to_array(:lowerBounds, ',') as bigint[]), cast(string_to_array(:upperBounds, ',') as bigint[])) join path by calling /api/v1/network/supply without a timestamp, causing the DB to perform a nested-loop join between the entity table and the unnested ranges array on every request, with no query result cache, leading to 30%+ CPU spike per sustained request burst?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_588b7261-5be1-4241-9656-48be516827e0?mode=deep",
+    "timestamp": "2026-05-01 15:11:16.037967",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user observe that the getSupply() native query performs a full aggregation (coalesce(sum(e.balance), 0)) with no LIMIT clause and no index hint, and by sending a moderate number of simultaneous /api/v1/network/supply requests cause the PostgreSQL planner to perform repeated sequential scans of the entity table, increasing I/O by 30%+ compared to the preceding 24 hours?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a04fd7f-5960-4f7e-969c-980f4b1e4deb?mode=deep",
+    "timestamp": "2026-05-01 15:11:28.591702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the fact that getSupply() executes a join between entity e and unnest(...) as ranges(min_val, max_val) on e.id between ranges.min_val and ranges.max_val, where the number of ranges is determined by server-side config but the query is re-executed on every call, to amplify DB join cost by issuing requests at a rate that keeps the DB executor threads saturated, raising node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7db2c9d8-0564-4fdf-8123-50c170206a66?mode=deep",
+    "timestamp": "2026-05-01 15:11:41.961360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByAlias()] Can an unprivileged external user craft API requests that resolve entity IDs via alias lookup, sending large or unusual byte[] alias values that force a sequential scan on the entity table (if no covering index exists on alias), repeatedly invoking findByAlias() and causing sustained DB I/O that raises node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fda93d10-8d37-4e90-ab4f-446524db6c38?mode=deep",
+    "timestamp": "2026-05-01 15:11:56.494784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByAlias()] Can an unprivileged external user exploit the deleted <> true predicate in findByAlias() — which excludes NULL values differently from deleted IS NOT TRUE — to cause the DB to use a less-efficient query plan (e.g., avoiding a partial index that filters on deleted IS NOT TRUE), resulting in more expensive scans per call and 30%+ increased resource consumption under moderate request volume?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_167dc386-68f5-41ac-8afc-4f7761211312?mode=deep",
+    "timestamp": "2026-05-01 15:12:10.517638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByEvmAddress()] Can an unprivileged external user craft API requests that trigger findByEvmAddress() with 20-byte EVM address inputs that do not match any entity, forcing the DB to scan the evm_address index to exhaustion on every miss, and by issuing a sustained stream of such miss-inducing requests raise node DB CPU by 30%+ without brute force?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_523f97de-5a47-44ce-9c85-1a073995cdc0?mode=deep",
+    "timestamp": "2026-05-01 15:12:25.384058",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByEvmAddress()] Can an unprivileged external user exploit the deleted <> true condition in findByEvmAddress() — which does not match rows where deleted IS NULL — to cause the query planner to avoid a partial index on (evm_address) WHERE deleted IS NOT TRUE, resulting in a costlier full-index scan per request and 30%+ elevated resource consumption under moderate load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db518585-d1b1-468b-bb1b-9012ded24fa6?mode=deep",
+    "timestamp": "2026-05-01 15:12:40.930757",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByAlias()] Can an unprivileged external user send requests with alias byte arrays of maximum allowed length to findByAlias(), where the alias column stores variable-length binary data, causing the DB to perform expensive byte-by-byte comparisons across many rows and increasing CPU usage by 30%+ compared to baseline when sustained over time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcc165cc-861f-4232-b84d-85920912b614?mode=deep",
+    "timestamp": "2026-05-01 15:12:55.174830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user observe that the getSupply() query computes coalesce(max(e.balance_timestamp), 0) across all matched entity rows with no early termination, and by sending a steady stream of /api/v1/network/supply requests keep the DB aggregation executor busy enough to raise node CPU by 30%+ above the 24-hour baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32fe65fa-ae9f-4130-8510-fd88ec751c60?mode=deep",
+    "timestamp": "2026-05-01 15:13:08.307028",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the absence of HTTP-level rate limiting on /api/v1/network/supply to issue requests at a rate just below any connection-level throttle, where each request triggers the full entity-table aggregation in getSupply(), cumulatively increasing DB resource consumption by 30%+ over the preceding 24-hour average?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7437fe1a-3ebd-473b-b8f4-e2754fa439e5?mode=deep",
+    "timestamp": "2026-05-01 15:13:21.616741",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user trigger the getSupply() query path by calling /api/v1/network/supply with no timestamp parameter, where the query joins entity e with unnest of multiple bigint ranges and computes sum(e.balance), and by pipelining many such requests over a single HTTP/2 connection avoid per-connection throttling while still saturating DB threads, raising resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a425e34-3ad1-40af-8262-ecc5b083d1b6?mode=deep",
+    "timestamp": "2026-05-01 15:13:35.031820",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the fact that the getSupply() native query has no query timeout configured at the repository layer, allowing a single slow execution (e.g., during DB maintenance or high table bloat) to hold a DB connection open indefinitely, and by issuing multiple such requests exhaust the connection pool and raise node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_17b6b80e-5094-4952-8970-ea8599e42e9a?mode=deep",
+    "timestamp": "2026-05-01 15:13:48.699472",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the string_to_array(:lowerBounds, ',') call inside getSupply() — where lowerBounds is a comma-separated string of bigint IDs — by observing that if the server-side config produces a very long bounds string (many AccountRange entries), each call to getSupply() forces PostgreSQL to allocate and process a large bigint array, increasing memory pressure and CPU by 30%+ under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f51cb8ad-c4b4-4427-a7bf-a7c113528bf2?mode=deep",
+    "timestamp": "2026-05-01 15:14:03.124366",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user send requests to /api/v1/network/supply that cause getSupply() to execute the unnest join against a large entity table, where the between ranges.min_val and ranges.max_val predicate forces a range scan for each unnested pair, and by timing requests to coincide with peak entity table growth amplify the scan cost to exceed 30% above the 24-hour resource baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4dda3e8b-b468-4d58-803a-2bf6791af6d8?mode=deep",
+    "timestamp": "2026-05-01 15:14:17.745801",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByAlias()] Can an unprivileged external user exploit the nativeQuery = true nature of findByAlias() — which bypasses JPA second-level cache — to ensure every alias lookup hits the DB directly, and by issuing a sustained stream of alias-based entity resolution requests raise DB CPU by 30%+ compared to the preceding 24-hour average?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e04c60a1-1345-4d7a-8f43-28f427187894?mode=deep",
+    "timestamp": "2026-05-01 15:14:34.138456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByEvmAddress()] Can an unprivileged external user exploit the nativeQuery = true nature of findByEvmAddress() — which bypasses JPA second-level cache — to ensure every EVM address lookup hits the DB directly, and by issuing a sustained stream of EVM-address-based entity resolution requests raise DB CPU by 30%+ compared to the preceding 24-hour average?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f45f031-4b97-426e-a357-9dccb15483cf?mode=deep",
+    "timestamp": "2026-05-01 15:14:47.033225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the cast(coalesce(sum(e.balance), 0) as bigint) aggregation in getSupply() — which must read the balance column for every entity row in the matched ranges — to cause repeated full-column reads from the entity table, increasing disk I/O and buffer cache pressure by 30%+ when called concurrently?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d867382-bf9f-4a48-a213-9cc7041f458f?mode=deep",
+    "timestamp": "2026-05-01 15:15:01.781389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user trigger repeated calls to getSupply() via /api/v1/network/supply to cause PostgreSQL to repeatedly parse and plan the native query (since it uses named parameters :lowerBounds/:upperBounds rather than positional ?1 parameters, potentially affecting prepared statement caching), increasing query planning overhead and raising node CPU by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b40ae621-b530-498f-b51a-d55945b6f112?mode=deep",
+    "timestamp": "2026-05-01 15:15:17.101493",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByAlias()] Can an unprivileged external user send alias byte arrays that are all-zeros or all-ones (boundary values) to findByAlias(), causing the DB to scan the entire alias index from one end to the other before returning empty, and by repeating this with different boundary patterns keep the index scan executor busy enough to raise node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e9658a70-c70a-480e-8131-6def048b42ae?mode=deep",
+    "timestamp": "2026-05-01 15:15:33.034668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: findByEvmAddress()] Can an unprivileged external user send EVM address byte arrays that are all-zeros or all-ones (boundary values) to findByEvmAddress(), causing the DB to scan the entire evm_address index from one end to the other before returning empty, and by repeating this with different boundary patterns keep the index scan executor busy enough to raise node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b701494-0722-4bb3-b6d7-9d79d65820e3?mode=deep",
+    "timestamp": "2026-05-01 15:15:48.175827",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the fact that getSupply() is called from NetworkServiceImpl.getSupply() only when timestamp.isEmpty() is true, and by sending /api/v1/network/supply requests without any timestamp parameter ensure the most expensive code path (full entity table aggregation) is always taken, raising node resource consumption by 30%+ compared to the 24-hour baseline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_818a5198-ab87-4733-b1be-f2cda3c4d946?mode=deep",
+    "timestamp": "2026-05-01 15:16:02.368808",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the absence of a LIMIT or TOP clause in the getSupply() aggregation query to ensure that as the entity table grows over time, each call to getSupply() becomes progressively more expensive, and by maintaining a constant request rate cause resource consumption to exceed 30% above the 24-hour baseline as the table size increases?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1d6d2df0-51e6-4cd3-b613-53f7510dc67f?mode=deep",
+    "timestamp": "2026-05-01 15:16:17.146362",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/EntityRepository.java -> Scope: Medium: Increasing network processing node resource consumption by at least 30% without brute force actions, compared to the preceding 24 hours'] [Function: getSupply()] Can an unprivileged external user exploit the join between entity e and unnest(...) as ranges(min_val, max_val) on e.id between ranges.min_val and ranges.max_val in getSupply() — where the unnest produces multiple range pairs — to cause PostgreSQL to perform a bitmap index scan or sequential scan for each range pair, multiplying I/O cost by the number of ranges and raising node resource consumption by 30%+?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cca96bd2-5a3e-4129-a838-4b0d1926be59?mode=deep",
+    "timestamp": "2026-05-01 15:16:30.695524",
+    "report_generated": false
+  }
+]
