@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: newBlockchainOnlineRouter()] Can an unprivileged external user submit a crafted /construction/submit request that bypasses the `isSupportedTransactionType()` check by encoding a non-`TransferTransaction`/`AccountCreateTransaction` type in the hex payload, causing the Hiero SDK to execute an unintended transaction type that drains funds from the payer account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc7a2976-45f7-40a9-9df8-44e4e33e2adf?mode=deep",
+    "timestamp": "2026-05-01 19:58:59.750018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionCombine()] Can an unprivileged external user supply a `Signatures` array where `signature.Bytes` is a valid Ed25519 signature over an attacker-controlled `frozenBodyBytes` (not the original transaction body), bypassing the `ed25519.Verify(pubKey.Bytes(), frozenBodyBytes, signature.Bytes)` check by also controlling the `UnsignedTransaction` hex, causing a fraudulent transfer transaction to be submitted and funds lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fa2e841-d720-446e-87e3-dec481989361?mode=deep",
+    "timestamp": "2026-05-01 19:59:11.631992",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: getSdkPayerAccountId()] Can an unprivileged external user inject a crafted `account_map` metadata string (e.g., `victimAlias:0.0.attacker,victimAlias:0.0.victim`) into the /construction/payloads request, exploiting the `strings.HasPrefix(aliasMap, payerAlias)` prefix match in `getSdkPayerAccountId()` to substitute the payer account ID with an attacker-controlled account, causing the transaction to be signed and submitted on behalf of the wrong payer and resulting in direct fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c94cd811-c072-4d78-a9b3-4bf17d453121?mode=deep",
+    "timestamp": "2026-05-01 19:59:24.014378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user craft a /construction/payloads request with a `metadata[metadataKeyAccountMap]` value containing a colon-delimited string where `mapping[1]` (after `strings.Split(aliasMap, ':')`) resolves to an arbitrary account ID, bypassing the alias-to-account mapping validation and redirecting the transaction payer to a victim account, leading to unauthorized fund deduction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7bf820b6-2860-4102-bb29-87d716a5a22a?mode=deep",
+    "timestamp": "2026-05-01 19:59:37.761667",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionSubmit()] Can an unprivileged external user replay a previously observed signed transaction hex string at /construction/submit, given that the Rosetta server performs no replay-protection check beyond what the Hiero network enforces, and if the `valid_start_nanos` window has not expired, cause duplicate fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e6a40a95-d0b4-4eb3-8167-b2e1512b82f0?mode=deep",
+    "timestamp": "2026-05-01 19:59:50.777794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: getTransactionTimestampProperty()] Can an unprivileged external user supply a `valid_until_nanos` metadata value far in the future (e.g., `maxInt64`) to `getTransactionTimestampProperty()`, causing `validStartNanos = validUntil - maxValidDurationNanos` to produce a valid but far-future transaction start time, extending the window during which a stolen signed transaction can be replayed and funds drained?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da56e3e7-6cad-46f7-90e7-ea926a1331b3?mode=deep",
+    "timestamp": "2026-05-01 20:00:04.124303",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionMetadata()] Can an unprivileged external user call /construction/metadata with a crafted `options` map that injects arbitrary key-value pairs via `maps.Clone(request.Options)` into the returned metadata, causing a downstream /construction/payloads call to consume attacker-controlled `node_account_id` or `valid_until_nanos` values and redirect or delay fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70bc2ae2-8c12-407b-ae90-6346ab856998?mode=deep",
+    "timestamp": "2026-05-01 20:00:18.278649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: getRandomNodeAccountId()] Can an unprivileged external user, by repeatedly calling /construction/metadata to observe the returned `node_account_id` values, enumerate all available node account IDs from `c.sdkClient.GetNetwork()` and then supply a specific `node_account_id` in /construction/payloads metadata to force transaction routing to a specific node, enabling targeted transaction manipulation or censorship that results in fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d4c87b3-6540-4e97-b2b4-75a044a3d9bd?mode=deep",
+    "timestamp": "2026-05-01 20:00:32.060055",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user supply a `metadata[metadataKeyNodeAccountId]` string that passes `hiero.AccountIDFromString()` but refers to a non-existent or malicious node account, causing `transactionSetNodeAccountId()` to embed an invalid node in the frozen transaction, making the transaction unroutable and causing the payer's funds to be locked or lost upon submission?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c661e45-2d83-409c-b4e4-2bd77bf2175d?mode=deep",
+    "timestamp": "2026-05-01 20:00:46.244999",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: cryptoTransferTransactionConstructor.preprocess()] Can an unprivileged external user craft operations where multiple entries for the same account cancel out in the `totalAmounts` map (e.g., +100 and -100 for account A, and -100 for account B with +100 for account C), satisfying the zero-sum check `totalAmount != 0` while constructing a net transfer that drains account B without B's consent, if B's key is later supplied in the combine step?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70aa53ed-5e85-4da7-9940-76fc609aab6b?mode=deep",
+    "timestamp": "2026-05-01 20:00:59.952352",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionCombine()] Can an unprivileged external user submit a /construction/combine request with a `UnsignedTransaction` hex that encodes a `TransferTransaction` with attacker-chosen recipient and amount, paired with a valid signature from a key the attacker controls, and then submit it via /construction/submit, causing direct fund transfer from the signing account to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae39fd15-cf2a-48a7-a7bf-458b842499d5?mode=deep",
+    "timestamp": "2026-05-01 20:01:14.752534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: newBlockchainOnlineRouter()] Can an unprivileged external user exploit the `server.CorsMiddleware(tracingMiddleware)` CORS configuration (which uses the coinbase rosetta-sdk-go default CORS policy) to perform a cross-origin request from a malicious website that tricks a victim's browser into calling /construction/submit with a pre-built signed transaction, causing fund loss without the victim's direct action?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0c30f2f-d9a8-4719-bdc1-73fd4638f333?mode=deep",
+    "timestamp": "2026-05-01 20:01:28.823396",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionDerive()] Can an unprivileged external user supply a crafted `PublicKey.Bytes` to /construction/derive that passes the `rTypes.Edwards25519` curve type check but produces an account ID via `types.NewAccountIdFromPublicKeyBytes()` that collides with or is indistinguishable from a victim's account ID, causing the attacker to derive and use the victim's account identifier in subsequent construction calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_307b2858-bdb4-4a56-a1d5-7cedf5213fd7?mode=deep",
+    "timestamp": "2026-05-01 20:01:42.948039",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: resolveAccountAliases()] Can an unprivileged external user supply a comma-separated `account_aliases` option string with a crafted alias that, after `types.NewAccountIdFromString()` parsing, resolves to a different account than intended due to shard/realm defaulting (`c.systemShard`, `c.systemRealm`), causing `accountRepo.GetAccountId()` to return a victim's numeric account ID and embedding it in the `account_map` metadata used for payer resolution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00bf279e-d2da-4e2e-a3d8-22a3c2811915?mode=deep",
+    "timestamp": "2026-05-01 20:01:56.752626",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user set `validStartNanos = 0` in the metadata (omitting `valid_start_nanos` and `valid_until_nanos`), causing `transactionSetTransactionId()` to call `hiero.TransactionIDGenerate(payer)` with a server-generated timestamp, and then race-submit the transaction before the legitimate user can, front-running a fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_88183d72-a8aa-4008-b17f-36df303c7623?mode=deep",
+    "timestamp": "2026-05-01 20:02:10.920930",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: getFrozenTransactionBodyBytes()] Can an unprivileged external user supply a `UnsignedTransaction` hex where `hiero.TransactionString(transaction)` produces a prototext that, when unmarshalled into `services.SignedTransaction{}`, yields `BodyBytes` that differ from the actual transaction body (due to prototext round-trip inconsistency), causing `ed25519.Verify()` in `ConstructionCombine()` to verify a signature over different bytes than what gets executed, enabling signature confusion and unauthorized fund transfer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e49b3099-8571-41d4-9956-d3dd1f4761e1?mode=deep",
+    "timestamp": "2026-05-01 20:02:25.311556",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionSubmit()] Can an unprivileged external user call /construction/submit with a hex-encoded `SignedTransaction` that contains a `TransferTransaction` with a zero-value `valid_duration`, bypassing `isValidTransactionValidDuration()` (which only runs at payloads time, not submit time), causing the Hiero network to reject the transaction after fees are deducted from the payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b9175c49-1589-48e4-a36c-55aff21c90e3?mode=deep",
+    "timestamp": "2026-05-01 20:02:39.053573",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: newBlockchainOfflineRouter()] Can an unprivileged external user exploit the offline mode router (constructed with `nil` accountRepo in `NewConstructionAPIService`) to call /construction/payloads and build a transaction with an arbitrary payer account ID (since alias resolution is skipped in offline mode per `ErrEndpointNotSupportedInOfflineMode`), then submit the signed transaction via an online node, causing fund loss from the spoofed payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_953dbcff-bbc5-4893-9a72-665d1913baa7?mode=deep",
+    "timestamp": "2026-05-01 20:02:52.880482",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: cryptoCreateTransactionConstructor.Construct()] Can an unprivileged external user craft a `cryptoCreate` operation with a negative `InitialBalance` (derived from `cryptoCreate.InitialBalance = -amount.GetValue()` where `amount.GetValue()` is positive), causing `hiero.HbarFromTinybar(cryptoCreate.InitialBalance)` to create an account with a negative initial balance, potentially exploiting SDK behavior to credit the attacker's account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6045bc25-f41e-41ff-bc34-a40a23294341?mode=deep",
+    "timestamp": "2026-05-01 20:03:06.739456",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionPayloads()] Can an unprivileged external user supply a `metadata[metadataKeyAccountMap]` string with a colon in the alias portion (e.g., `0.0.alias:extra:0.0.victim`), causing `strings.Split(aliasMap, ':')` to produce `mapping[1] = 'extra'` instead of the intended account ID, and then `hiero.AccountIDFromString('extra')` to fail silently or return a zero account, leading to incorrect payer assignment and potential fund loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6afa0203-f275-4125-99f6-451686a56a6d?mode=deep",
+    "timestamp": "2026-05-01 20:03:21.822528",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: transactionSetTransactionId()] Can an unprivileged external user supply a `valid_start_nanos` value of `1` (minimum positive int64) to `getTransactionTimestampProperty()`, causing `transactionSetTransactionId()` to create a transaction with a start time in the distant past (Unix epoch + 1 nanosecond), which the Hiero network may reject after fees are deducted, resulting in fee loss for the payer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_79df0a1b-d0b1-40d3-b0fd-c7bcb4877716?mode=deep",
+    "timestamp": "2026-05-01 20:03:37.515986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionCombine()] Can an unprivileged external user submit multiple signatures in the `request.Signatures` array for the same public key, causing `hiero.TransactionAddSignature()` to add duplicate signatures to the transaction, and if the SDK does not deduplicate, potentially causing the transaction to exceed signature limits and be rejected after fees are deducted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_587129a1-2891-409b-8c96-ca4f55f3b67d?mode=deep",
+    "timestamp": "2026-05-01 20:03:50.845572",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: newBlockchainOnlineRouter()] Can an unprivileged external user send a flood of /construction/submit requests with valid but duplicate signed transactions to exhaust the `sdkClient` connection pool (since `sdkClient.SetMaxAttempts(1)` disables retries but does not limit concurrency), causing legitimate transactions to fail and funds to be locked in pending state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20c51cb5-c8f0-47aa-be61-f6d28a9e5b00?mode=deep",
+    "timestamp": "2026-05-01 20:04:04.803119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionMetadata()] Can an unprivileged external user call /construction/metadata with `options[optionKeyOperationType]` set to an unsupported operation type, causing `c.transactionHandler.GetDefaultMaxTransactionFee()` to return an error, and then observe the error response to enumerate supported operation types for use in a targeted fund-draining attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d46ed92-bf8f-4689-8532-dba98c8dedea?mode=deep",
+    "timestamp": "2026-05-01 20:04:18.243378",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/main.go -> Scope: Critical: Direct loss of funds'] [Function: ConstructionHash()] Can an unprivileged external user call /construction/hash with a crafted `SignedTransaction` hex that passes `unmarshallTransactionFromHexString()` and `isSupportedTransactionType()` but contains a manipulated transaction body, causing `hiero.TransactionGetTransactionHash()` to return a hash that does not match the actual submitted transaction, enabling the attacker to present a false transaction ID to a victim while a different transaction executes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64fdf5fd-6665-4e24-a725-908f0b843f03?mode=deep",
+    "timestamp": "2026-05-01 20:04:32.382464",
+    "report_generated": false
+  }
+]
