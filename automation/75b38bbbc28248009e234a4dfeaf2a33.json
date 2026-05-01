@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDbPoolConfig()] Can an unprivileged external user cause a network partition by exploiting the absence of a maximum cap on `connectionTimeout` in `parseDbPoolConfig()`, setting it to `86400000` (24 hours) via environment variable, so that during a DB network partition, all 10 pool connections hang for 24 hours before timing out, making the REST API completely unresponsive for the entire partition duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07ae638f-c3b8-4b2b-99ab-1335a1bedc4f?mode=deep",
+    "timestamp": "2026-05-01 18:08:30.493691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadYaml()] Can an unprivileged external user cause a network partition by exploiting `loadYaml()` using `fs.readFileSync()` synchronously, where a YAML file at a network-mounted path becomes unavailable during a network partition, causing the synchronous read to block the Node.js event loop indefinitely and preventing any API requests from being processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a55cbe8e-305a-4326-9b10-4d95c4882cf8?mode=deep",
+    "timestamp": "2026-05-01 18:08:42.566400",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseQueryConfig()] Can an unprivileged external user cause a network partition by exploiting `parseQueryConfig()` not enforcing a maximum on `maxScheduledTransactionConsensusTimestampRange` (default 89285m ≈ 62 days), allowing it to be set to an arbitrarily large value that causes scheduled transaction queries to scan the entire DB history, holding connections for the full `statementTimeout` and exhausting the pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_532b4aff-cf0c-4392-841d-10b35f19c789?mode=deep",
+    "timestamp": "2026-05-01 18:08:54.805083",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: setConfigValue()] Can an unprivileged external user cause a network partition by exploiting `setConfigValue()` not sanitizing the `value` parameter before calling `convertType()`, where a value of `'__proto__'` or `'constructor'` passed through an environment variable corrupts the config object's prototype chain, causing `parseDbPoolConfig()` to read `undefined` for pool keys and crash the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a509ac87-b0bf-4267-ba7c-dbf83504846f?mode=deep",
+    "timestamp": "2026-05-01 18:09:07.442980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDbPoolConfig()] Can an unprivileged external user cause a network partition by exploiting the interaction between `parseDbPoolConfig()` setting `statementTimeout=20000` and the DB pool's `max=10`, where 10 concurrent requests each triggering a 20-second query hold all connections, and the `connectionTimeoutMillis=20000` causes the 11th request to also wait 20 seconds before failing, creating a 20-second rolling blackout window for all API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba09336a-06b7-4628-9ba7-23f81a3040aa?mode=deep",
+    "timestamp": "2026-05-01 18:09:19.703225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadEnvironment()] Can an unprivileged external user cause a network partition by exploiting `loadEnvironment()` processing environment variables in an undefined order (via `Object.entries(process.env)`), where two conflicting env vars `HIERO_MIRROR_REST_DB_POOL_CONNECTIONTIMEOUT` and `HEDERA_MIRROR_REST_DB_POOL_CONNECTIONTIMEOUT` are both set, causing non-deterministic config state that may set `connectionTimeout` to `1` on some process restarts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58fed47d-f196-4919-9b32-ba04b99ce9af?mode=deep",
+    "timestamp": "2026-05-01 18:09:32.542085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: convertType()] Can an unprivileged external user cause a network partition by exploiting `convertType()`'s `isNaN()` behavior where `isNaN(true)` returns `false` (since `Number(true) === 1`), causing a boolean `true` value in an env var for `HIERO_MIRROR_REST_DB_POOL_MAXCONNECTIONS` to be converted to `1` via `+true`, setting the pool to 1 connection and making any concurrent request cause a partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_764c0dba-fdfc-46e9-8a05-0af30a4dd1dc?mode=deep",
+    "timestamp": "2026-05-01 18:09:45.276592",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseQueryConfig()] Can an unprivileged external user cause a network partition by exploiting `parseQueryConfig()` computing `maxTimestampRangeNs` as a `BigInt` that is stored in the mutable `query` config object, where a race condition between config initialization and request handling causes a request to read `undefined` for `maxTimestampRangeNs`, bypassing the timestamp range check and issuing an unbounded DB query that holds a connection indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74b6134a-adda-4976-be14-f2ce4e0f5132?mode=deep",
+    "timestamp": "2026-05-01 18:09:58.122477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: load()] Can an unprivileged external user cause a network partition by exploiting `load()` checking `fs.existsSync()` before `loadYaml()`, where a TOCTOU race allows a symlink to be swapped between the existence check and the `fs.readFileSync()` call in `loadYaml()`, causing the config to be loaded from an attacker-controlled file that sets `maxConnections=1` and `connectionTimeout=2147483647`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd9f9655-9fee-49ff-be74-1789623c39cd?mode=deep",
+    "timestamp": "2026-05-01 18:10:11.768261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseUsersConfig()] Can an unprivileged external user cause a network partition by exploiting `parseUsersConfig()` not enforcing a maximum number of users in the array, allowing a config with thousands of user entries to cause `parseUsersConfig()` to perform O(n²) duplicate detection via `usernames.indexOf()`, blocking the Node.js event loop during startup and delaying service availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf9d04cf-6a5f-408a-a7b2-58be57424119?mode=deep",
+    "timestamp": "2026-05-01 18:10:24.170785",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDurationConfig()] Can an unprivileged external user cause a network partition by exploiting `parseDurationConfig()` where `parseDuration('0s')` returns `0` (falsy), causing `parseDurationConfig()` to throw `InvalidConfigError` for a zero-value `maxValidStartTimestampDrift`, crashing the service at startup and creating a permanent partition if an operator sets this value to `0` based on a misunderstanding of the design?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e3629b1c-3dbb-4f66-b37a-e64ed7a07095?mode=deep",
+    "timestamp": "2026-05-01 18:10:37.277988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: setConfigValue()] Can an unprivileged external user cause a network partition by exploiting `setConfigValue()` traversing the config object with `Object.entries(current)` where `current` becomes a non-object (e.g., a number or string) mid-traversal due to a prior config mutation, causing an uncaught `TypeError` that crashes the Node.js process and partitions the API from all clients?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56a75d37-bf66-441f-9a96-6756b5357208?mode=deep",
+    "timestamp": "2026-05-01 18:10:49.927239",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDbPoolConfig()] Can an unprivileged external user cause a network partition by exploiting the fact that `parseDbPoolConfig()` validates `connectionTimeout`, `maxConnections`, and `statementTimeout` but not `idleTimeoutMillis` or `keepAlive` settings, allowing a network partition to leave idle connections in a broken state that are never recycled, gradually reducing the effective pool size to zero?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e7d1f7e-f2df-4c51-812e-ee75e7cb558a?mode=deep",
+    "timestamp": "2026-05-01 18:11:02.457428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadYaml()] Can an unprivileged external user cause a network partition by exploiting `loadYaml()` using `yaml.load()` which supports YAML anchors and aliases, where a crafted YAML file with a billion-laughs-style anchor expansion causes `extend(true, config, doc)` to consume all available memory, crashing the Node.js process and partitioning the API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_09dea230-35f2-4b65-b149-052e39b9cd05?mode=deep",
+    "timestamp": "2026-05-01 18:11:14.850191",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseQueryConfig()] Can an unprivileged external user cause a network partition by exploiting `parseQueryConfig()` storing both the raw string (e.g., `maxTimestampRange: '7d'`) and the computed nanosecond BigInt (`maxTimestampRangeNs`) in the same mutable `query` object, where a concurrent request modifies `query.maxTimestampRange` to a new string value without updating `maxTimestampRangeNs`, causing the enforcement check to use a stale limit and allow unbounded DB queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e020acff-803a-40f8-9a3d-4c4108e64408?mode=deep",
+    "timestamp": "2026-05-01 18:11:28.224133",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getConfig()] Can an unprivileged external user cause a network partition by exploiting `getConfig()` returning `config.hiero?.mirror?.rest` which is a direct reference to the mutable config object, where a request handler that modifies a config property (e.g., `config.db.pool.maxConnections`) at runtime reduces the pool size, causing subsequent requests to be rejected and partitioning the API from the DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81d30046-b294-4d9a-a0cd-e7766cdfbf54?mode=deep",
+    "timestamp": "2026-05-01 18:11:41.053247",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadEnvironment()] Can an unprivileged external user cause a network partition by exploiting `loadEnvironment()` calling `setConfigValue()` for every environment variable without any filtering of sensitive system variables, where a system variable like `PATH` or `HOME` happens to match the case-insensitive config traversal and corrupts a config value, causing `parseDbPoolConfig()` to set an invalid pool configuration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f7614734-37fb-4117-b87d-16f7479def0b?mode=deep",
+    "timestamp": "2026-05-01 18:11:54.336117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDbPoolConfig()] Can an unprivileged external user cause a network partition by exploiting the interaction between `maxConnections=10` and `connectionTimeout=20000ms`, where an attacker sends exactly 10 requests that each sleep for 19 seconds (just under `statementTimeout`), holding all pool connections, and then sends a burst of requests that each wait the full 20-second `connectionTimeout` before failing, creating a sustained 40-second window of complete API unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fbb1e75-90cf-4ed2-bbac-aa30b7626861?mode=deep",
+    "timestamp": "2026-05-01 18:12:07.080139",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: setConfigValue()] Can an unprivileged external user cause a network partition by exploiting `setConfigValue()`'s `hedera`→`hiero` migration where the migration check `property === hederaPrefix` occurs inside the inner loop over `Object.entries(current)`, causing the migration to trigger multiple times for the same property segment and potentially overwriting a valid `hiero` config value with a deprecated `hedera` value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cf244b57-f83d-43c0-9050-36dee621ae83?mode=deep",
+    "timestamp": "2026-05-01 18:12:20.086889",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDurationConfig()] Can an unprivileged external user cause a network partition by exploiting `parseDurationConfig()` accepting `maxRecordFileCloseInterval` values much larger than the actual network close interval (design parameter: ~2s, default: 10s), where setting this to `86400s` via environment variable causes `recordFileService.js` to scan an entire day's worth of partitions per query, holding DB connections for the full `statementTimeout` and exhausting the pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b6b0ed4-5d91-46db-9674-2e8ce5694142?mode=deep",
+    "timestamp": "2026-05-01 18:12:32.905530",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseCommon()] Can an unprivileged external user cause a network partition by exploiting `parseCommon()` calling `BigInt(common.shard)` where `common.shard` is set to a non-integer string via environment variable (e.g., `HIERO_MIRROR_COMMON_SHARD=1.5`), causing `BigInt('1.5')` to throw a `SyntaxError` that is uncaught at the module level, crashing the REST service and creating a permanent partition?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ad8c65b5-1d09-4fee-b0c6-66dd453d5d6e?mode=deep",
+    "timestamp": "2026-05-01 18:12:46.274529",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: loadYaml()] Can an unprivileged external user cause a network partition by exploiting `loadYaml()` silently catching all errors (`logger.warn()` only), where a YAML parse error leaves the `config` object in a partially-merged state with `db.pool.connectionTimeout` set to `undefined`, which then passes `parseDbPoolConfig()`'s `parseInt(undefined, 10)` returning `NaN` and throwing `InvalidConfigError`, crashing the service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_571b8f46-d6bd-4480-b710-81dde03d1187?mode=deep",
+    "timestamp": "2026-05-01 18:12:59.851085",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseDbPoolConfig()] Can an unprivileged external user cause a network partition by exploiting the absence of a `keepAliveInitialDelayMillis` or `keepAlive` setting in the pool config validated by `parseDbPoolConfig()`, where a network partition causes TCP connections to remain in a half-open state indefinitely, consuming all `maxConnections` slots without the pool detecting the broken connections?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea32358e-96bf-4487-bd6a-b61f02c307c5?mode=deep",
+    "timestamp": "2026-05-01 18:13:12.884771",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: setConfigValue()] Can an unprivileged external user cause a network partition by exploiting `setConfigValue()` using `properties.length < 3` as the minimum length check, where an environment variable `HIERO_MIRROR_X` (length 3) passes the prefix check but then fails to find a matching config key, silently returning without error, while a similar variable `HIERO_MIRROR_REST_DB_POOL_CONNECTIONTIMEOUT=1` successfully sets the timeout to 1ms, causing immediate connection failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc22973a-c4ae-4d2d-9965-caedc0706100?mode=deep",
+    "timestamp": "2026-05-01 18:13:25.607892",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/config.js -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parseQueryConfig()] Can an unprivileged external user cause a network partition by exploiting `parseQueryConfig()` not validating `maxRepeatedQueryParameters` (default 100), allowing an attacker to send requests with 100 repeated timestamp parameters that each generate a complex SQL predicate, causing the DB to spend the full `statementTimeout` processing the query and holding a pool connection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3449bc10-ee83-433e-a272-8bd7a3eadee3?mode=deep",
+    "timestamp": "2026-05-01 18:13:38.712246",
+    "report_generated": false
+  }
+]
