@@ -298,5 +298,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4db20984-4dcd-4643-81da-798ab029b17f?mode=deep",
     "timestamp": "2026-05-01 17:27:48.994611",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user open an unbounded number of concurrent gRPC subscriptions, each spawning a new PollingContext and occupying a thread on the boundedElastic() scheduler, exhausting the scheduler's thread pool and causing all subsequent poll() calls to queue indefinitely, preventing any new topic messages from being delivered and halting transaction confirmation across the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0fc89394-8a36-49ad-869f-e8f57eee166a?mode=deep",
+    "timestamp": "2026-05-01 21:03:22.016818",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user craft a TopicMessageFilter with a startTime set to the minimum possible long value, causing last.getConsensusTimestamp() + 1 to overflow to Long.MIN_VALUE on the first poll cycle, resulting in the DB query scanning the entire topic_message table on every poll interval and exhausting database connection pool resources, effectively shutting down transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45cb6295-21ce-4228-bed5-a29baa6e7054?mode=deep",
+    "timestamp": "2026-05-01 21:03:34.113332",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user subscribe with limit=0 (hasLimit() returns false), causing poll() to always compute pageSize = Math.min(Integer.MAX_VALUE, maxPageSize) = 5000 and never terminate the RepeatSpec.times(Long.MAX_VALUE) loop, creating a permanent polling storm against the database that starves legitimate transaction processing queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40ca4774-5816-4183-992c-121679aecf01?mode=deep",
+    "timestamp": "2026-05-01 21:03:46.609754",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user submit thousands of subscriptions each with a very old startTime, causing each poll() invocation to call topicMessageRepository.findByFilter(newFilter) with a massive result set via Flux.fromStream(), holding open thousands of simultaneous database cursors/streams and exhausting the JDBC connection pool, preventing the importer from writing new transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b1973ba-d5d2-4dc8-8741-6c1a75d504e0?mode=deep",
+    "timestamp": "2026-05-01 21:03:59.523477",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the RepeatSpec.times(Long.MAX_VALUE).withFixedDelay(interval) loop by subscribing with a very small interval (if interval is configurable per-request or defaults to 500ms) to generate a high-frequency polling storm, saturating the boundedElastic() scheduler and blocking all other reactive pipelines from executing, causing a total network transaction confirmation halt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_990c23c5-225f-4309-b105-398874ed7df1?mode=deep",
+    "timestamp": "2026-05-01 21:04:13.482625",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user set limit to Long.MAX_VALUE in the TopicMessageFilter, causing the expression (int)(filter.getLimit() - context.getCount().get()) to produce a negative or overflowed int value when cast, resulting in Math.min() returning a negative pageSize that corrupts the newFilter and causes an unhandled exception in topicMessageRepository.findByFilter(), crashing the polling pipeline for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70cd96d3-c904-414a-9e57-f64649722ddd?mode=deep",
+    "timestamp": "2026-05-01 21:04:26.897331",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user open a large number of subscriptions without ever consuming messages (slow consumer / zero-demand subscriber), causing Flux.fromStream() in poll() to accumulate unbounded in-memory buffers on the boundedElastic() scheduler, leading to OutOfMemoryError that kills the JVM process and causes a total network shutdown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_365e620c-d14c-43e9-a1ee-c8dab860d92d?mode=deep",
+    "timestamp": "2026-05-01 21:04:39.589912",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user subscribe to a topic with an extremely old startTime (e.g., epoch 0), causing each poll() to return the full maxPageSize=5000 messages every interval, and since last.getConsensusTimestamp() + 1 only advances by one message per cycle, the subscriber never catches up, permanently saturating the DB with maximum-size queries and preventing other queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a985e56-6ecb-429f-9ac7-cb77ac601b7b?mode=deep",
+    "timestamp": "2026-05-01 21:04:52.746248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the Schedulers.boundedElastic() shared scheduler instance (shared across all PollingTopicListener instances) by opening enough subscriptions to fill all available threads, causing a thread starvation deadlock where poll() tasks are queued but never executed, halting all topic message delivery and transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb22c68c-c784-4f24-997f-9f362348b42e?mode=deep",
+    "timestamp": "2026-05-01 21:05:05.959402",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user craft a filter where filter.getLimit() equals exactly context.getCount().get() at the time of the cast to int, causing limit to be 0 and pageSize to be Math.min(0, maxPageSize) = 0, which when passed to topicMessageRepository.findByFilter() triggers an invalid SQL query or exception that propagates up and terminates the shared polling infrastructure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_525a9436-4072-46a6-a493-be06978c649a?mode=deep",
+    "timestamp": "2026-05-01 21:05:18.898060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user trigger a resource leak by subscribing and then immediately cancelling thousands of times in rapid succession, causing the Flux.defer(() -> poll(context)) to create and abandon PollingContext objects faster than GC can reclaim them, leading to heap exhaustion and JVM crash that shuts down the entire mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_86e627b9-a97f-4b5f-aa07-159eaa61a9f0?mode=deep",
+    "timestamp": "2026-05-01 21:05:32.792333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user exploit the Flux.fromStream() call by subscribing to a topic that has a very high message volume, causing the stream returned by topicMessageRepository.findByFilter() to never be closed if the subscriber cancels mid-stream, leaking a database cursor and eventually exhausting all available DB connections, preventing transaction writes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ffedbf5-1439-498c-8e3a-6c17ddefd44f?mode=deep",
+    "timestamp": "2026-05-01 21:05:47.935554",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user abuse the jitter(0.1) on RepeatSpec to cause timing collisions where many subscriptions' poll() calls fire simultaneously at the same DB timestamp window, creating a thundering herd that overwhelms the database with identical queries and causes connection timeouts for the importer's transaction ingestion pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5f756495-7033-4401-8805-ca69c3eeb08d?mode=deep",
+    "timestamp": "2026-05-01 21:06:02.537648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user set startTime to a value just before Long.MAX_VALUE, so that last.getConsensusTimestamp() + 1 overflows to Long.MIN_VALUE after the first message is received, causing subsequent poll() calls to query from the beginning of time and generate unbounded result sets that crash the DB or exhaust memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1ddc6bd-d159-42cb-8b28-1460edf511fd?mode=deep",
+    "timestamp": "2026-05-01 21:06:16.640648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the fact that each call to listen() creates a new independent Scheduler via Schedulers.boundedElastic() (or shares a global one) and a new PollingContext, and by opening thousands of subscriptions force the JVM to allocate thousands of AtomicLong and AtomicReference objects simultaneously, causing GC pressure that triggers stop-the-world pauses long enough to halt transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05ecabd9-9c7f-4945-b0af-8787e31e0026?mode=deep",
+    "timestamp": "2026-05-01 21:06:30.009109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user subscribe with a topicId that does not exist in the database, causing topicMessageRepository.findByFilter() to execute a full table scan on every poll interval (due to missing index on non-existent topic), and by opening thousands of such subscriptions saturate the DB CPU and I/O, preventing legitimate transaction confirmation queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b4e1116-fcb7-4611-9153-17369dc835ff?mode=deep",
+    "timestamp": "2026-05-01 21:06:42.753775",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the delaySubscription(interval, scheduler) combined with RepeatSpec.times(Long.MAX_VALUE) to create a scenario where cancellation of a subscription does not properly clean up the scheduled repeat task on the boundedElastic() scheduler, causing ghost polling tasks to accumulate and eventually exhaust scheduler capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bed6de1e-cd33-4318-9229-88187a9b7471?mode=deep",
+    "timestamp": "2026-05-01 21:06:55.737720",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user exploit the filter.toBuilder().limit(pageSize).startTime(startTime).build() reconstruction in poll() by providing a filter whose endTime is just barely after startTime, causing every poll() to return zero results but still execute a DB query, and by opening thousands of such subscriptions generate a constant stream of empty DB queries that saturate the connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5aa87afb-deb5-49e2-a0f4-b472aacd38d5?mode=deep",
+    "timestamp": "2026-05-01 21:07:09.293440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user cause a cascading failure by subscribing with a limit of 1 and a startTime far in the past, so that poll() immediately returns one message, count reaches limit, but the RepeatSpec loop continues indefinitely because there is no termination condition tied to limit exhaustion, causing infinite DB polling that degrades the entire system?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c58e32aa-94fb-4df4-92e1-890a729ae5a4?mode=deep",
+    "timestamp": "2026-05-01 21:07:22.415226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user exploit the integer cast (int)(filter.getLimit() - context.getCount().get()) when filter.getLimit() is a large long value (e.g., Integer.MAX_VALUE + 1L), causing the cast to produce a negative int, which then makes Math.min(negativeValue, maxPageSize) return the negative value, and passing a negative limit to findByFilter() triggers a SQL error that crashes the polling Flux for all active subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2cee4336-bd25-4289-a903-b8398e2b7608?mode=deep",
+    "timestamp": "2026-05-01 21:07:35.907324",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the shared Schedulers.boundedElastic() instance by submitting subscriptions that each block a scheduler thread (e.g., via a slow topicMessageRepository.findByFilter() call caused by a large result set), filling all available threads in the bounded pool and causing a deadlock where new poll() tasks cannot be scheduled, halting all transaction message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a5216aae-b432-4449-86f1-061d3dc9047c?mode=deep",
+    "timestamp": "2026-05-01 21:07:49.324267",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user trigger a memory exhaustion attack by subscribing to a high-volume topic with no limit and a very old startTime, causing Flux.fromStream() to load up to maxPageSize=5000 TopicMessage objects per poll cycle per subscription, and with thousands of concurrent subscriptions, allocating gigabytes of heap that triggers OutOfMemoryError and kills the mirror node process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fbacb7d3-0d9c-4a52-908b-1fa28dfdce9b?mode=deep",
+    "timestamp": "2026-05-01 21:08:03.748246",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the absence of a per-subscriber rate limit or connection limit in listen() to open an arbitrarily large number of subscriptions from a single IP or client, each independently polling the database every 500ms, creating a denial-of-service condition that prevents the database from processing new transaction ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a466f351-a0b7-414f-b6b2-74e067958947?mode=deep",
+    "timestamp": "2026-05-01 21:08:18.755568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: poll()] Can an unprivileged external user cause a livelock by subscribing with a startTime that is always equal to the current time minus one nanosecond, so that each poll() returns zero results (no messages in that window), the last AtomicReference is never updated, and the polling loop runs at maximum frequency consuming scheduler threads without making progress, starving other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_637f270c-9f62-4ca3-bd23-433d54ab2d4e?mode=deep",
+    "timestamp": "2026-05-01 21:08:33.159428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: listen()] Can an unprivileged external user exploit the Micrometer.observation(observationRegistry) tap in the Flux pipeline to cause metric cardinality explosion by subscribing with many unique topicId values, creating thousands of unique metric time series that exhaust the ObservationRegistry's memory and crash the monitoring subsystem, indirectly causing the mirror node to lose observability and fail to detect transaction confirmation failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d448cc1-ef72-4ce7-85a7-5168ae42fe6e?mode=deep",
+    "timestamp": "2026-05-01 21:08:48.958803",
+    "report_generated": false
   }
 ]
