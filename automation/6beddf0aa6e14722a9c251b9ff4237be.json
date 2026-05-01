@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b210ba8e-56d9-4f76-a3e2-84e111ca8585?mode=deep",
     "timestamp": "2026-05-01 17:49:01.785809",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user supply a timestamp Bound where getAdjustedLowerRangeValue() returns 0 (null lower) and adjustUpperBound() returns Long.MAX_VALUE (null upper) but timestamp.isEmpty() returns false, causing getSupplyHistory() to be called with an unbounded range instead of entityRepository.getSupply(), leading to incorrect supply data being exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a466a9e-4cc7-425f-a773-9506cee283df?mode=deep",
+    "timestamp": "2026-05-01 18:22:16.758622",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user craft a timestamp Bound with only an upper bound set (no lower), causing getAdjustedLowerRangeValue() to return 0 and optimalLowerBound to be computed from getFirstDayOfMonth(maxTimestamp, -1), silently shifting minTimestamp forward and causing records from the actual requested range to be missing from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c5f6322f-60ca-495f-b118-6eef513ea515?mode=deep",
+    "timestamp": "2026-05-01 18:22:28.889854",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user provide a maxTimestamp near Long.MAX_VALUE such that getFirstDayOfMonth(maxTimestamp, -1) overflows or produces an incorrect epoch, causing Math.max(minTimestamp, optimalLowerBound) to silently clamp minTimestamp to a wrong value and return incorrect supply data to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ecf8516-d7e8-4faf-8d45-7cba5116de1e?mode=deep",
+    "timestamp": "2026-05-01 18:22:41.825638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user submit a timestamp with operator GT at the maximum long value (Long.MAX_VALUE), causing getAdjustedLowerRangeValue() to overflow to Long.MIN_VALUE via lowerBound++, bypassing the minTimestamp > maxTimestamp check and querying accountBalanceRepository.getSupplyHistory() with a negative lower timestamp, returning incorrect supply records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f839d12-f620-4fc8-b68d-1768d9e53b1b?mode=deep",
+    "timestamp": "2026-05-01 18:22:55.029761",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user submit a timestamp with operator LT at value 0, causing adjustUpperBound() to return -1 via upperBound--, and since minTimestamp (0) > maxTimestamp (-1) the IllegalArgumentException is thrown, but if the check is bypassed by a GT lower bound that also underflows, incorrect supply data could be returned to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d175a6f7-d300-49a4-a3ee-3b5b3cfaf5d5?mode=deep",
+    "timestamp": "2026-05-01 18:23:09.530649",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user provide a timestamp Bound where both lower and upper are set to the same nanosecond value using GTE/LTE, causing getFirstDayOfMonth(maxTimestamp, -1) to compute a month-start that is after the requested timestamp, making Math.max() override minTimestamp to a future value and returning zero supply records (missing data) to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d8e20b2-6a0e-4a40-872d-dd06ff86d269?mode=deep",
+    "timestamp": "2026-05-01 18:23:24.051774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFirstDayOfMonth(long timestamp, int monthOffset)] Can an unprivileged external user supply a nanosecond timestamp that, when converted via Instant.ofEpochSecond(0, timestamp), produces a date in a month where withDayOfMonth(1) combined with plusMonths(-1) crosses a DST boundary or calendar edge, causing the computed first-day-of-month to be off by one day and silently excluding valid balance records from the mirror node supply export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48871da8-7a31-4a92-9d51-2bdddd22b46e?mode=deep",
+    "timestamp": "2026-05-01 18:23:38.371736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFirstDayOfMonth(long timestamp, int monthOffset)] Can an unprivileged external user provide a timestamp corresponding to January 1st, causing plusMonths(-1) to roll back to December of the prior year, and the resulting optimalLowerBound to be a full year earlier than expected, causing accountBalanceRepository.getSupplyHistory() to aggregate over an excessively wide range and return an inflated or incorrect supply value to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43fa5bb0-ef28-4c8e-9e77-9a8933505869?mode=deep",
+    "timestamp": "2026-05-01 18:23:53.951260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getFirstDayOfMonth(long timestamp, int monthOffset)] Can an unprivileged external user supply a timestamp of 0 nanoseconds (epoch), causing Instant.ofEpochSecond(0, 0) to produce 1970-01-01, and plusMonths(-1) to produce 1969-12-01, resulting in a negative optimalLowerBound after multiplication by DomainUtils.NANOS_PER_SECOND, which Math.max() would then ignore, but the negative value could cause unexpected SQL behavior in getSupplyHistory() returning incorrect records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_383da0d9-4710-49c2-9f4e-fc557dbec2f6?mode=deep",
+    "timestamp": "2026-05-01 18:24:08.398638",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user exploit the fact that networkProperties.getUnreleasedSupplyRangeBounds() is a lazily-initialized field (via @Getter(lazy=true)) to observe a race condition where lowerBounds and upperBounds are inconsistently initialized, causing getSupply() to query with mismatched account ranges and return incorrect unreleased supply data to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a09a6884-e39f-4423-a379-d7079287db82?mode=deep",
+    "timestamp": "2026-05-01 18:24:21.668509",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user trigger the entityRepository.getSupply() path (empty timestamp) and observe that the SQL query uses string_to_array on lowerBounds/upperBounds, and if the NetworkProperties unreleasedSupplyAccounts list is empty or misconfigured, the query returns coalesce(sum(balance), 0) = 0 with consensusTimestamp = 0, causing EntityNotFoundException to be thrown and missing supply data from mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0c2c1eb-8dcf-4687-854d-b84b25a9b0d0?mode=deep",
+    "timestamp": "2026-05-01 18:24:34.797081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getSupply(Bound timestamp)] Can an unprivileged external user craft a timestamp range where minTimestamp equals maxTimestamp (a single-point range), causing accountBalanceRepository.getSupplyHistory() to query with lowerTimestamp == upperTimestamp, and if no account_balance record exists at that exact nanosecond, the query returns consensusTimestamp=0 triggering EntityNotFoundException, causing missing supply data in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d4e41ec-e848-4d9c-a968-ce29493d1ef2?mode=deep",
+    "timestamp": "2026-05-01 18:24:47.667674",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a NetworkNodeRequest with no nodeIds and no fileId, causing getAddressBookFileId() to fall back to systemEntity.addressBookFile102().getId(), and if the address book file 102 has been superseded by file 101 in the database, the returned network nodes are stale/incorrect compared to what mirror nodes should export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48f4d7b9-d87e-469f-b2aa-373be46188a2?mode=deep",
+    "timestamp": "2026-05-01 18:25:00.828400",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user supply multiple EQ nodeId parameters (e.g., node.id=eq:1&node.id=eq:2) combined with a GTE range parameter, causing the nodeIds HashSet to be populated and then filtered by Range.closed(lowerBound, upperBound), where the range excludes some EQ values, silently dropping valid nodes from the mirror node export?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82de858a-fe18-41e2-b768-b308587233bd?mode=deep",
+    "timestamp": "2026-05-01 18:25:14.018585",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit multiple GTE nodeId parameters (e.g., node.id=gte:1&node.id=gte:5), causing the loop to overwrite lowerBound with Math.max() each iteration, but since hasLowerBound() returns true for EQ as well, a mixed EQ+GTE input could cause lowerBound to be set from an EQ parameter that was also added to nodeIds, leading to incorrect range filtering and missing nodes in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_75a73c1c-5f75-4e2e-8a08-cb8068e1937e?mode=deep",
+    "timestamp": "2026-05-01 18:25:27.016323",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a nodeId with operator GT at Long.MAX_VALUE - 1, causing getInclusiveValue() to return Long.MAX_VALUE as lowerBound, and then lowerBound > upperBound (Long.MAX_VALUE > Long.MAX_VALUE) is false, so networkNodeRepository.findNetworkNodes() is called with lowerBound=Long.MAX_VALUE and upperBound=Long.MAX_VALUE, potentially returning incorrect or unexpected node records to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2b71d93-2b26-4ed9-b520-1d695d48a114?mode=deep",
+    "timestamp": "2026-05-01 18:25:40.344349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a nodeId with operator LT at value 1, causing getInclusiveValue() to return 0 as upperBound, and since lowerBound starts at 0, lowerBound (0) > upperBound (0) is false, so findNetworkNodes() is called with lowerBound=0 and upperBound=0, returning only node 0 (if it exists) instead of an empty result, causing incorrect records to be exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82b81a9e-e286-4c9f-bf68-58ff825a0a0a?mode=deep",
+    "timestamp": "2026-05-01 18:25:53.640373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a nodeId with operator LT at value 0, causing getInclusiveValue() to return -1 as upperBound via value - 1, and since lowerBound (0) > upperBound (-1) is true, IllegalArgumentException is thrown, but if the check is not reached due to EQ nodeIds being present, the Range.closed(0, -1) construction would throw an exception from Guava, causing an unhandled error instead of a clean empty result?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_095c9405-5806-45c5-8da6-2959b18f88af?mode=deep",
+    "timestamp": "2026-05-01 18:26:07.064764",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user exploit the fact that the nodeIds HashSet uses Long boxing, and submit a very large number of EQ nodeId parameters, causing the HashSet to grow unboundedly and the subsequent stream().filter(range::contains).toArray() to consume excessive memory, leading to a denial-of-service that prevents mirror nodes from receiving network node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_abc3ef65-f644-405e-a03e-2ac94941c8f2?mode=deep",
+    "timestamp": "2026-05-01 18:26:21.561030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a request with limit=1 and observe that getEffectiveLimit() caps at MAX_LIMIT=25 but the minimum is 1 (enforced by @Min(1)), and if the underlying networkNodeRepository.findNetworkNodes() returns more records than the limit due to a missing LIMIT clause in the SQL, incorrect/extra records are exported to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c9ec4bd-284b-40a3-9434-b3cb444e08fa?mode=deep",
+    "timestamp": "2026-05-01 18:26:35.344208",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a fileId parameter with an arbitrary entity ID (e.g., a non-address-book file ID), causing getAddressBookFileId() to use that arbitrary value directly via request.getFileId().value(), and networkNodeRepository.findNetworkNodes() to query against a wrong file, returning incorrect or empty node records to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d903654c-0e28-4b32-9d64-8094b0f8c6cb?mode=deep",
+    "timestamp": "2026-05-01 18:26:49.079349",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a request with order=DESC and observe that orderDirection is passed as the string 'DESC' to networkNodeRepository.findNetworkNodes(), and if the repository uses this string in a native SQL ORDER BY clause without sanitization, a SQL injection via a crafted order value could return incorrect or reordered records to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d7c05e4-2aa2-4585-a28b-487b4cce097c?mode=deep",
+    "timestamp": "2026-05-01 18:27:03.031101",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit a nodeId list containing both EQ and range operators where the EQ values are outside the range, causing nodeIdArray to be empty and List.of() to be returned early, but the caller (mirror node exporter) interprets an empty list as 'no nodes exist' rather than 'no nodes match filter', leading to missing node records in mirror node exports?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd8a5f47-3c10-4755-8440-6ecb8ed987be?mode=deep",
+    "timestamp": "2026-05-01 18:27:15.864217",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getNetworkNodes(NetworkNodeRequest request)] Can an unprivileged external user submit multiple LTE nodeId parameters (e.g., node.id=lte:10&node.id=lte:5), causing the loop to apply Math.min() and correctly use 5 as upperBound, but also submit a GTE parameter that sets lowerBound=6, causing lowerBound > upperBound (6 > 5) to throw IllegalArgumentException instead of returning an empty list, causing an error response instead of correct empty data to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0686f25d-ceae-4d97-8ac8-991111b8705d?mode=deep",
+    "timestamp": "2026-05-01 18:27:29.632213",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkService.java -> Scope: Medium: Incorrect or missing records exported to mirror nodes'] [Function: getRegisteredNodes(RegisteredNodesRequest request)] Can an unprivileged external user submit a RegisteredNodesRequest with registeredNodeIds containing a single EQ parameter, causing resolveRegisteredNodeIdBounds() to return Range.closed(value, value) immediately without checking if the value is valid, and if the value is 0 or negative (though NumberRangeParameter rejects negatives), the query could return unexpected records to mirror nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11ef390e-9f9b-4031-9878-1c640e1fbb36?mode=deep",
+    "timestamp": "2026-05-01 18:27:44.036802",
+    "report_generated": false
   }
 ]
