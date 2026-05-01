@@ -1,8 +1,6 @@
 import json
 import os
 
-from decouple import config
-
 MAX_REPO = 50
 SOURCE_REPO = "hiero-ledger/hiero-mirror-node"
 REPO_NAME = "hiero-mirror-node"
@@ -19,14 +17,33 @@ def get_cyclic_index(run_number, max_index=100):
     return (int(run_number) - 1) % max_index + 1
 
 
+def load_repository_urls():
+    """Load repository URLs from repositories.json."""
+    repo_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "repositories.json")
+    if not os.path.exists(repo_file):
+        return []
+
+    try:
+        with open(repo_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    if not isinstance(data, list):
+        return []
+
+    return [url for url in data if isinstance(url, str) and url.strip()]
+
+
 if run_number == "0":
     BASE_URL = f"https://deepwiki.com/{SOURCE_REPO}"
 else:
-    # Convert to cyclic index (1-100)
-    run_index = get_cyclic_index(run_number, MAX_REPO)
-    # Format the URL with leading zeros
-    repo_number = f"{run_index:03d}"
-    BASE_URL = f"https://deepwiki.com/oyakh1/{REPO_NAME}--{repo_number}"
+    repository_urls = load_repository_urls()
+    if repository_urls:
+        run_index = get_cyclic_index(run_number, len(repository_urls))
+        BASE_URL = repository_urls[run_index - 1]
+    else:
+        BASE_URL = f"https://deepwiki.com/{SOURCE_REPO}"
 
 
 scope_files = [
@@ -432,4 +449,3 @@ If not, output exactly:
 No extra text.
 """
     return prompt
-

@@ -30,8 +30,8 @@ class IndexDeepwiki:
         self.options = webdriver.ChromeOptions()
 
         # --- Add these two lines here ---
-        self.options.add_argument("--headless")
-        self.options.add_argument("--window-size=1920,1080")
+        # self.options.add_argument("--headless")
+        # self.options.add_argument("--window-size=1920,1080")
         # ---------------------------------
 
         # removed headless so the browser window is visible
@@ -79,12 +79,7 @@ class IndexDeepwiki:
             textarea.click()
             textarea.clear()
 
-            email = f"devprotegik{random.randint(0,100)}@gmail.com"
-            # # Use JavaScript to set the textarea value directly. It's more reliable for large text.
-            # self.driver.execute_script("arguments[0].value = arguments[1];", textarea, email)
-            # # Dispatch an 'input' event to make sure the web application detects the change.
-            # self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
-            #                            textarea)
+            email = f"dev.codertjay+{random.randint(0,100)}@gmail.com"
             textarea.send_keys(email)
             textarea.send_keys(Keys.ENTER)
             time.sleep(3)
@@ -111,6 +106,7 @@ def main():
 
             print(f"[{i}/{total}] Processing: {question[:50]}...")
             bot.index_repo(question)
+            time.sleep(4 * 60)
 
         # If we get here, processing was successful
         print(f"Successfully processed {i} questions")

@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import requests
-from decouple import config
 
 # Add the project root to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -193,19 +192,43 @@ def get_existing_repos():
         return set()
 
 
+def load_repo_accounts():
+    """Load GitHub usernames/tokens from key.json in insertion order."""
+    key_file = Path(__file__).resolve().parent.parent / "key.json"
+    if not key_file.exists():
+        print(f"❌ key.json not found at {key_file}")
+        return []
+
+    try:
+        with open(key_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"❌ Failed to read key.json: {e}")
+        return []
+
+    if not isinstance(data, dict) or not data:
+        print("❌ key.json is empty or invalid")
+        return []
+
+    accounts = [(username, token) for username, token in data.items() if token]
+    if not accounts:
+        print("❌ key.json has no valid tokens")
+        return []
+
+    return accounts
+
+
 def main():
     # Configuration
     source_repo = SOURCE_REPO
     base_name = source_repo.split("/")[-1]
     num_repos = MAX_REPO  # For testing, change to 100 for production
 
-    # Get GitHub token and username from environment
-    token = os.getenv('REPO_TOKEN') or config('REPO_TOKEN', default=None)
-    username = "oyakh1"
-
-    if not token:
-        print("❌ Error: GITHUB_TOKEN environment variable not set")
+    accounts = load_repo_accounts()
+    if not accounts:
         return
+
+    print(f"Using {len(accounts)} account(s) for round-robin repo creation")
 
     # Create a temporary directory
     temp_dir = Path("temp_repo")
@@ -238,12 +261,16 @@ def main():
                 print(f"⏩ Skipping {repo_name} - already exists")
                 continue
 
-            print(f"\n🔄 Processing {i}/{num_repos}: {repo_name}")
+            account_index = (i - 1) % len(accounts)
+            username, token = accounts[account_index]
+            print(
+                f"\n🔄 Processing {i}/{num_repos}: {repo_name} "
+                f"(account {account_index + 1}/{len(accounts)}: {username})"
+            )
 
             # Setup and push to GitHub
             if setup_github_repo(repo_name, source_repo, token, username):
                 print(f"✅ Successfully created {repo_name}")
-
                 save_repo_url(repo_name, username)
                 # Clean up for next iteration
                 run_command("rm -rf .git")
