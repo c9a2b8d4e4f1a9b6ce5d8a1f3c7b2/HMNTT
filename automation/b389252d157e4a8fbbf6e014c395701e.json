@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce546f0e-249a-42e1-8e4a-2d1dc092df79?mode=deep",
     "timestamp": "2026-04-29 00:49:10.698216",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user trigger silent fee type suppression by querying a token whose DB `type` field is null or an unrecognized string, causing `nonFixedFeesField` to default to `royalty_fees` and silently drop all `fractional_fees` from the response, leading to consumers making decisions based on incomplete fee schedules?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_03053c69-cf32-4abb-b2a8-6f156e8703a9?mode=deep",
+    "timestamp": "2026-05-01 14:44:01.944552",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user exploit the `tokenType === Token.TYPES.FUNGIBLE_COMMON` branch in `createCustomFeeObject()` by querying a token whose `row.type` is stored as a non-canonical casing (e.g., `fungible_common` vs `FUNGIBLE_COMMON`), causing the wrong fee field (`royalty_fees` instead of `fractional_fees`) to be returned, misrepresenting the token's actual fee schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ef71dd6-7c6c-4277-8bfa-afb3607421ce?mode=deep",
+    "timestamp": "2026-05-01 14:44:14.294812",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user cause a fee type cross-contamination by querying a token that has both `fractional_fees` and `royalty_fees` populated in the DB (due to a migration or data integrity issue), where `createCustomFeeObject()` only returns one based on `tokenType`, silently hiding the other fee type from the API response and causing integrators to undercount fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e69da53-43ec-4e9f-8663-73e61571ff2b?mode=deep",
+    "timestamp": "2026-05-01 14:44:26.803411",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user supply multiple `timestamp` query parameters (e.g., `?timestamp=lte:100&timestamp=lte:200`) to `getTokenInfoRequest`, causing `extractSqlFromTokenInfoRequest()` to only honor `filters[filters.length - 1]` (the last filter), effectively bypassing the intended timestamp constraint and retrieving a fee schedule from a different point in time than expected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bb21da7a-4b9f-4932-a02a-c9e83c703381?mode=deep",
+    "timestamp": "2026-05-01 14:44:39.514251",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: transformTimestampFilterOp()] Can an unprivileged external user exploit `transformTimestampFilterOp()` converting `eq` to `lte` to retrieve a fee schedule that was active BEFORE the specified timestamp rather than exactly AT it, causing the API to return a stale or superseded fee schedule that no longer reflects the token's current fee parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1819183-e004-4219-8099-694661e71e39?mode=deep",
+    "timestamp": "2026-05-01 14:44:53.481942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user craft a `timestamp=eq:X` request where `X` falls between two fee schedule updates, causing `buildHistoryQuery()` to return the older fee schedule via the `_history` table UNION ALL path, exposing a fee schedule that was intentionally replaced and should no longer be authoritative?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42789ab4-e6b9-4fd1-95ac-4b8279fb2bbe?mode=deep",
+    "timestamp": "2026-05-01 14:45:07.271686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp=lte:0` (epoch zero) to `getTokenInfoRequest`, causing `buildHistoryQuery()` to query for fee schedules with `lower(timestamp_range) <= 0`, potentially returning the earliest-ever fee schedule or causing unexpected query behavior that misrepresents the token's fee history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf56c71b-bdf1-4f20-aaa5-f384f5a8249d?mode=deep",
+    "timestamp": "2026-05-01 14:45:19.869701",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user supply a `timestamp=lte:9999999999999999999` (max bigint) to `getTokenInfoRequest`, causing `buildHistoryQuery()` to return the most recent fee schedule from the history table rather than the current table, potentially returning a stale fee schedule if the current table and history table are out of sync?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_659a732a-1a61-4f0c-9379-5ede122c96ac?mode=deep",
+    "timestamp": "2026-05-01 14:45:32.490876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user exploit the `conditionsSql.replace('entity_id', 'token_id')` string replacement in `extractSqlFromTokenInfoRequest()`, where only the FIRST occurrence of `entity_id` is replaced, to cause a malformed SQL condition that returns incorrect fee schedule data from the token history table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d4d11cb-9412-4aa7-bf5d-abebd8172f69?mode=deep",
+    "timestamp": "2026-05-01 14:45:45.106731",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user trigger a fee schedule ordering ambiguity in `buildHistoryQuery()` by querying a timestamp where two fee schedule updates share the same `lower(timestamp_range)` value, causing the `order by modified_timestamp desc limit 1` to non-deterministically return either fee schedule, making the API response for fee data inconsistent across repeated requests?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c87819f-34a7-4ab4-920d-534682603c94?mode=deep",
+    "timestamp": "2026-05-01 14:45:58.093013",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user exploit the `rows.length !== 1 || !rows[0].custom_fee` check in `getTokenInfoRequest()` to enumerate which token IDs have custom fees defined (those returning 200) versus those without (returning 404), leaking information about the fee structure of the token ecosystem?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4387188-3477-4325-a9fe-19d214267b09?mode=deep",
+    "timestamp": "2026-05-01 14:46:11.986040",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user bypass the `TokenService.putTokenCache(token)` call by always including a `timestamp` filter in requests to `getTokenInfoRequest()`, ensuring the cache is never populated with their queried fee data, and then observe whether subsequent cache-based responses differ from their timestamp-filtered responses to infer fee schedule change timing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_890f264e-9035-4301-b610-ec4f34f22b0e?mode=deep",
+    "timestamp": "2026-05-01 14:46:25.527412",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatTokenInfoRow()] Can an unprivileged external user observe that `formatTokenInfoRow()` returns `fee_schedule_key` in the response, and use repeated queries with different `timestamp` values to reconstruct the full history of fee schedule key rotations for a token, enabling them to map when fee schedule authority changed hands?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_33b4bb0e-7c1b-41c0-8d20-39ee37e892bf?mode=deep",
+    "timestamp": "2026-05-01 14:46:38.939253",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user cause `createCustomFeeObject()` to return a fee object with `created_timestamp: null` (via `utils.nsToSecNs(viewModel.created_timestamp)` when `createdTimestamp` is undefined), leading API consumers to treat the fee schedule as having no creation time and potentially applying it incorrectly?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ca96df7-51a1-4f57-b544-7f192846c6c0?mode=deep",
+    "timestamp": "2026-05-01 14:46:53.827829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user trigger a scenario where `createCustomFeeObject()` returns `fixed_fees: []` and `fractional_fees: []` (both empty arrays) for a token that actually has fees defined in the DB, by querying at a timestamp before the first fee schedule was created, causing consumers to believe the token has no fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8864023-4ea7-44da-9108-95d35f224aec?mode=deep",
+    "timestamp": "2026-05-01 14:47:07.470945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user supply a `timestamp=lt:X` (strictly less than) where `X` is the exact consensus timestamp of a fee schedule update, causing `extractSqlFromTokenInfoRequest()` to return the fee schedule from just before the update, effectively reading a superseded fee schedule that no longer applies?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b77aa973-1a90-44c0-8286-639683fa0c6e?mode=deep",
+    "timestamp": "2026-05-01 14:47:20.289515",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: validateTokenInfoFilter()] Can an unprivileged external user bypass `validateTokenInfoFilter()` by supplying a `timestamp` value that passes `utils.isValidTimestampParam()` but represents a future timestamp (e.g., year 2099), causing `buildHistoryQuery()` to return the current fee schedule as if it were a historical query, potentially bypassing any future-timestamp guards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2fa5b6c8-f049-44f6-8901-cc3655c2ddeb?mode=deep",
+    "timestamp": "2026-05-01 14:47:33.175113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: isValidTokenInfoTimestampFilterOp()] Can an unprivileged external user confirm that `isValidTokenInfoTimestampFilterOp()` only allows `eq`, `lt`, `lte` and use `timestamp=lte:X` with a very large value to always retrieve the latest fee schedule via the history query path rather than the current table, potentially getting a different (stale) result if the history table lags behind the current table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c37dddaf-4e11-4f27-b3f7-4f107a28ccf9?mode=deep",
+    "timestamp": "2026-05-01 14:47:46.454427",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user exploit the UNION ALL in `buildHistoryQuery()` between the current `custom_fee` table and `custom_fee_history` table, where both subqueries apply the same timestamp condition, to receive duplicate or conflicting fee schedule entries when the same fee schedule exists in both tables simultaneously during a migration window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73025bea-b706-48b2-8421-8453255ec027?mode=deep",
+    "timestamp": "2026-05-01 14:47:59.388063",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user observe that `createCustomFeeObject()` uses `viewModel[nonFixedFeesField]` where `nonFixedFeesField` is a dynamic property key, and if `tokenType` is an unexpected value (e.g., empty string), the returned object would have a key of `royalty_fees` with an empty array, hiding any fractional fees that exist in the DB?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40dfec6a-1461-47cc-9111-a4c6adfdfbe6?mode=deep",
+    "timestamp": "2026-05-01 14:48:13.102562",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: formatTokenInfoRow()] Can an unprivileged external user cause `formatTokenInfoRow()` to return a `custom_fees` object where `created_timestamp` is a different value than `modified_timestamp`, creating confusion about when the current fee schedule was established versus when the token was last modified, leading to incorrect fee application by integrators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32ac3e92-69cb-45ff-a80f-c1c57f5b66f4?mode=deep",
+    "timestamp": "2026-05-01 14:48:26.625979",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: extractSqlFromTokenInfoRequest()] Can an unprivileged external user supply a `timestamp` filter with value `0.000000001` (minimum valid nanosecond timestamp) to `getTokenInfoRequest()`, causing `buildHistoryQuery()` to query for fee schedules at the very beginning of chain history, potentially returning a fee schedule that was never intended to be publicly accessible via the historical query path?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4148b1f3-21cc-4b34-a4a1-69256e8a10a2?mode=deep",
+    "timestamp": "2026-05-01 14:48:39.751521",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getTokenInfoRequest()] Can an unprivileged external user send a high volume of `getTokenInfoRequest()` calls with varying `timestamp` parameters to enumerate the complete fee schedule history of a token, reconstructing every fee change ever made to that token's custom fees without any rate limiting or access control?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6bf40673-dd95-42fb-b573-04a127f18650?mode=deep",
+    "timestamp": "2026-05-01 14:48:53.440844",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: buildHistoryQuery()] Can an unprivileged external user exploit the `order by lower(${tableAlias}.timestamp_range) desc limit 1` in the history subquery of `buildHistoryQuery()` to always get the most recent historical fee schedule, even when a specific `eq` timestamp was requested, because `transformTimestampFilterOp` converts `eq` to `lte`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef16957d-0944-49a6-8ee2-6d44790a0de8?mode=deep",
+    "timestamp": "2026-05-01 14:49:06.668236",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/tokens.js -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: createCustomFeeObject()] Can an unprivileged external user observe that `createCustomFeeObject()` returns `null` when `customFee` is falsy, and use this to distinguish between tokens that have never had a fee schedule (null) versus tokens whose fee schedule was cleared (empty arrays), leaking information about the token's fee history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40fea7eb-d2f6-4aa4-8535-5c0123bf3eb6?mode=deep",
+    "timestamp": "2026-05-01 14:49:19.846528",
+    "report_generated": false
   }
 ]
