@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the fact that GET /api/v1/network/stake accepts arbitrary HTTP headers without validation, given that some headers like Accept-Encoding with extremely large values or malformed Content-Type headers could cause the Spring framework to perform expensive parsing before reaching NetworkController.getNetworkStake(), amplifying per-request overhead and reducing the effective request rate the service can handle before database connections are exhausted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_efde290a-36bf-4c4e-bbf0-fcfaec999418?mode=deep",
+    "timestamp": "2026-05-01 19:12:54.010212",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a database autovacuum interference by flooding the network_stake table with read queries via findLatest(), given that PostgreSQL's autovacuum process may be delayed when the table is under heavy read load, causing table bloat from dead tuples left by the importer's prune() operations, which in turn causes the 'select max(consensus_timestamp)' subquery to scan more pages including dead tuples, progressively degrading query performance until the endpoint becomes unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a6019cc-d9a4-44ad-af60-e1b550c639ac?mode=deep",
+    "timestamp": "2026-05-01 19:13:06.101677",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the lack of a LIMIT clause in the findLatest() native query, given that the query 'select * from network_stake where consensus_timestamp = (select max(consensus_timestamp) from network_stake)' has no LIMIT 1 guard, to cause the query to return multiple rows if the primary key constraint on consensus_timestamp is somehow violated or if a database corruption event creates duplicate timestamps, causing Hibernate to throw a NonUniqueResultException that propagates as a 500 error and makes the endpoint permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a43b3914-c754-4bc8-af44-989ca0eeff60?mode=deep",
+    "timestamp": "2026-05-01 19:13:18.635373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a denial-of-service by exploiting the HTTP keep-alive behavior on GET /api/v1/network/stake, given that persistent connections allow a single attacker client to send thousands of pipelined requests over one TCP connection without the overhead of TCP handshakes, each triggering a separate findLatest() database query, saturating the database connection pool faster than connection-based rate limiting could detect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_53779331-f625-445e-a2c0-0d30f8e454b1?mode=deep",
+    "timestamp": "2026-05-01 19:13:31.405117",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the fact that the network_stake table's primary key index on consensus_timestamp may not be used efficiently by the correlated subquery in findLatest() under certain PostgreSQL statistics conditions, given that if the planner underestimates row counts it may choose a sequential scan over an index scan, causing the query to read the entire table on every request and under concurrent load causing I/O saturation that prevents the importer from writing new records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7822110d-8f33-4f16-9475-abe837f949b9?mode=deep",
+    "timestamp": "2026-05-01 19:13:44.764198",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a service crash by exploiting the NetworkStake entity's use of primitive long fields (consensusTimestamp, epochDay, etc.) which cannot be null, given that if the database returns a row with a null value in any of these columns due to a schema migration issue or data corruption, Hibernate will throw a NullPointerException during entity hydration from findLatest(), causing an unhandled 500 error that if repeated across all instances simultaneously takes down the entire rest-java service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b844a50c-439d-4dd8-9b0b-a99d2b70b2b1?mode=deep",
+    "timestamp": "2026-05-01 19:13:58.299700",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the fact that the GET /api/v1/network/stake endpoint has no authentication requirement and is publicly accessible, given that the OpenAPI spec defines it with no security schemes, to use it as an amplification vector in a distributed attack where thousands of bots each send requests, collectively exhausting the database connection pool and preventing the importer from persisting new NodeStakeUpdate transactions that are critical for network consensus?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45f388a6-1f23-498a-9a58-c3d2ef4c7a97?mode=deep",
+    "timestamp": "2026-05-01 19:14:11.498981",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a database connection leak by exploiting an exception in the NetworkStakeMapper.map() call after findLatest() returns a result, given that if the mapper throws an unchecked exception the Spring transaction may not properly release the database connection back to the HikariCP pool, causing connections to accumulate as leaked until the pool is exhausted and the importer cannot acquire connections to write new staking data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c742763e-1713-48c8-b139-d616da3777f0?mode=deep",
+    "timestamp": "2026-05-01 19:14:26.127501",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the correlated subquery in findLatest() to cause a PostgreSQL shared buffer cache eviction, given that repeated full scans of the network_stake table via 'select max(consensus_timestamp) from network_stake' will load the entire table into shared buffers, evicting other critical table pages (such as those for the transaction or record_file tables used by the importer), causing the importer's write queries to suffer cache misses and dramatically increased I/O latency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eac62d62-8783-4a4b-b831-098602225c49?mode=deep",
+    "timestamp": "2026-05-01 19:14:40.350515",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a staking reward calculation failure by exploiting a timing window where findLatest() returns stale data due to PostgreSQL read committed isolation, given that if the importer inserts a new network_stake row and the rest-java service reads the previous row due to transaction ordering, downstream consumers of the /api/v1/network/stake endpoint receive incorrect stakingRewardRate or stakingStartThreshold values, causing nodes to make incorrect staking decisions that could prevent transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d1e7cd9f-a878-4c0d-821b-4a1fd096997b?mode=deep",
+    "timestamp": "2026-05-01 19:14:53.747900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the fact that the rest-java service has no circuit breaker around networkStakeRepository.findLatest() calls, given that if the PostgreSQL database becomes slow or unresponsive all threads calling findLatest() will block indefinitely until the statementTimeout of 10000ms is reached, causing all servlet threads to be consumed by blocked database calls and making the service completely unresponsive, triggering Kubernetes liveness probe failures and pod restarts that further disrupt service availability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7497030b-41c9-4241-bb97-fb19e684c209?mode=deep",
+    "timestamp": "2026-05-01 19:15:08.397038",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a denial-of-service by exploiting the fact that the network_stake table has no partitioning in the rest-java schema (unlike other tables in V2.0.0 migration), given that as the table grows unbounded the 'select max(consensus_timestamp) from network_stake' subquery must scan an increasingly large unpartitioned table, causing query time to grow until it regularly exceeds the statementTimeout and the endpoint returns 500 errors, making stake data permanently unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ae39819-b205-4a63-80bb-08093a6a274c?mode=deep",
+    "timestamp": "2026-05-01 19:15:21.679098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the Spring Data JPA entity manager session lifecycle in findLatest() to cause a session leak, given that if the database connection is interrupted mid-query the JPA EntityManager may not properly close the session, causing Hibernate session objects to accumulate in memory and eventually causing an OutOfMemoryError in the rest-java JVM that crashes the service and makes network stake data unavailable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20b0c88c-c4e4-43b5-8c9e-d8e963502efe?mode=deep",
+    "timestamp": "2026-05-01 19:15:35.121374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a network bandwidth exhaustion attack by repeatedly calling GET /api/v1/network/stake, given that each response contains a full NetworkStakeResponse JSON object with 14 fields including large integer values, and under high request volume the cumulative response bandwidth could saturate the network interface of the rest-java pod, preventing the importer from communicating with the database over the same network segment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b3827092-f26a-4f99-b686-6d2e908ad4ed?mode=deep",
+    "timestamp": "2026-05-01 19:15:48.161030",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user exploit the absence of a @QueryHints annotation with HINT_COMMENT or query timeout on findLatest() to prevent PostgreSQL from applying statement-level timeouts at the query level, given that the statementTimeout is set at the connection level and a long-running 'select max(consensus_timestamp)' query may not be cancelled promptly, holding a database connection for up to 10 seconds per request and under concurrent load exhausting the connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9df2838b-4390-480f-b101-f4fe37859da1?mode=deep",
+    "timestamp": "2026-05-01 19:16:01.331119",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/repository/NetworkStakeRepository.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: findLatest()] Can an unprivileged external user cause a PostgreSQL WAL (Write-Ahead Log) pressure issue by flooding GET /api/v1/network/stake, given that even read-only queries in PostgreSQL generate WAL entries for visibility map updates and hint bit setting, and under high concurrent read load on the network_stake table the WAL generation rate could exceed the WAL writer's capacity, causing the importer's INSERT operations to stall waiting for WAL flush and halting new transaction record persistence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15b4b159-e1c2-4ea6-bbfd-3d70ec6dedc7?mode=deep",
+    "timestamp": "2026-05-01 19:16:15.555461",
+    "report_generated": false
+  }
+]
