@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: updateIndex()] Can an unprivileged external user who controls the cloud storage bucket (e.g., a demo/misconfigured deployment) inject a crafted v6 RecordFile with an arbitrarily large getIndex() value so that the offset computed as `recordFile.getIndex() - lastRecordFile.getIndex() - 1` becomes a large positive number, causing `repository.updateIndex(offset)` to shift ALL historical block numbers upward and permanently corrupt the canonical block index for every previously stored record file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cd5e4a9-879b-4973-9963-0f54414ec464?mode=deep",
+    "timestamp": "2026-05-01 22:15:27.019490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: updateIndex()] Can an unprivileged external user inject a crafted v6 RecordFile with a getIndex() value smaller than the last v5 file's index, producing a large negative offset in `recordFile.getIndex() - lastRecordFile.getIndex() - 1`, so that `repository.updateIndex(offset)` decrements all historical block numbers below zero, making the entire Hashgraph block history unqueryable via block number?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cb47ec3-8477-4200-a010-2ee7e57863e4?mode=deep",
+    "timestamp": "2026-05-01 22:15:39.194803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: updateIndex()] Can an unprivileged external user trigger the v5-to-v6 block number migration path in `updateIndex()` multiple times by repeatedly injecting v6-versioned files after resetting the in-memory `last` reference (e.g., via service restart), causing `repository.updateIndex(offset)` to be applied cumulatively and compounding the block index corruption across all historical record files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aea0c147-f276-4696-a41e-ffe15ce7ee3c?mode=deep",
+    "timestamp": "2026-05-01 22:15:51.704222",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: shouldParse() (AbstractStreamFileParser)] Can an unprivileged external user exploit the condition `if (previous == null) return true` in `shouldParse()` — triggered when `streamFileRepository.findLatest()` returns empty (fresh install or wiped DB) — to inject a forged RecordFile with a fabricated previousHash and arbitrary transaction history, bypassing hash chain validation entirely and poisoning the mirror node's view of Hashgraph history from genesis?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8896fc58-18f9-4dcb-9b4a-7652709c8c06?mode=deep",
+    "timestamp": "2026-05-01 22:16:04.472713",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: shouldParse() (AbstractStreamFileParser)] Can an unprivileged external user craft a RecordFile whose `getConsensusStart()` is less than or equal to the previous file's `getConsensusEnd()`, causing `shouldParse()` to silently skip the file with only a WARN log, so that a legitimate file is permanently dropped from the mirror node's history without any error or alert, creating a gap in the Hashgraph transaction record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_db1c448a-e3a3-4e52-b826-6e87de9facc4?mode=deep",
+    "timestamp": "2026-05-01 22:16:17.844950",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: shouldParse() (AbstractStreamFileParser)] Can an unprivileged external user who can influence the `isChained()` property of a stream type (e.g., via a misconfigured or new stream type) bypass the hash chain check `if (previous.getType().isChained() && !expectedHash.contentEquals(actualHash))` entirely, allowing injection of a RecordFile with a mismatched previousHash that is accepted without throwing `HashMismatchException`, breaking the cryptographic chain of trust?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7cbfdd56-a8fe-447a-b833-1cc9d10ed69b?mode=deep",
+    "timestamp": "2026-05-01 22:16:30.656144",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user inject a RecordFile whose `getItems()` list contains RecordItems with out-of-order or duplicate `getConsensusTimestamp()` values, causing `recordItemListener.onItem()` to persist transactions with incorrect ordering in the database, corrupting the canonical sequence of Hashgraph history visible via the mirror node API?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_05fe28da-4f78-4edf-a3b1-4dd4f9b59420?mode=deep",
+    "timestamp": "2026-05-01 22:16:44.013081",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user craft a RecordFile where `getConsensusEnd()` does not match the consensus timestamp of the last item in `getItems()`, causing `applicationEventPublisher.publishEvent(new RecordFileParsedEvent(this, recordFile.getConsensusEnd()))` to broadcast a false consensusEnd to all downstream listeners (e.g., HistoricalBalanceService), triggering balance snapshots at incorrect timestamps and corrupting historical balance history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55647381-f98f-4e98-bb48-023dfd070c41?mode=deep",
+    "timestamp": "2026-05-01 22:16:57.635860",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user inject a RecordFile with an empty `getItems()` list (or a list where all items are filtered by `dateRangeFilter`), causing `recordFile.setCount(0)` while `aggregator.update(recordFile)` still sets `gasUsed=0` and `logsBloom=EMPTY`, so the record file is persisted as a valid but empty block, creating phantom blocks in the Hashgraph history that never existed on the consensus network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91033a80-5262-417b-bf8f-6174c80ee2c1?mode=deep",
+    "timestamp": "2026-05-01 22:17:10.467828",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RecordItemAggregator.accept()] Can an unprivileged external user craft a RecordItem where `isTopLevel()` returns false (e.g., by setting a non-zero nonce or parentConsensusTimestamp) to exclude a contract transaction from `gasUsed` and `logsBloom` aggregation in `RecordItemAggregator.accept()`, causing the persisted `record_file.gas_used` and `record_file.logs_bloom` to be incorrect and misrepresenting the block's EVM execution history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bf44b86e-629c-40b5-99b5-31e1a84e5574?mode=deep",
+    "timestamp": "2026-05-01 22:17:23.099740",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RecordItemAggregator.accept()] Can an unprivileged external user inject a RecordItem with a crafted `ContractFunctionResult` containing an extremely large `getGasUsed()` value, causing `gasUsed += result.getGasUsed()` to overflow the `long` accumulator in `RecordItemAggregator`, resulting in a negative or wrapped `gasUsed` value being persisted to `record_file.gas_used` and corrupting EVM gas accounting for that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc87e5c8-c03b-44c6-aca1-fe67b94da869?mode=deep",
+    "timestamp": "2026-05-01 22:17:35.567020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: RecordItemAggregator.accept()] Can an unprivileged external user inject a RecordItem with a `ContractFunctionResult` whose `getBloom()` byte array is shorter than 256 bytes, causing `logsBloom.or(DomainUtils.toBytes(result.getBloom()))` to OR only a partial bloom into the filter, producing an incorrect `logs_bloom` for the block that causes false negatives in EVM log filtering and misrepresents the block's event history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1da5cfa7-27a4-4f47-b338-1205a60986d0?mode=deep",
+    "timestamp": "2026-05-01 22:17:48.770068",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user craft a RecordFile where `aggregator.accept(recordItem)` is called for ALL items (including those outside the `dateRangeFilter`) while `recordItemListener.onItem()` is only called for filtered items, causing `gasUsed` and `logsBloom` to include data from transactions that were never persisted to the database, creating an inconsistency between the block metadata and the actual stored transaction history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36692916-3e24-47ff-a3be-b7668850b472?mode=deep",
+    "timestamp": "2026-05-01 22:18:01.644875",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: parse(RecordFile)] Can an unprivileged external user trigger the `@Retryable` retry mechanism by causing a transient failure (e.g., DB connection drop) during `parse()`, so that the same RecordFile is re-parsed multiple times within a single transaction boundary, potentially causing `recordItemListener.onItem()` to be called multiple times for the same RecordItem and inserting duplicate transactions into the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a7f9c37-f7ad-4946-aeab-87934e91d52a?mode=deep",
+    "timestamp": "2026-05-01 22:18:14.885793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: parse(RecordFile)] Can an unprivileged external user exploit the `@Transactional(timeoutString)` timeout on `parse()` to cause a partial transaction commit — where some `recordItemListener.onItem()` calls succeed but the transaction rolls back — leaving the `parserContext` cleared in the `finally` block but the `last` AtomicReference in `AbstractStreamFileParser` potentially updated, causing the next parse to use a stale `last` reference and skip hash chain validation for the subsequent file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_292179a2-e3f7-4717-9886-09ff540817e4?mode=deep",
+    "timestamp": "2026-05-01 22:18:28.199502",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: parse(List<RecordFile>)] Can an unprivileged external user inject a batch of RecordFiles via `parse(List<RecordFile>)` where the first file passes hash chain validation but subsequent files have manipulated hashes, exploiting the fact that `doFlush()` is only called once at the end of the batch (on the last file), so that partially-processed files with invalid hashes have their items persisted via `doParse()` before the `HashMismatchException` is thrown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0f5cf742-086c-448f-8cff-a9d88fee6d0d?mode=deep",
+    "timestamp": "2026-05-01 22:18:41.263723",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: parse(List<RecordFile>)] Can an unprivileged external user craft a batch where `streamFile2.setPreviousHash(streamFile1.getHash())` is valid but `streamFile1` itself has a forged hash that doesn't match the actual DB-stored previous file's hash, exploiting the fact that `shouldParse()` uses the in-memory `previous` variable (not the DB) for subsequent files in a batch, allowing a chain of forged files to pass hash validation within a single batch call?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80fc028a-a666-4432-b266-27afcf297116?mode=deep",
+    "timestamp": "2026-05-01 22:18:54.598330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user inject a RecordFile with a manipulated `getConsensusEnd()` value that is earlier than the actual last item's consensus timestamp, causing `applicationEventPublisher.publishEvent(new RecordFileParsedEvent(this, recordFile.getConsensusEnd()))` to fire with a false timestamp, triggering `HistoricalBalanceService.onRecordFileParsed()` to generate balance snapshots at a timestamp that predates actual transactions in the block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c7641ff-ae47-4868-8185-3e89d0a1a7b4?mode=deep",
+    "timestamp": "2026-05-01 22:19:08.361654",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user inject a RecordFile with a `getSidecars()` list containing SidecarFile objects whose hashes were not re-verified at parse time (verification happens at download time), so that `parserContext.addAll(recordFile.getSidecars())` adds unverified sidecar data to the parser context, allowing manipulated contract state changes or bytecode to be persisted as part of the Hashgraph history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_94f34fbf-6a9b-4e69-b127-86a07a98f0c5?mode=deep",
+    "timestamp": "2026-05-01 22:19:21.302462",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: updateIndex()] Can an unprivileged external user craft a v6 RecordFile with `getIndex()` equal to `Long.MIN_VALUE`, causing the offset calculation `recordFile.getIndex() - lastRecordFile.getIndex() - 1` to produce a `Long.MAX_VALUE` due to signed long overflow, triggering `repository.updateIndex(Long.MAX_VALUE)` and corrupting every block index in the database to an astronomically large value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ffeb41df-7286-4d74-a680-56491dc46d1d?mode=deep",
+    "timestamp": "2026-05-01 22:19:35.382389",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: updateIndex()] Can an unprivileged external user exploit the condition `if (offset != 0 && streamFileRepository instanceof RecordFileRepository repository)` to trigger `repository.updateIndex(offset)` with offset=-1 by crafting a v6 file whose index is exactly `lastRecordFile.getIndex()`, causing all historical block numbers to be decremented by 1 and shifting the entire block index sequence, breaking block-number-based lookups for all historical transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_640916c7-42c0-4097-9358-211044595ccd?mode=deep",
+    "timestamp": "2026-05-01 22:19:49.106744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getLast() (AbstractStreamFileParser)] Can an unprivileged external user exploit a race condition between the in-memory `last` AtomicReference and `streamFileRepository.findLatest()` in `getLast()` — where `last.get()` returns null after a service restart but the DB contains a stale or corrupted last record — to cause `updateIndex()` to compute an incorrect offset based on a DB record that doesn't reflect the true last processed file, corrupting block indices?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_00bdddd1-74c6-40af-a7f6-20b9d3fd41ac?mode=deep",
+    "timestamp": "2026-05-01 22:20:02.091444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user inject a RecordFile where `recordFile.getItems()` returns a mutable list that is modified concurrently during the `forEach` iteration in `doParse()`, causing some RecordItems to be processed by `aggregator.accept()` but not by `recordItemListener.onItem()` (or vice versa), resulting in an inconsistent block state where gasUsed/logsBloom don't match the persisted transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b303486c-2411-4a2e-9405-4b863023589e?mode=deep",
+    "timestamp": "2026-05-01 22:20:15.171186",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: doParse()] Can an unprivileged external user craft a RecordItem with a `getConsensusTimestamp()` of `Long.MIN_VALUE` or `Long.MAX_VALUE`, causing `dateRangeFilter.filter(recordItem.getConsensusTimestamp())` to behave unexpectedly (e.g., always pass or always fail), and `Instant.ofEpochSecond(0, recordItem.getConsensusTimestamp())` in `recordMetrics()` to throw an `ArithmeticException` or produce an incorrect latency metric that disrupts monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_296f9330-f04b-4917-8abd-29a3d2e5d29a?mode=deep",
+    "timestamp": "2026-05-01 22:20:29.919444",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/record/RecordFileParser.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: parse(RecordFile)] Can an unprivileged external user exploit the `synchronized` keyword on `parse(RecordFile)` combined with the `@Retryable` annotation to cause a deadlock or starvation scenario where a long-running retry loop holds the monitor lock, preventing any other RecordFile from being parsed and halting the mirror node's ingestion of new Hashgraph history indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_65708cb7-04eb-41a0-9d94-9b76c77af78f?mode=deep",
+    "timestamp": "2026-05-01 22:20:43.884427",
+    "report_generated": false
+  }
+]
