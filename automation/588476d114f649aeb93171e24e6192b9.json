@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user induce a network partition by flooding the consensus node's gRPC port, causing cryptoTransfer.Execute(client) to block indefinitely because ctx is never passed to Execute(), resulting in the goroutine handling that ticker tick being permanently stuck and the pinger becoming unresponsive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fc09ca5-f030-4c5d-82a4-c3a0940f5a92?mode=deep",
+    "timestamp": "2026-05-01 16:08:57.497685",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user trigger a network partition that causes resp.GetReceipt(client) to block without a deadline because no context is forwarded to GetReceipt(), meaning a successful Execute() is followed by an indefinitely blocking receipt poll that prevents the pinger from ever returning nil and marking the transfer as successful?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bdc697d3-f3e8-47c9-950e-ee4e1f9faafb?mode=deep",
+    "timestamp": "2026-05-01 16:09:09.556025",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition timed precisely after cryptoTransfer.Execute(client) returns a non-nil resp but before resp.GetReceipt(client) completes, causing the pinger to treat a committed on-chain transaction as failed, increment lastErr, and retry—resulting in duplicate HBAR transfers being submitted to the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8300280-d341-484d-bc99-29391aeffef0?mode=deep",
+    "timestamp": "2026-05-01 16:09:22.199917",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of ctx propagation into cryptoTransfer.Execute(client) so that even after the operator cancels the context (SIGTERM), the in-flight Execute() call continues running, causing the pinger process to hang past its shutdown deadline and never release its operator key session?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ca8dee94-cbff-47f8-baad-8b1b20a9e8b6?mode=deep",
+    "timestamp": "2026-05-01 16:09:35.018445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: backoff()] Can an unprivileged external user cause repeated network partitions that drive attempt values high enough that the bit-shift expression 1<<(attempt-1) in backoff() overflows a signed integer on 32-bit platforms, producing a negative or zero duration that causes the timer to fire immediately, collapsing the intended exponential backoff into a tight retry loop that floods the consensus network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c4f8e082-0f7d-48cb-88ba-5a3ac15acf9e?mode=deep",
+    "timestamp": "2026-05-01 16:09:48.477162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: backoff()] Can an unprivileged external user exploit the fact that backoff() caps at 30 seconds regardless of how many consecutive partition-induced failures occur, meaning that with cfg.maxRetries=10 the pinger will hammer the network with up to 11 Execute() calls per tick even during a sustained partition, amplifying load on already-degraded nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_50f1c9bc-696c-445a-8ff0-f78d777c6dbb?mode=deep",
+    "timestamp": "2026-05-01 16:10:02.898740",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that lasts exactly long enough for all cfg.maxRetries+1 attempts to exhaust, then restore connectivity, so that the pinger logs 'all attempts failed' and skips the current tick entirely—creating a silent gap in the transfer history that makes the mirror node appear to have missed transactions it actually never received?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f205a4e3-6fee-44a5-8634-7d016d253bfe?mode=deep",
+    "timestamp": "2026-05-01 16:10:16.171960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that ctx.Err() is only checked at the top of each loop iteration (not inside the blocking Execute() or GetReceipt() calls), so that a context cancellation issued during a partition-induced blocking call is silently ignored until the SDK call eventually times out on its own, delaying graceful shutdown by the full SDK timeout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38fd7d4c-3191-4e99-a31a-1e6613ac8c4c?mode=deep",
+    "timestamp": "2026-05-01 16:10:30.290534",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user induce a network partition that causes the ticker in main.go to accumulate multiple unfired ticks while submitWithRetry() is blocked, so that upon partition recovery a burst of concurrent submitWithRetry() goroutines are launched simultaneously, causing a transaction submission storm against the consensus nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b3cd4d8-7485-4dc2-9c94-da1596340c6d?mode=deep",
+    "timestamp": "2026-05-01 16:10:42.730105",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that makes cryptoTransfer.Execute(client) return an error on every attempt, causing the pinger to log 'attempt %d/%d failed' for every retry across every tick interval, flooding the container's stdout/stderr with log lines at a rate that exhausts the container's log buffer or disk space?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7efe254-516a-4c37-ba81-9c4cda324819?mode=deep",
+    "timestamp": "2026-05-01 16:10:55.686256",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the lack of a per-call timeout on cryptoTransfer.Execute(client) during a network partition to hold the pinger's goroutine hostage for the full SDK-level connection timeout (potentially minutes), preventing the liveness heartbeat goroutine in main.go from being meaningful since the pinger process is alive but functionally frozen?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8c49cc99-4fd0-499c-8bc5-7e20e074231f?mode=deep",
+    "timestamp": "2026-05-01 16:11:09.050323",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a partial network partition (only the receipt endpoint is unreachable) so that Execute() succeeds and commits a transaction, but GetReceipt() always times out, causing the pinger to perpetually retry and double-submit the same logical transfer every cfg.interval seconds, draining the operator account's HBAR balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1aef3146-e5b5-410a-9e97-048d208be749?mode=deep",
+    "timestamp": "2026-05-01 16:11:21.327808",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that the timer created by time.NewTimer(sleep) inside the retry loop is only stopped on ctx.Done(), meaning that if the context is never cancelled during a partition, the timer fires and the next attempt proceeds even if the network is still partitioned, wasting resources on guaranteed-to-fail Execute() calls?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30672d82-2a20-4a2b-9aca-7e708720a6bb?mode=deep",
+    "timestamp": "2026-05-01 16:11:34.462129",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that makes every Execute() call return an error, so that lastErr is overwritten on every iteration and the final error returned by submitWithRetry() only reflects the last attempt's error—losing diagnostic information about earlier failures and making it impossible to distinguish a transient partition from a permanent misconfiguration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc2dfcce-a331-4cb9-935d-3a54c179de20?mode=deep",
+    "timestamp": "2026-05-01 16:11:47.128850",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that AddHbarTransfer() constructs a new TransferTransaction on every retry attempt without any idempotency key or deduplication ID, so that during a partition where Execute() succeeds but the response is lost, each retry submits a brand-new transaction with a new transaction ID, causing multiple independent on-chain debits from the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45f45c75-40fa-4b4e-81f3-ada67ca10a3d?mode=deep",
+    "timestamp": "2026-05-01 16:11:59.962263",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that is intermittent (flapping), so that the pinger alternates between Execute() succeeding and failing across retries within a single submitWithRetry() call, causing the function to return nil (success) even though some of those Execute() calls committed duplicate transactions that were never detected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa8a7b2a-dc52-4d2e-a193-33a935e0789e?mode=deep",
+    "timestamp": "2026-05-01 16:12:13.030031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: backoff()] Can an unprivileged external user exploit the fact that backoff() uses base * time.Duration(1<<(attempt-1)) where attempt starts at 1, meaning the first retry has zero additional backoff (1<<0 = 1, so sleep = base), and if base is set to a very small value via HIERO_MIRROR_PINGER_BASE_BACKOFF env var, the pinger retries almost instantly during a partition, creating a denial-of-service amplification against consensus nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_18552e57-808f-4d38-85d1-1d350e0538e2?mode=deep",
+    "timestamp": "2026-05-01 16:12:26.162661",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that prevents GetReceipt() from completing, so that the pinger's goroutine is blocked inside submitWithRetry() while the main ticker continues to fire, and since the ticker channel is unbuffered (time.NewTicker), subsequent ticks are dropped—causing the pinger to silently skip monitoring intervals without any alerting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2788f3b1-0f56-461d-bf08-ce9bd8d6f030?mode=deep",
+    "timestamp": "2026-05-01 16:12:40.094226",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the race between ctx.Err() check at the top of the loop and the blocking Execute() call, so that during a network partition the context is cancelled (SIGTERM received) between the ctx.Err() check and the Execute() call, causing Execute() to run without context awareness and potentially committing a transaction after the operator intended to shut down?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_20d34a49-56c5-4319-a99a-3fa7fc60f6a1?mode=deep",
+    "timestamp": "2026-05-01 16:12:53.858063",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that makes the Hiero SDK's internal node selection rotate through all available consensus nodes (since Execute() retries internally), causing the pinger to exhaust all node connections simultaneously and leave the SDK client in a degraded state that persists even after the partition is resolved?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a8a62e3-8bb2-4229-b296-24315aad18eb?mode=deep",
+    "timestamp": "2026-05-01 16:13:07.518655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that submitWithRetry() does not record the start time of the overall retry sequence (only per-attempt start times), so that during a long partition the function can block for up to (cfg.maxRetries+1) * SDK_timeout + sum(backoffs) seconds without any overall deadline, causing the pinger to be unresponsive for an unbounded period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0720745-2442-42e0-b91f-3851d2c8813d?mode=deep",
+    "timestamp": "2026-05-01 16:13:21.148654",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that makes Execute() return a non-nil error but with a nil resp, and then if the SDK has a bug where resp is non-nil despite an error, calling resp.GetReceipt(client) on a partial response during partition could panic, crashing the pinger process entirely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2091fdd5-f8d0-4ca4-ae41-dae98d222202?mode=deep",
+    "timestamp": "2026-05-01 16:13:33.809945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that the pinger does not implement circuit-breaker logic, so that during a sustained network partition the pinger will continue to attempt cfg.maxRetries+1 Execute() calls every cfg.interval seconds indefinitely, creating a sustained amplified load against the already-partitioned network infrastructure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_043aada8-6138-405a-b7f3-be9ee166f6a8?mode=deep",
+    "timestamp": "2026-05-01 16:13:46.493007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user cause a network partition that makes the Hiero SDK's gRPC connection enter a TRANSIENT_FAILURE state, causing Execute() to block for the full gRPC backoff period before returning an error, and since this is not bounded by ctx, the pinger's retry loop can be held open for far longer than cfg.baseBackoff * cfg.maxRetries would suggest?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_73249c7c-a06e-4308-96f1-acc424b6a579?mode=deep",
+    "timestamp": "2026-05-01 16:13:59.627835",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/transfer.go -> Scope: Critical: Network partition caused outside of design parameters'] [Function: submitWithRetry()] Can an unprivileged external user exploit the fact that the pinger logs the full error from Execute() on every failed attempt (log.Printf('attempt %d/%d failed: %v')), and if the SDK error message includes internal node addresses or connection details, a partition-induced error storm could leak sensitive infrastructure topology information to anyone with log access?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_797831b6-4a43-4573-a906-8f7fd6397d20?mode=deep",
+    "timestamp": "2026-05-01 16:14:12.444732",
+    "report_generated": false
+  }
+]
