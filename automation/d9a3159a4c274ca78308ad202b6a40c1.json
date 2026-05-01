@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user open a large number of concurrent gRPC subscriptions so that when a network partition isolates the database, each subscription's independent polling loop hammers reconnect attempts against the DB simultaneously, exhausting the `boundedElastic` scheduler thread pool and causing a complete denial of service for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14359fae-ce72-487c-9edc-ec1bb615b28d?mode=deep",
+    "timestamp": "2026-05-01 19:58:43.926123",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the `RepeatSpec.times(Long.MAX_VALUE)` infinite retry loop so that during a network partition, each subscriber's polling flux never terminates and never backs off beyond the fixed `interval`, causing unbounded accumulation of in-flight DB connection attempts that persist after the partition heals?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d477411-b511-447e-a7c6-35c0d89b6c6b?mode=deep",
+    "timestamp": "2026-05-01 19:58:55.906705",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user trigger a scenario where, during a network partition, `topicMessageRepository.findByFilter(newFilter)` throws a transient exception that is silently swallowed by the reactive stream, causing `context.getLast()` to remain stale and the polling cursor to never advance, resulting in permanent message loss after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9ab8bb7d-32c4-4aed-8653-fb2619f11aa7?mode=deep",
+    "timestamp": "2026-05-01 19:59:08.679382",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user subscribe with a very early `startTime` so that upon network partition recovery, the `startTime = last.getConsensusTimestamp() + 1` cursor resets to a historical position and the subsequent page fetch with `maxPageSize` (up to 5000 rows) floods the database with massive result sets, amplifying the reconnection storm?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b1daec0d-18d4-49cd-9a16-0c56516dcaa3?mode=deep",
+    "timestamp": "2026-05-01 19:59:21.496227",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the `delaySubscription(interval, scheduler)` combined with `RepeatSpec.withScheduler(scheduler)` so that during a network partition, all queued retry tasks pile up on the shared `Schedulers.boundedElastic()` instance, starving legitimate non-partition-related tasks and causing cascading failures across the gRPC service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c31d0087-0499-4967-8268-5b52f52dc722?mode=deep",
+    "timestamp": "2026-05-01 19:59:35.094151",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user craft a `TopicMessageFilter` with `limit` set to `Long.MAX_VALUE` so that the expression `(int)(filter.getLimit() - context.getCount().get())` overflows to a negative integer during partition recovery, causing `Math.min(limit, listenerProperties.getMaxPageSize())` to produce an unexpected page size and corrupt the polling state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3460e140-23f8-4fcb-b8e2-b7d3b5c15aed?mode=deep",
+    "timestamp": "2026-05-01 19:59:49.691003",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onNext()] Can an unprivileged external user exploit a network partition that causes duplicate message delivery upon reconnection, where `count.incrementAndGet()` and `last.set(topicMessage)` are updated non-atomically, leading to a race condition where `count` reflects more messages than `last` has advanced, causing the limit calculation in `poll()` to terminate the stream prematurely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7caf0cc6-0c4b-490a-83db-d83e73f76675?mode=deep",
+    "timestamp": "2026-05-01 20:00:04.041926",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user open thousands of subscriptions before a network partition, so that when the partition heals and all `RepeatSpec.times(Long.MAX_VALUE)` loops simultaneously resume polling, the resulting thundering herd of `findByFilter` calls overwhelms the database connection pool and prevents legitimate recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f62b90c1-ac03-4604-9993-a3a1f1187afd?mode=deep",
+    "timestamp": "2026-05-01 20:00:18.531611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the fact that during a network partition `Flux.fromStream(topicMessageRepository.findByFilter(newFilter))` may return a partially consumed stream that is never closed, causing a resource leak of open database cursors that accumulates until the DB connection pool is exhausted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eb2c6678-35aa-4d8e-8f90-d9175da0eddb?mode=deep",
+    "timestamp": "2026-05-01 20:00:33.168361",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the `jitter(0.1)` on `RepeatSpec` being insufficient to desynchronize retry storms, so that during a network partition affecting many concurrent subscribers, the 10% jitter window still results in synchronized retry bursts that cause periodic DB overload spikes upon partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3811a489-37a7-442c-9e5a-0995e102e341?mode=deep",
+    "timestamp": "2026-05-01 20:00:49.874617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user subscribe with `limit=1` and a very old `startTime`, so that during a network partition the `PollingContext.count` never increments (due to failed polls), and upon recovery the subscriber receives a burst of messages that bypasses any intended rate limiting, causing downstream gRPC buffer overflow?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d555604b-74a4-48e7-9591-6ebbc8d7d055?mode=deep",
+    "timestamp": "2026-05-01 20:01:04.149057",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the absence of a maximum retry count cap (beyond `Long.MAX_VALUE`) in `RepeatSpec.times(Long.MAX_VALUE)` during a prolonged network partition to keep a gRPC stream open indefinitely, consuming server-side resources (threads, memory, file descriptors) without ever receiving a message?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7cb7b2a-89b8-4048-8b4b-16827707ddd9?mode=deep",
+    "timestamp": "2026-05-01 20:01:17.029172",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user trigger a scenario where a network partition causes `topicMessageRepository.findByFilter(newFilter)` to block indefinitely (no query timeout configured), holding a `boundedElastic` thread hostage and preventing other subscribers from being scheduled?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7625d398-5998-4525-ac3c-b531054ecce3?mode=deep",
+    "timestamp": "2026-05-01 20:01:31.000374",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the fact that `PollingContext` is created per-subscription and holds an `AtomicReference<TopicMessage> last` that is never cleaned up during a network partition, causing unbounded heap growth if many subscriptions are opened and the partition prevents `onNext()` from ever being called to update the reference?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_229d99dd-b6f6-4320-b12c-0147a6b2f28c?mode=deep",
+    "timestamp": "2026-05-01 20:01:45.563024",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the `newFilter = filter.toBuilder().limit(pageSize).startTime(startTime).build()` reconstruction on every poll cycle so that during a network partition, the `startTime` remains frozen at `filter.getStartTime()` (since `last` is null), and upon recovery the subscriber receives all messages since the original start time in a single burst, causing memory exhaustion in the reactive pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78a3437f-6641-43e5-a2a1-2abd8e26330d?mode=deep",
+    "timestamp": "2026-05-01 20:01:59.341784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the shared `Schedulers.boundedElastic()` instance (a single scheduler shared across all `PollingTopicListener` instances) so that during a network partition, one subscriber's blocked polling tasks prevent other subscribers' `delaySubscription` timers from firing, causing starvation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_143397ac-d137-490a-af3a-4b65349ae9ef?mode=deep",
+    "timestamp": "2026-05-01 20:02:13.323538",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the absence of error handling in `poll()` so that a network partition causing a `DataAccessException` from `topicMessageRepository.findByFilter(newFilter)` propagates up the reactive chain and terminates the `Flux`, silently dropping the subscriber without any notification or retry, causing silent data loss?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_be213a47-4142-4a7d-b9b2-84a48720195b?mode=deep",
+    "timestamp": "2026-05-01 20:02:27.303075",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the `doOnSubscribe` log statement that logs the full `filter` object (including `subscriberId`, `topicId`, `startTime`, `limit`) during a network partition scenario where log flooding occurs, causing log storage exhaustion or log injection if filter fields contain special characters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29148470-4de1-463b-bfc1-42e2d537f05b?mode=deep",
+    "timestamp": "2026-05-01 20:02:41.723788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the `int limit = (int)(filter.getLimit() - context.getCount().get())` cast during a network partition where `context.getCount()` has been incremented by a partial batch before the partition, causing the remaining limit to be miscalculated and resulting in either premature stream termination or delivery of more messages than the requested limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ff4107-7058-4867-bd14-3b83f71bbf22?mode=deep",
+    "timestamp": "2026-05-01 20:02:56.051766",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the `RepeatSpec.withFixedDelay(interval)` combined with a network partition to create a scenario where the fixed delay timer fires but the previous poll's DB connection is still pending, causing concurrent overlapping `findByFilter` calls for the same subscription and potential duplicate message delivery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ed13b72-914c-4c7e-b964-963e09c862ea?mode=deep",
+    "timestamp": "2026-05-01 20:03:09.852454",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the `Flux.fromStream()` wrapping of `topicMessageRepository.findByFilter(newFilter)` during a network partition, where the underlying JDBC stream is not closed on partition-induced cancellation, leading to connection pool exhaustion as leaked connections accumulate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9167cdf2-6589-446c-bc08-d48e5d2a2414?mode=deep",
+    "timestamp": "2026-05-01 20:03:23.484952",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user subscribe to a high-traffic topic with no `limit` set (`hasLimit()` returns false), so that during a network partition recovery, `pageSize = Math.min(Integer.MAX_VALUE, maxPageSize)` causes the maximum page size (5000) to be fetched on every poll cycle, amplifying the recovery load on the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4044a566-57f0-49d8-b2de-635a5410ec15?mode=deep",
+    "timestamp": "2026-05-01 20:03:36.954506",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: onNext()] Can an unprivileged external user exploit a network partition that causes the reactive backpressure to stall `onNext()` calls, so that `last.set(topicMessage)` is never called and the polling cursor remains at the original `filter.getStartTime()`, causing the same messages to be re-fetched and re-delivered indefinitely after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b8d44476-1649-4606-9180-398005de4fe3?mode=deep",
+    "timestamp": "2026-05-01 20:03:51.546703",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: listen()] Can an unprivileged external user exploit the absence of a circuit breaker in the `listen()` polling loop so that during a sustained network partition, the polling flux continues to attempt DB connections at the configured `interval` rate indefinitely, preventing the system from entering a degraded-but-stable state and instead maintaining constant failed connection pressure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4185b67d-9025-4784-bb0b-cfa94da18628?mode=deep",
+    "timestamp": "2026-05-01 20:04:04.801655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: poll()] Can an unprivileged external user exploit the `filter.toBuilder().limit(pageSize).startTime(startTime).build()` call during a network partition where `startTime` is derived from a `consensusTimestamp` that was corrupted or set to a future value by a prior partial write, causing the polling loop to skip all current messages and never deliver data after recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d33cb40-21ba-40cb-b5d4-f4ec04c0b8fd?mode=deep",
+    "timestamp": "2026-05-01 20:04:19.041710",
+    "report_generated": false
+  }
+]
