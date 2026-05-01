@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query a staking-eligible account's balance at a historical block where pending staking rewards have accrued but not yet been paid out, causing the Rosetta API to return a balance that omits the pending_reward from entity_stake, allowing the attacker to observe a systematically understated balance and exploit downstream systems that rely on this figure for settlement or collateral decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1854d7eb-c23c-487b-b102-90f1bd599f61?mode=deep",
+    "timestamp": "2026-05-01 18:53:42.119858",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getBalanceChange()] Can an unprivileged external user exploit the fact that balanceChangeBetween only sums amounts from crypto_transfer and never queries staking_reward_transfer, so that any staking reward credited between snapshotTimestamp and consensusEnd is silently excluded from the returned hbarValue, causing the computed balance to be lower than the true on-chain balance and enabling theft by triggering a transfer based on the understated figure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3cea4bc3-08c6-4f21-97ad-ee2f34946129?mode=deep",
+    "timestamp": "2026-05-01 18:53:54.241994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user supply a consensusEnd timestamp that falls exactly at a staking period boundary where pending rewards were just accrued but the staking_reward_transfer record has not yet been written, causing getLatestBalanceSnapshot() to return a pre-reward balance and getBalanceChange() to miss the reward transfer, resulting in a balance that excludes the unpaid reward and enabling theft of that reward amount?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3a43f07e-74f9-4a9f-86bb-a1a603f534fa?mode=deep",
+    "timestamp": "2026-05-01 18:54:06.775011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query a deleted account's balance by supplying a consensusEnd after deletion, causing the code to set balanceSnapshotEndTimestamp = balanceChangeEndTimestamp - 1 (one nanosecond before deletion), which excludes any staking_reward_transfer that occurred at the exact deletion timestamp, allowing the attacker to observe a balance that omits the final staking reward payout and exploit that discrepancy?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6141d61e-155f-4332-a418-ae2b8642d890?mode=deep",
+    "timestamp": "2026-05-01 18:54:19.501441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user trigger a scenario where selectPreviousPartitionLowerBound returns no rows (partitionLowerBound defaults to 0), causing the account_balance lookup to scan from epoch 0 and return a stale snapshot that predates multiple staking reward payouts, so that the subsequent getBalanceChange() call computes a delta that omits all staking rewards paid after that stale snapshot, resulting in a severely understated balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_781dab76-a8cf-43a5-b635-9e43ec826b09?mode=deep",
+    "timestamp": "2026-05-01 18:54:33.117373",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user craft a consensusEnd value that is between two consecutive staking_reward_transfer records for the same account, causing the balance calculation to include the account_balance snapshot (which already reflects a prior reward) but exclude the most recent reward transfer because it falls outside the balanceChangeBetween window, leading to double-exclusion of the reward and an understated balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8a8c9fed-f343-4a5d-8211-d416f914e919?mode=deep",
+    "timestamp": "2026-05-01 18:54:46.631073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias that was previously owned by a high-balance staking account and has since been reassigned, causing selectCryptoEntityByAlias to return the first match ordered by timestamp_range desc (the current owner), but the balance snapshot in account_balance still references the old owner's staking rewards, resulting in a balance that incorrectly attributes unpaid staking rewards to the new alias owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_19ec6f3e-c663-4ffd-99ab-c34c3103e4e5?mode=deep",
+    "timestamp": "2026-05-01 18:54:59.644377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user observe that hbarAmount.Value += hbarValue performs unchecked int64 addition, and by querying an account with an extremely large pending staking reward accumulated over many periods combined with a large crypto_transfer delta, trigger an integer overflow that wraps the balance to a negative or near-zero value, causing the reported balance to be far below the true value and enabling theft by exploiting the understated figure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cfdb3a9d-c43a-48d6-9cdf-ec7ac9d11bde?mode=deep",
+    "timestamp": "2026-05-01 18:55:13.896916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getBalanceChange()] Can an unprivileged external user exploit the errata filter (errata is null or errata <> 'DELETE') in balanceChangeBetween to ensure that a staking reward transfer that was erroneously marked with errata='DELETE' is excluded from the balance delta, causing the balance to be understated by the reward amount, and then use the Rosetta API's reported balance to justify a fraudulent claim that the account has fewer funds than it actually does?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a44fb974-e9c5-4263-b2cd-631f37d95b82?mode=deep",
+    "timestamp": "2026-05-01 18:55:26.923711",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query an alias-based account (accountId.HasAlias() == true) at a consensusEnd before the alias was registered, causing getCryptoEntity() to return nil and the function to return types.AmountSlice{&types.HbarAmount{}} (zero balance), even though the underlying numeric account had accumulated staking rewards, allowing the attacker to present a zero-balance proof to a third party while the actual rewards remain unclaimed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5a9c2a2d-df09-4abd-be1c-89111857254e?mode=deep",
+    "timestamp": "2026-05-01 18:55:40.147353",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a timestamp that falls in a partition gap (between two mirror_node_time_partitions entries), causing selectPreviousPartitionLowerBound to return the lower bound of a partition that predates the most recent staking reward payout, so that the account_balance snapshot used is older than the last reward, and getBalanceChange() then double-counts or omits the reward transfer depending on the snapshot timestamp alignment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_feceae93-eba5-47db-b931-729990c5d690?mode=deep",
+    "timestamp": "2026-05-01 18:55:52.959726",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user repeatedly query RetrieveBalanceAtBlock() with incrementally increasing consensusEnd values around a known staking reward payout timestamp to precisely identify the exact nanosecond the reward was credited, and then use that information to front-run or manipulate a dependent financial protocol that relies on the Rosetta balance endpoint for settlement, effectively stealing the timing advantage of the unpaid reward?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6dd7071d-0058-4ef4-8f8f-2fcf31109ce8?mode=deep",
+    "timestamp": "2026-05-01 18:56:06.541568",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getCryptoEntity()] Can an unprivileged external user supply a consensusEnd that falls within the timestamp_range of an entity_history record for a deleted account that previously had large staking rewards, causing getCryptoEntity() to return the deleted entity, and then RetrieveBalanceAtBlock() to compute a balance that includes the pre-deletion staking reward snapshot but excludes the reward transfer at deletion, resulting in an incorrect balance that can be used to claim funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7aa0e8c-098e-4232-92c4-281e589543d8?mode=deep",
+    "timestamp": "2026-05-01 18:56:19.327582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that when entity.Deleted is true and entity.GetModifiedTimestamp() <= consensusEnd, the code sets balanceChangeEndTimestamp = entity.GetModifiedTimestamp() but staking_reward_transfer records at that exact timestamp are not included in balanceChangeBetween (which only queries crypto_transfer), causing the final staking reward to be permanently excluded from the reported balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc3bfdd9-323b-449d-b716-08408cc4baae?mode=deep",
+    "timestamp": "2026-05-01 18:56:33.073291",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getBalanceChange()] Can an unprivileged external user observe that balanceChangeBetween uses consensus_timestamp > @start (exclusive lower bound) and consensus_timestamp <= @end (inclusive upper bound), and by choosing a consensusEnd equal to the snapshotTimestamp of the latest balance snapshot, cause the query to return zero delta even though staking rewards were paid at exactly snapshotTimestamp, resulting in those rewards being excluded from the balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e89a3cc1-07cd-4449-95ea-500e523657c2?mode=deep",
+    "timestamp": "2026-05-01 18:56:47.445127",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query the balance of account 0.0.800 (the staking reward account, referenced via treasuryEntityId) at a block where large pending rewards are reserved, causing latestBalanceBeforeConsensus to return the treasury's balance without accounting for reserved_staking_rewards, and then use the inflated treasury balance reading to argue that more rewards are available than actually are, enabling theft of rewards that should be reserved for other stakers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d77a2ee-80d7-4e34-91ec-dc4e520e9938?mode=deep",
+    "timestamp": "2026-05-01 18:57:01.445258",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a timestamp where the treasury account (treasuryEntityId) has no account_balance entry at or before that timestamp, causing latestBalanceBeforeConsensus to return ConsensusTimestamp == 0, triggering hErrors.ErrNodeIsStarting, and using this error response to infer the absence of balance snapshots and deduce the timing of unpaid staking reward windows that can be exploited?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4af8f745-3a77-4617-97bd-86269d4daaa2?mode=deep",
+    "timestamp": "2026-05-01 18:57:16.112503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that the Rosetta balance endpoint does not join entity_stake to include pending_reward in the returned AmountSlice, so that an account with a large accumulated pending_reward appears to have a lower balance than it truly does, and a third-party exchange or bridge that trusts the Rosetta balance for withdrawal limits allows the attacker to withdraw more than the reported balance by triggering the actual reward payout separately?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6d285218-75fb-4ebb-b6c1-e81b8284080f?mode=deep",
+    "timestamp": "2026-05-01 18:57:31.224122",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias that resolves to a CONTRACT entity (since selectCryptoEntityById filters type in ('ACCOUNT', 'CONTRACT') but selectCryptoEntityByAlias does not filter by type), causing getCryptoEntity() to return a contract entity whose staking rewards are computed differently, and then RetrieveBalanceAtBlock() to return a balance that omits the contract's pending staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6920600a-8bbc-4503-a382-83f4f0f721cc?mode=deep",
+    "timestamp": "2026-05-01 18:57:44.709333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user query a balance at a consensusEnd that is exactly one nanosecond before a staking_reward_transfer consensus_timestamp, causing the reward to be excluded from both the account_balance snapshot (not yet reflected) and the balanceChangeBetween delta (exclusive of that timestamp), resulting in the reward being invisible in the balance and enabling the attacker to claim the account has fewer funds than it does?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81b642ff-cc80-45ef-9df6-2d099e9ea37f?mode=deep",
+    "timestamp": "2026-05-01 18:57:59.587008",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getBalanceChange()] Can an unprivileged external user exploit the fact that staking_reward_transfer records are stored in a separate table from crypto_transfer, and balanceChangeBetween only queries crypto_transfer, so that even when a staking reward IS paid out (creating a staking_reward_transfer record), the corresponding credit to the account in crypto_transfer may be recorded under a different entity_id (e.g., 0.0.800 debit vs. account credit), causing the balance delta to be miscalculated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a773d684-40c9-4779-813a-c068f473c885?mode=deep",
+    "timestamp": "2026-05-01 18:58:14.119617",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user supply a very large consensusEnd value (near int64 max) to RetrieveBalanceAtBlock(), causing getInclusiveInt8Range(consensusEnd, consensusEnd) to create a range that matches no entity in entity_history, returning nil entity, and then the balance calculation proceeds with only the account_balance snapshot without any staking reward adjustments, resulting in a balance that excludes all rewards paid after the last snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c56c486a-5c0c-4459-98e0-c3bf9e0108b5?mode=deep",
+    "timestamp": "2026-05-01 18:58:27.321306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: GetAccountId()] Can an unprivileged external user supply an alias that matches a deleted account (selectCurrentCryptoEntityByAlias filters deleted is null or deleted is false), causing GetAccountId() to return ErrAccountNotFound even though the account had unpaid staking rewards at deletion time, and then use this error to argue the account never existed and claim the orphaned staking rewards through a separate mechanism?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29c02b26-78c8-4d48-83d5-2e5fa27cc70c?mode=deep",
+    "timestamp": "2026-05-01 18:58:40.686113",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the two-step balance calculation (snapshot + delta) where the account_balance snapshot already includes previously paid staking rewards but the delta from balanceChangeBetween excludes the current period's unpaid reward, causing the Rosetta API to consistently underreport the true balance by exactly the pending_reward amount, and use this systematic underreporting to manipulate a DeFi protocol's collateral ratio?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71846828-3a6f-4289-923e-a13534121fb4?mode=deep",
+    "timestamp": "2026-05-01 18:58:54.800555",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a timestamp that causes selectPreviousPartitionLowerBound to return the lower bound of a partition that starts after the last staking_reward_transfer for the account, causing the account_balance lookup to use a lower_bound that excludes the snapshot containing the paid reward, and getBalanceChange() to then re-add the reward as a crypto_transfer delta, resulting in double-counting of the reward in the balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7cca2b3-d921-4436-a499-3d554ccf7b25?mode=deep",
+    "timestamp": "2026-05-01 18:59:09.466256",
+    "report_generated": false
+  }
+]
