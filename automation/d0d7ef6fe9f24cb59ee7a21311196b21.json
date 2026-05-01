@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactions()] Can an unprivileged external user send GET /api/v1/transactions with no timestamp filter, causing `parseTimestampFilters` to use an unbounded open range via `bindTimestampRange`, triggering a full-table sequential scan on the `transaction` table and causing sustained CPU/IO exhaustion (DoS)?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_641874b8-4a4f-4f02-8ed2-a3d99114e41c?mode=deep",
+    "timestamp": "2026-05-01 19:03:21.743925",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactions()] Can an unprivileged external user supply the maximum allowed `limit` value repeatedly across paginated requests to force the server to execute the expensive three-way FULL OUTER JOIN in `getTransactionTimestampsQuery()` on every page, amplifying DB load beyond what a single query would suggest?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0cbecb27-bf40-44fe-845a-cdd2da2a53f5?mode=deep",
+    "timestamp": "2026-05-01 19:03:33.899367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user supply many repeated `account.id` query parameters (up to `maxRepeatedQueryParameters`) to grow `accountIdEqValues` into a large array, causing `getQueryWithEqualValues` to emit `= any($N)` with a large array parameter and force a costly index scan on `crypto_transfer.entity_id`, leading to DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_892264e3-e12b-43e5-8eab-d0cafb425d54?mode=deep",
+    "timestamp": "2026-05-01 19:03:46.183970",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user supply many repeated `transactiontype` query parameters to grow the `transactionTypes` array, causing `getQueryWithEqualValues` to emit `type = any($N)` with a large array, forcing a full scan of the `transaction` table and causing DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2e927b0-eb31-44a2-bf24-29093571a346?mode=deep",
+    "timestamp": "2026-05-01 19:03:59.051888",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply both an `account.id` filter and a `type` filter to trigger the three-way FULL OUTER JOIN path (crypto_transfer + token_transfer + entity_transaction UNION ALL), causing multiplicative query cost amplification and sustained DB resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e0abc537-6d83-4707-a427-28e3e0ef0a51?mode=deep",
+    "timestamp": "2026-05-01 19:04:12.364517",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply a `type=credit` or `type=debit` filter alongside an `account.id` filter to trigger the FULL OUTER JOIN between `cryptoTransferQuery` and `tokenTransferQuery` subqueries, each independently scanning large transfer tables, causing a DoS via query amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_45ca3046-3106-447c-a001-192d62da56d3?mode=deep",
+    "timestamp": "2026-05-01 19:04:26.395464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply a valid 48-byte base64url transaction hash that matches multiple rows in `getTransactionHash()`, causing `lookupKeys` to grow large and `getTransactionsByTransactionIdsSql()` to emit a long OR-chain of `(payer_account_id = $N and consensus_timestamp = $M)` conditions, degrading query performance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6fe464ff-884b-4904-a9df-c04664395898?mode=deep",
+    "timestamp": "2026-05-01 19:04:42.105796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply a 32-byte (ETH-length) hash prefix that matches many rows in the `transaction_hash` table, causing `getTransactionHash` to return many rows, all reusing `rows[0].payer_account_id` as the payer for all lookup keys, potentially leaking cross-payer transaction data if the first row's payer is used to authorize the subquery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_04d2488d-299a-447e-9d24-c28a65902b83?mode=deep",
+    "timestamp": "2026-05-01 19:04:56.785334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a 32-byte ETH-prefix hash that matches many `transaction_hash` rows, causing `lookupKeys` to be a large flat array, which then causes `getTransactionsByTransactionIdsSql()` to iterate over all pairs and push many parameters, leading to a very large parameterized query that exhausts DB statement memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_450bdeb1-dad0-42e7-91b2-48e216769255?mode=deep",
+    "timestamp": "2026-05-01 19:05:10.220740",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user trigger the `mayMissLongTermScheduledTransaction()` retry path by querying a transaction ID for a successful SCHEDULECREATE (type=42), causing the handler to execute two sequential DB queries instead of one, doubling DB load per request and enabling a 2x amplification DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_deaa0f33-e7bf-406c-a96f-228a08799a09?mode=deep",
+    "timestamp": "2026-05-01 19:05:25.523998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply `?scheduled=true` for a transaction ID that has no matching rows, causing `mayMissLongTermScheduledTransaction()` to return `true` (via `scheduled && transactions.length === 0`), triggering a second DB query with an expanded `upperConsensusTimestampIndex` range, doubling DB cost per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ef37b4f6-0aed-4c96-a383-79d8cc23bd54?mode=deep",
+    "timestamp": "2026-05-01 19:05:39.913283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply a transaction ID whose corresponding transaction has a non-empty `inner_transactions` field, causing `getTransactionsByTransactionIdsSql()` to be called a second time for inner transactions, resulting in two DB queries per request and enabling a 2x query amplification DoS?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_623c5459-40fd-426f-b0f3-7da9ed5fc5a4?mode=deep",
+    "timestamp": "2026-05-01 19:05:55.694289",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user supply a transaction ID for a batch transaction with a very large `inner_transactions` array, causing `rows.push(...innerTransactionRows)` to append many rows, then `formatTransactionRows()` to process all of them including async `createStakingRewardTransferList()`, leading to excessive memory and CPU usage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d82a5433-b6ac-4ba0-800b-612b1cd045ac?mode=deep",
+    "timestamp": "2026-05-01 19:06:09.808687",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: doGetTransactions()] Can an unprivileged external user exploit the `cache.get(payerAndTimestamps, loader, keyMapper)` call where `keyMapper` generates keys as `transaction:${timestamp}` (without including `payer_account_id`) to cause cache key collisions between transactions from different payers that share the same `consensus_timestamp`, potentially returning stale or wrong transaction data to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d56c300-ab6d-48ca-8ff6-b2c946718801?mode=deep",
+    "timestamp": "2026-05-01 19:06:25.537260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: keyMapper()] Can an unprivileged external user craft a `consensus_timestamp` value that, after the `.replace('.', '')` operation, collides with a different timestamp's cache key (e.g., `1.23` and `123` both producing `transaction:123`), causing cache poisoning where one user's transaction data is served to another?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac03ecd5-c4b0-4bef-b185-71e80abc89bd?mode=deep",
+    "timestamp": "2026-05-01 19:06:40.150861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user query a recently-created SCHEDULECREATE transaction (type=42, result=SUCCESS) to force the response to use `SHORTER_CACHE_CONTROL_HEADER` (`public, max-age=5`), causing downstream CDN/proxy caches to serve a short-lived but publicly-cacheable response, potentially leaking transaction data to other users via shared caches?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a591b23b-1dae-4011-ad59-382ff7211071?mode=deep",
+    "timestamp": "2026-05-01 19:06:55.607985",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user repeatedly query a SCHEDULECREATE transaction within `maxScheduledTransactionConsensusTimestampRangeNs` to keep triggering the `SHORTER_CACHE_CONTROL_HEADER` path, preventing the response from being cached for longer periods and increasing backend DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8f7c7d0-75d4-4968-bd09-cc57eed8750b?mode=deep",
+    "timestamp": "2026-05-01 19:07:10.917311",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter to trigger the `entityTransactionCondition` path where `.replace(/(ctl|t)\\./g, '')` strips table alias prefixes from the combined condition string, potentially causing ambiguous column references in the `entity_transaction` subquery that resolve to unexpected columns, leading to incorrect data being returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4b98973-9eb5-4b7e-b092-fda17025e138?mode=deep",
+    "timestamp": "2026-05-01 19:07:27.713821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter to trigger the `nftTransfersUnion` UNION ALL path against `entity_transaction`, where `entityTransactionCondition` is built by joining and regex-replacing multiple condition strings, and a crafted account ID value could cause the regex replacement to produce a malformed SQL fragment?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c07a72c4-b774-46ef-94f5-a804d3e29c00?mode=deep",
+    "timestamp": "2026-05-01 19:07:44.285014",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user supply a non-`eq` operator for `account.id` (e.g., `account.id=gte:0.0.100`) causing `accountConditions.push(`ctl.entity_id${operator}$${params.push(value)}`)` to embed the operator string directly into the SQL fragment, and if operator validation is insufficient, inject a malformed SQL operator?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48c610b5-c1ce-4a92-aaa5-859da1f7ad20?mode=deep",
+    "timestamp": "2026-05-01 19:07:57.652739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter that causes `accountQuery.replace(/ctl\\\\.entity_id/g, 'ttl.account_id')` to produce an incorrect SQL fragment if the account query contains the literal string `ctl.entity_id` in a value position, leading to a malformed or semantically incorrect SQL query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91e929d5-12ff-4b35-b084-2864b1f64503?mode=deep",
+    "timestamp": "2026-05-01 19:08:12.034794",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply a `credit` filter alongside an `account.id` filter to trigger `creditDebitQuery.replace(/ctl\\\\.amount/g, 'ttl.amount')` on the token transfer query, and if `creditDebitQuery` contains unexpected content, cause the replacement to produce a semantically incorrect SQL fragment that bypasses the credit/debit filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2489f30a-2540-4e1f-b62a-a9b6725be7fb?mode=deep",
+    "timestamp": "2026-05-01 19:08:26.383152",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID with a very large valid-start nanosecond value such that `minTimestamp - config.query.maxValidStartTimestampDriftNs` underflows the BigInt range or produces a negative consensus timestamp bound, causing the query to scan an unexpectedly large range of the `transaction` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b7d22d03-38be-4487-b3ca-53a00634ebb6?mode=deep",
+    "timestamp": "2026-05-01 19:08:40.620060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID with a valid-start timestamp near `constants.MAX_LONG` such that `maxTimestamp + maxTransactionConsensusTimestampRangeNs` overflows BigInt arithmetic, producing an incorrect upper bound for `consensus_timestamp` and causing the query to return no results or scan an incorrect range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_584c1152-9659-406a-9edc-e593cf1531b8?mode=deep",
+    "timestamp": "2026-05-01 19:08:55.832032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: '] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user trigger the path where `timestampField === Transaction.CONSENSUS_TIMESTAMP` and `maxConsensusTimestamp` is set to `transactionKeys[transactionKeys.length - 1]` (the last element of the array), and by controlling the order of hash-lookup results, cause the upper bound to be set to an unexpectedly small value, causing legitimate transactions to be excluded from results?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58b0f169-12d7-41da-8dcc-af4e056e6a58?mode=deep",
+    "timestamp": "2026-05-01 19:09:09.436921",
+    "report_generated": false
+  }
+]
