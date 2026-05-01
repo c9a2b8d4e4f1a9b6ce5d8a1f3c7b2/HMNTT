@@ -148,5 +148,155 @@
     "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e235ae0b-aced-4f70-8991-59440d393d09?mode=deep",
     "timestamp": "2026-04-29 04:39:16.770237",
     "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user supply a crafted `transactionIdOrHash` path parameter that passes `isValidTransactionHash()` regex but decodes to an unexpected byte sequence via base64url ambiguity (e.g., characters that are valid in both base64 and base64url), causing `Buffer.from(transactionIdOrHash, 'base64url')` to silently produce a different hash than intended, resulting in the wrong smart contract transaction being returned and unintended smart contract state being exposed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63ab40a0-3ddb-4a84-9c32-ee32c86828b1?mode=deep",
+    "timestamp": "2026-05-01 18:54:49.036971",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user submit a `transactionIdOrHash` with the `0x` prefix of exactly `Transaction.HEX_HASH_WITH_PREFIX_SIZE` length, triggering the `substring(2)` strip, and then supply a hex string whose first two characters are also `0x`-like, causing the prefix strip to misalign the hash bytes and return a different smart contract transaction record than the one actually requested?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81d1204d-d313-44da-bf72-fb3d4461e4ed?mode=deep",
+    "timestamp": "2026-05-01 18:55:01.214464",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromTransactionsByIdOrHashRequest()] Can an unprivileged external user craft a hash input that is exactly `Transaction.BASE64_HASH_SIZE` characters long but contains only hex-valid characters, causing the encoding branch to select `base64url` instead of `hex`, silently decoding to a different 36-byte buffer and matching a different smart contract transaction in the database, leading to incorrect transaction data being returned to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2b8df847-f1fc-443c-b492-62e80f32e499?mode=deep",
+    "timestamp": "2026-05-01 18:55:13.766710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user trigger the hash-based lookup path in `extractSqlFromTransactionsByIdOrHashRequest()` where `rows[0].payer_account_id` is used as the single `payerAccountId` for all rows returned by `getTransactionHash()`, causing transactions from multiple different payers (all sharing the same 32-byte hash prefix) to be incorrectly attributed to one payer, resulting in cross-account smart contract transaction data leakage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_77d73959-1970-4352-808c-7c43665e9735?mode=deep",
+    "timestamp": "2026-05-01 18:55:26.792335",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user submit a valid transaction ID whose `inner_transactions` array in the database is extremely large (e.g., thousands of entries), causing `getTransactionsByTransactionIdsSql(innerTransactions, filters, Transaction.VALID_START_NS)` to build a SQL query with thousands of OR conditions and parameter bindings, exhausting database query plan resources and causing the mirror node REST layer to become unresponsive for smart contract transaction queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_555aa4cd-407b-4524-84cd-710cb5019d60?mode=deep",
+    "timestamp": "2026-05-01 18:55:40.083946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: mayMissLongTermScheduledTransaction()] Can an unprivileged external user submit a request with `scheduled=true` and a transaction ID that has zero matching rows in the database, causing `mayMissLongTermScheduledTransaction()` to return `true` and trigger a second `pool.queryQuietly()` call with an expanded `upperConsensusTimestampIndex` range, effectively doubling the database query cost and enabling a denial-of-service against smart contract transaction lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e45fa1a7-5390-4974-8012-7000159e36dd?mode=deep",
+    "timestamp": "2026-05-01 18:55:53.713556",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: mayMissLongTermScheduledTransaction()] Can an unprivileged external user omit the `scheduled` query parameter entirely, causing `mayMissLongTermScheduledTransaction()` to enter the `scheduled === undefined` branch, and by having a `SCHEDULECREATE` transaction (type === `scheduleCreateProtoId` = 42) with a successful result in the response, force a second expanded-range database query, allowing the attacker to systematically double query load for any transaction ID that has a successful SCHEDULECREATE record?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13aed822-4ece-40d3-943f-27c6abf23979?mode=deep",
+    "timestamp": "2026-05-01 18:56:07.891484",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHashCacheControlHeader()] Can an unprivileged external user exploit the fact that `getTransactionsByIdOrHashCacheControlHeader()` uses the raw `rows` array (pre-`formatTransactionRows`) to check `transaction.type === scheduleCreateProtoId` and `SUCCESS_PROTO_IDS.includes(transaction.result)`, where `transaction.result` is a raw database integer, to craft a scenario where a smart contract transaction response is served with a 5-second `public` cache header instead of the default, causing stale smart contract state to be cached and served to other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4da5c7f4-20e9-423f-bc59-774eb2acb91d?mode=deep",
+    "timestamp": "2026-05-01 18:56:22.812744",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: keyMapper()] Can an unprivileged external user exploit the `keyMapper()` function's `timestamp.replace('.', '')` logic, where a `consensus_timestamp` string like `'1234.5678'` becomes `'transaction:12345678'` (same as a timestamp `12345678` with no decimal), to cause a cache key collision between two different smart contract transactions, resulting in one transaction's data being incorrectly served in response to a query for the other?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ca7e1d3-d1c2-4551-bed5-ea68adcbe38f?mode=deep",
+    "timestamp": "2026-05-01 18:56:39.576220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: keyMapper()] Can an unprivileged external user trigger a scenario where `consensus_timestamp` is returned as a numeric type (not a string) from the database, causing the `typeof timestamp === 'string'` check in `keyMapper()` to skip the `.replace('.', '')` call, producing a cache key like `'transaction:1234.5678'` that never matches a future lookup key `'transaction:12345678'`, effectively bypassing the cache for all smart contract transactions and causing unbounded repeated database queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ea753fc4-8cac-4ac1-9017-085974772be2?mode=deep",
+    "timestamp": "2026-05-01 18:56:56.148138",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter combined with a `type` filter, causing `entityTransactionCondition` to be built by stripping `(ctl|t)\\\\.` prefixes from the combined query string via regex replacement, and if the `resultTypeQuery` or `transactionTypeQuery` contains a column alias that matches the regex pattern, produce a malformed SQL condition that incorrectly filters smart contract transactions from the `entity_transaction` table?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_36fbd8c2-5107-46eb-82b9-10d3a05b53e1?mode=deep",
+    "timestamp": "2026-05-01 18:57:09.676864",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionTimestampsQuery()] Can an unprivileged external user supply both an `account.id` filter and a `type` filter, causing the `entityTransactionCondition` to be built by joining `accountQuery`, `resultTypeQuery`, `timestampQuery`, and `transactionTypeQuery` after stripping table aliases, where the `timestampQuery` still contains `t.consensus_timestamp` references that were not fully replaced, resulting in a SQL error or incorrect filtering of smart contract transactions in the `entity_transaction` union branch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6129bfe-5e1e-4787-a380-0d4c3110339a?mode=deep",
+    "timestamp": "2026-05-01 18:57:23.023359",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply an `account.id` filter that causes `tokenTransferQuery` to be built with `accountQuery.replace(/ctl\\\\.entity_id/g, 'ttl.account_id')`, and if the `accountQuery` contains multiple `ctl.entity_id` references (e.g., from multiple account ID filters), the replacement produces a query that incorrectly filters token transfers, causing smart contract-related token transfer transactions to be omitted from or duplicated in the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aef916c2-f17a-488e-8c83-1752ae4edc3f?mode=deep",
+    "timestamp": "2026-05-01 18:57:37.560407",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransferDistinctTimestampsQuery()] Can an unprivileged external user supply a `type` filter combined with an `account.id` filter, causing the `joinClause` in `getTransferDistinctTimestampsQuery()` to include a JOIN to the `transaction` table using `(consensus_timestamp, payer_account_id)`, and if the transfer table has rows with the same `(consensus_timestamp, payer_account_id)` as a different transaction type, cause smart contract transactions to be incorrectly excluded from the result set?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_59546220-0c16-47b5-9f5c-c46cec103ffc?mode=deep",
+    "timestamp": "2026-05-01 18:57:51.421668",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: extractSqlFromTransactionsRequest()] Can an unprivileged external user supply conflicting `type=credit` and `type=debit` values in the same request, causing `extractSqlFromTransactionsRequest()` to return `null` (via the `lastCreditDebitValue !== null && lastCreditDebitValue !== value` check), which causes `getTransactionTimestamps()` to return `{rows: []}` silently, masking the existence of smart contract transactions without any error to the caller?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b7c2eac-aee0-431b-b8e6-dd9754ffb292?mode=deep",
+    "timestamp": "2026-05-01 18:58:05.995592",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user trigger the hash-based lookup path where `getTransactionHash()` returns multiple rows with different `consensus_timestamp` values, causing `lookupKeys` to be built as `[payerAccountId, ts1, payerAccountId, ts2, ...]` (all using `rows[0].payer_account_id`), and the resulting SQL to use `OR` conditions that match transactions from different payers sharing the same consensus timestamps, leaking smart contract transaction data across account boundaries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ded2387-9b38-499a-bcb4-0077e86aaf33?mode=deep",
+    "timestamp": "2026-05-01 18:58:20.438418",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID where `BigInt(transactionKeys[index + 1])` conversion of a very large timestamp value causes `maxTimestamp + maxTransactionConsensusTimestampRangeNs` to overflow JavaScript's BigInt arithmetic bounds, producing an incorrect upper consensus timestamp bound and causing the query to return smart contract transactions outside the intended time window?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2debe91d-d5a6-4390-a9be-bc898d884593?mode=deep",
+    "timestamp": "2026-05-01 18:58:34.039715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByTransactionIdsSql()] Can an unprivileged external user supply a transaction ID with a `valid_start_ns` timestamp that, when subtracted by `config.query.maxValidStartTimestampDriftNs`, underflows to a negative BigInt value, causing the lower consensus timestamp bound to be negative and the resulting SQL query to scan the entire transaction table, enabling a resource exhaustion attack against smart contract transaction lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_033a7b23-7555-490a-846d-6698a64592b4?mode=deep",
+    "timestamp": "2026-05-01 18:58:47.926579",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user submit a transaction ID (non-hash path) where `inner_transactions` rows are returned, and the second `getTransactionsByTransactionIdsSql()` call for inner transactions uses `Transaction.VALID_START_NS` as the timestamp field, causing the lower bound to be `minTimestamp - maxValidStartTimestampDriftNs`, which may be significantly earlier than the outer transaction, returning unrelated smart contract transactions that happen to share the same `valid_start_ns` range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0738a9b3-df95-4531-9595-25abcf55daab?mode=deep",
+    "timestamp": "2026-05-01 18:59:02.241336",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user submit a transaction ID where the outer transaction has `inner_transactions` populated, and the `nonce` or `scheduled` filters from `acceptedSingleTransactionParameters` are passed through to the inner transaction query via `getTransactionsByTransactionIdsSql(innerTransactions, filters, Transaction.VALID_START_NS)`, causing the inner transaction query to be incorrectly filtered by nonce/scheduled state and omitting valid inner smart contract transactions from the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_297e6a42-a639-41a2-b0d2-b4091af7141f?mode=deep",
+    "timestamp": "2026-05-01 18:59:17.305115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user submit a hash-based request where `isTransactionHash` is `true`, causing the inner transactions block (`if (!isTransactionHash && innerTransactions.length > 0)`) to be skipped entirely, resulting in inner smart contract transactions (child transactions of a batch) being silently omitted from the response when queried by hash, creating an incomplete view of smart contract execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3e73e25f-0f7e-4b90-90e1-d666757a93dd?mode=deep",
+    "timestamp": "2026-05-01 18:59:31.070563",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: getTransactionsByIdOrHash()] Can an unprivileged external user trigger the `mayMissLongTermScheduledTransaction()` retry path, which mutates `params[params.upperConsensusTimestampIndex]` in-place on the shared `params` array, and if the same `params` array is referenced elsewhere (e.g., via closure or cache), cause the second `pool.queryQuietly(query, params)` call to use a corrupted parameter set, returning incorrect smart contract transaction data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67a02b92-5518-462f-bd0f-8fb0e40a7a90?mode=deep",
+    "timestamp": "2026-05-01 18:59:45.520608",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: formatTransactionRows()] Can an unprivileged external user trigger a response where `row.entity_id` is a valid but unexpected entity ID (e.g., a system entity), causing `EntityId.parse(row.entity_id, {isNullable: true}).toString()` to return a string representation that differs from what the caller expects, leading to incorrect smart contract entity identification in downstream integrations that rely on the `entity_id` field?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc3aa21c-ca11-4ed3-8fcb-0d566a91e9a2?mode=deep",
+    "timestamp": "2026-05-01 19:00:01.521457",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: formatTransactionRows()] Can an unprivileged external user trigger a scenario where `row.transaction_hash` is a 48-byte buffer, causing `utils.encodeBase64(row.transaction_hash)` to produce a base64 string of the full 48 bytes, while `extractSqlFromTransactionsByIdOrHashRequest()` normalizes the hash to 32 bytes for lookup, creating a mismatch between the hash displayed in the response and the hash that would be used to look up the same transaction, breaking smart contract transaction traceability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b612ecc1-b0eb-4e8e-bf0d-c2b8383df42a?mode=deep",
+    "timestamp": "2026-05-01 19:00:17.007399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/transactions.js -> Scope: Medium: A bug in the respective layer 0/1/2 network code that results in unintended smart contract behavior with no concrete funds at direct risk'] [Function: createMaxCustomFeesList()] Can an unprivileged external user trigger a response where `row.max_custom_fees` contains malformed or oversized protobuf-serialized `CustomFeeLimit` bytes, causing `new CustomFeeLimits(maxCustomFeesList)` to throw an unhandled exception during `formatTransactionRows()`, crashing the response handler and making smart contract transaction data unavailable for all concurrent requests sharing the same Node.js event loop?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d227ea7-adcb-4d04-a7be-98d336e36ed8?mode=deep",
+    "timestamp": "2026-05-01 19:00:31.680364",
+    "report_generated": false
   }
 ]
