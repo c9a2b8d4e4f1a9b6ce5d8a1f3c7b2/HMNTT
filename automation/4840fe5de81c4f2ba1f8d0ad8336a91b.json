@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getSharedListener()] Can an unprivileged external user enumerate all active topic subscriptions by observing the shared ConcurrentHashMap `topicMessages` side-effects (e.g., timing differences in computeIfAbsent) to determine which topic IDs are currently being listened to, leaking subscription metadata?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bb403fb-e2ba-4727-b34d-87c77be73e9c?mode=deep",
+    "timestamp": "2026-05-01 21:06:24.024343",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getTopic()] Can an unprivileged external user supply a crafted `topicId` whose `getId()` produces a value that, when formatted via `String.format(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08918668-676e-4d46-b4b2-ceeec9153d04?mode=deep",
+    "timestamp": "2026-05-01 21:06:36.295261",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user trigger the `.share()` operator on a `Flux<TopicMessage>` to force all co-subscribers on the same topic to receive a terminal error signal by causing a single subscription to emit an error, effectively denying service to all concurrent listeners on that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a3d2ee91-84d9-401a-8af9-084f63cafbb5?mode=deep",
+    "timestamp": "2026-05-01 21:06:48.804784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: listen() (inherited)] Can an unprivileged external user exhaust the `onBackpressureBuffer` of size `maxBufferSize` (default 16384) by subscribing to a high-volume topic and consuming messages slowly, triggering `BufferOverflowStrategy.ERROR` which terminates the shared Flux and disrupts all other subscribers on the same topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ae4135a-2251-484b-b589-57b080b4f328?mode=deep",
+    "timestamp": "2026-05-01 21:07:01.598938",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getSharedListener()] Can an unprivileged external user create subscriptions to a large number of distinct topic IDs, causing the `topicMessages` ConcurrentHashMap to grow unboundedly, exhausting heap memory and causing an out-of-memory denial of service on the gRPC server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76f3fa2b-49ce-4aeb-85af-664c7215f5d8?mode=deep",
+    "timestamp": "2026-05-01 21:07:15.131330",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the `Retry.backoff(Long.MAX_VALUE, interval)` retry policy in `subscribe()` to keep a zombie subscription alive indefinitely after the underlying Redis connection fails, holding resources (threads, memory) without ever releasing them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_045795fa-f741-48c4-86e2-312fce8ceaa0?mode=deep",
+    "timestamp": "2026-05-01 21:07:28.152973",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: RedisTopicListener() constructor] Can an unprivileged external user trigger repeated gRPC subscription requests to force the `container` Mono's `Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(8))` to spin indefinitely, consuming CPU and connection pool resources in a denial-of-service attack against the Redis connection layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2cb01e28-9d74-4b05-ab0f-d84fa56f9707?mode=deep",
+    "timestamp": "2026-05-01 21:07:41.446325",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: unsubscribe()] Can an unprivileged external user exploit a race condition between `computeIfAbsent` in `getSharedListener()` and `topicMessages.remove()` in `unsubscribe()` to cause a topic entry to be removed from the map while a new subscriber is being added, resulting in a lost subscription and missed messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6dabef9-a564-4ee9-9684-de7edc055173?mode=deep",
+    "timestamp": "2026-05-01 21:07:55.355041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user cause the shared `.share()` Flux to terminate by disconnecting abruptly, triggering `doOnCancel(() -> unsubscribe(topic))`, which removes the topic from `topicMessages` and forces all remaining subscribers to lose their live feed without notification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d413bb5-818a-4785-a907-ecfc4d48896f?mode=deep",
+    "timestamp": "2026-05-01 21:08:09.630774",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the fact that `subscribe()` uses `.share()` (hot publisher) so that a subscriber who connects after the shared Flux has already started will miss all previously emitted messages, leading to silent data loss for late-joining subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48f7211a-d259-406b-8284-11352f80f510?mode=deep",
+    "timestamp": "2026-05-01 21:08:23.652736",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getSharedListener()] Can an unprivileged external user force a new `subscribe()` call for the same topic by timing their subscription to arrive exactly when `unsubscribe()` removes the entry from `topicMessages`, creating duplicate Redis channel subscriptions that double-deliver messages to some subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16d28ab7-96b9-475e-a734-3d66b21197c4?mode=deep",
+    "timestamp": "2026-05-01 21:08:38.519197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the `messageSerializer` deserialization path in `r.receive(Collections.singletonList(topic), channelSerializer, messageSerializer)` to trigger a deserialization vulnerability if the Redis channel is poisoned with a malformed `TopicMessage` payload, causing a crash or RCE on the gRPC server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7afd4714-79b4-4bb7-9bf4-1fed3a2d7c93?mode=deep",
+    "timestamp": "2026-05-01 21:08:53.814707",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getTopic()] Can an unprivileged external user supply a negative or zero `topicId` that passes `@Min(0)` validation in `TopicMessageFilter` and produces a Redis channel name like `topic.0` or `topic.-1`, subscribing to an unintended or reserved channel and receiving messages not meant for them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71194c2a-9c18-4c7e-a1a8-296709249ab0?mode=deep",
+    "timestamp": "2026-05-01 21:09:09.280762",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user open thousands of concurrent gRPC streams to the same topic, each sharing the same `Flux` via `.share()`, and then cancel them all simultaneously to trigger `doOnCancel(() -> unsubscribe(topic))` multiple times, causing repeated remove-and-resubscribe cycles that thrash the Redis connection?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d177fde0-6397-42e5-a6ad-16487654b7ee?mode=deep",
+    "timestamp": "2026-05-01 21:09:24.066050",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: listen() (inherited)] Can an unprivileged external user exploit the `publishOn(Schedulers.boundedElastic(), false, listenerProperties.getPrefetch())` scheduler to exhaust the bounded elastic thread pool by opening many slow-consuming subscriptions, starving other legitimate subscribers of processing threads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4435094-75ef-491c-9d16-a569baa22af2?mode=deep",
+    "timestamp": "2026-05-01 21:09:37.723679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: RedisTopicListener() constructor] Can an unprivileged external user cause the `.cache()` on the `container` Mono to cache a failed/errored `ReactiveRedisMessageListenerContainer` instance, permanently preventing any new Redis connections from being established for the lifetime of the application?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_52a1e775-ff67-41e8-8d38-6ac67cf6c074?mode=deep",
+    "timestamp": "2026-05-01 21:09:51.812403",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the absence of per-subscriber rate limiting in `subscribe()` to flood the shared Flux with subscription requests, causing excessive Redis SUBSCRIBE commands to be issued and overwhelming the Redis server's subscription limit?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_08e4cfb9-a405-4e2a-b4de-fbb888c88e26?mode=deep",
+    "timestamp": "2026-05-01 21:10:06.176523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getSharedListener()] Can an unprivileged external user exploit the `computeIfAbsent` call to trigger a long-running `subscribe()` computation inside the ConcurrentHashMap, blocking other threads that attempt to access the same or adjacent map buckets, causing a thread contention denial of service?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f232b95-7f1b-441b-abea-8c832a0b50f6?mode=deep",
+    "timestamp": "2026-05-01 21:10:20.650269",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user cause the `doOnError(t -> log.error(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71e8513a-ef14-4003-b1f1-050c87fa1555?mode=deep",
+    "timestamp": "2026-05-01 21:10:35.811549",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: unsubscribe()] Can an unprivileged external user exploit the `log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e8bc78a-6d7c-4f6c-b315-7d2968581e52?mode=deep",
+    "timestamp": "2026-05-01 21:10:49.892838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the `doOnSubscribe(s -> log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b899c18b-037b-4514-8be8-774c0b41728f?mode=deep",
+    "timestamp": "2026-05-01 21:11:04.554840",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getSharedListener()] Can an unprivileged external user subscribe to a topic that has never been subscribed to before, causing `computeIfAbsent` to call `subscribe(topic)` which creates a new `ReactiveRedisMessageListenerContainer` subscription, and by doing this for thousands of unique topics, exhaust Redis server-side subscription slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55f3aa09-32b8-462b-963f-f99ebd109f9d?mode=deep",
+    "timestamp": "2026-05-01 21:11:16.960441",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: subscribe()] Can an unprivileged external user exploit the retry mechanism `Retry.backoff(Long.MAX_VALUE, interval).maxBackoff(interval.multipliedBy(4L))` in `subscribe()` to keep a failed subscription retrying indefinitely, accumulating retry state objects in memory and causing a slow memory leak?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a2ea7045-8394-4f04-b26f-17430bfb39d9?mode=deep",
+    "timestamp": "2026-05-01 21:11:30.085476",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: listen() (inherited)] Can an unprivileged external user trigger `BufferOverflowStrategy.ERROR` on the shared backpressure buffer by subscribing to a high-throughput topic and not consuming messages, causing the entire shared Flux to terminate with an error and disconnecting all other subscribers on that topic?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4377e881-02a5-4da8-8ece-5f6c8da1ec21?mode=deep",
+    "timestamp": "2026-05-01 21:11:43.342090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/RedisTopicListener.java -> Scope: '] [Function: getTopic()] Can an unprivileged external user supply a `topicId` with `getId()` returning `Long.MAX_VALUE` (9223372036854775807), producing a Redis channel name `topic.9223372036854775807` that may overflow or behave unexpectedly in Redis channel matching, causing subscription routing errors?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34fffba3-ee28-4c73-8e51-8bab60d9025a?mode=deep",
+    "timestamp": "2026-05-01 21:11:56.886232",
+    "report_generated": false
+  }
+]
