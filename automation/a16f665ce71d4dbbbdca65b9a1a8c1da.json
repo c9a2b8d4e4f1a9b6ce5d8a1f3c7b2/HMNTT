@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user flood the /block endpoint with requests for distinct valid block indices, causing the entityCache LRU to thrash continuously and forcing every updateOperationAccountAlias() call to miss the cache and issue a GetAccountAlias() DB query, degrading service responsiveness for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d8af4477-6967-4434-9044-d786980801c6?mode=deep",
+    "timestamp": "2026-05-01 17:57:32.910012",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: updateOperationAccountAlias()] Can an unprivileged external user trigger repeated Block() requests for blocks containing many unique account IDs, exhausting the entityCache capacity (bounded by MaxSize) and causing sustained cache eviction storms that force O(N*operations) GetAccountAlias() calls per request, degrading DB connection pool availability for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0194c727-e2fd-476a-950d-ae7fd6f9cf7c?mode=deep",
+    "timestamp": "2026-05-01 17:57:44.425225",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send concurrent Block() requests for the same block index simultaneously, causing redundant parallel GetAccountAlias() DB calls for the same accountId before any result is cached via entityCache.Set(), amplifying DB load without any rate limiting or deduplication guard?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_37128958-0b6b-41a2-9f2c-0a306d751ec7?mode=deep",
+    "timestamp": "2026-05-01 17:57:56.164763",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: BlockTransaction()] Can an unprivileged external user repeatedly call the /block/transaction endpoint with a valid block identifier but a non-existent transaction hash, causing FindByHashInBlock() to issue repeated DB queries with no result caching, degrading DB throughput for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c7b2f95f-a773-4795-8db8-be111592b7aa?mode=deep",
+    "timestamp": "2026-05-01 17:58:08.474449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a PartialBlockIdentifier containing only a Hash (no Index), forcing blockRepo.FindByHash() to execute a full hash-based DB scan on every request with no response caching at the service layer, enabling sustained read amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_948f1f7c-2c8c-447d-a48f-676c792c42b5?mode=deep",
+    "timestamp": "2026-05-01 17:58:20.750309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a nil PartialBlockIdentifier (both Hash and Index nil), causing blockRepo.RetrieveLatest() to be called on every request, creating a hot-path DB query that degrades the ability of legitimate users to retrieve the latest block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c265e1ed-33e0-4391-90df-729c4b704aab?mode=deep",
+    "timestamp": "2026-05-01 17:58:33.575453",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: NewBlockAPIService()] Can an unprivileged external user exploit the absence of any per-IP or per-client rate limiting in the blockAPIService to send thousands of concurrent requests, exhausting goroutine or connection pool resources and causing service degradation for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d6d7485-b033-4bb6-8f50-654584db24f7?mode=deep",
+    "timestamp": "2026-05-01 17:58:46.785637",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user craft a BlockRequest with a very large block index (e.g., math.MaxInt64) to force blockRepo.FindByIndex() to execute a query for a non-existent block, and by repeating this at high frequency, saturate DB query slots and delay legitimate block lookups?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ebd959a-a482-4f52-a937-073dbc700b79?mode=deep",
+    "timestamp": "2026-05-01 17:59:00.289394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a negative block index, and if the repository layer does not reject negative indices before querying, cause unexpected DB behavior or error-path overhead that degrades service for legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c1930123-d463-4435-8137-9b9518846333?mode=deep",
+    "timestamp": "2026-05-01 17:59:14.588137",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: BlockTransaction()] Can an unprivileged external user send BlockTransaction() requests with a block hash that is a valid hex string but does not correspond to any block, causing FindByIdentifier() to execute a DB lookup on every request with no caching, enabling sustained DB read amplification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbf2aeb7-bbf8-4fb8-ae59-78fd179f3a71?mode=deep",
+    "timestamp": "2026-05-01 17:59:28.237838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: updateOperationAccountAlias()] Can an unprivileged external user trigger Block() requests for blocks with a large number of operations per transaction, causing updateOperationAccountAlias() to iterate over all operations and issue a GetAccountAlias() DB call for each unique accountId not in entityCache, amplifying DB load proportionally to the number of operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ef44e2a-1506-4582-b7a1-144bc83c1ae1?mode=deep",
+    "timestamp": "2026-05-01 17:59:41.066636",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user exploit the lack of response caching at the blockAPIService layer to repeatedly request the same valid block, causing FindBetween() and updateOperationAccountAlias() to re-execute on every request, wasting DB and CPU resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74fbabbd-1c22-4e6a-9d08-f5cf48049b3c?mode=deep",
+    "timestamp": "2026-05-01 17:59:53.617627",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a PartialBlockIdentifier containing both a valid Index and a mismatched Hash, causing FindByIdentifier() to execute a DB query that returns no result, and by repeating this pattern, saturate DB query capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a12ce2c-98df-453d-b9c2-b8849946f100?mode=deep",
+    "timestamp": "2026-05-01 18:00:05.998776",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: updateOperationAccountAlias()] Can an unprivileged external user cause entityCache thrashing by requesting blocks whose operations reference account IDs that cycle through more unique values than entityCacheConfig.MaxSize, ensuring every request results in 100% cache miss rate and maximum DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a1139d3-c960-4f39-af1d-ec46cf2fdcce?mode=deep",
+    "timestamp": "2026-05-01 18:00:18.798288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send a Block() request for a block with exactly maxTransactionsInBlock+1 transactions, causing the service to allocate an otherTransactions slice and populate it, and by repeating this at high frequency, cause repeated memory allocation pressure on the server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5d8d3f4-6468-4a1a-97bf-cec8a850cb3f?mode=deep",
+    "timestamp": "2026-05-01 18:00:31.983061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user exploit the fact that block.Transactions is sliced at maxTransactionsInBlock (line 66) but the full FindBetween() result is always fetched first, meaning even if only a subset is returned to the caller, the full DB query and memory allocation for all transactions always occurs, enabling amplified resource consumption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_06324dc4-e4b7-4157-95af-23888eb91333?mode=deep",
+    "timestamp": "2026-05-01 18:00:46.100806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: BlockTransaction()] Can an unprivileged external user send BlockTransaction() requests with an extremely long transaction hash string, causing SafeRemoveHexPrefix() and FindByHashInBlock() to process oversized input on every request, consuming excess CPU and memory without any input length validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_959f646c-b6d7-4a5a-9adf-a371e58b245b?mode=deep",
+    "timestamp": "2026-05-01 18:01:00.131523",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: BlockTransaction()] Can an unprivileged external user send BlockTransaction() requests with a transaction hash containing only the hex prefix '0x' and no actual hash bytes, causing SafeRemoveHexPrefix() to produce an empty string that is passed to FindByHashInBlock(), potentially triggering unexpected DB query behavior or error paths?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8eb372ea-cedd-47c8-9122-f9fa67db42c1?mode=deep",
+    "timestamp": "2026-05-01 18:01:14.967871",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a hash field containing only '0x' (empty after SafeRemoveHexPrefix), causing FindByHash() or FindByIdentifier() to execute a DB query with an empty hash string, potentially causing a full table scan or unexpected query plan?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91d86ce4-c669-4b74-a934-043f41a9782a?mode=deep",
+    "timestamp": "2026-05-01 18:01:27.481053",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: updateOperationAccountAlias()] Can an unprivileged external user cause a cache set/get race condition by sending concurrent Block() requests for the same block, where multiple goroutines simultaneously call entityCache.Get() (miss), then entityCache.Set() for the same accountId, resulting in redundant DB calls and potential cache inconsistency?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e4a0a13-8c83-4378-99bb-c8ef5c67c829?mode=deep",
+    "timestamp": "2026-05-01 18:01:40.612753",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a block index of 0 (genesis block), causing RetrieveBlock() to call FindByIndex() with index 0, and if the genesis block has many transactions, trigger maximum updateOperationAccountAlias() overhead on every such request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3931ebf6-8646-4b46-ae5b-6dee4d3467ba?mode=deep",
+    "timestamp": "2026-05-01 18:01:53.653479",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user exploit the sequential nature of updateOperationAccountAlias() (which processes transactions one by one and operations one by one) to cause O(T*O) DB calls per Block() request by targeting blocks with T transactions each having O operations with unique account IDs not in cache?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2675ebd6-b8cf-4133-b21f-e1b256a494e7?mode=deep",
+    "timestamp": "2026-05-01 18:02:06.242679",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: NewBlockAPIService()] Can an unprivileged external user exploit the fact that the entityCache is shared across all concurrent requests (no per-request isolation) to cause cache pollution by flooding with requests that populate the cache with low-value entries, evicting high-value entries used by legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4232d9da-1d00-4203-aa77-6504629663bf?mode=deep",
+    "timestamp": "2026-05-01 18:02:20.057527",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: Block()] Can an unprivileged external user send Block() requests with a hash field containing a very long hex string (e.g., 10,000 characters), causing SafeRemoveHexPrefix() and subsequent DB query construction to process oversized input, consuming excess memory and CPU per request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbbc58e4-2244-4339-a52a-afac7986ae47?mode=deep",
+    "timestamp": "2026-05-01 18:02:33.561190",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/services/block_service.go -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: BlockTransaction()] Can an unprivileged external user send BlockTransaction() requests with a valid block but a transaction hash that is a valid hex string of incorrect length, causing FindByHashInBlock() to execute a DB query that always returns no result, enabling sustained DB read amplification with no caching?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a704e28-7c41-4bc5-9f47-18b90344aa48?mode=deep",
+    "timestamp": "2026-05-01 18:02:46.307971",
+    "report_generated": false
+  }
+]
