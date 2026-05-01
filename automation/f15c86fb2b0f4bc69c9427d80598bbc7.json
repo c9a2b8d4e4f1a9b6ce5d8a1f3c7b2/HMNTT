@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user trigger a sustained network partition between the importer and its upstream data source so that the @Retryable loop in RecordFileParser.parse() retries indefinitely (maxAttempts=Integer.MAX_VALUE) with exponential backoff up to 30s, holding the synchronized lock permanently and starving all subsequent parse() calls, causing complete ingestion halt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_340f5bcf-f150-49b2-b4e8-f85822353434?mode=deep",
+    "timestamp": "2026-05-01 17:38:12.855739",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition mid-batch so that parse(List<T>) in AbstractStreamFileParser partially processes files (doParse() succeeds for some, then throws on DB flush), leaving the in-memory AtomicReference<T> last in an inconsistent state relative to the persisted StreamFileRepository, causing hash chain verification to permanently fail on restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f70c038-cdef-489f-8fd2-43d824b62868?mode=deep",
+    "timestamp": "2026-05-01 17:38:24.910293",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user induce a network partition that causes the @Transactional parse() to exceed the 120-second transactionTimeout, rolling back the DB transaction while doFlush() has already called last.set(streamFile), creating a split-brain where the in-memory last pointer references a file that was never committed to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f124c761-ec53-4f04-8d41-eb8ffd6dfa7b?mode=deep",
+    "timestamp": "2026-05-01 17:38:37.450737",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getProperties()] Can an unprivileged external user exploit a network partition that causes the importer to restart, and upon restart getLast() falls back to streamFileRepository.findLatest() which returns null due to DB unavailability, causing shouldParse() to return true unconditionally and re-parse already-committed stream files, leading to duplicate data ingestion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4f9ad22-8501-4ace-a7b6-e93d11aee4db?mode=deep",
+    "timestamp": "2026-05-01 17:38:50.452784",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that interrupts the doFlush() call after streamFileListener.onEnd() succeeds but before last.set(streamFile) executes, so that on retry the same file is re-processed by doParse() but onEnd() is called twice, causing duplicate downstream state mutations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_090dadf4-67d4-4687-88fa-4e95c9e57a43?mode=deep",
+    "timestamp": "2026-05-01 17:39:04.547288",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user trigger a network partition during batch parse(List<T>) so that the loop processes N files via doParse() but doFlush(previous) fails, and on @Retryable retry the entire batch is re-submitted, causing doParse() to be called again on already-processed files without the shouldParse() guard catching duplicates because previous is reset to getLast() which still points to the pre-batch state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d9362757-aab1-4d41-ae55-e056f3c72354?mode=deep",
+    "timestamp": "2026-05-01 17:39:18.647542",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that makes streamFileRepository.findLatest() throw a transient exception inside getLast(), which propagates out of shouldParse() uncaught, bypassing the success=false flag and causing parseDurationMetricSuccess to be recorded for a failed parse, corrupting health indicator metrics and masking the outage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_40320488-f54e-4f7e-9e49-2ec59438d868?mode=deep",
+    "timestamp": "2026-05-01 17:39:31.949536",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user exploit a network partition that causes the @Transactional boundary to roll back after doParse() mutates in-memory state on the streamFile object (setCount, setLoadEnd), so that on @Retryable retry the streamFile carries stale mutated fields into a second doParse() call, producing incorrect count and timing metrics persisted to the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_95bd1d3b-92a4-4d91-b15f-56a26eb37306?mode=deep",
+    "timestamp": "2026-05-01 17:39:45.984438",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition that makes the batch parse(List<T>) throw mid-loop at index i, so that streamFiles[0..i-1] have been processed by doParse() but not flushed, and on retry the loop re-runs from index 0 with previous=getLast() (which still points to the pre-batch DB state), causing shouldParse() to pass for already-processed files and doParse() to be called again, resulting in double-counting of transaction items?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dfc117f9-a7c0-4f28-8aa6-0d7d6a99cc84?mode=deep",
+    "timestamp": "2026-05-01 17:40:00.042492",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user induce a network partition between the importer and the database that causes synchronized parse() to block indefinitely on the @Transactional commit, holding the monitor lock on the RecordFileParser instance, so that the BatchStreamFileNotifier's StreamFileSubscriber thread blocks on streamFileParser.parse() and the ArrayBlockingQueue fills to queueCapacity=10, causing the notify() put() call to block and stalling the entire downloader pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c569da69-94ff-4ef3-8057-9a0b0b27a8a3?mode=deep",
+    "timestamp": "2026-05-01 17:40:13.013803",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that makes the @Retryable mechanism retry parse() with exponential backoff (minBackoff=500ms, multiplier=2, maxBackoff=30s), and since maxAttempts=Integer.MAX_VALUE, the retry loop runs for days, consuming all available heap via accumulated Stopwatch and Timer objects created per retry attempt, eventually causing an OutOfMemoryError that is excluded from retry and terminates the importer process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15db0fd6-cd4e-4585-b058-712d7a571a3d?mode=deep",
+    "timestamp": "2026-05-01 17:40:26.774232",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user trigger a network partition that causes the totalDurationMetric.record(streamFile.getLoadEnd() - streamFile.getLoadStart(), TimeUnit.MILLISECONDS) call in parse(List<T>) to record a negative duration when loadEnd is null or zero due to doParse() not completing setLoadEnd(), causing metric corruption that misleads operators into believing ingestion is healthy during a partition event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc52c2c2-d56c-427d-99b2-fc5e30624fd0?mode=deep",
+    "timestamp": "2026-05-01 17:40:40.629921",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that interrupts the parseLatencyMetric.record(Duration.between(consensusInstant, Instant.now())) call after doFlush() succeeds, so that the success timer is never recorded, causing StreamFileHealthIndicator to see no increment in parseDurationMetricSuccess.count() and report DOWN status, triggering false-positive alerting and operator intervention that worsens the partition impact?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34ff00e5-438f-4db9-ae42-7dde685e522a?mode=deep",
+    "timestamp": "2026-05-01 17:40:54.130996",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user exploit a network partition that causes the synchronized parse() method to be retried by @Retryable while a second thread is waiting on the synchronized lock, and upon partition recovery both threads attempt to parse the same streamFile concurrently after the lock is released, causing the AtomicReference<T> last to be set twice with the same file and corrupting the hash chain state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e74bb5c-4a7b-438b-a2b8-ff099a343a86?mode=deep",
+    "timestamp": "2026-05-01 17:41:08.290503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition that makes the batch parse(List<T>) fail after processing the first file in the list, and since the @Retryable annotation retries the entire synchronized method, the second attempt calls getLast() which now returns the first file from the in-memory AtomicReference (set by a concurrent single-file parse() call), causing shouldParse() to skip the first file in the batch and break the hash chain continuity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d2deb3d-06b5-4fdd-9b3b-b119312b57cb?mode=deep",
+    "timestamp": "2026-05-01 17:41:21.174756",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: getProperties()] Can an unprivileged external user cause a network partition that makes the importer's configuration refresh fail, leaving parserProperties.isEnabled() returning a stale cached value of false, causing shouldParse() to silently skip all incoming stream files without throwing an exception, resulting in an undetected ingestion gap that persists until the next restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f3bd0a4-5126-4cf4-a96d-a031d86d56ad?mode=deep",
+    "timestamp": "2026-05-01 17:41:34.456098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user trigger a network partition that causes the DB connection pool to be exhausted during @Transactional parse(), so that subsequent @Retryable attempts all fail immediately with connection acquisition timeout, and since maxAttempts=Integer.MAX_VALUE the retry loop spins at maximum frequency consuming 100% CPU on the importer thread, causing a denial-of-service for all other importer operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a6838a78-5e6a-4300-827e-aa066db3d163?mode=deep",
+    "timestamp": "2026-05-01 17:41:48.461900",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that makes streamFileListener.onEnd(streamFile) inside doFlush() throw a RuntimeException after the DB transaction has committed, so that last.set(streamFile) is never called, and on the next parse() call getLast() returns the previous file from the DB, causing shouldParse() to re-validate the hash chain against the wrong predecessor and potentially accepting a forged stream file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_43c29d13-9fc7-4c2f-99c6-d86e7fcb75d9?mode=deep",
+    "timestamp": "2026-05-01 17:42:02.499748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition that makes the batch parse(List<T>) fail at doFlush(previous) where previous is the last successfully doParse()-d file, and since the @Transactional rollback undoes all DB writes but the in-memory streamFile objects retain their mutated state (count, loadEnd set by doParse()), the retry re-processes files with already-mutated objects causing incorrect aggregated counts to be persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66e4a7cc-7057-420a-834d-a445cf836c97?mode=deep",
+    "timestamp": "2026-05-01 17:42:16.920916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user exploit a network partition that causes the importer JVM to be killed mid-transaction, and upon restart getLast() calls streamFileRepository.findLatest() which returns the last committed file, but the in-memory AtomicReference<T> last is null, causing shouldParse() to skip the hash chain check (previous==null branch returns true) and accept any stream file regardless of its previousHash value?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af975692-3cbe-4e5b-89cb-2c056b643500?mode=deep",
+    "timestamp": "2026-05-01 17:42:31.878180",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that makes the @Transactional parse() time out at exactly the moment when streamFile.clear() is called inside doFlush(), so that the transaction rolls back but the streamFile's bytes and items are already nulled out, making the @Retryable retry attempt call doParse() on a cleared streamFile with null bytes, causing a NullPointerException that is not excluded from retry and loops indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b2bf185c-f75b-469e-a19a-596888ec5445?mode=deep",
+    "timestamp": "2026-05-01 17:42:48.541656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition that makes the batch parse(List<T>) fail after the loop completes (all doParse() calls succeed) but before doFlush(previous) is called, and since the @Retryable retry re-enters the synchronized method, the second attempt's getLast() returns the same initial value, causing all N files to be re-processed by doParse() a second time, doubling all side effects in the downstream listener?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ca7a309-2dd4-4a63-aeb6-b259a4f21b4d?mode=deep",
+    "timestamp": "2026-05-01 17:43:05.707220",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user trigger a network partition that causes the Stopwatch in parse(T) to measure an extremely large elapsed time (hours), and when timer.record(stopwatch.elapsed()) is called in the finally block, the Micrometer Timer histogram overflows or records an out-of-range bucket, corrupting the parse duration metric and causing the StreamFileHealthIndicator to permanently report DOWN even after partition recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_109cbd21-14cd-4fe5-8a4c-c43b7e9934bb?mode=deep",
+    "timestamp": "2026-05-01 17:43:24.238694",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(T streamFile)] Can an unprivileged external user cause a network partition that makes the DB unavailable during getLast(), causing streamFileRepository.findLatest() to throw a DataAccessException, which propagates out of shouldParse() and is caught by the outer catch(Exception e) block, setting success=false and re-throwing, but since the exception originated before doParse() the parseDurationMetricFailure records a near-zero duration, masking the partition from duration-based alerting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d65da01b-b6ba-4d2f-b57e-f91a8dcb36f2?mode=deep",
+    "timestamp": "2026-05-01 17:43:42.533861",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Network partition caused outside of design parameters'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user cause a network partition that makes the batch parse(List<T>) fail at index i with a HashMismatchException (thrown by shouldParse()), and since the @Retryable retries the entire batch, the retry re-evaluates shouldParse() for files 0..i-1 which were already processed, but because previous is reset to getLast() (DB state), the hash chain re-validation may now pass or fail differently, causing non-deterministic acceptance or rejection of the batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_964aaf2f-bcf6-45b4-8061-28967c9b79d0?mode=deep",
+    "timestamp": "2026-05-01 17:44:02.429410",
+    "report_generated": false
+  }
+]
