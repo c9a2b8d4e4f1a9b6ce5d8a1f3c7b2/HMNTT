@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user craft a request to /api/v1/accounts/{id}/rewards where openApiRoute resolves to undefined, causing isEmpty(openApiParameters) to be true and bypassing all parameter normalization, so that raw unsanitized timestamp values are passed directly to the SQL query via querystring.stringify(query), allowing the attacker to enumerate staking reward records outside the intended filter range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ecb302ea-a912-4a97-a856-dff5fe0e0f23?mode=deep",
+    "timestamp": "2026-05-01 21:16:34.651984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user submit a request to /api/v1/accounts/{id}/rewards with a mismatched openApiRoute (e.g., by sending a path that does not match any OpenAPI spec entry), causing the fallback path + '?' + querystring.stringify(query) to be returned without default order/limit injection, so that the SQL query returns an unbounded or differently-ordered set of staking reward transfers, leaking reward amounts for the target account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_62e61955-a792-4818-8a08-49d5dd0a43d5?mode=deep",
+    "timestamp": "2026-05-01 21:16:46.715254",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send multiple timestamp values to /api/v1/accounts/{id}/rewards (e.g., ?timestamp=lt:9999999999.000000000&timestamp=0.000000001) and, because filterKeys.TIMESTAMP is in NON_SORTED_PARAMS and not in COLLAPSABLE_PARAMS, have both values preserved in their original order, exploiting the documented behavior that timestamp order changes SQL results (e.g., returning a 404 vs. returning records), to suppress visibility of staking reward payouts for a victim account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a74c89a-9571-425b-92bd-a6c338280654?mode=deep",
+    "timestamp": "2026-05-01 21:16:59.445022",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user craft a request to /api/v1/accounts/{id}/rewards with timestamp parameters in a specific order (e.g., ?timestamp=lt:X&timestamp=gte:Y vs ?timestamp=gte:Y&timestamp=lt:X) to exploit the NON_SORTED_PARAMS preservation of timestamp order, causing the underlying SQL query to return a different result set of staking_reward_transfer rows, thereby accessing reward records that should be filtered out?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_faa00abb-2c59-4509-bae8-5c2ac08e8cb3?mode=deep",
+    "timestamp": "2026-05-01 21:17:12.568631",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user omit the order parameter from a /api/v1/accounts/{id}/rewards request, causing normalizeRequestQueryParams() to inject the OpenAPI default value (desc) via the param?.defaultValue !== undefined branch, and then craft a pagination cursor (links.next) that relies on this injected default to enumerate all staking reward transfers for an account in descending order, effectively extracting the full reward history without explicitly setting any filter?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b0e4b21-a8b5-4654-b652-631ca228761a?mode=deep",
+    "timestamp": "2026-05-01 21:17:25.567431",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user omit the limit parameter from a /api/v1/accounts/{id}/rewards request so that normalizeRequestQueryParams() injects the OpenAPI default limit value, and then use the injected default limit combined with pagination links to enumerate all staking reward transfers for any account, leaking the full reward payout history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ee57add-f248-452c-a392-d8075383c3cd?mode=deep",
+    "timestamp": "2026-05-01 21:17:38.961109",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: appendToQuery()] Can an unprivileged external user inject a value containing '&timestamp=gt:0' into a query parameter that is appended via appendToQuery(queryString, name + '=' + normalizedValue) without encoding, causing a second timestamp condition to be appended to the normalized query string, bypassing the intended timestamp filter on staking reward transfers and returning records outside the allowed range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e306e4a-44f4-4722-a9b1-2bb07b11cc17?mode=deep",
+    "timestamp": "2026-05-01 21:17:52.309186",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send an empty array for the timestamp parameter to /api/v1/accounts/{id}/rewards, causing getNormalizedArrayValue() to return undefined (via the isEmpty(valueArray) check), so that the timestamp filter is silently dropped from the normalized query and the SQL query returns all staking reward transfers for the account without any time restriction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9bee35d0-2ffe-4319-826a-d4fdaab25ea3?mode=deep",
+    "timestamp": "2026-05-01 21:18:05.027806",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fact that the cache key in responseCacheHandler.js is generated from req.originalUrl (not the normalized URL produced by normalizeRequestQueryParams()), by sending two semantically equivalent requests with different raw URLs (e.g., different parameter ordering), causing one to be served from cache with stale pending_reward data while the other hits the database, leaking the difference in reward state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f928cf80-523c-4e0d-b9b5-8375afada73d?mode=deep",
+    "timestamp": "2026-05-01 21:18:17.565686",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user poison the Redis cache for a victim account's /api/v1/accounts/{id}/rewards response by sending a crafted URL whose MD5 hash (used as cache key) collides with the victim's normalized URL, causing the victim to receive the attacker's manipulated reward data when they query their own staking rewards?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_64778c2b-2f53-4106-9be6-771aeae8f602?mode=deep",
+    "timestamp": "2026-05-01 21:18:30.538010",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user craft a /api/v1/accounts/{id}/rewards URL with extra unknown query parameters that are not in the OpenAPI spec, causing normalizeRequestQueryParams() to silently drop them (since only openApiParameters are iterated), so that the normalized URL differs from the raw URL and the cache key (based on req.originalUrl) never matches the normalized form, effectively bypassing the cache and forcing repeated database queries that leak timing information about reward records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ce9784e-e429-4733-a90c-14e9690e68c8?mode=deep",
+    "timestamp": "2026-05-01 21:18:43.795634",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send a single-element array for the timestamp parameter (e.g., ?timestamp[]=gt:0) to /api/v1/accounts/{id}/rewards, causing getNormalizedArrayValue() to process it as an array and call valueArray.sort() (since timestamp is in NON_SORTED_PARAMS but the sort branch is skipped), and then join with '&timestamp=' to produce a normalized value that differs from the scalar form, potentially bypassing timestamp validation and returning all staking reward transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7aec1168-13dd-4c2e-806d-6306c8411d4f?mode=deep",
+    "timestamp": "2026-05-01 21:18:57.519553",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send a timestamp value containing the substring '&timestamp=' to /api/v1/accounts/{id}/rewards, causing the valueArray.join('&' + name + '=') call in getNormalizedArrayValue() to produce a malformed normalized query string that injects an additional timestamp condition, bypassing the intended filter and returning staking reward transfers outside the attacker-specified range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7aafb78b-481f-423a-ae64-e8e8341338d9?mode=deep",
+    "timestamp": "2026-05-01 21:19:11.009728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request to /api/v1/accounts/{id}/rewards where the query object contains a key with the same name as a parameter but with different casing (e.g., Timestamp vs timestamp), and because requestHandler.js lowercases all keys before normalizeRequestQueryParams() processes them, the attacker can craft a URL where the raw URL (used for cache key) has uppercase keys but the normalized URL has lowercase keys, causing a cache miss and forcing fresh database reads that reveal current pending_reward values?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9dc0062-5a5a-458c-baaf-51aee3651579?mode=deep",
+    "timestamp": "2026-05-01 21:19:26.707814",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the isEmpty(normalizedValue) check in normalizeRequestQueryParams() by sending a timestamp value of '0' (which isEmpty() from lodash treats as falsy for strings of length 0 but not for '0'), to verify whether the isEmpty check correctly handles numeric-string values, and if not, cause the timestamp filter to be silently dropped, returning all staking reward transfers for the target account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0dbdae88-fc6c-484f-ac14-e3677f53e91a?mode=deep",
+    "timestamp": "2026-05-01 21:19:39.789567",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a request to /api/v1/accounts/{id} (account info endpoint) without any timestamp parameter, causing normalizeRequestQueryParams() to inject the OpenAPI default timestamp value, and if that default resolves to the current time, the pending_reward field returned reflects the most recent staking period, allowing the attacker to monitor reward accrual for any account without authentication?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbb77c4a-500a-4711-9ce2-589964fd6ce5?mode=deep",
+    "timestamp": "2026-05-01 21:19:54.497589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a /api/v1/accounts/{id}/rewards request with a timestamp parameter set to a future value (e.g., timestamp=gt:9999999999.999999999), and because normalizeRequestQueryParams() preserves this value without range validation, the SQL query returns zero results, allowing the attacker to confirm the absence of future reward records and infer the account's current staking status?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c2b5c52-0aaf-4740-ba5f-9c8e96be45ac?mode=deep",
+    "timestamp": "2026-05-01 21:20:09.107273",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send multiple identical timestamp values to /api/v1/accounts/{id}/rewards (e.g., ?timestamp=X&timestamp=X), causing getNormalizedArrayValue() to preserve both (since timestamp is NON_SORTED), and the SQL query to use an IN clause with duplicate values, potentially causing the database to return duplicate reward records that inflate the apparent reward amount for the account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8927da6a-dda0-4ab1-8a51-6d9d53817880?mode=deep",
+    "timestamp": "2026-05-01 21:20:23.804326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a /api/v1/accounts/{id}/rewards request where the openApiRoute parameter passed to normalizeRequestQueryParams() is a different route (e.g., due to route aliasing or path normalization), causing the wrong set of OpenAPI parameters to be used for normalization, injecting incorrect default values (e.g., a different default limit or order) that change the set of staking reward transfers returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f8e448fd-4103-48b1-9b13-b504c0008bd4?mode=deep",
+    "timestamp": "2026-05-01 21:20:37.008512",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user exploit the fact that normalizeRequestQueryParams() only iterates over openApiParameters (parameters defined in the OpenAPI spec) and silently drops any extra query parameters not in the spec, by sending extra parameters that are processed by the controller before normalization occurs, causing a discrepancy between what the controller filters and what the cache key represents, leading to incorrect reward data being cached and served?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_29ac2b80-f116-4d1b-b4ac-55a6191621b0?mode=deep",
+    "timestamp": "2026-05-01 21:20:52.084356",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getNormalizedArrayValue()] Can an unprivileged external user send a large number of timestamp values to /api/v1/accounts/{id}/rewards (up to the maxRepeatedQueryParameters limit in requestHandler.js), causing getNormalizedArrayValue() to join them all into a single normalized value string, and the resulting SQL IN clause to include all timestamps, effectively querying for specific reward payout timestamps that the attacker has enumerated from other sources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a4a4d8b4-9932-4e1e-9e62-cb3240aa2076?mode=deep",
+    "timestamp": "2026-05-01 21:21:06.781310",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a /api/v1/accounts/{id}/rewards request with a limit parameter set to the maximum allowed value, and because normalizeRequestQueryParams() preserves user-supplied values over defaults (via the value !== undefined branch), extract the maximum number of staking reward transfer records in a single request, leaking the complete reward history for any account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cbd998c-8344-4df2-8d25-d3ea74e7a14a?mode=deep",
+    "timestamp": "2026-05-01 21:21:22.115118",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user craft a /api/v1/accounts/{id}/rewards URL where the path contains URL-encoded characters (e.g., %2F, %3F) that are decoded differently by the OpenAPI route matcher vs. the path parameter passed to normalizeRequestQueryParams(), causing the openApiMap.get(openApiRoute) lookup to return undefined and bypassing parameter normalization, so that raw query parameters are passed to the SQL layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_41581a50-58dc-453c-b71f-9007e5f02ab1?mode=deep",
+    "timestamp": "2026-05-01 21:21:35.398765",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: normalizeRequestQueryParams()] Can an unprivileged external user send a /api/v1/accounts/{id}/rewards request with a timestamp parameter containing a ne: operator prefix (e.g., ?timestamp=ne:1234567890.000000000), and because normalizeRequestQueryParams() does not validate operator prefixes (it only normalizes the structure), the value is passed to extractStakingRewardsQuery() which throws an InvalidArgumentError, causing a 400 response that leaks information about the timestamp of a specific reward payout?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67254636-a23a-463d-8960-c61238a5fb41?mode=deep",
+    "timestamp": "2026-05-01 21:21:48.406706",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestNormalizer.js -> Scope: Medium: Theft of unpaid staking rewards'] [Function: getQueryPrefix()] Can an unprivileged external user exploit the getQueryPrefix() function returning '' for an empty normalizedQuery and '&' otherwise, by crafting a request where the first parameter in the OpenAPI spec order is a timestamp filter, causing the normalized query to start with 'timestamp=...' without a '?' prefix, and if this normalized string is used in a redirect or link header, the missing '?' causes the URL to be misinterpreted, leaking reward data to an unintended endpoint?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_521aaf2a-23c9-4f30-b636-a9aa0275bf7f?mode=deep",
+    "timestamp": "2026-05-01 21:22:02.120443",
+    "report_generated": false
+  }
+]
