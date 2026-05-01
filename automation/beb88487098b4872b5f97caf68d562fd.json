@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user craft a balance file containing duplicate TokenBalance entries for the same account/token pair so that the second (correct, higher) balance is silently dropped by tokenBalances.putIfAbsent() while the first (lower, attacker-injected) balance is persisted, causing downstream fund-display loss for that account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15440102-a4d8-4b2f-8738-0621d86d1df2?mode=deep",
+    "timestamp": "2026-05-01 21:01:55.091656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply an AccountBalanceFile whose items list contains a TokenBalance with balance=0 for a victim account before the legitimate non-zero entry, exploiting putIfAbsent() first-write-wins semantics to permanently record a zero balance and make the victim's funds appear lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a03c91b2-6a62-478d-be9b-ad6ac3cc0514?mode=deep",
+    "timestamp": "2026-05-01 21:02:07.066435",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user trigger a scenario where batchPersister.persist(accountBalances) at the mid-loop flush succeeds but batchPersister.persist(tokenBalances.values()) at line 105 fails, leaving account balances partially committed without their corresponding token balances, causing token fund records to be permanently missing from the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76f890a1-3bad-4c1b-9f9f-fed6b9fb8960?mode=deep",
+    "timestamp": "2026-05-01 21:02:19.742859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply a crafted AccountBalanceFile where accountBalances.size() reaches batchSize and is flushed (clearing the list) but tokenBalances.size() has not yet reached batchSize, so a subsequent exception during the final batchPersister.persist(tokenBalances.values()) call at line 105 causes token balances to be lost while account balances were already committed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec2fb64c-2dfe-47f6-90a3-093f10015bc8?mode=deep",
+    "timestamp": "2026-05-01 21:02:33.063845",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(AccountBalanceFile)] Can an unprivileged external user exploit the @Retryable annotation so that after a transient failure, the retry re-executes doParse() on already-partially-persisted data, and because AccountBalance.isNew() always returns true, duplicate rows are inserted causing balance double-counting or constraint violations that corrupt fund records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34579b84-a249-435f-9eac-766021d0741b?mode=deep",
+    "timestamp": "2026-05-01 21:02:47.194726",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List)] Can an unprivileged external user supply a large list of AccountBalanceFile objects so that the batch parse() loop calls doParse() for each file but only calls doFlush() on the last one, and if doFlush() fails, all previously parsed balance data is lost from the in-memory state without being persisted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2f8e7545-8e6e-4a59-a48a-0878cf543eef?mode=deep",
+    "timestamp": "2026-05-01 21:03:00.129838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user provide an AccountBalanceFile whose consensusTimestamp falls exactly on the boundary of DateRangeFilter (start == timestamp), causing filter.filter() to return false and skip all balance persistence, resulting in a complete loss of balance snapshot data for that consensus period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_903f4a89-cfa7-4853-b84a-ec8ee4693f06?mode=deep",
+    "timestamp": "2026-05-01 21:03:13.189440",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user inject an AccountBalanceFile with a manipulated consensusTimestamp that passes the DateRangeFilter check but does not correspond to the actual network consensus time, causing incorrect balance snapshots to be stored and making legitimate balances appear as if they belong to a different time period, leading to fund discrepancies?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_61a27c14-f2b7-41b4-b2c3-1ce85d8a2f39?mode=deep",
+    "timestamp": "2026-05-01 21:03:27.211789",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user craft an AccountBalanceFile with an extremely large number of items (exceeding batchSize multiple times) so that the alternating flush of accountBalances and tokenBalances creates a state where accountBalances is cleared and re-filled but tokenBalances grows unboundedly in memory, eventually causing an OOM that is excluded from @Retryable retry, leaving the transaction in an inconsistent state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_146626ba-3f7f-4add-b64a-549f1e96c3ac?mode=deep",
+    "timestamp": "2026-05-01 21:03:39.763870",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply a balance file where a single AccountBalance entry has a very large number of TokenBalance entries (exceeding batchSize), causing tokenBalances.size() >= batchSize to trigger a mid-forEach flush of tokenBalances while accountBalances has not yet been flushed, and if the token balance persist fails, the account balance for that entry is never persisted either?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3d2a4260-e377-47a6-94f9-5cf31ea7c982?mode=deep",
+    "timestamp": "2026-05-01 21:03:52.598032",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user exploit the fact that tokenBalances is a HashMap (not ordered) so that when batchPersister.persist(tokenBalances.values()) is called, the iteration order is non-deterministic, and a race condition in the underlying BatchInserter COPY operation causes some token balances to be written while others are silently dropped?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b10b728f-939a-49ce-81ff-491b18ed9019?mode=deep",
+    "timestamp": "2026-05-01 21:04:06.243090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(AccountBalanceFile)] Can an unprivileged external user trigger repeated transient failures up to maxAttempts-1 times via resource exhaustion, causing the @Retryable mechanism to exhaust retries and permanently skip processing of a balance file, resulting in a complete loss of that balance snapshot from the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_38d4f07a-1781-4fc5-9b3d-c66d15cbaa6e?mode=deep",
+    "timestamp": "2026-05-01 21:04:19.911945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply an AccountBalanceFile with items where AccountBalance.balance is Long.MAX_VALUE, causing arithmetic overflow when the value is serialized by BatchInserter's CsvMapper and written via COPY FROM STDIN, resulting in a corrupted balance value being stored in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_14291e6d-0c97-4df6-b959-7ed84cd57802?mode=deep",
+    "timestamp": "2026-05-01 21:04:34.136041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user craft a balance file where the same accountId appears multiple times in the items list with different balance values, causing multiple AccountBalance rows with the same composite key (consensusTimestamp, accountId) to be inserted via batchPersister.persist() since isNew() always returns true, leading to duplicate rows and incorrect balance aggregation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5321b5a2-51e3-4102-bfb8-005d6ed51ef1?mode=deep",
+    "timestamp": "2026-05-01 21:04:46.825106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply an AccountBalanceFile where accountBalanceFile.getItems() returns a null or empty list, causing the forEach to silently complete with count=0, and accountBalanceFile.setCount(0) being recorded, making it appear the file was successfully processed with no balances, permanently suppressing re-processing of that file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71012d04-7825-44bd-80fc-8869cba12736?mode=deep",
+    "timestamp": "2026-05-01 21:05:00.376598",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user exploit the fact that accountBalances.clear() is called after batchPersister.persist(accountBalances) inside the forEach loop, but if the persist call throws a RuntimeException that is caught by the @Transactional rollback, the already-cleared list means those account balances are permanently lost and cannot be re-persisted on retry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2c7ebcad-3731-41f2-9f88-3390e67ec4e2?mode=deep",
+    "timestamp": "2026-05-01 21:05:14.966143",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(AccountBalanceFile)] Can an unprivileged external user exploit the @Transactional(timeoutString) annotation by supplying a very large balance file that takes longer than the configured transaction timeout (default 5 minutes) to process, causing the transaction to be rolled back mid-parse and all partially persisted balances to be lost without any re-processing guarantee?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0e10d173-bda7-4ed2-a82d-be7268375a47?mode=deep",
+    "timestamp": "2026-05-01 21:05:28.286907",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user inject a TokenBalance with a null tokenId into the items list, causing tokenBalance.getId() to return a partially null TokenBalance.Id, which is then used as a HashMap key, leading to NullPointerException that aborts the entire doParse() and causes all balances in that file to be lost?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e5eb6b42-9c23-486b-82b3-8ab0f3e75206?mode=deep",
+    "timestamp": "2026-05-01 21:05:40.995530",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply an AccountBalanceFile where getConsensusTimestamp() returns null, causing filter.filter(null) to throw a NullPointerException that bypasses the entire balance persistence block, resulting in a complete loss of that balance snapshot?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2d17ee1-4737-443e-8be6-edfecad8758c?mode=deep",
+    "timestamp": "2026-05-01 21:05:54.097905",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user craft a balance file with a consensusTimestamp that is identical to an already-processed file's consensusTimestamp, bypassing the shouldParse() check in AbstractStreamFileParser (which only compares consensusEnd >= consensusStart), and causing duplicate balance records to be inserted for the same timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e45e1c6a-e024-4104-9519-7c7e23c7e26d?mode=deep",
+    "timestamp": "2026-05-01 21:06:07.645066",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user exploit the log.warn() at line 88 (duplicate token balance skipped) to silently suppress legitimate token balance updates, where the attacker ensures their crafted lower-balance entry is processed first, and the legitimate higher-balance entry is logged as a duplicate and discarded?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ce07acf-34f9-4a55-9dec-9355f11e821e?mode=deep",
+    "timestamp": "2026-05-01 21:06:20.818223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user supply an AccountBalanceFile where the items list is a lazy/streaming collection that throws an exception mid-iteration inside the forEach, causing accountBalances to be partially filled and some already-flushed batches to be committed while the transaction is rolled back for the remainder, creating an inconsistent balance state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c135c4b0-42ff-4630-8ccb-edc1a78eb3b5?mode=deep",
+    "timestamp": "2026-05-01 21:06:33.897922",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user exploit the fact that tokenBalances uses HashMap.newHashMap(batchSize) with initial capacity equal to batchSize, so that when the actual number of unique token balances far exceeds batchSize, repeated rehashing causes memory pressure that triggers GC pauses, extending processing time beyond the @Transactional timeout and causing a rollback?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_093b6a51-fb0f-4f44-ba3b-a75d0b359028?mode=deep",
+    "timestamp": "2026-05-01 21:06:48.212788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List)] Can an unprivileged external user supply a list of AccountBalanceFile objects where one file in the middle of the list causes doParse() to throw an exception, causing the entire batch transaction to roll back, including all files that were successfully parsed before the failing one, resulting in a complete loss of multiple balance snapshots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed854b95-a0e1-4568-80be-6b63282816fb?mode=deep",
+    "timestamp": "2026-05-01 21:07:01.373448",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/balance/AccountBalanceFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doParse()] Can an unprivileged external user craft an AccountBalanceFile where accountBalance.getTokenBalances() returns a modifiable list that is mutated by another thread during the forEach iteration, causing ConcurrentModificationException that aborts doParse() and loses all balance data for that file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f918f250-4b13-4d87-b3c0-174a0e1fe706?mode=deep",
+    "timestamp": "2026-05-01 21:07:14.980809",
+    "report_generated": false
+  }
+]
