@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user flood the endpoint GET /api/v1/accounts/{id}/allowances/tokens with thousands of concurrent requests, each triggering getAccountTokenAllowances() and holding a database connection via super.getRows(), exhausting the connection pool in pool() and causing all subsequent mirror node queries—including those needed for transaction confirmation—to queue indefinitely, resulting in total service unavailability?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_aa91beb0-4054-44e8-ba2b-1a566ec6540f?mode=deep",
+    "timestamp": "2026-05-01 22:23:45.780494",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user craft a request with both lower and upper bound spender.id filters and a token.id filter, causing getQuery() to produce a three-branch union all query where each branch independently executes select * from token_allowance with its own ORDER BY and LIMIT clause, tripling the database load per single HTTP request and enabling a small number of concurrent attackers to saturate the database server, preventing transaction-related queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ec704fe9-7dc4-4da3-b540-b61c8045a788?mode=deep",
+    "timestamp": "2026-05-01 22:23:57.751616",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user send requests that cause getSubQuery() to be called three times per getQuery() invocation—once each for lower, inner, and upper filter arrays—each call appending to the shared mutable params array and issuing a separate parameterized SQL query with ORDER BY spender, token_id and LIMIT $2, causing the database to perform three sequential sort operations per request and enabling CPU exhaustion on the database server under concurrent load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c0a5ea22-6844-48f7-839f-312cb1ca73b8?mode=deep",
+    "timestamp": "2026-05-01 22:24:09.902377",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user exploit the fact that the params array is initialized as [ownerAccountId, limit] and then mutated by reference across multiple getSubQuery() calls, causing parameter index drift where a filter value pushed in the first subquery occupies position $3 while the second subquery's filter occupies $4, and if any upstream validation gap allows an extra filter to be injected, the parameter positions shift causing a malformed query that crashes the database session and propagates as an unhandled rejection crashing the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4db276da-95b4-415a-a604-c7b098c5aabf?mode=deep",
+    "timestamp": "2026-05-01 22:24:22.642224",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user send a high-limit request (e.g., limit=25 with three active subqueries) causing getAccountTokenAllowances() to receive up to 75 rows from the union all before the outer limit is applied, then rows.map((ta) => new TokenAllowance(ta)) allocates 75 JavaScript objects per request, and under sustained concurrent load this causes Node.js heap exhaustion, triggering an out-of-memory crash that shuts down the REST API service entirely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b0d56853-2874-40cc-91ab-1fe3eaf1fe15?mode=deep",
+    "timestamp": "2026-05-01 22:24:37.575209",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user exploit the static accountTokenAllowanceQuery = 'select * from token_allowance' which selects all columns including amount, amount_granted, owner, spender, token_id, payer_account_id, and timestamp_range, causing each subquery to transfer the full row width across the database connection, and under high concurrency this saturates the database-to-application network bandwidth, starving legitimate transaction-processing queries of network capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ea32d28-b3c7-4edf-ab19-ea2874b5ad8c?mode=deep",
+    "timestamp": "2026-05-01 22:24:51.653988",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user send requests targeting accounts with a very large number of token allowances, causing the union all query built in getQuery() to perform full or near-full scans of the token_allowance table for each of the three subqueries, consuming excessive I/O and CPU on the database server and causing query timeouts that cascade into connection pool exhaustion and service shutdown?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5530252-7cce-44df-bccc-68cfc405bf79?mode=deep",
+    "timestamp": "2026-05-01 22:25:05.101692",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the async nature of getAccountTokenAllowances() by sending a burst of requests that all await super.getRows() simultaneously, causing the Node.js event loop to be blocked by a large number of pending Promise resolutions, degrading the responsiveness of the REST API to the point where health checks fail and the service is marked unavailable, halting transaction confirmation workflows that depend on mirror node queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dba2daa6-f287-4039-8bac-c61a5640f6ea?mode=deep",
+    "timestamp": "2026-05-01 22:25:18.574309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user craft a request where filter.operator is a value that, if not strictly validated upstream, causes getSubQuery() to embed an unexpected operator string directly into the SQL condition string '${column}${filter.operator}$${params.length}', producing a syntactically invalid SQL statement that causes the database driver to throw an unhandled exception, crashing the Node.js worker process and taking the REST API offline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bcbe9f3b-e20b-4eb0-845c-b63a74f78b30?mode=deep",
+    "timestamp": "2026-05-01 22:25:32.374748",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user send a request where the order parameter is manipulated to produce an invalid OrderSpec, causing getOrderByQuery() to generate a malformed ORDER BY clause that is embedded into all three subqueries and the outer union all query, resulting in a database parse error that propagates as an unhandled rejection and crashes the service process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a96f4d2d-f8f3-43a2-b618-f02ad4381313?mode=deep",
+    "timestamp": "2026-05-01 22:25:45.638796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user exploit the amountCondition = 'amount > 0' filter which is always appended to every subquery, and by targeting an account with millions of zero-amount allowances, cause the database to scan the entire token_allowance table to evaluate this condition before applying the index on owner, consuming excessive CPU and I/O that starves other database operations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ac4f42ec-3dc1-4694-bffc-645abf3c74b2?mode=deep",
+    "timestamp": "2026-05-01 22:25:59.391170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user send requests with the maximum allowed limit value, causing the union all query in getQuery() to request up to 3 * maxLimit rows from the database before the outer LIMIT $2 is applied, and the resulting large intermediate result set causes the database to allocate excessive memory for sorting and merging, triggering an out-of-memory condition on the database server that crashes it and halts all transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b0a1bd4-b8f3-4c4d-9b20-918f1c2978e0?mode=deep",
+    "timestamp": "2026-05-01 22:26:13.549681",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the singleton export pattern 'export default new TokenAllowanceService()' where a single shared instance handles all requests, and by sending concurrent requests that all mutate shared state through the params array passed by reference into getSubQuery(), cause race conditions that corrupt the SQL query or parameter array, resulting in malformed queries that crash the database session or return incorrect data that causes downstream processing failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a14ca7b8-03d0-499d-b3ff-209e3dc8fd70?mode=deep",
+    "timestamp": "2026-05-01 22:26:26.438540",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user send a request where filter.key resolves to a value not present in the static columns map, causing TokenAllowanceService.columns[filter.key] to return undefined, and the resulting SQL condition '${undefined}${filter.operator}$${params.length}' produces a syntactically invalid query that throws a database error, and if this error is not caught, it propagates as an unhandled Promise rejection that crashes the Node.js process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e716f016-af52-447a-ac5e-57c23086596a?mode=deep",
+    "timestamp": "2026-05-01 22:26:41.004445",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user exploit the fact that the limitClause is hardcoded to super.getLimitQuery(2) which always generates 'limit $2', and by sending a request where the limit parameter at position $2 is set to the maximum integer value, cause each of the three subqueries to attempt to fetch an unbounded number of rows, exhausting database memory and crashing the database server?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab1a3199-6eae-43ac-8a93-bf51b7a2bdd2?mode=deep",
+    "timestamp": "2026-05-01 22:26:54.660165",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user perform a slowloris-style attack by opening many connections to the allowances/tokens endpoint and keeping them alive with slow reads, causing getAccountTokenAllowances() to hold open database connections for extended periods via the awaited super.getRows() call, exhausting the database connection pool and preventing any new queries from being executed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23694661-65eb-4d89-bd19-54dea0beaa5f?mode=deep",
+    "timestamp": "2026-05-01 22:27:08.288106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user craft a request that triggers all three subqueries (lower, inner, upper all non-empty) where each subquery contains the full ORDER BY spender, token_id clause, causing the database to perform three independent sort operations on potentially large datasets, and the combined CPU cost of these sorts under concurrent load causes the database server to become unresponsive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ce68a8ac-6b44-4819-8271-496085b8bd2c?mode=deep",
+    "timestamp": "2026-05-01 22:27:22.271229",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user exploit the union all construction in getQuery() where subQueries.map((q) => '(${q})').join('\\\\nunion all\\\\n') combines up to three full subqueries each with their own ORDER BY and LIMIT, causing the database query planner to generate an extremely expensive execution plan that consumes all available database CPU for the duration of the query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6df08e50-ee72-4797-8b55-47bd3ef02738?mode=deep",
+    "timestamp": "2026-05-01 22:27:35.361242",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user send requests targeting non-existent account IDs that still pass validation, causing getAccountTokenAllowances() to execute full table scans on token_allowance with the owner = $1 condition matching zero rows but still consuming database I/O for the scan, and under high concurrency this I/O load prevents legitimate transaction queries from completing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_388dbda1-9f97-4f56-bf56-a11b3518cdee?mode=deep",
+    "timestamp": "2026-05-01 22:27:49.178632",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user exploit the direct string interpolation of filter.operator into the SQL condition '${column}${filter.operator}$${params.length}' where if upstream validation allows an operator like '= ANY' or similar multi-token operator, the resulting SQL changes query semantics in a way that bypasses the amountCondition filter or causes a query parse error that crashes the database session?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_26e5298f-31b2-41c7-8cb0-8d0deb07badf?mode=deep",
+    "timestamp": "2026-05-01 22:28:03.286655",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user send a sustained stream of requests that each trigger the three-subquery union all path in getQuery(), causing the database to maintain multiple active cursors and sort buffers simultaneously, exhausting the database server's work_mem allocation and causing it to spill to disk, dramatically slowing all database operations including transaction processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_07b73980-988d-48e8-abc6-e24716e620b7?mode=deep",
+    "timestamp": "2026-05-01 22:28:17.692125",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the lack of any timeout enforcement in getAccountTokenAllowances() where super.getRows(sqlQuery, params) can run indefinitely if the database query is slow, causing request handler goroutines to accumulate without bound under load, eventually exhausting Node.js memory and crashing the process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78a81e0d-3fa4-4ab1-a491-7634acfccf36?mode=deep",
+    "timestamp": "2026-05-01 22:28:33.079059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getSubQuery()] Can an unprivileged external user send requests where the spender.id filter value is set to the maximum valid entity ID, causing the database to perform a range scan from that value to the end of the index on the spender column, and if the token_allowance table has many entries near the maximum ID range, this scan is expensive and under concurrency exhausts database I/O capacity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bfac0292-36bc-4df0-b1c5-e5f2f2bb2930?mode=deep",
+    "timestamp": "2026-05-01 22:28:47.869783",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getQuery()] Can an unprivileged external user exploit the fact that the params array is shared by reference across all getSubQuery() calls in getQuery(), and by sending concurrent requests through the singleton TokenAllowanceService instance, cause two concurrent getQuery() invocations to interleave their params.push() calls, corrupting the parameter array and producing a query with misaligned parameters that causes a database error or data corruption?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ed48481-3019-4f2a-b51d-f73d4528196e?mode=deep",
+    "timestamp": "2026-05-01 22:29:01.599197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/tokenAllowanceService.js -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: getAccountTokenAllowances()] Can an unprivileged external user exploit the rows.map((ta) => new TokenAllowance(ta)) call in getAccountTokenAllowances() where each TokenAllowance constructor calls Object.assign with mapKeys and camelCase transformation on every row, causing excessive CPU usage for large result sets under concurrent load, degrading the Node.js event loop and making the service unresponsive?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc927f44-bed4-4132-9998-4e8dcbac9998?mode=deep",
+    "timestamp": "2026-05-01 22:29:15.128028",
+    "report_generated": false
+  }
+]
