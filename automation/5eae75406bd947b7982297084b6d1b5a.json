@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery whose query field is exactly 'and ' (just the prefix with no column name), causing replaceAll to transform it to 'and f.' and producing a SQL fragment 'and f. $N' that is syntactically invalid, causing a database error that is surfaced as a 500 response and denying access to the file history for all users querying at that time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fc8c946-dfe2-4788-b787-b8f3f318d183?mode=deep",
+    "timestamp": "2026-05-01 22:47:47.728399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: fallbackRetry()] Can an unprivileged external user supply a whereQuery with a consensus_timestamp constraint that is just above the first_consensus_timestamp of every file version, causing each fallback iteration to find a row but immediately fail construction, walking backward through all 10 attempts and ultimately returning null, making the entire file history appear unavailable to legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_82f275d6-601a-4424-91a9-eaaf5fe2e7f2?mode=deep",
+    "timestamp": "2026-05-01 22:47:59.952956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a whereQuery with a param that is an array (Array.isArray check in buildWhereSqlStatement), causing the SQL to use an IN clause for consensus_timestamp, which changes the semantics from a range filter to a set membership filter, potentially including or excluding specific timestamps and reorganizing which file version is treated as the latest?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d56f43ca-c273-4ceb-b8ae-77c702e0a85f?mode=deep",
+    "timestamp": "2026-05-01 22:48:12.647728",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getFileDataQuery (static)] Can an unprivileged external user supply a timestamp that matches a FILEUPDATE (type=19) with empty file_data (length = 0), causing the anchor subquery to skip that row (due to the length(<>0) check) and fall back to the previous FILECREATE, causing the outer query to include FILEAPPEND chunks that were superseded by the empty FILEUPDATE, producing a file content that misrepresents the post-update state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4eb00a7f-3f71-4183-9209-e1353c6ff231?mode=deep",
+    "timestamp": "2026-05-01 22:48:25.567611",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery that produces an innerWhere string containing 'AND ' (uppercase), which replaceAll('and ', ...) does not match (case-sensitive), causing the inner CTE to apply the filter but the outer query to not apply the corresponding alias-prefixed filter, creating an asymmetry that causes the outer query to include rows outside the intended timestamp range and reorganize the aggregated file content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bbba727f-7a6e-453d-af9f-8cc752aefabf?mode=deep",
+    "timestamp": "2026-05-01 22:48:38.969998",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getExchangeRate()] Can an unprivileged external user supply a timestamp filter to the exchange rate endpoint that is far in the future, causing getExchangeRate to return the most recent exchange rate file regardless of whether it has been validated, and if the most recent file is a partially written FILEAPPEND sequence, the string_agg in latestFileContentsQuery would concatenate an incomplete file, causing ExchangeRate construction to fail and triggering fallbackRetry to serve an older rate?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fd830278-20bd-4f23-89ca-df06f45a3507?mode=deep",
+    "timestamp": "2026-05-01 22:48:53.332639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: fallbackRetry()] Can an unprivileged external user observe that fallbackRetry appends a new whereQuery entry on each failed attempt using spread syntax ([...whereQuery, {query: ..., param: row.first_consensus_timestamp}]), and by causing the first attempt to fail with a first_consensus_timestamp that equals the original whereQuery's upper bound, cause the second attempt to query an empty range, returning null and hiding valid file history after only 2 attempts instead of 10?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f1f9975-894c-4cc3-9ef9-91c796c8e716?mode=deep",
+    "timestamp": "2026-05-01 22:49:07.717940",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery entry with a query field that contains 'and entity_id', causing replaceAll to transform it to 'and f.entity_id' in the outer clause, which combined with the existing 'f.entity_id = $1' creates a redundant but potentially conflicting condition if the operator differs, causing the query to return no rows and suppressing the file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7fdfcbe-bf6a-4e8d-a0c6-525bfdbe5028?mode=deep",
+    "timestamp": "2026-05-01 22:49:21.718200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getFileData()] Can an unprivileged external user pass a timestamp that is exactly equal to a FILECREATE (type=17) consensus_timestamp, causing the anchor subquery to select that FILECREATE as the anchor, and the outer query to return only the FILECREATE's file_data without any subsequent FILEAPPEND chunks, producing an incomplete file reconstruction that misrepresents the transaction history at that point?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f8e1999-058a-4f55-8a98-712b45dec3a0?mode=deep",
+    "timestamp": "2026-05-01 22:49:35.978169",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a whereQuery with a very large number of filter entries, causing buildWhereSqlStatement to generate a SQL query with hundreds of AND conditions, leading to a query plan that scans the file_data table inefficiently, causing a denial-of-service that prevents legitimate users from accessing file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0b56ca24-8128-476b-9a62-abeeac344c0a?mode=deep",
+    "timestamp": "2026-05-01 22:49:49.784228",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: fallbackRetry()] Can an unprivileged external user supply a whereQuery that causes getLatestFileDataContents to return a row where row.first_consensus_timestamp is 0, causing the appended constraint 'consensus_timestamp < 0' to exclude all rows in subsequent attempts, making fallbackRetry return null after 2 attempts and hiding all file history beyond the first attempt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3c97de6e-80b2-4c17-ba26-3c4628928fa7?mode=deep",
+    "timestamp": "2026-05-01 22:50:04.513054",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery whose query field contains 'and transaction_type', causing replaceAll to produce 'and f.transaction_type' in the outer clause, which overrides the existing 'f.transaction_type IN (16,17,19)' filter with an attacker-controlled operator and value, potentially including transaction types outside the intended set and reorganizing which rows are aggregated into the file content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1bcf43ae-0056-4453-8696-8013fde43fc3?mode=deep",
+    "timestamp": "2026-05-01 22:50:18.614916",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getFileDataQuery (static)] Can an unprivileged external user supply a timestamp $2 that falls between two consecutive FILEUPDATE (type=19) operations with non-empty file_data, causing the anchor subquery to select the more recent FILEUPDATE as anchor, and the outer query to return only the data from that FILEUPDATE forward, omitting the FILEAPPEND chunks from the previous epoch that were part of the historical file state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_613c26d9-22c2-4207-a297-25d995d6d68a?mode=deep",
+    "timestamp": "2026-05-01 22:50:31.680073",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery entry where the query field is 'and f.consensus_timestamp' (already containing the table alias), causing replaceAll to produce 'and f.f.consensus_timestamp' in the outer clause, which is an invalid column reference that causes a SQL error, denying access to file history for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8b10edaa-ae08-402d-b6c6-dbb544768fd2?mode=deep",
+    "timestamp": "2026-05-01 22:50:44.999932",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getExchangeRate()] Can an unprivileged external user supply a timestamp filter that selects a file version where the ExchangeRate constructor throws due to malformed data, causing fallbackRetry to walk backward through history and serve an exchange rate from a significantly earlier time period, causing downstream fee calculations to use stale rates and misrepresenting the current network state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_286a49de-601f-402c-b3e6-0e265b66aa43?mode=deep",
+    "timestamp": "2026-05-01 22:50:58.413339",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: fallbackRetry()] Can an unprivileged external user observe that the whereQuery is reset to the original on each outer loop iteration (const whereQuery = filterQueries.whereQuery ?? []) but filters accumulates new entries, and by supplying a whereQuery that conflicts with the accumulated consensus_timestamp < X constraints, cause the query to return inconsistent results across retries, producing non-deterministic file history responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67ebc82a-63f8-45c1-9d42-0a37fbc6032b?mode=deep",
+    "timestamp": "2026-05-01 22:51:11.702036",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a whereQuery with a param value of null, causing buildWhereSqlStatement to push null into the params array, which PostgreSQL interprets as NULL in the parameterized query, causing the consensus_timestamp comparison to evaluate as UNKNOWN (three-valued logic), silently excluding all rows and returning null from getSingleRow, hiding the file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ed13bbb4-105e-4073-bd93-fcc46946f5bb?mode=deep",
+    "timestamp": "2026-05-01 22:51:26.130106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery entry whose query field is 'and consensus_timestamp =' (equality operator), causing the CTE latest_create to be restricted to a single timestamp, and if that timestamp corresponds to a FILEUPDATE with empty file_data, the CTE returns that as the anchor, causing the outer query to aggregate only the chunks from that specific update onward, reorganizing the file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0a6c392-d3b8-41e4-b504-ff5e56a12c4e?mode=deep",
+    "timestamp": "2026-05-01 22:51:39.755350",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getFileData()] Can an unprivileged external user pass a timestamp that is a floating-point number (e.g., 1234567890.5), causing the parameterized query to pass a non-integer to PostgreSQL's bigint consensus_timestamp column, resulting in either a type error or implicit truncation that selects a different anchor row than intended, reorganizing the file content returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_90f76133-fff5-4638-93d9-dc82f52759c3?mode=deep",
+    "timestamp": "2026-05-01 22:51:52.580283",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery that produces an innerWhere string of exactly '<filterInnerPlaceHolder>' (the placeholder value itself), causing the replace call to substitute the placeholder with itself and then the second replace to substitute the outer placeholder with a transformed version, resulting in a query with the literal placeholder string in the SQL, causing a syntax error that denies access to file history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd1c274e-79e9-460f-aec7-fd3af1ac7ecc?mode=deep",
+    "timestamp": "2026-05-01 22:52:05.990749",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: fallbackRetry()] Can an unprivileged external user supply a whereQuery that causes getLatestFileDataContents to always return a non-null row but the resultConstructor always throws, exhausting all 10 attempts and returning null, while each attempt logs the file entity ID and consensus_timestamp via logger.warn, enabling the attacker to enumerate all historical file versions through timing or error side-channels?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_655ea9e0-cebc-4932-99c6-86b6b3bbd95e?mode=deep",
+    "timestamp": "2026-05-01 22:52:20.814230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileContentsQuery()] Can an unprivileged external user supply a whereQuery entry with a query field containing 'and file_data', causing replaceAll to produce 'and f.file_data' in the outer clause, which adds an attacker-controlled filter on the file_data column itself, potentially excluding specific file chunks from the string_agg and producing an incomplete or reorganized file content?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b97b6121-7f07-40e7-af48-62608f073167?mode=deep",
+    "timestamp": "2026-05-01 22:52:35.396628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getFileDataQuery (static)] Can an unprivileged external user supply a timestamp $2 that is exactly equal to the consensus_timestamp of a FILEAPPEND (type=16) with empty file_data, causing the anchor subquery to skip that row and select the previous FILECREATE, and the outer query to include all FILEAPPEND chunks up to $2, producing a file content that includes chunks that were logically superseded by the empty append?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c377ff23-d2d3-44e4-936d-f32f75a03ffc?mode=deep",
+    "timestamp": "2026-05-01 22:52:50.194881",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getLatestFileDataContents()] Can an unprivileged external user supply a whereQuery with duplicate consensus_timestamp constraints (e.g., two entries both filtering on consensus_timestamp), causing buildWhereSqlStatement to generate a SQL query with redundant conditions that the query planner resolves in an unexpected way, potentially selecting a different max(consensus_timestamp) in the CTE and reorganizing the file history anchor?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_69ce92d2-f753-4cbb-ade0-5434e90a17ba?mode=deep",
+    "timestamp": "2026-05-01 22:53:04.695090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/service/fileDataService.js -> Scope: High: Reorganizing transaction history without direct theft of funds'] [Function: getExchangeRate()] Can an unprivileged external user supply a timestamp filter to the exchange rate endpoint that is exactly 1 nanosecond before the most recent FILECREATE, causing the CTE latest_create to find no rows (since no FILECREATE/FILEUPDATE exists at or before that timestamp), the join to produce no results, and the exchange rate to be returned as null, denying the exchange rate to all users querying at that timestamp?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4100009f-fa3c-4931-a658-a13cadfc4855?mode=deep",
+    "timestamp": "2026-05-01 22:53:18.780264",
+    "report_generated": false
+  }
+]
