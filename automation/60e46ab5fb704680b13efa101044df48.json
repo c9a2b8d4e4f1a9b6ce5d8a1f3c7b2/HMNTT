@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user open an unbounded number of concurrent gRPC subscriptions to `listen()`, each spawning a `Schedulers.boundedElastic()` task that exhausts the bounded elastic thread pool, causing a denial-of-service for all other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c6768ac2-2acd-4fa1-91c3-19dded8936b3?mode=deep",
+    "timestamp": "2026-05-01 15:18:33.088018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user subscribe to `listen()` with `RepeatSpec.times(Long.MAX_VALUE)` driving an infinite polling loop, and by never cancelling the subscription, permanently hold a scheduler thread and database connection, starving legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_23657d9a-e2fb-478b-b382-327016f613bb?mode=deep",
+    "timestamp": "2026-05-01 15:18:45.077134",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user supply a `TopicMessageFilter` with `limit=0` (no limit), causing `poll()` to set `pageSize = Math.min(Integer.MAX_VALUE, listenerProperties.getMaxPageSize())` and repeatedly fetch `maxPageSize` rows every `interval` milliseconds, generating excessive database load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ef652c7-1418-42db-801d-737c2465c385?mode=deep",
+    "timestamp": "2026-05-01 15:18:57.344946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user craft a `TopicMessageFilter` with a very old `startTime` value, causing `poll()` to compute `startTime = filter.getStartTime()` pointing far in the past and forcing the database to scan a massive historical range on every poll cycle, leading to query timeout or resource exhaustion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f465cd30-2e14-415d-973c-da96a77ee190?mode=deep",
+    "timestamp": "2026-05-01 15:19:09.971574",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user trigger an integer overflow in `(int)(filter.getLimit() - context.getCount().get())` by supplying a `limit` value close to `Long.MAX_VALUE`, causing the cast to `int` to wrap to a negative value, which then makes `Math.min(limit, listenerProperties.getMaxPageSize())` return a negative `pageSize` and corrupt the repository query?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0d0d0096-733f-484b-9e60-6a94d1db87d0?mode=deep",
+    "timestamp": "2026-05-01 15:19:23.898781",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user set `filter.getLimit()` to a value just above `Integer.MAX_VALUE` so that the cast `(int)(filter.getLimit() - context.getCount().get())` overflows to a negative integer, bypassing the `hasLimit()` guard and causing `findByFilter` to receive a negative limit, potentially returning all rows?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dd7f6cb9-046c-4cad-80cf-f4cf7279d2c9?mode=deep",
+    "timestamp": "2026-05-01 15:19:38.195234",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user exploit the fact that `newFilter` is built via `filter.toBuilder().limit(pageSize).startTime(startTime).build()` without re-validating `@AssertTrue` constraints, allowing a derived filter with an invalid `startTime`/`endTime` relationship to reach `topicMessageRepository.findByFilter()` unchecked?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9dffea0d-abba-4b51-ab15-220017618283?mode=deep",
+    "timestamp": "2026-05-01 15:19:52.517995",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user open thousands of subscriptions each with a distinct `topicId`, causing the `Schedulers.boundedElastic()` pool to queue tasks indefinitely, increasing memory usage through unbounded task queuing and eventually causing an OutOfMemoryError?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fa0bf857-8124-4268-9a3b-bd5cd475b44b?mode=deep",
+    "timestamp": "2026-05-01 15:20:08.213961",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user exploit the `delaySubscription(interval, scheduler)` combined with `RepeatSpec.times(Long.MAX_VALUE)` to keep a Flux alive indefinitely even after the gRPC stream is logically closed, because no `takeUntil` or timeout operator is applied, leading to a resource leak?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81a04f22-07fa-43b7-aecb-4af9e3fb549c?mode=deep",
+    "timestamp": "2026-05-01 15:20:22.644946",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user supply a `TopicMessageFilter` with `limit=1` and a `startTime` in the distant past, causing `poll()` to issue a database query for a single row per poll cycle indefinitely (since `count` never reaches `limit` if no messages exist), generating continuous unnecessary DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7db2d4d1-8a2a-4415-acc5-42fbeaf8d4c1?mode=deep",
+    "timestamp": "2026-05-01 15:20:37.174465",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: PollingContext.onNext()] Can an unprivileged external user exploit a race condition between `last.set(topicMessage)` and `count.incrementAndGet()` in `onNext()` where two concurrent reactive signals update `last` and `count` non-atomically, causing `poll()` to compute an incorrect `startTime` from a stale `last` value while `count` has already advanced, resulting in duplicate or skipped messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9fc16b99-727d-450d-89a8-ec9de567d5e4?mode=deep",
+    "timestamp": "2026-05-01 15:20:54.215262",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user cause `last.getConsensusTimestamp() + 1` to overflow `long` if `consensusTimestamp` is `Long.MAX_VALUE`, producing a negative `startTime` that wraps around and causes the repository to return messages from the beginning of time?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f520651b-ddac-4ef4-8e0e-d9c5c8217008?mode=deep",
+    "timestamp": "2026-05-01 15:21:08.591819",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user abuse the `.tag(METRIC_TAG, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4afc6745-0d62-44e9-8b28-22db6349555d?mode=deep",
+    "timestamp": "2026-05-01 15:21:22.408480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user trigger a log injection attack via the `filter` object logged in `doOnSubscribe(s -> log.info(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a2a4259-0a40-4e11-a139-4cfa300be9cb?mode=deep",
+    "timestamp": "2026-05-01 15:21:37.227406",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user supply a `TopicMessageFilter` with `endTime` set to a value only slightly greater than `startTime`, causing `poll()` to build a `newFilter` with `startTime` advancing past `endTime` after the first message, yet the Flux never terminates because there is no `endTime` enforcement in the polling loop itself?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01e6e20b-36b2-4828-b06e-b7ca9212ba5a?mode=deep",
+    "timestamp": "2026-05-01 15:21:50.655983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user exploit the absence of a per-subscriber rate limit on `listen()` to open hundreds of subscriptions to the same `topicId`, multiplying the number of identical database queries issued per interval and causing a thundering-herd effect on the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f922e60e-058c-42a0-8630-27e5f93c3bfe?mode=deep",
+    "timestamp": "2026-05-01 15:22:04.509913",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user set `filter.getLimit()` to exactly `Long.MAX_VALUE` so that `filter.getLimit() - context.getCount().get()` equals `Long.MAX_VALUE` when count is 0, and the cast `(int)Long.MAX_VALUE` produces `-1`, causing `Math.min(-1, maxPageSize)` to return `-1` and pass a negative limit to `findByFilter`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_679a2ac8-ed02-46ce-937e-027994d470e7?mode=deep",
+    "timestamp": "2026-05-01 15:22:18.808960",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user exploit the `Schedulers.boundedElastic()` scheduler being a single shared instance across all `PollingTopicListener` instances to monopolize all scheduler threads by opening many subscriptions, blocking the scheduler for other reactive pipelines in the application?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_85ccaa25-65d7-4e5f-9c6d-93a3523de8fd?mode=deep",
+    "timestamp": "2026-05-01 15:22:32.426379",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user craft a `TopicMessageFilter` where `topicId` references a non-existent topic, causing `poll()` to issue a database query that returns an empty stream on every poll cycle for the lifetime of the subscription (up to `Long.MAX_VALUE` repetitions), wasting database and scheduler resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d2a4ba45-fe45-4365-9e49-cfdd27eb219b?mode=deep",
+    "timestamp": "2026-05-01 15:22:47.058724",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user exploit the lack of a maximum subscription duration in `listen()` to hold a subscription open indefinitely (driven by `RepeatSpec.times(Long.MAX_VALUE)`), preventing garbage collection of the `PollingContext` object and its associated `AtomicLong` and `AtomicReference` fields?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d17ecd14-c260-4656-9902-6afbdb872184?mode=deep",
+    "timestamp": "2026-05-01 15:23:01.601004",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user exploit the `Flux.fromStream(topicMessageRepository.findByFilter(newFilter))` call where the underlying `Stream` is not explicitly closed, causing a database cursor/connection leak if the downstream subscriber cancels mid-stream?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2a8a9576-10e7-4588-a978-2664bae24bfb?mode=deep",
+    "timestamp": "2026-05-01 15:23:16.625610",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user exploit the `.jitter(0.1)` on `RepeatSpec` to cause poll intervals to occasionally be very short (near zero), resulting in burst database queries that overwhelm connection pool limits?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a573fa3-1595-4d62-b520-901eeeadb80b?mode=deep",
+    "timestamp": "2026-05-01 15:23:31.052001",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: PollingContext.onNext()] Can an unprivileged external user trigger a scenario where `onNext()` is called concurrently from multiple threads (due to `boundedElastic` scheduler), causing `last.set()` and `count.incrementAndGet()` to be updated in an inconsistent order, leading to `poll()` computing a `startTime` that skips messages?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d7dfa32-21db-462f-a2d7-ca38742388ac?mode=deep",
+    "timestamp": "2026-05-01 15:23:45.195955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: poll()] Can an unprivileged external user exploit the fact that `newFilter` is constructed with `filter.toBuilder()` which copies all original filter fields (including `subscriberId`, `topicId`, `endTime`) and then overrides only `limit` and `startTime`, potentially leaking the original `subscriberId` into repository query logs or audit trails?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eac7a630-8cf5-4867-b6e8-a126f2626498?mode=deep",
+    "timestamp": "2026-05-01 15:23:59.477847",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/listener/PollingTopicListener.java -> Scope: '] [Function: listen()] Can an unprivileged external user cause a memory leak by subscribing and immediately cancelling repeatedly, where each cancelled subscription leaves a `PollingContext` object in memory because `doOnCancel` or `doFinally` cleanup is not implemented?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13f254a5-7703-4c54-9201-cf4e957e9736?mode=deep",
+    "timestamp": "2026-05-01 15:24:12.887934",
+    "report_generated": false
+  }
+]
