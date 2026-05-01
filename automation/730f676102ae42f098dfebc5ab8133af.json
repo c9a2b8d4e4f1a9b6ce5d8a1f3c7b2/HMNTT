@@ -1,0 +1,98 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to an HTTPS URL with a self-signed or invalid TLS certificate, and since http.Client{Timeout: cfg.mirrorNodeClientTimeout} in fetchMirrorNodeNetwork() uses the default TLS configuration without certificate pinning, the attacker can perform a man-in-the-middle attack to return a crafted nodesEnvelope that poisons the network map and permanently misdirects all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab3165e9-c36d-4d9b-bb9b-5b5bb76d3f3b?mode=deep",
+    "timestamp": "2026-05-01 17:31:13.788178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_TIMEOUT to '1ns' (an extremely small but valid duration), causing http.Client{Timeout: cfg.mirrorNodeClientTimeout} in fetchMirrorNodeNetwork() to time out on every request, making buildNetworkFromMirrorNodes() always fail, preventing newClient() from initializing when network='other', and permanently blocking all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a7f118c0-51a8-47bb-be0c-31e307ca7ebe?mode=deep",
+    "timestamp": "2026-05-01 17:31:26.197194",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user set HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_BASE_BACKOFF to an extremely large value (e.g., '8760h'), causing the exponential backoff in buildNetworkFromMirrorNodes() (cfg.mirrorNodeClientBaseBackoff * time.Duration(1<<(attempt-1))) to produce durations measured in years, permanently blocking the pinger initialization and freezing all fund transfers indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4926ef2b-cc27-460a-801c-a9ab5e543b3a?mode=deep",
+    "timestamp": "2026-05-01 17:31:38.723702",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a server that returns a nodesEnvelope JSON with an extremely large Nodes array (e.g., millions of entries), causing json.NewDecoder(resp.Body).Decode(&payload) in fetchMirrorNodeNetwork() to consume unbounded memory, crashing the pinger process and permanently halting all fund transfers until manual restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_994b5208-fe47-471d-8ca7-2a1d32e3394d?mode=deep",
+    "timestamp": "2026-05-01 17:31:51.708936",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a server that returns a nodesEnvelope where nodeEntry.NodeAccountID contains a malformed account ID string that hiero.AccountIDFromString() silently skips (continue on error), causing all nodes to be skipped and the network map to be empty, triggering the 'no usable service_endpoints found' error and permanently blocking fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b3d3049-aaae-4201-aace-10a31a5c90a9?mode=deep",
+    "timestamp": "2026-05-01 17:32:04.905829",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.toAccountID to '0.0.0' (the null/genesis account on Hedera), causing hiero.AccountIDFromString(cfg.toAccountID) in submitWithRetry() to succeed but AddHbarTransfer(toID, hiero.HbarFromTinybar(cfg.amountTinybar)) to target an account that cannot hold or return funds, permanently freezing all transferred HBAR in an unrecoverable account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1dffe0da-55d7-4427-9ff5-1e3946eb952b?mode=deep",
+    "timestamp": "2026-05-01 17:32:17.394670",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the heartbeat goroutine in main() writes to /tmp/alive every 15 seconds independently of whether submitWithRetry() is succeeding, so that even when all fund transfers are permanently failing (e.g., due to a frozen toAccountID), the liveness probe continues to report the pinger as alive, masking the fund-freezing condition and preventing automated recovery?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a5a2329-ed60-4794-b96f-7ada88c59c6f?mode=deep",
+    "timestamp": "2026-05-01 17:32:30.043726",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: main()] Can an unprivileged external user exploit the fact that os.WriteFile('/tmp/ready', ...) in main() is called immediately after newClient() succeeds but before any transfer is validated, so that the readiness probe reports the pinger as ready even when cfg.toAccountID is a frozen/deleted account, causing the orchestrator to consider the service healthy while funds are being permanently frozen on every transfer attempt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_057430d9-be51-41c0-b824-fa265ee41206?mode=deep",
+    "timestamp": "2026-05-01 17:32:42.603478",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user set cfg.amountTinybar to int64 max value (9223372036854775807) via HIERO_MIRROR_PINGER_AMOUNT_TINYBAR, causing hiero.HbarFromTinybar(-cfg.amountTinybar) to produce a value of -9223372036854775807 tinybar that overflows or is rejected by the Hedera SDK, resulting in a malformed cryptoTransfer transaction that permanently fails and consumes fees on every retry, draining the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_176b1673-3296-431f-94ce-04b7a85df772?mode=deep",
+    "timestamp": "2026-05-01 17:32:55.160994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: loadConfig()] Can an unprivileged external user set HIERO_MIRROR_PINGER_MAX_RETRIES to '0' (which passes the cfg.maxRetries < 0 check since 0 is not < 0), causing submitWithRetry() to execute exactly one transfer attempt (attempts = 0 + 1 = 1) with no retries, so that any transient network failure permanently blocks the current tick's transfer without retry, and combined with a small cfg.interval, causes rapid fee consumption that drains the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_816e577b-6315-4b17-9698-c025bca626a0?mode=deep",
+    "timestamp": "2026-05-01 17:33:08.681741",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: backoff()] Can an unprivileged external user set cfg.baseBackoff to '0s' which is caught by the cfg.baseBackoff <= 0 check and reset to 1*time.Second, but then set cfg.maxRetries to 63, causing backoff() to compute 1s * time.Duration(1<<62) = an astronomically large duration that overflows time.Duration (int64 nanoseconds), producing a negative or zero sleep duration and causing time.NewTimer(sleep) to fire immediately, bypassing all backoff protection and enabling rapid retry storms?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e022179-7351-4b60-9c34-b9448a73a366?mode=deep",
+    "timestamp": "2026-05-01 17:33:21.349937",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a server that returns HTTP 429 (Too Many Requests), which is treated as retryable (retry = resp.StatusCode == http.StatusTooManyRequests) in fetchMirrorNodeNetwork(), causing buildNetworkFromMirrorNodes() to retry up to cfg.mirrorNodeClientMaxRetries times with exponential backoff, permanently blocking pinger initialization and freezing all fund transfers for the duration of the retry storm?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8aed8079-f881-44c2-9177-70aefdcc22ec?mode=deep",
+    "timestamp": "2026-05-01 17:33:34.604383",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user set cfg.mirrorRest to a server that returns HTTP 503 (Service Unavailable) indefinitely, which is treated as retryable (resp.StatusCode >= 500) in fetchMirrorNodeNetwork(), causing buildNetworkFromMirrorNodes() to exhaust all cfg.mirrorNodeClientMaxRetries retries and return an error, preventing newClient() from completing and permanently blocking all fund transfers when network='other'?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f27d3f4d-7015-4cfc-b722-828116542ca6?mode=deep",
+    "timestamp": "2026-05-01 17:33:47.311205",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: newClient()] Can an unprivileged external user set cfg.network to 'other' and cfg.mirrorRest to a server that returns a valid nodesEnvelope but with serviceEndpoint entries pointing to non-Hedera gRPC servers, causing hiero.ClientForNetwork(netmap) to build a client that connects to invalid nodes, and then cryptoTransfer.Execute(client) in submitWithRetry() to permanently fail with connection errors, freezing all fund transfers while consuming fees on each attempt?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8bdd004d-b5be-4fb2-ab73-8396ba503fe4?mode=deep",
+    "timestamp": "2026-05-01 17:34:00.611503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: newClient()] Can an unprivileged external user set cfg.operatorKey to a valid Ed25519 private key string that does not correspond to cfg.operatorID, causing hiero.PrivateKeyFromString() to succeed and client.SetOperator() to set a mismatched key, so that every cryptoTransfer.Execute(client) in submitWithRetry() fails with INVALID_SIGNATURE, exhausting all retries and permanently blocking fund transfers while consuming fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0b4d5ab-f282-4b04-be23-e66c9d308e75?mode=deep",
+    "timestamp": "2026-05-01 17:34:13.175804",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/main.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: submitWithRetry()] Can an unprivileged external user exploit the absence of a transaction memo or idempotency key in the cryptoTransfer built by NewTransferTransaction().AddHbarTransfer().AddHbarTransfer(), causing duplicate transactions to be submitted on retry (when resp.GetReceipt() fails but the transaction was already executed), resulting in double-spending of operator funds and accelerated account balance depletion that permanently freezes the operator account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4466fe2c-4dbd-43b2-be27-6c86630ddc73?mode=deep",
+    "timestamp": "2026-05-01 17:34:26.914540",
+    "report_generated": false
+  }
+]
