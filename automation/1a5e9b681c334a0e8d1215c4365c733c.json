@@ -1,0 +1,140 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user submit a token dissociate of a deleted token with a totalSupply delta that, when aggregated with the existing totalSupply via 'totalSupply + newTotalSupply', produces a value of exactly -1, which the upsert coalesce then treats as a negative value and applies the additive branch 'e_total_supply + (-1)', causing a perpetual decrement on every subsequent upsert and eventually driving the persisted totalSupply to Long.MIN_VALUE?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72c6efe0-181f-4e5a-9a89-5f3b57ef4697?mode=deep",
+    "timestamp": "2026-05-01 19:43:47.564483",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to enter an infinite retry loop by submitting a token dissociate of a deleted token that produces a totalSupply overflow in the Java layer (Long.MIN_VALUE - 1), causing setTotalSupply() to silently wrap around to Long.MAX_VALUE due to Java's unchecked long arithmetic, and then the upsert SQL to treat this as a non-negative replacement value, permanently corrupting the token's supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4a6fba03-5147-4e98-9c24-3c0716f0e01f?mode=deep",
+    "timestamp": "2026-05-01 19:43:59.845059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that Java long arithmetic wraps silently (no ArithmeticException for overflow unlike Math.addExact) in the expression 'totalSupply = totalSupply + newTotalSupply' to cause a wrapped-around positive totalSupply to be stored, which the upsert coalesce then treats as a non-negative replacement, permanently setting the token's supply to a large positive value that violates the maxSupply constraint and corrupts all future supply accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1e3067c4-4ecf-420b-a79d-32a4aea32d85?mode=deep",
+    "timestamp": "2026-05-01 19:44:12.264114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user submit a token dissociate of a deleted token where the negative totalSupply delta is exactly Long.MIN_VALUE, causing the Java expression 'totalSupply == null ? newTotalSupply : totalSupply + newTotalSupply' to set totalSupply = Long.MIN_VALUE when totalSupply is null, and then the SQL upsert to store Long.MIN_VALUE as the supply, which when subsequently decremented by another dissociate causes a PostgreSQL bigint overflow and crashes the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c495997a-aee5-417c-ac5c-3208f5c9b392?mode=deep",
+    "timestamp": "2026-05-01 19:44:25.212275",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the mergeToken() logic where 'current.setTotalSupply(previous.getTotalSupply())' is called unconditionally at the end of the merge, overwriting any negative delta that was already accumulated in current.totalSupply via setTotalSupply(), causing the dissociate-of-deleted-token supply reduction to be silently lost and the token's supply to remain permanently inflated?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba873562-0fdd-4399-b9fd-9a031121059e?mode=deep",
+    "timestamp": "2026-05-01 19:44:38.874311",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause a denial of service by submitting thousands of token dissociate transactions for deleted tokens within a single record file, causing the importer to call setTotalSupply() thousands of times with negative deltas on the same in-memory Token object, accumulating a totalSupply so negative that the subsequent SQL upsert's coalesce expression produces a value that violates a database check constraint, aborting the entire batch and halting the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5bcb5e9f-fcab-4691-9e55-1ef935d8dca3?mode=deep",
+    "timestamp": "2026-05-01 19:44:52.780852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the interaction between the Token.setTotalSupply() negative aggregation path and the FixFungibleTokenTotalSupplyMigration's SQL, which recomputes totalSupply from token_balance snapshots, by submitting token transfers that fall outside the 31-day snapshot window, causing the migration to compute a totalSupply that excludes recent transfers and permanently corrupts the supply, halting transaction confirmation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b484498e-e4c9-4d84-9f0b-e3489cc22b3a?mode=deep",
+    "timestamp": "2026-05-01 19:45:07.172399",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user trigger a scenario where the onTokenConsecutiveNegativeTotalSupply path in SqlEntityListener processes two negative totalSupply updates in the same batch, and the mergeToken() function incorrectly applies the second update's totalSupply as a replacement (non-negative branch) rather than an aggregation, causing the first negative delta to be lost and the token's supply to be permanently incorrect?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47bd4629-c8fa-4f36-9128-bf7c41b885fb?mode=deep",
+    "timestamp": "2026-05-01 19:45:23.220987",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to crash by submitting a token dissociate of a deleted token where the resulting negative totalSupply, when stored in the database and later read back by the FixFungibleTokenTotalSupplyMigration, causes the migration's SQL to compute a negative totalSupply for a FUNGIBLE_COMMON token, violating an implicit non-negative supply invariant and causing subsequent token transfer validations to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af30002d-9fa8-4215-a08a-66e6ee30d25f?mode=deep",
+    "timestamp": "2026-05-01 19:45:37.745308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the @UpsertColumn coalesce for totalSupply does not handle the case where e_total_supply is NULL and the incoming totalSupply is negative, causing the SQL expression 'e_total_supply + coalesce(total_supply, 0)' to evaluate as NULL + (-X) = NULL in PostgreSQL, silently setting the token's totalSupply to NULL and breaking all downstream supply checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ce1f2bc-85e3-491c-8745-752365416c68?mode=deep",
+    "timestamp": "2026-05-01 19:45:51.502593",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user submit a token mint transaction with a newTotalSupply of 0 (a valid edge case), causing setTotalSupply(0) to take the non-negative branch and set totalSupply = 0, overwriting any previously accumulated negative delta from dissociate operations, and causing the token's supply to be permanently reset to 0 regardless of the actual on-chain state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e557190b-0cbf-4ee5-84c5-be23fbfb6a8b?mode=deep",
+    "timestamp": "2026-05-01 19:46:04.916311",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the boundary condition in setTotalSupply() where newTotalSupply == 0 is treated as non-negative (taking the 'totalSupply = newTotalSupply' branch), by crafting a token burn that results in exactly 0 total supply, causing the importer to overwrite a previously correct supply value with 0 and breaking all subsequent mint/burn accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dbdf1bdc-f4bf-4fae-a567-58c84214bdc9?mode=deep",
+    "timestamp": "2026-05-01 19:46:19.018863",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause a permanent split-brain between the mirror node's token totalSupply and the actual on-chain state by submitting a sequence of transactions that exploit the dual-path logic in setTotalSupply() — alternating between negative deltas (aggregation) and non-negative replacements — such that the final persisted supply diverges from consensus and causes the mirror node to reject all new token transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d5a575e6-bc90-4936-a57f-47785579b9aa?mode=deep",
+    "timestamp": "2026-05-01 19:46:33.351428",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the Token class uses @SuperBuilder(toBuilder = true) and @NoArgsConstructor, allowing a Token object to be constructed with a null tokenId, and when such a Token is passed to the BatchUpserter, the null tokenId causes a NOT NULL constraint violation in the database that aborts the entire batch and halts the importer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d6c1cc25-ed4e-4b3e-a275-083401a5a9ab?mode=deep",
+    "timestamp": "2026-05-01 19:46:50.260309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to deadlock by submitting two concurrent record files that both contain token dissociate transactions for the same deleted token, causing two BatchUpserter instances to simultaneously attempt to upsert the same token row, resulting in a PostgreSQL row-level lock deadlock that aborts one transaction and causes the importer to retry indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9909d44d-ffd5-4818-a97e-850575988cb2?mode=deep",
+    "timestamp": "2026-05-01 19:47:04.854783",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the Token entity's @Upsertable(history = true, skipPartialUpdate = true) annotation causes partial updates (where only totalSupply is set) to be skipped when no existing row is found, by submitting a token supply update before the token creation is processed, causing the supply update to be silently dropped and the token to be created with a null totalSupply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_343aa34e-339e-4851-a08d-1c1194a786dc?mode=deep",
+    "timestamp": "2026-05-01 19:47:19.621480",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to produce an incorrect token history by exploiting the mergeToken() logic that copies immutable fields (decimals, freezeDefault, initialSupply, etc.) from previous to current, such that a token update transaction that changes only totalSupply causes the history table to record incorrect immutable field values, corrupting the audit trail and causing historical transaction queries to return invalid data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6a86df6b-da25-42b4-891d-be6cf8b599da?mode=deep",
+    "timestamp": "2026-05-01 19:47:33.107394",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the Token's totalSupply field is a Long (nullable) while maxSupply is a primitive long (non-nullable, defaults to 0), by creating a token with maxSupply=0 (INFINITE supply type) and then submitting a dissociate of a deleted token that sets totalSupply to a large negative value, causing the mirror node to serve a totalSupply that is less than 0 and greater in magnitude than maxSupply, breaking supply invariant checks?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_935af253-13bd-4f3d-9140-2f0da07becd4?mode=deep",
+    "timestamp": "2026-05-01 19:47:47.042601",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to fail by submitting a token dissociate of a deleted token where the negative totalSupply delta, when aggregated in Java via setTotalSupply(), produces a value that is valid as a Java long but exceeds PostgreSQL's bigint range when the SQL coalesce expression adds it to the existing e_total_supply, causing a PostgreSQL numeric overflow error that aborts the batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_80da6782-70d5-462e-9669-c47d014a61f0?mode=deep",
+    "timestamp": "2026-05-01 19:48:01.364190",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the Token class's @Data annotation generates equals() and hashCode() based on all fields including totalSupply, causing two Token objects with the same tokenId but different totalSupply values to be treated as different objects in collections, leading to duplicate token entries in the batch upsert that violate the primary key constraint and abort the batch?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15691903-c393-4bee-b70d-0d4b7b18ce58?mode=deep",
+    "timestamp": "2026-05-01 19:48:16.408583",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to process a token dissociate of a deleted token out of order (due to record file reprocessing or replay), causing setTotalSupply() to apply the same negative delta twice, resulting in a totalSupply that is doubly decremented and permanently incorrect, causing all future supply-dependent transaction validations to fail?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ee7e8b37-8592-4b19-9a36-2ea38ad4839b?mode=deep",
+    "timestamp": "2026-05-01 19:48:29.993536",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user exploit the fact that the Token's timestampRange field (Range<Long>) is not validated for ordering (lower <= upper), by submitting a token update with a reversed timestamp range, causing the upsert history logic to insert an invalid history record that corrupts the token_history table and causes the importer to fail on subsequent queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4d58c1e9-6b97-4bac-9fd4-ae498c76f222?mode=deep",
+    "timestamp": "2026-05-01 19:48:44.491490",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/domain/token/Token.java -> Scope: Critical: Network not being able to confirm new transactions (total network shutdown)'] [Function: setTotalSupply(Long)] Can an unprivileged user cause the importer to enter an inconsistent state by submitting a token wipe transaction that produces a newTotalSupply of 0 (valid) immediately after a dissociate-of-deleted-token that set totalSupply to a negative value, causing setTotalSupply(0) to overwrite the negative value with 0 and lose the dissociate's supply reduction, resulting in an inflated totalSupply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f1924bb5-752f-41c6-9747-7bcea0e8968f?mode=deep",
+    "timestamp": "2026-05-01 19:48:57.858062",
+    "report_generated": false
+  }
+]
