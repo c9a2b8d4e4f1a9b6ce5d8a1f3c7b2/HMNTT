@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestNetworkStake()] Can an unprivileged external user repeatedly call GET /api/v1/network/stake with no parameters to retrieve stale nodeRewardFeeNumerator/nodeRewardFeeDenominator and stakingRewardFeeNumerator/stakingRewardFeeDenominator values from networkStakeRepository.findLatest(), causing downstream fee calculations to reflect outdated fee fractions outside design parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4c87936c-a847-4843-a1ef-6e4dd463dfa6?mode=deep",
+    "timestamp": "2026-05-01 22:31:50.389340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getLatestNetworkStake()] Can an unprivileged external user exploit the absence of any timestamp filter in getLatestNetworkStake() to always receive the single latest network_stake row, meaning if the importer ingests a malformed NodeStakeUpdate transaction with extreme fee fractions, the attacker can read and propagate those fee values to influence client-side fee decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2e0ba5ca-1ab3-4264-83fa-abb25ecec328?mode=deep",
+    "timestamp": "2026-05-01 22:32:02.216112",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user supply a crafted timestamp parameter (e.g., timestamp=gt:0&timestamp=lt:1) to getSupply() such that minTimestamp > maxTimestamp is not caught before getFirstDayOfMonth() is called, causing an arithmetic exception or returning a consensusTimestamp of 0L that triggers EntityNotFoundException, effectively denying fee-related supply data to legitimate users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdac6680-d11a-4f29-89a1-dc157082db34?mode=deep",
+    "timestamp": "2026-05-01 22:32:14.964403",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user provide a timestamp upper bound equal to Long.MAX_VALUE (via timestamp=lte:9223372036854775807) to getSupply(), causing getFirstDayOfMonth(maxTimestamp, -1) to overflow when computing plusMonths(-1) on an Instant near the epoch maximum, resulting in an incorrect optimalLowerBound that silently shifts the supply window and returns wrong releasedSupply values used in fee economics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81bfaae8-059c-4e1d-9725-6af0ad97de7b?mode=deep",
+    "timestamp": "2026-05-01 22:32:27.733624",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user send timestamp=gt:9223372036854775806 to getSupply(), causing getAdjustedLowerRangeValue() in Bound to add 1 to Long.MAX_VALUE-1 producing Long.MAX_VALUE, which then passes the minTimestamp > maxTimestamp check but causes accountBalanceRepository.getSupplyHistory() to return zero unreleased supply, making releasedSupply() equal to TOTAL_SUPPLY (5_000_000_000_000_000_000L) and misrepresenting fee-relevant circulating supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_490f0f7f-f18d-4d94-9404-20a259d5bd7e?mode=deep",
+    "timestamp": "2026-05-01 22:32:41.061672",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user provide timestamp=gt:9223372036854775807 to getSupply(), causing getAdjustedLowerRangeValue() to compute Long.MAX_VALUE + 1 = Long.MIN_VALUE due to long overflow, bypassing the minTimestamp > maxTimestamp guard and querying accountBalanceRepository.getSupplyHistory() with a negative lowerTimestamp, returning incorrect supply data that distorts fee-relevant economic parameters?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f25f172e-f4dc-46ab-ba25-a536a8294282?mode=deep",
+    "timestamp": "2026-05-01 22:32:53.791065",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFirstDayOfMonth(long, int)] Can an unprivileged external user supply a timestamp of 0 (epoch nanoseconds) to getSupply(), causing getFirstDayOfMonth(0, -1) to compute a negative epoch second (month before Unix epoch), which when multiplied by DomainUtils.NANOS_PER_SECOND produces a large negative nanosecond value, making optimalLowerBound negative and causing Math.max(minTimestamp, optimalLowerBound) to use the user-supplied minTimestamp unconstrained, bypassing the intended one-month lookback window for supply history?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9d5f92a7-409d-4e3b-bc21-f90681ef2fe7?mode=deep",
+    "timestamp": "2026-05-01 22:33:06.749767",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getFirstDayOfMonth(long, int)] Can an unprivileged external user provide a timestamp value near Long.MAX_VALUE / DomainUtils.NANOS_PER_SECOND to getSupply(), causing Instant.ofEpochSecond(0, timestamp) in getFirstDayOfMonth() to throw an ArithmeticException or DateTimeException due to nanosecond overflow, resulting in an unhandled 500 error that leaks internal stack trace information about fee schedule file processing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9aba246a-8e59-4468-bc9c-d6081b78ad9a?mode=deep",
+    "timestamp": "2026-05-01 22:33:20.781681",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user send timestamp=lte:0 to getSupply(), causing adjustUpperBound() to return 0 and getAdjustedLowerRangeValue() to return 0, so minTimestamp (0) equals maxTimestamp (0), passing the range check, but getFirstDayOfMonth(0, -1) computes a negative optimalLowerBound, and Math.max(0, negativeValue) = 0, querying accountBalanceRepository.getSupplyHistory() with lowerTimestamp=0 and upperTimestamp=0, returning a supply snapshot at genesis that misrepresents current fee-relevant circulating supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_648cc959-e49f-478c-8914-e5ff25cc3671?mode=deep",
+    "timestamp": "2026-05-01 22:33:34.155755",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user exploit the Math.max(minTimestamp, optimalLowerBound) logic in getSupply() by providing a very recent upper timestamp so that optimalLowerBound (first day of previous month) is larger than the user-supplied minTimestamp, silently overriding the user's requested range and returning supply data from a different time window than requested, causing fee-relevant supply figures to be misattributed to the wrong time period?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3aecd366-494a-466a-ad40-bc27fac323c0?mode=deep",
+    "timestamp": "2026-05-01 22:33:48.258452",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user send two timestamp parameters (timestamp=gte:X&timestamp=lte:X) where X is a timestamp with no corresponding account_balance row, causing accountBalanceRepository.getSupplyHistory() to return consensusTimestamp=0L, triggering EntityNotFoundException('Network supply not found'), and using this as an oracle to enumerate valid vs. invalid timestamps for fee schedule file existence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_afacd148-cfae-4ff5-9aaf-8fe9ae34be70?mode=deep",
+    "timestamp": "2026-05-01 22:34:01.779714",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user craft a request with nodeId=lt:0 to getNetworkNodes(), causing NumberRangeParameter.getInclusiveValue() to return -1 (value - 1 = 0 - 1 = -1), which is then used in Math.min(upperBound, -1) setting upperBound to -1, and since lowerBound (0) > upperBound (-1), an IllegalArgumentException is thrown, but the error message 'Invalid range provided for node.id' leaks internal parameter naming conventions used in fee-related node queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_de391b9b-750b-4248-a892-330cb68d36a1?mode=deep",
+    "timestamp": "2026-05-01 22:34:16.204830",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user provide nodeId=gt:9223372036854775806 to getNetworkNodes(), causing getInclusiveValue() to compute Long.MAX_VALUE - 1 + 1 = Long.MAX_VALUE, which is used in Math.max(lowerBound, Long.MAX_VALUE), setting lowerBound to Long.MAX_VALUE, and since upperBound remains Long.MAX_VALUE, the range check passes but networkNodeRepository.findNetworkNodes() is called with minNodeId=Long.MAX_VALUE, returning an empty list that hides fee-relevant node stake data (rewardRateStart, maxStake, minStake) from the response?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c709b426-ce91-48e4-a1d0-0bf4c4f8a6c0?mode=deep",
+    "timestamp": "2026-05-01 22:34:31.936334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user provide nodeId=gt:9223372036854775807 to getNetworkNodes(), causing getInclusiveValue() to compute Long.MAX_VALUE + 1 = Long.MIN_VALUE due to long overflow, setting lowerBound to Long.MIN_VALUE via Math.max(0, Long.MIN_VALUE) = 0, and then querying all nodes with no effective lower bound, potentially returning all node stake data including fee-relevant reward rates outside the intended query scope?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a10cc3d4-a46c-4a77-9d1e-ae73edaec170?mode=deep",
+    "timestamp": "2026-05-01 22:34:48.221207",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user supply a crafted fileId parameter to getAddressBookFileId() to select an alternative address book file (e.g., file 101 instead of 102), causing networkNodeRepository.findNetworkNodes() to return nodes from a different address book version with different fee-relevant stake data (rewardRateStart, maxStake, minStake), effectively reading fee parameters from outside the current design-intended address book?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e0906ba-aafa-48ac-917b-c020ad3efcfd?mode=deep",
+    "timestamp": "2026-05-01 22:35:01.075798",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user send multiple nodeId parameters combining EQ and range operators (e.g., nodeId=eq:5&nodeId=gte:3) to getNetworkNodes(), where the EQ value (5) is within the range [3, MAX_VALUE], causing nodeIdArray=[5] to be passed to findNetworkNodes() while lowerBound=3 and upperBound=MAX_VALUE are also passed, potentially returning node 5's fee-relevant stake data (rewardRateStart) in a way that bypasses the intended single-node lookup semantics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f282c4d-0cb0-42da-94ec-f1c82f881e38?mode=deep",
+    "timestamp": "2026-05-01 22:35:14.009859",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user send nodeId=eq:5&nodeId=eq:5 (duplicate EQ values) to getNetworkNodes(), causing the HashSet<Long> nodeIds to deduplicate to {5}, and nodeIdArray=[5] to be passed to findNetworkNodes(), but the lowerBound and upperBound remain 0 and Long.MAX_VALUE respectively, meaning the SQL WHERE clause uses both nodeIds=[5] AND node_id BETWEEN 0 AND MAX_VALUE, which is functionally correct but may bypass intended single-node access controls for fee-relevant node data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ba7cea87-d04a-4fd2-949d-d932596dc65c?mode=deep",
+    "timestamp": "2026-05-01 22:35:27.108693",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getNetworkNodes(NetworkNodeRequest)] Can an unprivileged external user provide limit=25 (MAX_LIMIT) with nodeId=gte:0 to getNetworkNodes(), causing getEffectiveLimit() to return 25 and networkNodeRepository.findNetworkNodes() to return up to 25 nodes with their full fee-relevant stake data (rewardRateStart, maxStake, minStake, stakeRewarded), enabling bulk enumeration of all network fee parameters in a single request outside the intended default limit of 10?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_848dcf4f-9842-4e95-92a7-e781333e5f35?mode=deep",
+    "timestamp": "2026-05-01 22:35:39.929248",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: resolveRegisteredNodeIdBounds(List)] Can an unprivileged external user send registeredNodeId=eq:5&registeredNodeId=gte:3 to getRegisteredNodes(), causing resolveRegisteredNodeIdBounds() to throw IllegalArgumentException('The eq operator cannot be combined with other operators') when registeredNodeIdRanges.size() > 1, but this error message leaks the internal parameter name 'eq' and the constraint logic, enabling an attacker to probe the fee-relevant registered node data structure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d085854-a240-4d8c-bb53-513e35d85655?mode=deep",
+    "timestamp": "2026-05-01 22:35:53.306582",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: resolveRegisteredNodeIdBounds(List)] Can an unprivileged external user send registeredNodeId=gt:9223372036854775806 to getRegisteredNodes(), causing getInclusiveValue() to return Long.MAX_VALUE, which is used in Math.max(0, Long.MAX_VALUE) = Long.MAX_VALUE as lowerBound, and since upperBound is also Long.MAX_VALUE, the range check passes and registeredNodeRepository.findByRegisteredNodeIdBetweenAndDeletedIsFalseAndTypeIs() is called with lowerBound=upperBound=Long.MAX_VALUE, returning an empty result that hides fee-relevant registered node data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4e4d8fee-355c-4568-9309-7f767c1fcd88?mode=deep",
+    "timestamp": "2026-05-01 22:36:06.763778",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: resolveRegisteredNodeIdBounds(List)] Can an unprivileged external user send registeredNodeId=lt:1 to getRegisteredNodes(), causing getInclusiveValue() to return 0 (1 - 1 = 0), which is used in Math.min(Long.MAX_VALUE, 0) = 0 as upperBound, and since lowerBound=0 equals upperBound=0, the range check passes and the query returns only registered node with ID 0, potentially exposing fee-relevant node type data for a specific node outside the intended default range?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8ced52c1-a4fb-4716-83c9-677175fcb303?mode=deep",
+    "timestamp": "2026-05-01 22:36:19.227115",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: resolveRegisteredNodeIdBounds(List)] Can an unprivileged external user send registeredNodeId=lt:0 to getRegisteredNodes(), causing NumberRangeParameter.getNumberValue() to throw IllegalArgumentException('Invalid range value') since value < 0, but this exception propagates before resolveRegisteredNodeIdBounds() is called, leaking that the parameter validation occurs at parse time rather than service time, enabling timing-based probing of fee-relevant node ID ranges?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_01205710-fe3b-4b0e-8d72-13d0d79e3af4?mode=deep",
+    "timestamp": "2026-05-01 22:36:32.379609",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRegisteredNodes(RegisteredNodesRequest)] Can an unprivileged external user send type=CONSENSUS to getRegisteredNodes() with no registeredNodeId filter, causing registeredNodeRepository.findByRegisteredNodeIdBetweenAndDeletedIsFalseAndTypeIs() to return all non-deleted consensus nodes with their type IDs, enabling enumeration of fee-relevant node type distribution that could be used to predict fee schedule changes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_eac02b94-3bcb-4a0c-a884-ced1245b996b?mode=deep",
+    "timestamp": "2026-05-01 22:36:46.393955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getRegisteredNodes(RegisteredNodesRequest)] Can an unprivileged external user send limit=MAX_LIMIT with registeredNodeId=gte:0 to getRegisteredNodes(), causing the PageRequest to use the maximum allowed page size, and since Sort.by(request.getOrder(), REGISTERED_NODE.REGISTERED_NODE_ID.getName()) uses the jOOQ column name directly, an attacker could probe whether the sort field name matches the database column name to infer schema details relevant to fee parameter storage?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_93fa8ff8-19f7-493b-be0c-abb35d6e7620?mode=deep",
+    "timestamp": "2026-05-01 22:37:00.171069",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest-java/src/main/java/org/hiero/mirror/restjava/service/NetworkServiceImpl.java -> Scope: Medium: Modification of transaction fees outside of design parameters'] [Function: getSupply(Bound)] Can an unprivileged external user exploit the lazy initialization of NetworkProperties.unreleasedSupplyRangeBounds (annotated @Getter(lazy=true)) by sending concurrent requests to getSupply() before the bounds are initialized, causing a race condition where createUnreleasedSupplyRangeBounds() is called multiple times with different CommonProperties.getInstance() shard/realm values, resulting in inconsistent lowerBounds/upperBounds strings passed to accountBalanceRepository.getSupplyHistory() and incorrect unreleased supply calculations that affect fee-relevant circulating supply?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f847d872-8e4a-4d55-94ef-3134526ae3e8?mode=deep",
+    "timestamp": "2026-05-01 22:37:13.468633",
+    "report_generated": false
+  }
+]
