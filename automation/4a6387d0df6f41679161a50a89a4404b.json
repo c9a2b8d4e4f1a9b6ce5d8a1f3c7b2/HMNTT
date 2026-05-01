@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user inject a malicious operator value into the `filter.operator` field (e.g., `=1 OR 1=1--`) since it is interpolated directly into `whereQuery += \\`${filterColumnMap[filter.key]}${filter.operator}$${paramCount}\\`` without sanitization, causing the WHERE clause to be bypassed and returning all schedule transaction_body records regardless of intended filter, leading to unauthorized disclosure of all submitted transaction bodies?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0071eadb-ac5e-408b-8128-4d960d823804?mode=deep",
+    "timestamp": "2026-05-01 21:03:48.647223",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user supply a crafted `order` filter value (e.g., `asc; DROP TABLE schedule--`) since `scheduleOrderQuery(order)` interpolates the order value directly into `order by s.schedule_id ${order}` without parameterization, causing SQL injection that corrupts or destroys the schedule table containing submitted transaction bodies?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a52fcd9e-5eaa-449d-9b55-25fc4ef5a634?mode=deep",
+    "timestamp": "2026-05-01 21:04:00.788158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getSchedulesQuery()] Can an unprivileged external user craft an `order` query parameter containing SQL fragments (e.g., `asc UNION SELECT transaction_body,2,3,4,5,6,7,8 FROM schedule--`) since `scheduleOrderQuery(order)` is string-interpolated into the final query, causing a UNION-based SQL injection that leaks all `transaction_body` bytes of submitted transactions to the attacker?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_72483bf9-bad5-42db-96ae-772a88da2af3?mode=deep",
+    "timestamp": "2026-05-01 21:04:13.433984",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: mergeScheduleEntities()] Can an unprivileged external user trigger prototype pollution by causing a schedule entity with `id` equal to `__proto__` or `constructor` to be returned from the database, since `result[entity.id] = omit(entity, ['id'])` uses the entity id as a key in a plain object, causing `Object.assign` to pollute the prototype and corrupt `transaction_body` or `wait_for_expiry` fields across all subsequent schedule responses?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3465ed40-d9e9-4e4e-8aae-548df25273d5?mode=deep",
+    "timestamp": "2026-05-01 21:04:26.488648",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: mergeScheduleEntities()] Can an unprivileged external user trigger prototype pollution via `result[signature.entity_id] = omit(signature, ['entity_id'])` in the `signatureMap` reduce, where a `transaction_signature` row with `entity_id` set to `__proto__` causes `Object.assign(schedule, ...)` to overwrite the `transaction_body` field on all schedule objects, leading to tampered transaction body data being served to all API consumers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c89e2c7a-61be-45d3-8112-d4bb0d738737?mode=deep",
+    "timestamp": "2026-05-01 21:04:40.475882",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `hasExecuted = executedTimestamp !== null || schedule.deleted` check by querying a schedule whose `deleted` flag is set to `true` but whose `transaction_body` has not yet been executed, causing the response to be cached with `public, max-age=3600` and served stale to all subsequent clients who rely on the transaction body to determine whether to co-sign the schedule?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_81c48f81-56e9-4b11-9ccd-f330adb4a05a?mode=deep",
+    "timestamp": "2026-05-01 21:04:55.431566",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `hasAutoExpired` check (`expirationTime === null && nowNs >= consensusTimestamp + THIRTY_ONE_MINUTES * NANOS_PER_SECOND`) by querying a schedule exactly at the 31-minute boundary, causing the response to be cached for 3600 seconds with `LONGER_SCHEDULE_CACHE_CONTROL_HEADER` even though the schedule's `transaction_body` and signature set may still be active, leading downstream signers to believe the transaction is finalized when it is not?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_623c4585-46df-40ab-a473-e5569f580b13?mode=deep",
+    "timestamp": "2026-05-01 21:05:08.439449",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleCacheControlHeader()] Can an unprivileged external user exploit the `hasExpired` check (`expirationTime !== null && nowNs >= expirationTime + SIXTY_SECONDS * NANOS_PER_SECOND`) by querying a schedule at the exact 60-second grace period boundary, causing the `transaction_body` response to be cached for 3600 seconds with `public, max-age=3600` and served stale to clients who need to verify the current signature set before co-signing?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15017e06-e6d3-4adb-ad1d-895305892e7f?mode=deep",
+    "timestamp": "2026-05-01 21:05:22.053162",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user observe that `transaction_body: utils.encodeBase64(row.transaction_body)` exposes the full serialized protobuf bytes of the scheduled transaction as a base64 string, allowing the attacker to decode and reconstruct the exact transaction parameters (recipient, amount, token transfers) and craft a competing or front-running transaction before the schedule executes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48c73f1c-3eaf-44f0-9e30-d47332415370?mode=deep",
+    "timestamp": "2026-05-01 21:05:34.748687",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the fact that `signature.public_key_prefix` and `signature.signature` are returned verbatim from `encode(ts.public_key_prefix, 'base64')` and `encode(ts.signature, 'base64')` in `transactionSignatureJsonAgg`, allowing the attacker to harvest all partial signatures for a pending scheduled transaction and use them to reconstruct or replay the signing material?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e2bfd7c-49b1-4dfe-a0cc-e3b41fb7af73?mode=deep",
+    "timestamp": "2026-05-01 21:05:48.339114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the `signatures.filter((signature) => signature.consensus_timestamp !== null)` check by observing that signatures with a null `consensus_timestamp` are silently dropped from the response, causing clients to undercount the number of valid signers and incorrectly believe a scheduled transaction lacks sufficient signatures to execute?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f992edc-419d-4bff-a565-f23fb16b2be3?mode=deep",
+    "timestamp": "2026-05-01 21:06:02.386098",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the `SignatureType.getName(signature.type)` call returning `'UNKNOWN'` for unrecognized type values, causing clients that rely on the signature type to validate transaction signing requirements to misclassify a valid signature as unknown and refuse to co-sign a legitimate scheduled transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7c14af08-7fe8-4349-9e0d-f14ad73f78ac?mode=deep",
+    "timestamp": "2026-05-01 21:06:16.283230",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleById()] Can an unprivileged external user supply a crafted `scheduleId` path parameter that passes `EntityId.parseString` validation but resolves to a different schedule's encoded ID (e.g., via shard/realm/num encoding ambiguity), causing `getScheduleByIdQuery` to return the `transaction_body` of a different schedule than intended, leading to transaction body confusion?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_da4c70a1-36cc-44d3-8a47-27eb256198f4?mode=deep",
+    "timestamp": "2026-05-01 21:06:29.547178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleById()] Can an unprivileged external user exploit the `rows.length !== 1` check in `getScheduleById` by causing a race condition where a schedule is deleted between the query and the response, causing the function to throw `NotFoundError` and hide the `transaction_body` from legitimate signers who need it to complete the signing process?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_785a3a0e-7f68-461b-81d4-6fbad185569d?mode=deep",
+    "timestamp": "2026-05-01 21:06:43.310367",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleByIdQuery] Can an unprivileged external user exploit the `LEFT JOIN transaction_signature ts on ts.entity_id = s.schedule_id` in `getScheduleByIdQuery` by observing that all `transaction_signature` rows for a schedule are returned without any validity or expiry filtering, allowing the attacker to enumerate all historical signing attempts including failed or duplicate signatures to reconstruct the signing history of a submitted transaction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bff55613-a109-4733-babf-001c74201cbe?mode=deep",
+    "timestamp": "2026-05-01 21:06:56.069691",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getScheduleByIdQuery] Can an unprivileged external user exploit the `LEFT JOIN entity e on e.id = s.schedule_id` in `getScheduleByIdQuery` to observe that when no matching entity exists, `e.deleted`, `e.key`, and `e.memo` are returned as NULL, causing `formatScheduleRow` to return `admin_key: null` and `deleted: null`, which clients may misinterpret as the schedule being immutable and active, leading them to submit signatures for a transaction that cannot execute?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f5905c28-5071-4b7e-8d3f-b260cb3cc1fe?mode=deep",
+    "timestamp": "2026-05-01 21:07:09.277003",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getSchedules()] Can an unprivileged external user supply a very large `limit` parameter to `getSchedules` causing `extractSqlFromScheduleFilters` to set `filterQuery.limit` to an arbitrarily large value, resulting in a query that returns thousands of schedule records including their `transaction_body` fields, enabling bulk harvesting of all pending submitted transaction bodies in a single request?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7941c15a-e80e-4bd7-ab56-da5953a6738b?mode=deep",
+    "timestamp": "2026-05-01 21:07:22.619402",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getSchedules()] Can an unprivileged external user exploit the `Promise.all([pool.queryQuietly(entityQuery, entityIds), pool.queryQuietly(signatureQuery, entityIds)])` parallel execution in `getSchedules` to cause a TOCTOU race where the signature set changes between the schedule query and the signature query, resulting in `mergeScheduleEntities` assembling a response with mismatched `transaction_body` and `signatures` data that misrepresents the actual signing state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_142ca591-da17-4189-a4fd-02d4855c25d6?mode=deep",
+    "timestamp": "2026-05-01 21:07:36.399011",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: mergeScheduleEntities()] Can an unprivileged external user exploit `Object.assign(schedule, entityMap[schedule.schedule_id] ?? {}, signatureMap[schedule.schedule_id] ?? {})` where the `signatureMap` entry for a schedule_id overwrites the schedule's own `transaction_body` field if the signature aggregation result contains a key named `transaction_body`, causing the returned transaction body to be corrupted or replaced?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f0f027b1-0d1c-4408-a06e-2093b8927dc1?mode=deep",
+    "timestamp": "2026-05-01 21:07:49.255151",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: mergeScheduleEntities()] Can an unprivileged external user exploit the `omit(entity, ['id'])` call in `mergeScheduleEntities` where lodash `omit` returns a shallow copy that still contains all other entity fields, causing unexpected entity fields (e.g., `auto_renew_period`, `expiration_timestamp`) to be merged into the schedule object via `Object.assign` and overwrite schedule-specific fields like `wait_for_expiry`, corrupting the transaction execution semantics?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_60e60fcc-b324-43f2-a7e8-3fcbac2e45d6?mode=deep",
+    "timestamp": "2026-05-01 21:08:03.716007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user send duplicate `account.id` filter parameters (e.g., `?account.id=0.0.1&account.id=0.0.2`) causing `extractSqlFromScheduleFilters` to build a WHERE clause with multiple `creator_account_id` conditions, potentially causing the query to return schedules from unintended accounts and exposing `transaction_body` data for transactions not belonging to the queried account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f2a9bb3d-33ba-4d9e-8a73-5a1e18a10eee?mode=deep",
+    "timestamp": "2026-05-01 21:08:17.444959",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: extractSqlFromScheduleFilters()] Can an unprivileged external user send duplicate `schedule.id` filter parameters with conflicting operators (e.g., `?schedule.id=gt:100&schedule.id=lt:50`) causing `extractSqlFromScheduleFilters` to build a contradictory WHERE clause that returns zero results, effectively hiding all pending scheduled transactions from legitimate signers who need to discover and co-sign them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d7da3ae-966e-40ba-b212-085ea1f35070?mode=deep",
+    "timestamp": "2026-05-01 21:08:30.529345",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: getSchedules()] Can an unprivileged external user exploit the `schedulesResponse.links.next` pagination link generated by `utils.getPaginationLink` with `lastScheduleId` to craft a manipulated `schedule.id` cursor that skips over specific pending scheduled transactions, causing signers who paginate through the schedule list to miss transactions that require their signature?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c3502cb1-cbd6-4c02-9bdb-2f96a1a3e6d9?mode=deep",
+    "timestamp": "2026-05-01 21:08:44.007972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the `wait_for_expiry: row.wait_for_expiry` field being returned directly from the database without validation, and by observing this flag alongside `expiration_time`, determine the exact execution window of a scheduled transaction and time a competing transaction to front-run the scheduled execution?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e8c084a2-bf87-42c5-9b73-e7f254015afd?mode=deep",
+    "timestamp": "2026-05-01 21:08:57.660695",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/schedules.js -> Scope: High: Any impacts caused by Tampering with submitted transactions'] [Function: formatScheduleRow()] Can an unprivileged external user exploit the `executed_timestamp: utils.nsToSecNs(row.executed_timestamp)` field being returned as `null` for pending transactions to enumerate all unexecuted scheduled transactions and their `transaction_body` contents, building a complete map of pending financial operations on the network?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d3db611a-f174-46c4-8eec-ad1199a3de0f?mode=deep",
+    "timestamp": "2026-05-01 21:09:10.838525",
+    "report_generated": false
+  }
+]
