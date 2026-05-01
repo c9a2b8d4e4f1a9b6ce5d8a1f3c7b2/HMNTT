@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user submit a query string with mixed-case keys such as `account.id=0xVICTIM&ACCOUNT.ID=0xATTACKER` so that `requestQueryParser()` merges both values into an array via the `merge()` inner function, causing downstream authorization checks to evaluate the attacker-controlled value as the effective account identity and authorize a transaction on behalf of the victim?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fdcb60da-8c21-44ce-964d-98238b576d85?mode=deep",
+    "timestamp": "2026-05-01 22:59:14.498052",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user exploit the case-insensitive key lowercasing in `requestQueryParser()` by sending `spender=VICTIM&SPENDER=ATTACKER` so that both values are merged into an array, and if the downstream handler picks the last element as the effective spender, the attacker substitutes themselves as the authorized spender without the owner's approval?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_71c89aed-b75d-485d-9f93-e44abae2feee?mode=deep",
+    "timestamp": "2026-05-01 22:59:26.676018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `owner.id=VICTIM&Owner.Id=ATTACKER` to exploit the `key.toLowerCase()` normalization in `requestQueryParser()`, causing the merged array to contain both values, and if the downstream transaction handler iterates the array and processes the attacker-controlled value, authorize a transaction without the real owner's signature?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6ebfca0d-86da-4505-bfb5-b5c63af8b96f?mode=deep",
+    "timestamp": "2026-05-01 22:59:39.320628",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: canonicalizeValue()] Can an unprivileged external user send `result=SUCCESS&RESULT=fail` so that `canonicalizeValue()` lowercases both to `['success', 'fail']` after merging, causing the result filter to be effectively bypassed and returning failed/unauthorized transactions that should be hidden from the requester, leaking information about unapproved transaction attempts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_af00d762-ed0b-4469-8169-cebd6619feb1?mode=deep",
+    "timestamp": "2026-05-01 22:59:52.568302",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user craft a query string with `transactiontype=CRYPTOAPPROVEALLOWANCE&TransactionType=CRYPTOTRANSFER` so that `requestQueryParser()` merges both into an array under `transactiontype`, and if the downstream handler processes only the first or last value, the attacker can filter for allowance-approval transactions they did not initiate, exposing unauthorized approval records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_091f0545-7a7f-46ce-9ae5-ed8c833ff3f8?mode=deep",
+    "timestamp": "2026-05-01 23:00:05.710344",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: merge()] Can an unprivileged external user send a query string with many repeated `account.id` values of different cases (e.g., `account.id=A&Account.Id=B&ACCOUNT.ID=C`) so that the `merge()` inner function accumulates all into a single array, and if the downstream SQL query uses an `IN()` clause built from this array, the attacker can enumerate transaction records for multiple accounts without being the owner or signer of any of them?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3407f42f-916f-4571-bced-fdfd37ea30d8?mode=deep",
+    "timestamp": "2026-05-01 23:00:20.469306",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user exploit the `qs.parse(queryString, queryOptions)` call with a crafted `__proto__[result]=success` or `constructor[result]=success` query string to perform prototype pollution, overwriting the `result` property on `Object.prototype` so that downstream authorization checks that read `result` from the parsed object receive an attacker-controlled value, bypassing transaction result filtering?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_039ad84c-f2fc-499e-b518-b6500fc17ab0?mode=deep",
+    "timestamp": "2026-05-01 23:00:33.727795",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `__proto__[order]=asc` in the query string so that `qs.parse()` pollutes `Object.prototype.order`, and when `canonicalizeValue()` looks up `queryCanonicalizationMap['order']` it returns `lowerCaseQueryValue`, causing all subsequent requests in the same process to have their `order` parameter silently overridden, affecting transaction ordering and potentially exposing records in an order that leaks signer/owner relationships?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dfc78367-0c2d-4683-9632-6c7ada3eba09?mode=deep",
+    "timestamp": "2026-05-01 23:00:48.123360",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send a deeply nested query parameter such as `a[b][c]=val` that exceeds `depth: 1` in `queryOptions`, causing `qs` to throw due to `strictDepth: true` and `throwOnLimitExceeded: true`, and if the error is not properly caught before the authorization middleware runs, the request proceeds with a partially parsed or empty query object that bypasses owner/signer validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_13ab2f32-047d-4495-915f-9997e56cf667?mode=deep",
+    "timestamp": "2026-05-01 23:01:01.325904",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send more repeated query parameters than `config.query.maxRepeatedQueryParameters` (the `arrayLimit` in `queryOptions`) to trigger the `throwOnLimitExceeded: true` exception, and if the error propagates in a way that sets `res.locals.statusCode` to the pre-initialized `httpStatusCodes.OK.code` from `requestLogger()`, cause the server to return a 200 response with no authorization check applied?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6e4e9faf-ac64-4df5-804d-5f58afc3e5db?mode=deep",
+    "timestamp": "2026-05-01 23:01:15.512369",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestLogger()] Can an unprivileged external user exploit the fact that `requestLogger()` unconditionally sets `res.locals.statusCode = httpStatusCodes.OK.code` before any authorization check runs, so that if a downstream middleware throws an unhandled exception that skips the error handler, the response is sent with HTTP 200 and the pre-authorized OK status, making an unauthorized transaction appear successful?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16b302d9-323e-4157-aea7-e056c3091f01?mode=deep",
+    "timestamp": "2026-05-01 23:01:30.036326",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestLogger()] Can an unprivileged external user trigger a race condition by sending concurrent requests that share the same `httpContext` store, so that `httpContext.set(requestIdLabel, requestId)` from one request's `requestLogger()` call overwrites the `requestId` of another in-flight request, causing the authorization context of a legitimate owner's request to be associated with the attacker's request ID and logging the attacker's actions as the owner's?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7d35bd9d-2c76-4c7a-8d63-36bce14f305c?mode=deep",
+    "timestamp": "2026-05-01 23:01:43.618090",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestLogger()] Can an unprivileged external user exploit the `randomString(8)` call in `requestLogger()` which generates only 4 bytes of entropy (8 hex chars), making request IDs predictable enough to collide under high load, allowing the attacker to correlate or spoof a specific request ID that is used downstream as part of an authorization token or audit trail for a transaction they did not sign?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bceab7a7-9369-4d94-a264-1bcb9f5192fa?mode=deep",
+    "timestamp": "2026-05-01 23:01:58.387059",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `scheduled=true&SCHEDULED=false` so that `requestQueryParser()` merges both into an array under `scheduled`, and if the downstream handler collapses the array to the last value (as `COLLAPSABLE_PARAMS` does in `requestNormalizer.js`), the attacker can override the `scheduled` filter to expose scheduled transactions that require multi-signer approval but have not yet been signed by all required parties?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0167f197-2e0c-40f5-ab68-573d223c9674?mode=deep",
+    "timestamp": "2026-05-01 23:02:13.256710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: canonicalizeValue()] Can an unprivileged external user send `ORDER=DESC` (uppercase) so that `canonicalizeValue()` lowercases it to `desc` via `lowerCaseQueryValue`, and then send a second request with `order=asc` to observe whether the response ordering differs in a way that leaks the existence of transactions signed by a specific owner, enabling enumeration of unapproved allowance transactions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e7678666-0be8-47ae-89a4-a9e258950b92?mode=deep",
+    "timestamp": "2026-05-01 23:02:26.195584",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send a query string with `account.id[0]=VICTIM&account.id[1]=ATTACKER` (array bracket notation) so that `qs.parse()` with `depth: 1` parses this as a nested object, and after `requestQueryParser()` lowercases the key, the downstream handler receives an object instead of a string for `account.id`, bypassing string-based owner validation and authorizing access to the victim's transaction records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc02270e-4b80-4e6d-b07c-7681a3116f91?mode=deep",
+    "timestamp": "2026-05-01 23:02:39.649986",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `result=SUCCESS%00` (null-byte injection) in the query string so that `qs.parse()` decodes it and `canonicalizeValue()` lowercases it to `success\\x00`, and if the downstream SQL comparison uses string equality without null-byte sanitization, the filter is bypassed and transactions with any result (including unauthorized ones) are returned?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7a44776d-20af-4274-b594-7b78e4895edb?mode=deep",
+    "timestamp": "2026-05-01 23:02:52.801673",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `account.id=lt:0xFFFFFFFF` (a range operator) merged with `ACCOUNT.ID=eq:VICTIM` via the case-insensitive merge in `requestQueryParser()`, so that the downstream handler receives an array `['lt:0xFFFFFFFF', 'eq:VICTIM']` and if it processes both, the range operator expands the query to include all accounts below the threshold, returning transaction records for accounts the attacker does not own?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_435cbc97-a270-48c7-a1e3-025011364f32?mode=deep",
+    "timestamp": "2026-05-01 23:03:06.289343",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send a query string where the same parameter appears with different URL encodings (e.g., `account.id=VICTIM&account%2Eid=ATTACKER`) so that `qs.parse()` treats them as different keys, but after `key.toLowerCase()` normalization in `requestQueryParser()` they collapse to the same key and merge, injecting the attacker's account ID alongside the victim's in the authorization check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cebe055b-62cd-4ebb-8afa-0187ccb019c2?mode=deep",
+    "timestamp": "2026-05-01 23:03:20.302393",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: merge()] Can an unprivileged external user exploit the `merge()` inner function's behavior where if `current` is not an array it is wrapped in one (`current = [current]`), and then `next` values are pushed, to inject a crafted value as the second element of the merged array so that if the downstream handler uses `array[1]` as the authoritative value, the attacker's injected account ID is used as the transaction owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6247f043-16a7-4e2d-b8cd-b20820fd0330?mode=deep",
+    "timestamp": "2026-05-01 23:03:34.770796",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `type=CRYPTOAPPROVEALLOWANCE&TYPE=CRYPTODELETE` so that `requestQueryParser()` merges both under `type`, and if the downstream handler processes the array and executes the first matching transaction type handler, the attacker can trigger a delete operation on a resource they do not own by injecting the delete type alongside an allowance type?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58b9aeb2-7ae8-4657-b3fc-479bb6164c2a?mode=deep",
+    "timestamp": "2026-05-01 23:03:50.126715",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send a query string with `nonce=0&NONCE=999999` so that `requestQueryParser()` merges both under `nonce`, and since `nonce` is a `COLLAPSABLE_PARAMS` in `requestNormalizer.js`, the last value `999999` is used, allowing the attacker to override the nonce filter and access transaction records associated with a specific nonce that belongs to another account's transaction sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_208798ce-a3cf-42bb-9f0e-7161dccd4ba6?mode=deep",
+    "timestamp": "2026-05-01 23:04:04.651579",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `block.hash=LEGITIMATE_HASH&Block.Hash=ATTACKER_HASH` so that `requestQueryParser()` merges both under `block.hash`, and since `block.hash` is a `COLLAPSABLE_PARAMS`, the last value (attacker-controlled) is used as the effective block hash filter, redirecting the query to a block containing transactions the attacker wants to inspect without being a signer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d07b920-4a57-4b6c-b799-8624749912eb?mode=deep",
+    "timestamp": "2026-05-01 23:04:19.911708",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send a query string with `timestamp=gt:0&TIMESTAMP=lt:9999999999.999999999` so that `requestQueryParser()` merges both under `timestamp`, and since `timestamp` is a `NON_SORTED_PARAMS`, the order is preserved, causing the downstream handler to return all transactions in the full time range regardless of whether the requester is an authorized signer or owner?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f757b83e-5566-42d8-80fa-2fe4e496e2e6?mode=deep",
+    "timestamp": "2026-05-01 23:04:34.510171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rest/middleware/requestHandler.js -> Scope: High: Authorizing transactions without approval from signers/owners'] [Function: requestQueryParser()] Can an unprivileged external user send `limit=1000&LIMIT=1` so that `requestQueryParser()` merges both under `limit`, and if `getLimitParamValue()` uses the last value in the array (`values[values.length - 1]`), the attacker can force a limit of 1 to enumerate transaction records one at a time, or conversely inject a very large limit to retrieve bulk transaction data including unapproved allowance records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91df2ac5-b507-40bb-9fa6-5c2577350491?mode=deep",
+    "timestamp": "2026-05-01 23:04:48.133973",
+    "report_generated": false
+  }
+]
