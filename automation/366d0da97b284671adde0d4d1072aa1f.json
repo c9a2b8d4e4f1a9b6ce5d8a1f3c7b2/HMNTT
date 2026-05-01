@@ -1,0 +1,116 @@
+[
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getHashBytes()] Can an unprivileged external user submit a crafted record stream file containing a HashObject whose internal ByteString is a LiteralByteString larger than UnsafeByteOutput.SIZE (16 bytes), causing getHashBytes() to return the raw internal protobuf byte array via toBytes(), and then exploit any downstream code that mutates that array to silently corrupt the running hash chain stored in the HashObject, causing the mirror node to persist a falsified previousHash or hash value for a record file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f744424-0220-46a9-bcd6-33ae8a8e2c56?mode=deep",
+    "timestamp": "2026-05-01 16:16:07.550499",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: toBytes(ByteString)] Can an unprivileged external user craft a protobuf message containing a LiteralByteString larger than 16 bytes such that toBytes() returns the same reference as the internal protobuf array (no defensive copy), and if any downstream consumer of that array modifies it (e.g., in DigestOutputStream.write or array manipulation), the hash bytes used for running hash chain verification are silently altered, allowing a tampered record file to pass hash chain validation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dc940459-b7bf-4b63-8f01-1269e661620e?mode=deep",
+    "timestamp": "2026-05-01 16:16:19.443814",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fromBytes(byte[])] Can an unprivileged external user supply a byte array to fromBytes() which wraps it via UnsafeByteOperations.unsafeWrap() without copying, such that if the caller retains a reference to the original array and mutates it after wrapping, the ByteString used to represent a running hash or previous hash in a HashObject is silently changed, corrupting the Hashgraph history stored in the mirror node database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5982f9b5-7f5c-48dc-94c4-d3277848a519?mode=deep",
+    "timestamp": "2026-05-01 16:16:31.928718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: convertToNanosMax(long, long)] Can an unprivileged external user submit a transaction with a consensus timestamp whose seconds field is large enough to cause overflow in convertToNanosMax(), causing the fallback to return Long.MAX_VALUE, which is then stored as the consensus timestamp of a record item, causing all subsequent hash chain ordering comparisons to treat this record as the furthest-future event and silently accept or skip records that should be rejected as out-of-order?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2d61ef76-dbf6-490f-bb40-08559896db17?mode=deep",
+    "timestamp": "2026-05-01 16:16:44.458333",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: timeStampInNanos(Timestamp)] Can an unprivileged external user craft a protobuf Timestamp with seconds=1568376750538 (or any value causing long overflow in Math.multiplyExact) to trigger an ArithmeticException in timeStampInNanos(), causing the record file parser to abort processing of the entire record file, resulting in a gap in the mirror node's Hashgraph history and a denial-of-service on the importer pipeline?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fed8cdba-7636-44c0-a990-fc5dd5a06c83?mode=deep",
+    "timestamp": "2026-05-01 16:16:57.627821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: convertToNanos(long, long)] Can an unprivileged external user inject a record stream item with a Timestamp whose seconds value causes Math.multiplyExact(second, NANOS_PER_SECOND) to overflow, causing convertToNanos() to throw ArithmeticException and halt the entire record file parsing pipeline, preventing the mirror node from advancing its view of Hashgraph history and creating a permanent stall?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dde54eef-abca-4d03-a080-499850222380?mode=deep",
+    "timestamp": "2026-05-01 16:17:11.536211",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: getHashBytes()] Can an unprivileged external user submit a HashObject with an empty or zero-length hash ByteString, causing getHashBytes() to return an empty byte array, which is then encoded as an empty hex string via bytesToHex() and stored as the previousHash of a record file, breaking the hash chain by making the mirror node accept any subsequent file whose previousHash field is also empty?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a9a623d2-a429-4835-8996-ce01efce8a70?mode=deep",
+    "timestamp": "2026-05-01 16:17:25.901174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: trim(byte[])] Can an unprivileged external user craft a running hash value that begins with one or more zero bytes, causing trim() to strip those leading zeros before the hash is stored or compared, resulting in a hash mismatch between the stored previousHash and the actual hash of the previous record file, breaking the Hashgraph hash chain integrity check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_515bce2c-2c28-4933-baa5-7ac6c410e5ba?mode=deep",
+    "timestamp": "2026-05-01 16:17:39.732170",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: trim(ByteString)] Can an unprivileged external user supply a ByteString representing a running hash whose first byte is 0x00, causing trim(ByteString) to strip leading zeros and return a shorter ByteString, which when converted to hex via bytesToHex() produces a different string than the original 48-byte SHA-384 hash, causing the mirror node to store an incorrect previousHash and silently accept a tampered hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_15698649-8711-4d87-a5eb-59d1af942354?mode=deep",
+    "timestamp": "2026-05-01 16:17:53.878942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: bytesToHex(byte[])] Can an unprivileged external user craft a HashObject whose hash bytes, when passed through getHashBytes() and then bytesToHex(), produce a hex string that collides with the hex representation of a different hash value due to the absence of length normalization, allowing a tampered record file's running hash to match a legitimate previousHash stored in the database?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_30346c5c-e54d-4717-9628-b9e0c8e1aa31?mode=deep",
+    "timestamp": "2026-05-01 16:18:07.238832",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: UnsafeByteOutput.write(byte[], int, int)] Can an unprivileged external user trigger a code path where UnsafeByteOutput.write(byte[], int, int) is called with a non-zero offset, causing the method to store the entire backing array (ignoring offset and length), so that the returned byte array from toBytes() contains extra bytes beyond the actual hash data, corrupting the hash value used in running hash chain computation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1fead6d9-675b-423e-bbcc-37835f6a6653?mode=deep",
+    "timestamp": "2026-05-01 16:18:20.399116",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: UnsafeByteOutput.writeLazy(byte[], int, int)] Can an unprivileged external user trigger a code path where UnsafeByteOutput.writeLazy() is called with a non-zero offset or partial length, causing the method to store the full backing array reference rather than the intended slice, so that the hash bytes extracted from a HashObject include unintended data, corrupting the running hash chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_44072b55-ea67-485a-9b38-eb0dca4d6198?mode=deep",
+    "timestamp": "2026-05-01 16:18:34.082631",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: createSha384Digest()] Can an unprivileged external user exploit a race condition in concurrent record file processing where two threads both call createSha384Digest() and then share or swap the returned MessageDigest instances, causing the SHA-384 digest computed for one record file's hash chain to incorporate bytes from another file, producing an incorrect running hash that is then stored as the authoritative hash for that block?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9da61625-1e53-41d4-8eb5-1ec4a7f9ef63?mode=deep",
+    "timestamp": "2026-05-01 16:18:47.727718",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: isLongZeroAddress(byte[])] Can an unprivileged external user craft an EVM address whose first 12 bytes are all zeros (matching MIRROR_PREFIX) but whose last 8 bytes encode a negative long value, causing isLongZeroAddress() to return true and fromEvmAddress() to construct an EntityId with a negative num, which is then used to look up or create a Hashgraph entity record that maps to an unintended or system entity?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6e75457-bc31-4a92-95d7-e20d6a7e0f9e?mode=deep",
+    "timestamp": "2026-05-01 16:19:01.811688",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fromEvmAddress(byte[])] Can an unprivileged external user submit a contract call with an EVM address that passes isLongZeroAddress() (12 leading zero bytes) but whose 8-byte num portion encodes a value <= MAX_SYSTEM_ENTITY_NUM (999), causing fromEvmAddress() to return an EntityId for a system entity, allowing the user to interact with system-reserved Hashgraph entities through the EVM layer without direct authorization?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae628305-3b9c-4304-b8ea-e3b4f9bda575?mode=deep",
+    "timestamp": "2026-05-01 16:19:14.756640",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: fromTrimmedEvmAddress(byte[])] Can an unprivileged external user supply a short EVM address (less than 20 bytes) to fromTrimmedEvmAddress(), causing it to be left-padded with zeros via Bytes.concat(), which then passes isLongZeroAddress() and is decoded as a long-zero entity address, allowing the user to reference any Hashgraph entity by supplying a truncated address that would not normally be recognized as a long-zero address?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f971d0d-d2f8-43e8-8c39-21b46fe58953?mode=deep",
+    "timestamp": "2026-05-01 16:19:27.903923",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: normalize(ContractSlotKey)] Can an unprivileged external user craft two different contract storage slot keys that differ only in leading zero bytes, causing normalize() to trim both to the same byte sequence via trim(), resulting in a slot key collision where two distinct storage slots in the Hashgraph state are mapped to the same normalized key, corrupting the contract state history stored in the mirror node?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3b6eeef5-2db6-441b-b83a-12b76a7ca913?mode=deep",
+    "timestamp": "2026-05-01 16:19:40.357297",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: sanitize(String)] Can an unprivileged external user embed Unicode control characters other than the null character (0x0000) in transaction memo or other string fields, which sanitize() does not replace, causing those characters to be stored in the PostgreSQL database and later retrieved as part of Hashgraph history records, potentially corrupting downstream consumers that parse those strings as structured data?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dbe70c34-0d32-4107-a201-809e5f017f16?mode=deep",
+    "timestamp": "2026-05-01 16:19:53.411983",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: common/src/main/java/org/hiero/mirror/common/util/DomainUtils.java -> Scope: Critical: Any impact caused by Tampering/Manipulating Hashgraph history'] [Function: leftPadBytes(byte[] bytes, int length)] Can an unprivileged external user trigger a code path where leftPadBytes() is called with a length smaller than bytes.length, causing it to return the original array unmodified (no copy), and if the caller subsequently modifies the returned array, the original byte array (e.g., a hash value) is also mutated, corrupting the Hashgraph history data stored in memory?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0397900f-fde0-4e9d-8833-502cce00e315?mode=deep",
+    "timestamp": "2026-05-01 16:20:06.505202",
+    "report_generated": false
+  }
+]
