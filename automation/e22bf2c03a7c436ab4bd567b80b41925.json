@@ -1,0 +1,128 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response containing duplicate `addr` keys in the `network` map (same `net.JoinHostPort` result for multiple entries), causing later entries to silently overwrite earlier ones, resulting in a reduced network map that maps all addresses to a single attacker-controlled `hiero.AccountID`, so the SDK routes all transactions to one node that rejects them, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b8e80a7-67b0-4615-9399-eead43e703d6?mode=deep",
+    "timestamp": "2026-05-01 21:13:53.889020",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the fact that `buildNetworkFromMirrorNodes` is called once at startup (in `newClient`) and the resulting network map is never refreshed, by temporarily poisoning the mirror node response at startup time to inject attacker-controlled endpoints, causing the pinger to permanently use a malicious network map for all subsequent fund transfers, with no mechanism to recover without a restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_16a1f51f-c663-41e0-84bd-e49f2926fe9d?mode=deep",
+    "timestamp": "2026-05-01 21:14:06.101941",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the absence of HTTPS enforcement in `http.Client` (no TLS requirement is enforced in `buildNetworkFromMirrorNodes`) to intercept a plaintext HTTP connection to the mirror node REST API and inject a response with attacker-controlled `ServiceEndpoints`, causing the SDK client to route all `cryptoTransfer.Execute` calls to attacker nodes that permanently drop transactions, freezing the operator's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_78faecd2-ac47-4080-8705-7665eb61e49d?mode=deep",
+    "timestamp": "2026-05-01 21:14:18.455793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user cause the mirror node to return a response with `Content-Type: text/html` and an HTML error page body, causing `json.NewDecoder(resp.Body).Decode(&payload)` to fail with a JSON parse error, which is treated as non-retryable (`retry=false`), immediately aborting all retries and permanently preventing network map construction, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cce4b9ba-f37d-4ef7-9819-ec7d2629bdc4?mode=deep",
+    "timestamp": "2026-05-01 21:14:31.121599",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the `max(cfg.mirrorNodeClientMaxRetries + 1, 1)` calculation where `cfg.mirrorNodeClientMaxRetries` is set to `math.MaxInt` (via environment variable `HIERO_MIRROR_PINGER_MIRROR_NODE_CLIENT_MAX_RETRIES`), causing integer overflow to produce a negative `attempts` value, making the retry loop execute zero or unexpected iterations and permanently preventing network map construction?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_972a0274-3206-47af-9b97-9d2e4c7cf8a7?mode=deep",
+    "timestamp": "2026-05-01 21:14:44.174964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `serviceEndpoint.Port` is a negative integer (JSON allows negative numbers), which passes the `ep.Port == 0` check but causes `fmt.Sprintf(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_922296a5-5015-42b9-bb34-3057a347434d?mode=deep",
+    "timestamp": "2026-05-01 21:14:57.869106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `serviceEndpoint.Port` is an extremely large integer (e.g., 99999), which passes the `ep.Port == 0` check, causing `net.JoinHostPort` to produce an address with an invalid port number that the OS rejects, making all gRPC connections fail and permanently preventing transaction submission, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c318df7-ea7c-4d55-b7da-86553e0dd44c?mode=deep",
+    "timestamp": "2026-05-01 21:15:10.517893",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `DomainName` contains special characters (e.g., spaces, null bytes, or control characters) that survive `strings.TrimSpace` but cause `net.JoinHostPort` to produce a malformed address string, which the Hiero SDK cannot connect to, resulting in all gRPC calls failing and funds being permanently unspendable?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3f62ce7a-e903-41ff-9688-b10b47617e94?mode=deep",
+    "timestamp": "2026-05-01 21:15:23.106041",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `IPAddressV4` contains a broadcast address (e.g., `255.255.255.255`) or multicast address, causing `net.JoinHostPort` to produce an address that the SDK attempts to connect to but which never responds, causing all `cryptoTransfer.Execute` calls to time out and permanently fail, freezing the operator's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c90b15f3-9f9c-45b7-b35d-9fb437ec60d7?mode=deep",
+    "timestamp": "2026-05-01 21:15:36.584964",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the context passed to `buildNetworkFromMirrorNodes` (which uses `context.Background()` in `newClient`) by causing the mirror node to respond slowly enough that the HTTP timeout `cfg.mirrorNodeClientTimeout` expires on every attempt, causing all retries to fail with timeout errors and permanently preventing network map construction, freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_47873354-1349-4443-8cae-47869b29355c?mode=deep",
+    "timestamp": "2026-05-01 21:15:49.957340",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the fact that `http.NewRequestWithContext` uses the provided `ctx` for cancellation, and if the context is cancelled (e.g., via a signal) during the initial `buildNetworkFromMirrorNodes` call, the function returns `nil, ctx.Err()`, causing `newClient` to fail and the pinger to exit, permanently halting all fund transfers until manual restart?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_70937914-4d35-44e9-aec4-43ded925dde6?mode=deep",
+    "timestamp": "2026-05-01 21:16:02.763231",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where the `nodes` JSON field is present but typed as a non-array value (e.g., `\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_76dfae9c-c995-4c2d-821c-d6a985fac47c?mode=deep",
+    "timestamp": "2026-05-01 21:16:15.483422",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `NodeAccountID` contains a valid account ID string with an alias or EVM address format that `hiero.AccountIDFromString` parses successfully but which does not correspond to a real consensus node, causing the SDK to submit transactions to a non-node account that rejects them, permanently failing all transfers and freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6c4fef7c-7526-4a7e-982d-d1c72ba0fbb1?mode=deep",
+    "timestamp": "2026-05-01 21:16:28.103793",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the absence of any integrity verification (no HMAC, signature, or certificate pinning) on the mirror node REST response to perform a cache poisoning attack on an intermediate HTTP proxy or CDN, injecting a malicious `nodesEnvelope` that persists in cache and is served to the pinger on every startup, permanently routing all fund transfers to attacker-controlled nodes?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a10546b7-e767-49c2-8d2c-d08410660315?mode=deep",
+    "timestamp": "2026-05-01 21:16:41.599061",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response containing a single valid `nodeEntry` whose `ServiceEndpoints` point to a TCP port that accepts connections but never sends gRPC responses (a TCP tarpit), causing `cryptoTransfer.Execute` to block indefinitely on every attempt, consuming all retry slots and permanently preventing any transaction from being confirmed, freezing the operator's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34d8b995-e870-4818-a1c1-15cbbba0270f?mode=deep",
+    "timestamp": "2026-05-01 21:16:54.352667",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where all `nodeEntry` records have `ServiceEndpoints` with only `DomainName` set to a hostname that resolves to `NXDOMAIN` at gRPC connection time, causing all SDK connection attempts to fail with DNS resolution errors, permanently preventing transaction submission and freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63c0b074-486a-46f1-aeae-adda724a1c90?mode=deep",
+    "timestamp": "2026-05-01 21:17:07.154060",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the retry backoff formula `cfg.mirrorNodeClientBaseBackoff * time.Duration(1<<(attempt-1))` with `attempt` values approaching 63 to cause a bit-shift overflow producing a zero or negative `time.Duration`, causing `time.After(backoff)` to fire immediately and creating a tight retry loop that exhausts all attempts instantly without meaningful delay, preventing successful network map construction and freezing funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_dfc7b1d7-3cc4-4010-a376-03ed8b35ecb7?mode=deep",
+    "timestamp": "2026-05-01 21:17:21.021956",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `service_endpoints` contains thousands of entries, causing the `network` map to be populated with thousands of addresses, overwhelming the Hiero SDK's node selection logic and causing it to route transactions to unreachable nodes, permanently failing all transfers and freezing the operator's funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9b68a8fa-b7e2-4942-85c6-376631bbd624?mode=deep",
+    "timestamp": "2026-05-01 21:17:34.269272",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user exploit the fact that `resp.Body` is read without a `io.LimitReader`, causing a mirror node response with an extremely large `nodes` array (millions of entries) to be fully decoded into memory, exhausting the pinger process's heap, triggering an OOM kill, and permanently halting all fund transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_a0f806c8-ba77-4472-8420-827e7e266406?mode=deep",
+    "timestamp": "2026-05-01 21:17:48.294309",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: fetchMirrorNodeNetwork()] Can an unprivileged external user inject a mirror node response where `NodeAccountID` is set to the operator's own account ID (e.g., `0.0.2`), causing the `network` map to associate the operator's account as a consensus node, and when the SDK submits a `cryptoTransfer` to this \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_315d0d9b-3257-45e1-8996-2e4f7efc0400?mode=deep",
+    "timestamp": "2026-05-01 21:18:02.097710",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/mirror_node_client.go -> Scope: Critical: Unintended permanent freezing of funds'] [Function: buildNetworkFromMirrorNodes()] Can an unprivileged external user exploit the `strings.HasSuffix(base, \\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48dd518a-4f92-4b8c-9224-3ec3dbd93130?mode=deep",
+    "timestamp": "2026-05-01 21:18:14.924386",
+    "report_generated": false
+  }
+]
