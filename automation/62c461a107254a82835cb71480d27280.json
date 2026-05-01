@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user submit a crafted stream file with a manipulated `getPreviousHash()` value that matches the `expectedHash` from `getLast()` in `shouldParse()`, bypassing hash chain integrity so that a fraudulent record file containing fabricated crypto transfer debits is accepted and persisted, causing direct loss of funds for victim accounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c67edfb6-fed5-4873-b9a1-b5f4261c0ed2?mode=deep",
+    "timestamp": "2026-05-01 23:07:28.159994",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user exploit the condition `previous.getConsensusEnd() >= current.getConsensusStart()` in `shouldParse()` by crafting a stream file whose `getConsensusStart()` is set to a value just above the last file's `getConsensusEnd()`, allowing a file with fabricated transfer amounts to bypass the duplicate-skip guard and be parsed, leading to double-crediting or double-debiting of HBAR balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bc7793a5-ef09-4e37-9730-bb2a5fb3699f?mode=deep",
+    "timestamp": "2026-05-01 23:07:40.107403",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user inject a crafted stream file into the batch list passed to `parse(List<T> streamFiles)` such that an earlier file in the list passes `shouldParse()` and sets `previous` to itself, allowing a subsequent file with a matching `getPreviousHash()` but fraudulent transfer records to be parsed and committed via `doFlush(previous)`, causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f09dd662-99f9-4fa5-970d-a4668a21a108?mode=deep",
+    "timestamp": "2026-05-01 23:07:52.458897",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: shouldParse()] Can an unprivileged external user exploit the fact that `shouldParse()` only checks `previous.getType().isChained()` before verifying the hash chain, and since `StreamType.BALANCE` returns `false` for `isChained()`, craft a malicious `AccountBalanceFile` with inflated account balances that bypasses hash chain verification entirely, causing the mirror node to report fraudulently inflated balances that downstream applications use for fund-related decisions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_2489e200-8b71-43f8-9502-bbe5f234e416?mode=deep",
+    "timestamp": "2026-05-01 23:08:05.073976",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: getLast()] Can an unprivileged external user trigger a race condition in `getLast()` where the `AtomicReference<T> last` is null (e.g., after `clear()` is called) and `streamFileRepository.findLatest()` returns a stale or manipulated record, causing `shouldParse()` to skip hash chain verification (`previous == null` returns `true`) and accept a fraudulent stream file with fabricated crypto transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_83b7ba38-f73e-4916-bb85-51090678ddc0?mode=deep",
+    "timestamp": "2026-05-01 23:08:17.216931",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doFlush()] Can an unprivileged external user cause a partial-commit scenario where `streamFileListener.onEnd(streamFile)` in `doFlush()` persists transfer records to the database but `last.set(streamFile)` is not yet visible to a concurrent thread, allowing a second parse of the same stream file to pass `shouldParse()` (since `getLast()` still returns the old value) and double-persist crypto transfer debits, resulting in direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_63c2a303-e3e8-430f-85b9-f03606cc349c?mode=deep",
+    "timestamp": "2026-05-01 23:08:30.005111",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user exploit the `@Retryable` annotation on `RecordFileParser.parse(RecordFile)` by causing a transient failure after `doParse()` has already called `recordItemListener.onItem()` for transfer records but before `doFlush()` completes, so that on retry the same transfer records are processed again within a new transaction, leading to duplicate crypto transfer entries and incorrect balance accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_32471f59-0171-42e3-8ef3-98685839621b?mode=deep",
+    "timestamp": "2026-05-01 23:08:43.731072",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user exploit the batch `parse(List<T> streamFiles)` logic where `doFlush(previous)` is only called once for the last successfully parsed file, meaning that if an exception is thrown mid-batch after several files' `doParse()` calls have already mutated state via `recordItemListener.onItem()`, those partial transfer records may be committed or left in an inconsistent state, causing incorrect fund accounting?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_48f54eb2-1d60-4210-9a11-52c2304acdd5?mode=deep",
+    "timestamp": "2026-05-01 23:08:56.545067",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user craft a stream file with a `getConsensusEnd()` value of `Long.MIN_VALUE` or a negative nanosecond timestamp, causing `Instant.ofEpochSecond(0L, streamFile.getConsensusEnd())` to produce an invalid instant that corrupts `parseLatencyMetric` recording and potentially causes an arithmetic overflow in downstream balance calculations?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9e8ac8fb-5a8a-4ac9-813f-fc7e56e4d2e4?mode=deep",
+    "timestamp": "2026-05-01 23:09:09.409007",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: getProperties()] Can an unprivileged external user exploit the `parserProperties.isEnabled()` check in `shouldParse()` by observing that when the parser is disabled, `streamFile.clear()` is called but no error is thrown, allowing an attacker to time a file injection during a brief disable/re-enable window so that the `last` reference is not updated and the next file skips hash chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cff65109-b49f-484f-8b4d-18b85d6b5a97?mode=deep",
+    "timestamp": "2026-05-01 23:09:23.073110",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user submit a stream file where `streamFile.getLoadEnd()` returns `null` or zero, causing a `NullPointerException` or arithmetic error in `totalDurationMetric.record(streamFile.getLoadEnd() - streamFile.getLoadStart(), TimeUnit.MILLISECONDS)` that aborts the parse after `doParse()` has already persisted transfer records but before `doFlush()` updates `last`, leaving the parser in a state where the same file can be re-parsed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1b195b3f-33d3-428b-a674-c11dd0fade7f?mode=deep",
+    "timestamp": "2026-05-01 23:09:36.882153",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user inject a `null` element into the `List<T> streamFiles` passed to `parse(List<T>)`, causing a `NullPointerException` at `streamFile.getName()` that aborts the batch after some files have been parsed via `doParse()` but before `doFlush()` is called, leaving transfer records in an uncommitted or inconsistent state that could be re-processed on retry?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d208799f-d52f-4c78-a743-b45020b4f156?mode=deep",
+    "timestamp": "2026-05-01 23:09:50.672838",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: shouldParse()] Can an unprivileged external user exploit the string comparison `expectedHash.contentEquals(actualHash)` in `shouldParse()` by crafting a stream file where `getPreviousHash()` returns a string that is equal in content but differs in encoding or case (e.g., uppercase vs lowercase hex), bypassing the hash chain check and allowing a fraudulent record file to be parsed with fabricated transfer amounts?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_55f3ec4a-0bc3-4038-bdb1-de5d0a762082?mode=deep",
+    "timestamp": "2026-05-01 23:10:03.088725",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: getLast()] Can an unprivileged external user exploit the two-level cache in `getLast()` — where `last.get()` takes priority over `streamFileRepository.findLatest()` — by causing the in-memory `last` reference to become stale (e.g., via a JVM restart or `clear()` call) so that `streamFileRepository.findLatest()` returns a record with a null or empty hash, causing `shouldParse()` to skip hash chain verification and accept a fraudulent stream file?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9f7771a1-f2c8-4f5b-a317-8afa8ae84de4?mode=deep",
+    "timestamp": "2026-05-01 23:10:16.769341",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user exploit the `@Transactional` boundary on `RecordFileParser.parse(RecordFile)` by causing the transaction to time out (via `transactionTimeout`) after `doParse()` has processed all `recordItem.onItem()` calls but before `doFlush()` persists the stream file record, resulting in a rolled-back transaction that leaves the `last` AtomicReference pointing to the previous file, allowing the same fraudulent file to be re-submitted and re-parsed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c427bc63-b2c1-4d5b-a5c3-1ebe0418e55d?mode=deep",
+    "timestamp": "2026-05-01 23:10:29.241520",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user exploit the fact that `RecordFileParser.parse()` is `synchronized` but `AbstractStreamFileParser.parse()` is not, by triggering concurrent calls through a non-synchronized code path that bypasses the `synchronized` keyword, allowing two threads to simultaneously pass `shouldParse()` with the same `previous` reference and double-process the same stream file's crypto transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_caf33535-d094-4aa0-ab2c-d6766ae52d61?mode=deep",
+    "timestamp": "2026-05-01 23:10:41.858507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user craft a batch where the first stream file has a valid hash chain but subsequent files have manipulated `getConsensusStart()` values that are only slightly above the previous file's `getConsensusEnd()`, causing all files to pass `shouldParse()` and be parsed in sequence, with the last file containing fraudulent large-value crypto transfers that are committed via `doFlush(previous)`?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ca30d33-065e-4b29-ae0e-8b928e709613?mode=deep",
+    "timestamp": "2026-05-01 23:10:55.111945",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: doFlush()] Can an unprivileged external user exploit the ordering in `doFlush()` where `streamFileListener.onEnd(streamFile)` is called before `last.set(streamFile)`, so that if `onEnd()` throws an exception, `last` is never updated, causing the parser to re-process the same stream file on the next call (since `getLast()` still returns the old value) and potentially double-committing transfer records?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab927fba-6af1-4070-a6a0-d37005fe8f58?mode=deep",
+    "timestamp": "2026-05-01 23:11:08.832855",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user craft a stream file with a `getName()` that returns `null`, causing a `NullPointerException` in the log statement `log.error(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_91f82496-3a2e-4971-8054-e7b8f3198078?mode=deep",
+    "timestamp": "2026-05-01 23:11:23.277083",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user exploit the `initial == previous` check at line 146 of `AbstractStreamFileParser` by crafting a batch where all files are skipped by `shouldParse()` (e.g., all have `consensusEnd >= consensusStart` of current), causing `doFlush()` to never be called, but if a concurrent thread has already called `doParse()` on one of those files, the transfer records are persisted without the stream file record being committed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3dd7feca-a90c-4ec2-adbb-0286c92002a7?mode=deep",
+    "timestamp": "2026-05-01 23:11:39.132174",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user exploit the `@Retryable` annotation's `maxRetries` configuration by causing repeated transient failures that trigger the maximum number of retries, each time re-executing `doParse()` within a new transaction that processes the same `recordItem.onItem()` calls, potentially leading to duplicate crypto transfer records if the idempotency check in the database layer is insufficient?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_66bc67a0-1b1d-4b1e-af01-8d621bcd1325?mode=deep",
+    "timestamp": "2026-05-01 23:11:52.238425",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: shouldParse()] Can an unprivileged external user exploit the fact that `shouldParse()` uses `previous.getConsensusEnd() >= current.getConsensusStart()` (not strict equality) to skip files, by crafting a stream file where `getConsensusStart()` equals `previous.getConsensusEnd() + 1`, ensuring it passes the skip check even though it represents a gap in the consensus timeline, allowing a fraudulent file to be inserted into the chain?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a56fc7e-4ff7-4d8a-b49d-d25224583867?mode=deep",
+    "timestamp": "2026-05-01 23:12:05.005955",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(T streamFile)] Can an unprivileged external user craft a stream file with an extremely large `getCount()` value returned after `doParse()`, causing integer overflow in the `count` accumulation in `parse(List<T>)` at `count += streamFile.getCount()`, which could corrupt the logged item count and mask the actual number of fraudulent transfers processed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_67600840-b57e-449a-bfbd-6a100b47a935?mode=deep",
+    "timestamp": "2026-05-01 23:12:18.406200",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: parse(List<T> streamFiles)] Can an unprivileged external user exploit the fact that in `parse(List<T>)`, `doFlush()` is only called on `previous` (the last successfully parsed file), meaning that if the last file in the batch is skipped by `shouldParse()`, `doFlush()` is called on the second-to-last file, but the `last` AtomicReference is set to that file, potentially allowing a future submission of the skipped file to bypass hash chain verification?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_756d99f5-22ac-4830-800a-79329bc37ff0?mode=deep",
+    "timestamp": "2026-05-01 23:12:31.781885",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: importer/src/main/java/org/hiero/mirror/importer/parser/StreamFileParser.java -> Scope: Critical: Direct loss of funds'] [Function: getProperties()] Can an unprivileged external user exploit the `ParserProperties.getBatch()` configuration to manipulate the `queueCapacity` of `BatchStreamFileNotifier`'s `ArrayBlockingQueue`, causing the queue to overflow and drop legitimate stream files while accepting fraudulent ones, leading to gaps in the transaction record that hide fund theft?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9532857a-6311-46b5-9e1a-12dc70bdf363?mode=deep",
+    "timestamp": "2026-05-01 23:12:45.469089",
+    "report_generated": false
+  }
+]
