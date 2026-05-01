@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user open thousands of concurrent gRPC subscriptions by calling subscribeTopic() repeatedly with no rate limiting enforced, exhausting the boundedElastic scheduler thread pool and causing all other legitimate subscribers to be denied service through thread starvation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_636c0ef5-be2b-488e-bf31-6c46f7701396?mode=deep",
+    "timestamp": "2026-05-01 14:53:51.129260",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user subscribe with throttled=true (historical path) and no endTime set, causing numRepeats=Long.MAX_VALUE repeat cycles that hold a scheduler thread and DB connection open indefinitely, effectively griefing other subscribers by exhausting shared resources?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f53e4c7b-65f3-4756-8716-64f0173dca28?mode=deep",
+    "timestamp": "2026-05-01 14:54:03.190732",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user trigger the retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))) path by subscribing to a topic during a transient DB outage, causing the retriever to retry indefinitely and hold scheduler resources, preventing recovery for other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_11ddb688-96f0-4108-b0e2-b65993732bf4?mode=deep",
+    "timestamp": "2026-05-01 14:54:15.657716",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a TopicMessageFilter with startTime=0 (epoch) and no limit, forcing poll() to issue a full-table-scan query against the topic_message table on every polling interval, causing sustained high DB CPU load that degrades query performance for all other users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f234e11a-d229-4788-9622-3d39151380b4?mode=deep",
+    "timestamp": "2026-05-01 14:54:28.889279",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user set limit=0 (no limit) in TopicMessageFilter, causing poll() to compute pageSize=Math.min(Integer.MAX_VALUE, maxPageSize) and repeatedly fetch maxPageSize rows per poll cycle, generating excessive DB load that starves legitimate queries?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42494296-25cf-4f87-8847-ecc6abe9b6dd?mode=deep",
+    "timestamp": "2026-05-01 14:54:42.060519",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user open N concurrent subscriptions each with startTime=0 and no limit, where N is large enough to saturate the Schedulers.boundedElastic() pool, causing all new subscription attempts by legitimate users to queue indefinitely or be rejected?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_56cf0cf9-fc84-492a-8ef9-a951f29ee78d?mode=deep",
+    "timestamp": "2026-05-01 14:54:56.129621",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: PollingContext(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the fact that throttled=true sets numRepeats=Long.MAX_VALUE with no per-subscriber cap, holding a PollingContext alive indefinitely and consuming memory proportional to the number of concurrent attacker-controlled subscriptions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d0116fc3-d55e-40f3-bde8-b9c0bbca8241?mode=deep",
+    "timestamp": "2026-05-01 14:55:09.646318",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: isComplete()] Can an unprivileged external user subscribe with throttled=true and no limit set, causing isComplete() to only return true when pageSize.get() < retrieverProperties.getMaxPageSize(), meaning a topic with exactly maxPageSize messages per polling window will never complete and hold resources forever?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4ecbc796-5517-4cca-95cf-feb67d4e6c69?mode=deep",
+    "timestamp": "2026-05-01 14:55:24.081768",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: isComplete()] Can an unprivileged external user subscribe to a high-volume topic in throttled mode where each poll returns exactly maxPageSize=1000 messages, causing isComplete() to always return false and the subscription to loop indefinitely, consuming DB connections and scheduler threads?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cc87edd7-8bdf-41a0-b4ee-dfa202ed3f6c?mode=deep",
+    "timestamp": "2026-05-01 14:55:39.569993",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user abuse the timeout(retrieverProperties.getTimeout(), scheduler) default of 60 seconds by opening many subscriptions that each hold a scheduler thread for the full 60-second timeout window, creating a rolling denial-of-service against the bounded scheduler?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74ac1a0c-e7e6-4ea9-9da9-cde09a851364?mode=deep",
+    "timestamp": "2026-05-01 14:55:53.993980",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a filter with a very old startTime (e.g., startTime=1) and no endTime, causing each poll() invocation to scan from near-epoch through all historical messages, generating repeated expensive range scans that degrade DB performance for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1ee83f0a-9538-4da2-bdea-18e0c85d58ac?mode=deep",
+    "timestamp": "2026-05-01 14:56:09.248308",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the absence of a per-IP or per-client subscription limit to open concurrent subscriptions across multiple topic IDs simultaneously, multiplying DB query load and scheduler thread consumption to grief all other subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4f76faee-a6ed-43ac-be5c-e66a7874f10e?mode=deep",
+    "timestamp": "2026-05-01 14:56:22.187639",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: onComplete()] Can an unprivileged external user trigger mass log flooding by rapidly opening and closing thousands of subscriptions, causing onComplete() to emit a log.info() line per subscription completion and overwhelming the logging subsystem, degrading observability for operators?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ff0f8c8d-65bb-4001-b000-fd39f703b7a4?mode=deep",
+    "timestamp": "2026-05-01 14:56:36.730932",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1)) by subscribing during a DB degradation event, causing hundreds of concurrent retry chains that each hold a scheduler slot and amplify DB reconnection attempts, worsening the outage for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5c1de7bb-cc76-47ea-9e28-bedc5f164a9c?mode=deep",
+    "timestamp": "2026-05-01 14:56:50.410001",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user subscribe to a non-existent topic ID (when checkTopicExists=false) with startTime=0 and no limit, causing poll() to issue repeated empty-result queries on every polling interval indefinitely, wasting DB query slots?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f6236969-5807-4fbd-8a9d-533f83461b23?mode=deep",
+    "timestamp": "2026-05-01 14:57:05.464503",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user open subscriptions with throttled=false (unthrottled path) where pollingFrequency=20ms and maxPolls=12, causing 12 rapid-fire DB queries per subscription at 20ms intervals, and by opening many such subscriptions simultaneously, saturate the DB connection pool?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_953c5a48-90b5-4283-a65e-8492ea4e4c4b?mode=deep",
+    "timestamp": "2026-05-01 14:57:20.644821",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: PollingContext(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the unthrottled path where numRepeats=unthrottled.getMaxPolls() (default 12) combined with pollingFrequency=20ms to issue 12 queries in 240ms per subscription, and by opening hundreds of concurrent unthrottled subscriptions, cause a DB query storm that degrades service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0ecd6943-11fe-496c-8b1c-2eba9d782df3?mode=deep",
+    "timestamp": "2026-05-01 14:57:37.758475",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the fact that subscriberCount is only a gauge metric with no enforcement cap, allowing unlimited concurrent subscriptions that each consume memory for PollingContext objects, leading to heap exhaustion and JVM OOM that kills the gRPC service for all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cbf7c2bc-94fd-4ea1-be82-30900a548dae?mode=deep",
+    "timestamp": "2026-05-01 14:57:51.762315",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user set limit to a very large value (e.g., Long.MAX_VALUE) causing the limit calculation in poll() to compute pageSize=Math.min(Long.MAX_VALUE - total, maxPageSize) correctly but still issue maxPageSize queries per poll indefinitely, holding the subscription open for the full timeout duration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_316681c1-cbdf-407d-8665-f44672c6c75f?mode=deep",
+    "timestamp": "2026-05-01 14:58:06.435589",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the jitter(0.1) on the RepeatSpec to slightly randomize polling intervals, making it harder for rate-limiting or circuit-breaker mechanisms to detect and block the griefing pattern while still maintaining sustained DB load?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdef7149-7a5d-4f0b-b664-b1677b89f900?mode=deep",
+    "timestamp": "2026-05-01 14:58:21.589656",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user subscribe to a topic with a very large number of historical messages and no limit, causing Flux.fromStream(topicMessageRepository.findByFilter(newFilter)) to load up to maxPageSize=5000 (unthrottled) or 1000 (throttled) rows into memory per poll, and with many concurrent subscriptions cause heap pressure that triggers GC pauses affecting all users?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_87443da9-1e24-4a93-9c97-a7de92fd7705?mode=deep",
+    "timestamp": "2026-05-01 14:58:36.913594",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: onNext(TopicMessage topicMessage)] Can an unprivileged external user subscribe to a high-volume topic causing onNext() to call total.incrementAndGet() and pageSize.incrementAndGet() on every message, and with many concurrent subscriptions, create contention on AtomicLong operations that slows down message processing for all subscribers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f52d101-38c3-485a-a980-968a8bb42a53?mode=deep",
+    "timestamp": "2026-05-01 14:58:54.507408",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: retrieve(TopicMessageFilter filter, boolean throttled)] Can an unprivileged external user exploit the absence of connection-level throttling to open subscriptions from multiple source IPs (distributed griefing), each contributing to the total scheduler thread and DB connection consumption, bypassing any single-IP rate limiting that might exist at the network layer?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c27ddc68-c018-4d4f-9e2e-fe44c2bf100d?mode=deep",
+    "timestamp": "2026-05-01 14:59:10.446466",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: poll(PollingContext context)] Can an unprivileged external user craft a filter where startTime is set to the current time minus one nanosecond, causing poll() to issue queries that return zero results on every poll cycle but never trigger isComplete() in throttled mode (since pageSize=0 < maxPageSize=1000), holding the subscription open indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_d4fc2db3-d04e-44f8-88ff-bf02d15d4da1?mode=deep",
+    "timestamp": "2026-05-01 14:59:24.044876",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: grpc/src/main/java/org/hiero/mirror/grpc/retriever/TopicMessageRetriever.java -> Scope: Medium: Impacts caused by griefing with no economic damage to any user on the network'] [Function: isComplete()] Can an unprivileged external user exploit the isComplete() logic where throttled=true returns true only when pageSize.get() < retrieverProperties.getMaxPageSize(), by subscribing to a topic that consistently produces exactly maxPageSize messages per polling window, causing the subscription to never complete and hold resources indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e2ad7d2c-5b4e-46f3-8f6e-5ca977c51e08?mode=deep",
+    "timestamp": "2026-05-01 14:59:37.780358",
+    "report_generated": false
+  }
+]
