@@ -1,0 +1,146 @@
+[
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that when entity != nil but entity.Deleted is nil (pointer is nil, not false), the deletion check `entity.Deleted != nil && *entity.Deleted` evaluates to false, causing the full consensusEnd to be used as balanceSnapshotEndTimestamp even for accounts that are effectively deleted, returning an incorrect balance and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9a3f7b75-eccf-46a8-95bc-09039b8bc051?mode=deep",
+    "timestamp": "2026-05-01 15:13:55.624951",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getBalanceChange()] Can an unprivileged external user observe that balanceChangeBetween passes @end_range as a named parameter (sql.Named(\\",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_269d5392-d258-4b72-8c97-ef76cd236651?mode=deep",
+    "timestamp": "2026-05-01 15:14:07.482788",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user supply an alias-based AccountId where the alias bytes decode to a valid public key but the entity in the database has a different alias encoding (e.g., with or without DER prefix), causing getCryptoEntity() to return nil while GetAccountId() returns a valid entity, creating an inconsistency where RetrieveBalanceAtBlock() returns zero balance for an account that actually holds funds, causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1f3b8151-da0d-45f6-9563-cfd8e1409263?mode=deep",
+    "timestamp": "2026-05-01 15:14:19.832727",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a timestamp for which no treasury entity balance snapshot exists in account_balance, causing latestBalanceBeforeConsensus to return a row with ConsensusTimestamp = 0 and Balance = 0 (from the COALESCE), triggering ErrNodeIsStarting instead of a proper error, and causing automated systems to retry and potentially process stale balance data, leading to direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_42fd56ff-10b3-4dbe-9745-6cb1a9d7d0dc?mode=deep",
+    "timestamp": "2026-05-01 15:14:33.097790",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that id is set to accountId.GetId() for non-alias accounts (which returns accountId.EncodedId as int64) and to entity.Id.EncodedId for alias accounts, and craft a scenario where these two values differ for the same logical account, causing getLatestBalanceSnapshot() and getBalanceChange() to use different account IDs, returning a balance that is a mix of two different accounts' data and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_531e1e15-a83f-4646-9a65-49394c1d5eda?mode=deep",
+    "timestamp": "2026-05-01 15:14:46.881145",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias that matches a record in entity_history but not in entity (account was deleted and alias released), causing getCryptoEntity() to return the historical entity with Deleted = true, and then RetrieveBalanceAtBlock() to use GetModifiedTimestamp() from that historical record's TimestampRange.Lower.Int, which may be 0 for unbounded ranges, causing balanceSnapshotEndTimestamp = -1 and an invalid balance query, leading to direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f02dae49-f90d-4d89-bcb6-30bfa5e3eddb?mode=deep",
+    "timestamp": "2026-05-01 15:14:59.536331",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user trigger a time-of-check to time-of-use (TOCTOU) race condition between getCryptoEntity() and getLatestBalanceSnapshot() calls within RetrieveBalanceAtBlock(), where an account is deleted between the two calls, causing the balance snapshot to be computed for a deleted account using the wrong timestamp boundaries, resulting in an incorrect balance and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8d77ed1b-e09d-4767-b29b-7e1418beb678?mode=deep",
+    "timestamp": "2026-05-01 15:15:12.800164",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getBalanceChange()] Can an unprivileged external user supply a consensusStart greater than consensusEnd to getBalanceChange() (possible if snapshotTimestamp > balanceChangeEndTimestamp due to clock skew or data inconsistency), causing balanceChangeBetween to return 0 (no transfers in an impossible range), and hbarAmount.Value to equal only the snapshot balance without any delta correction, returning an incorrect balance and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_6b739410-2ab5-456f-8136-1ecbeba95cc5?mode=deep",
+    "timestamp": "2026-05-01 15:15:25.942197",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that amounts is initialized as make(types.AmountSlice, 0, 1) and only hbarAmount is appended, so that token balances are never included in the response, causing a downstream system that expects a complete balance (HBAR + tokens) to undercount total account value and make incorrect fund transfer decisions, resulting in direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_f4c55f63-c595-4e93-8ca3-f228b42a65b1?mode=deep",
+    "timestamp": "2026-05-01 15:15:38.965548",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: GetAccountAlias()] Can an unprivileged external user supply an accountId whose GetId() returns 0 (zero entity ID), causing selectCryptoEntityWithAliasById to query for entity with id = 0, potentially matching a system or treasury account, and returning that account's alias as the alias for the queried account, causing balance lookups to be redirected to the wrong account and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e03a8034-122d-4b01-9780-6fa2dee95105?mode=deep",
+    "timestamp": "2026-05-01 15:15:52.118031",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that entity.GetModifiedTimestamp() returns TimestampRange.Lower.Int (the lower bound of the timestamp range), which for the current entity record represents the creation/modification time, not the deletion time, causing balanceChangeEndTimestamp to be set to the wrong timestamp for deleted accounts and including or excluding transfers incorrectly, leading to direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46923cee-66ea-477d-bf6c-e3558c47d9ae?mode=deep",
+    "timestamp": "2026-05-01 15:16:06.379939",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user supply a timestamp that causes selectPreviousPartitionLowerBound to return a partitionLowerBound that is greater than the timestamp itself (due to a bug in the partition query), causing latestBalanceBeforeConsensus to find no matching balance snapshot (lower_bound > timestamp), returning ConsensusTimestamp = 0 and triggering ErrNodeIsStarting, while the real balance is non-zero, causing direct loss of funds in systems that treat this error as zero balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_1c439fde-9a62-4c88-a578-ca0d76f15672?mode=deep",
+    "timestamp": "2026-05-01 15:16:19.262972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getCryptoEntity()] Can an unprivileged external user supply an alias with all-zero bytes that matches the zero value of the alias column in the database, causing selectCryptoEntityByAlias to return unexpected entity records that have a null/zero alias, and getCryptoEntity() to return entities[0] which is an unrelated account, causing balance to be computed for the wrong account and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5b191786-993d-4a4a-b3e6-2a01830065aa?mode=deep",
+    "timestamp": "2026-05-01 15:16:32.676561",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that when accountId.HasAlias() is false and the entity is not found (entities is empty), getCryptoEntity() returns nil, nil, and RetrieveBalanceAtBlock() proceeds to call getLatestBalanceSnapshot() with id = accountId.GetId() (the original numeric ID), potentially returning a non-zero balance for a non-existent account, causing direct loss of funds in systems that trust this balance?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7ad9f21f-e5b4-401b-b0fd-fb4e45cb8bdf?mode=deep",
+    "timestamp": "2026-05-01 15:16:45.895507",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getBalanceChange()] Can an unprivileged external user exploit the fact that balanceChangeBetween uses consensus_timestamp > @start (strict greater than) while latestBalanceBeforeConsensus uses ab.consensus_timestamp <= bt.consensus_timestamp (less than or equal), creating a potential gap where a transfer at exactly snapshotTimestamp is excluded from the delta but may or may not be included in the snapshot, causing an off-by-one balance error and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e14da6d9-eb1f-41e7-960d-5ba4dde3f46b?mode=deep",
+    "timestamp": "2026-05-01 15:16:59.578135",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user supply a consensusEnd value that is before the account's creation timestamp, causing getCryptoEntity() to return nil (no entity existed at that time), and for a non-alias account, RetrieveBalanceAtBlock() to proceed with getLatestBalanceSnapshot() using the original numeric ID, potentially returning a non-zero balance for an account that did not yet exist, causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_46dd2d44-201c-421c-9def-549d00b40984?mode=deep",
+    "timestamp": "2026-05-01 15:17:13.228123",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getLatestBalanceSnapshot()] Can an unprivileged external user exploit the fact that latestBalanceBeforeConsensus uses the treasury entity ID (ar.treasuryEntityId.EncodedId) as an anchor to find the latest balance snapshot timestamp, so that if the treasury account has no balance snapshots in the queried time range, the subquery returns no rows and the outer COALESCE returns 0 balance for ALL accounts, causing direct loss of funds by reporting zero balances?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_e517807c-48a9-43c4-a087-b091de76fe17?mode=deep",
+    "timestamp": "2026-05-01 15:17:26.040107",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user craft a request where the same alias is associated with two different accounts in entity and entity_history at the same consensusEnd timestamp (due to a data integrity issue), causing getCryptoEntity() to return entities[0] non-deterministically, and RetrieveBalanceAtBlock() to return different balances for the same query on different calls, enabling an attacker to cherry-pick the higher balance response and cause direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8cb6a20c-c5bc-473b-b7e5-1b38493d2e42?mode=deep",
+    "timestamp": "2026-05-01 15:17:39.936897",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getCryptoEntity()] Can an unprivileged external user supply a very long alias byte slice that causes the SQL query selectCryptoEntityByAlias to behave unexpectedly (e.g., truncation, type mismatch in the alias = @alias comparison), causing the query to match unintended records or return an error that is mishandled, leading to incorrect balance attribution and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5e3fe231-829c-449c-b2ac-12a3feebee19?mode=deep",
+    "timestamp": "2026-05-01 15:17:54.070385",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that hbarAmount is initialized from getLatestBalanceSnapshot() as &types.HbarAmount{Value: ab.Balance} and then mutated in-place with hbarAmount.Value += hbarValue, so that if getLatestBalanceSnapshot() returns a shared/cached pointer, the mutation affects other callers' balance data, causing incorrect balances and direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34a8a1b6-7a7f-4eb1-8ded-fa46f0afdb6a?mode=deep",
+    "timestamp": "2026-05-01 15:18:09.142942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: getBalanceChange()] Can an unprivileged external user supply an account ID that is the treasury entity ID (ar.treasuryEntityId.EncodedId) and a consensusEnd that spans a large time range, causing balanceChangeBetween to sum an enormous number of crypto_transfer records and overflow int64, returning a negative balance change that when added to hbarAmount.Value produces an incorrect (negative) treasury balance, causing direct loss of funds in systems that use this balance for fund allocation?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c8324aa9-3d17-4d23-9baa-cccdf3eb4161?mode=deep",
+    "timestamp": "2026-05-01 15:18:22.899106",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that selectCryptoEntityByAlias does not have a LIMIT clause (unlike selectCryptoEntityById which has LIMIT 1), causing getCryptoEntity() to load all matching entities into memory, and if the alias matches thousands of historical records, cause a memory exhaustion that leads to incorrect partial results being returned, causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_3ae8f89b-94ee-4b22-8072-ee7d8b0d79de?mode=deep",
+    "timestamp": "2026-05-01 15:18:37.305114",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: GetAccountId()] Can an unprivileged external user supply an alias that matches a deleted account in the entity table (where deleted = false check in selectCurrentCryptoEntityByAlias uses 'deleted is null or deleted is false'), causing GetAccountId() to return the ID of a deleted account, and subsequent balance queries to compute balance for a deleted account, returning incorrect funds data and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_34bf5d0e-39be-40f8-9389-5d15e566b3e4?mode=deep",
+    "timestamp": "2026-05-01 15:18:50.918178",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: rosetta/app/persistence/account.go -> Scope: Critical: Direct loss of funds'] [Function: RetrieveBalanceAtBlock()] Can an unprivileged external user exploit the fact that when entity.Deleted is true and entity.GetModifiedTimestamp() returns a value greater than consensusEnd, the condition entity.GetModifiedTimestamp() <= consensusEnd is false, so balanceChangeEndTimestamp remains consensusEnd, causing post-deletion transfers to be included in the balance computation, returning an incorrect balance and causing direct loss of funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5d15abe5-40c4-493d-bed5-b4649d9c2429?mode=deep",
+    "timestamp": "2026-05-01 15:19:05.275131",
+    "report_generated": false
+  }
+]
