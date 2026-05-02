@@ -1,1 +1,0 @@
-Based on my investigation, I need to check one more critical aspect — whether the mirror node's transaction handler checks for transaction success before updating token state.
