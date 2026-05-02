@@ -1,1 +1,0 @@
-Let me verify the remaining key claims before rendering a verdict.
