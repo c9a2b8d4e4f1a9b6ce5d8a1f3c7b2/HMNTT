@@ -1,0 +1,152 @@
+[
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary writes error messages to os.Stderr (fmt.Fprintln(os.Stderr, 'heartbeat stale')) without any structured logging or alerting integration, to suppress liveness failure notifications by redirecting stderr, allowing a stale pinger to continue operating undetected while draining funds?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_4b0cf1bb-c957-4d3e-9fd1-eee6e5176ca6?mode=deep",
+    "timestamp": "2026-04-28 18:41:11.195158",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not check whether the pinger process (PID 1 or the main goroutine) is actually running before reporting liveness, allowing a scenario where the pinger process has exited but /tmp/alive was recently written, causing the liveness probe to return exit 0 for up to 2 minutes after the pinger has stopped, during which no transfers occur but the pod is not restarted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_9c0c6c07-c565-4600-99bd-5bfcfd5b6171?mode=deep",
+    "timestamp": "2026-04-28 18:41:23.199280",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's 'live' mode only checks /tmp/alive mtime and not the actual content written by the pinger (RFC3339Nano timestamp), to create /tmp/alive with arbitrary content but a current mtime, permanently satisfying the liveness check while the pinger's heartbeat goroutine has been killed by an OOM event?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_cdd434e4-cfb2-4377-a167-42ea9d9e70b2?mode=deep",
+    "timestamp": "2026-04-28 18:41:35.193942",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the Kubernetes liveness probe configuration (periodSeconds: 10, failureThreshold: 5) combined with the 2-minute staleness window to keep a compromised pinger alive for exactly 2 minutes + 50 seconds (5 failures × 10 seconds) after the heartbeat stops, during which the pinger continues submitting transfers to an attacker-controlled account?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b319343d-c2d0-4f9c-bcaa-ba799566e10f?mode=deep",
+    "timestamp": "2026-04-28 18:41:47.543787",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not validate the /tmp filesystem mount type (tmpfs vs. persistent volume) to persist /tmp/alive across pod restarts via a hostPath or PVC mount, causing the liveness probe to pass immediately on pod restart before the pinger has re-initialized, leading to premature transfer submissions with potentially stale configuration?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb82613e-4ae6-4172-8ea6-b76c7d6bedcf?mode=deep",
+    "timestamp": "2026-04-28 18:42:00.039770",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that os.Stat('/tmp/alive') returns the error directly to os.Stderr (fmt.Fprintln(os.Stderr, err)) without sanitization, and if the error message contains sensitive path information, use this to enumerate the container's filesystem layout and plan further attacks on the pinger's operator key files?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_74942cd3-5e75-4751-9894-20b14e67a458?mode=deep",
+    "timestamp": "2026-04-28 18:42:13.441292",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary is compiled with -trimpath and -ldflags='-s -w' (stripping debug info) to make reverse engineering easier (no DWARF symbols to confuse), and use the simplified binary to identify the exact os.Stat() call offset for a binary patching attack that always returns exit 0 regardless of file state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_479687ae-d969-4117-a1c4-77910cc0e9b7?mode=deep",
+    "timestamp": "2026-04-28 18:42:26.406573",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary runs as the same user (1000:1000) as the pinger process, meaning any file created by the pinger in /tmp is also writable by the healthcheck binary and vice versa, to use the healthcheck binary as a write primitive to overwrite /tmp/alive with a future-dated mtime and suppress liveness failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_0a4f9773-a40a-4165-adb9-de7b9a8dc675?mode=deep",
+    "timestamp": "2026-04-28 18:42:38.921331",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the 'ready' mode check (os.Stat('/tmp/ready')) has no timeout, and if the /tmp filesystem is under heavy I/O load (e.g., from a noisy neighbor container), the stat() call blocks indefinitely, causing the readiness probe to time out (timeoutSeconds: 2) and return a failure, removing the pod from service and causing a gap in transfer monitoring?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5731a41f-d6fc-413a-a421-8fb9d8fcadc3?mode=deep",
+    "timestamp": "2026-04-28 18:42:51.366334",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not implement any mutual exclusion with the pinger's heartbeat goroutine, creating a race condition where the healthcheck reads /tmp/alive's mtime at the exact moment the pinger is overwriting it, causing os.Stat() to return ENOENT (file temporarily absent during atomic rename) and triggering a false liveness failure?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_97985144-b7c6-4909-b117-26fc06aefda0?mode=deep",
+    "timestamp": "2026-04-28 18:43:03.967018",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's default mode (mode := 'ready') is triggered when len(os.Args) == 1, and if the Kubernetes probe configuration is misconfigured to pass no arguments, the binary always checks /tmp/ready instead of /tmp/alive, making the liveness probe equivalent to the readiness probe and allowing a pinger with a dead heartbeat to remain 'live' indefinitely?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_5ad82036-bd1f-45fc-a2f4-915d759cf285?mode=deep",
+    "timestamp": "2026-04-28 18:43:16.424576",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary exits with code 2 for unknown modes (os.Exit(2)) and Kubernetes treats any non-zero exit code as a probe failure, to craft a mode string that causes exit 2 and is indistinguishable from exit 1 in probe failure counting, potentially confusing monitoring systems that track specific exit codes for alerting on fund transfer failures?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_306791a6-4cc1-46d6-bad6-99cca95e0152?mode=deep",
+    "timestamp": "2026-04-28 18:43:28.934824",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not check the size of /tmp/alive (os.Stat() returns FileInfo but only ModTime() is used), allowing an attacker to truncate /tmp/alive to 0 bytes while preserving its mtime via a bind mount, causing the liveness check to pass while the pinger's heartbeat content is corrupted, masking a transfer failure state?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7b1d358c-0e00-4a87-b4c8-61d05b24a64a?mode=deep",
+    "timestamp": "2026-04-28 18:43:41.321972",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary is invoked by Kubernetes as a separate exec probe (not an HTTP endpoint), meaning there is no authentication or authorization on probe invocations, to repeatedly invoke the healthcheck binary from within the container to enumerate the state of /tmp/ready and /tmp/alive and infer the pinger's transfer cycle timing for a front-running attack?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_28d48092-14a4-48f3-a38f-931e40832366?mode=deep",
+    "timestamp": "2026-04-28 18:43:54.077332",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not validate that /tmp/alive was written by the legitimate pinger process (no PID check, no signature), allowing any process with write access to /tmp to impersonate the pinger's heartbeat and keep the liveness probe passing while the real pinger has been replaced by a malicious process that redirects transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_c16f765b-33ef-43f5-9c65-fa9fe1001a61?mode=deep",
+    "timestamp": "2026-04-28 18:44:07.253094",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary uses time.Since(fi.ModTime()) which relies on the system clock, and if the container's clock is set forward by an attacker (via a misconfigured time namespace), cause fi.ModTime() to appear to be in the future, making time.Since() return a negative value that is never > 2*time.Minute, permanently bypassing the staleness check?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_7e966560-1bcf-46f8-9efe-cc85c0e936c6?mode=deep",
+    "timestamp": "2026-04-28 18:44:20.028965",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's 'live' mode prints the raw os.Stat() error to stderr (fmt.Fprintln(os.Stderr, err)) which may include the full file path and system error details, to leak information about the container's filesystem layout that aids in planning a privilege escalation attack to access the pinger's operator private key?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_bbf48891-a6e3-46e9-9180-69d5a373cac9?mode=deep",
+    "timestamp": "2026-04-28 18:44:32.967721",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not implement any backoff or jitter when called repeatedly, and by flooding the Kubernetes API with fake probe results (via a compromised kubelet), cause the liveness probe to be evaluated more frequently than periodSeconds: 10, increasing the chance of catching a transient /tmp/alive absence and triggering unnecessary pod restarts with duplicate transfer submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_8e84df15-36e3-49cf-9748-fb04137b4ddb?mode=deep",
+    "timestamp": "2026-04-28 18:44:45.753149",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not check whether the pinger's Hedera client connection is healthy (only file-based checks), allowing a scenario where the pinger's gRPC connection to the Hedera network is severed but /tmp/alive is still being updated by the heartbeat goroutine, causing the liveness probe to report healthy while all transfer attempts are silently failing and fees are being consumed?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_100d6834-5928-4a18-9a76-593035d4b977?mode=deep",
+    "timestamp": "2026-04-28 18:44:59.533171",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not validate the inode of /tmp/alive between calls, allowing an attacker to delete and recreate /tmp/alive with a new inode but current mtime between probe intervals, bypassing any inode-based integrity checks and keeping the liveness probe passing while the pinger's state has been corrupted?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_fb820f13-740e-4096-b2cf-b097c2998667?mode=deep",
+    "timestamp": "2026-04-28 18:45:13.131852",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary is a stateless binary (no persistent state between invocations) that relies entirely on filesystem state, to create a persistent /tmp/alive file via a volume mount that survives pod restarts, causing the startup probe (which uses 'live' mode) to pass immediately on restart before the pinger has re-established its Hedera client, leading to transfer submissions with an uninitialized client?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_794913f5-40d4-4156-96f8-d859caf858b8?mode=deep",
+    "timestamp": "2026-04-28 18:45:25.514588",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not check the permissions of /tmp/alive (os.Stat() does not validate mode bits), allowing an attacker to create /tmp/alive with 000 permissions so that the pinger's heartbeat goroutine cannot overwrite it (os.WriteFile fails with EACCES), causing the mtime to go stale and eventually triggering a liveness failure that restarts the pod with duplicate transfer submissions?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_58bfd8a7-edd6-4db7-a097-917df89e609f?mode=deep",
+    "timestamp": "2026-04-28 18:45:38.502804",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary's 'ready' case calls os.Exit(0) immediately after os.Stat('/tmp/ready') succeeds, without checking whether the pinger's transfer client (newClient()) has successfully connected to the Hedera network, causing the pod to be marked ready and receive transfer ticks before the client is operational, resulting in failed transactions that still consume fees?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ab418ddf-e663-4cf0-84fd-c78891812880?mode=deep",
+    "timestamp": "2026-04-28 18:45:52.215801",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not implement any file locking on /tmp/alive, allowing a concurrent process to hold an exclusive lock on /tmp/alive while the pinger's heartbeat goroutine tries to write to it, causing os.WriteFile to block indefinitely, the mtime to go stale, and the liveness probe to eventually fail and restart the pod with potential duplicate transfers?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_ae3576af-30c9-4f0c-9600-efb6cdb8ae91?mode=deep",
+    "timestamp": "2026-04-28 18:46:05.193027",
+    "report_generated": false
+  },
+  {
+    "question": "[File: 'File Name: pinger/cmd/healthcheck/main.go -> Scope: Critical: Direct loss of funds'] [Function: main()] Can an unprivileged external user exploit the fact that the healthcheck binary does not validate that /tmp is actually a tmpfs mount (as opposed to a persistent disk), and if /tmp is backed by a persistent volume, /tmp/alive from a previous pod instance persists across restarts, causing the startup probe to pass immediately and the pinger to begin transfers before completing its initialization sequence?",
+    "url": "https://deepwiki.com/search/-security-audit-prompt-securit_b07d5794-1253-4dd9-a347-ddcf60dbb6e0?mode=deep",
+    "timestamp": "2026-04-28 18:46:18.876005",
+    "report_generated": false
+  }
+]
