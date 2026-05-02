@@ -1,0 +1,1 @@
+I need to read the repository implementation to understand the actual SQL query generated before making a determination.
